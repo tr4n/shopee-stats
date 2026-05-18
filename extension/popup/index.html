@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Analytics Pro</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo">
+        <img src="../icons/icon48.png" alt="Logo">
+        <h1>Shopee Analytics</h1>
+      </div>
+      <button id="theme-toggle" class="icon-btn" title="Chuyển chế độ giao diện">
+        <svg id="theme-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+      </button>
+    </header>
+
+    <main class="main-content">
+      <!-- Initial State -->
+      <div id="initial-state" class="state-view active">
+        <div class="hero-icon">💸</div>
+        <h2 class="hero-title">Sẵn sàng chiêm ngưỡng?</h2>
+        <p class="description">Hãy khám phá sự chấn động từ tổng chi tiêu trên Shopee của bạn.</p>
+
+        <div class="status-selector">
+          <span class="selector-label">Loại đơn hàng</span>
+          <div class="radio-group" style="flex-wrap: wrap;">
+            <label class="radio-item">
+              <input type="radio" name="list_type" value="3" checked>
+              <span class="radio-label">Đã hoàn thành</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="list_type" value="4">
+              <span class="radio-label">Đã hủy</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="list_type" value="7">
+              <span class="radio-label">Đang giao</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="list_type" value="9">
+              <span class="radio-label">Trả hàng</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="cache-info" class="cache-info hidden">
+          <span class="cache-icon">⚡</span>
+          <span id="cache-badge-text" class="cache-badge-text"></span>
+          <button id="btn-clear-cache" class="btn-cache-clear">Xóa</button>
+        </div>
+
+        <button id="btn-start" class="btn-primary">Bắt đầu thống kê ngay</button>
+        <p id="error-message" class="error-text"></p>
+      </div>
+
+      <!-- Loading State -->
+      <div id="loading-state" class="state-view">
+        <div class="loader">
+          <div class="spinner"></div>
+        </div>
+        <h2 class="loading-title">Đang thu thập dữ liệu...</h2>
+        <div class="progress-wrapper">
+          <div class="progress-bar-track">
+            <div id="progress-bar-fill" class="progress-bar-fill"></div>
+          </div>
+          <p id="progress-text" class="progress-text">Vui lòng chờ trong giây lát</p>
+        </div>
+      </div>
+
+      <!-- Result State -->
+      <div id="result-state" class="state-view">
+        <div class="summary-card glass">
+          <h3 class="card-title">Tổng Chi Tiêu</h3>
+          <h2 id="total-spent" class="huge-amount">0đ</h2>
+          <div class="badge rank-badge" id="rank-badge">Tính toán...</div>
+          <div id="trend-row" class="trend-row hidden"></div>
+          <div id="percentile-row" class="percentile-row hidden">
+            <span id="percentile-text" class="percentile-text"></span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="icon">📦</span>
+            <div class="stat-info">
+              <span class="stat-label">Tổng Đơn Hàng</span>
+              <span class="stat-value" id="total-orders">0</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <span class="icon">🛍️</span>
+            <div class="stat-info">
+              <span class="stat-label">Sản Phẩm Đã Mua</span>
+              <span class="stat-value" id="total-items">0</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <span class="icon">🎉</span>
+            <div class="stat-info">
+              <span class="stat-label">Tiết Kiệm Được</span>
+              <span class="stat-value highlight-green" id="total-saved">0đ</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <span class="icon">🚚</span>
+            <div class="stat-info">
+              <span class="stat-label">Phí Vận Chuyển</span>
+              <span class="stat-value" id="total-shipping">0đ</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 5 section -->
+        <div class="top-section">
+          <div class="top-header">
+            <span class="section-title">Top 5 Chi Tiêu</span>
+            <div class="sub-tabs">
+              <button class="sub-tab-btn active" data-subtarget="sub-items">Sản Phẩm</button>
+              <button class="sub-tab-btn" data-subtarget="sub-shops">Cửa Hàng</button>
+            </div>
+          </div>
+          <div class="period-filter-row">
+            <button class="period-pill active" data-period="all">Tất cả</button>
+            <button class="period-pill" data-period="1y">Năm nay</button>
+            <button class="period-pill" data-period="3m">3 Tháng</button>
+            <button class="period-pill" data-period="1m">Tháng này</button>
+          </div>
+          <div id="sub-items" class="sub-tab-content">
+            <!-- populated by JS -->
+          </div>
+          <div id="sub-shops" class="sub-tab-content hidden">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="tabs-container">
+          <div class="tabs">
+            <button class="tab-btn active" data-target="tab-time">Thời Gian Gần Đây</button>
+            <button class="tab-btn" data-target="tab-year">Theo Năm</button>
+          </div>
+
+          <div class="tab-content" id="tab-time">
+            <!-- Will be populated by JS -->
+          </div>
+
+          <div class="tab-content hidden" id="tab-year">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div class="share-row">
+          <button id="btn-share-card" class="btn-share-img">🖼 Tạo ảnh</button>
+          <button id="btn-share-link" class="btn-share-link">🔗 Sao chép link</button>
+        </div>
+        <div class="action-row" style="flex-direction: column; gap: 10px;">
+          <button id="btn-open-dashboard" class="btn-primary" style="width: 100%; margin: 0; padding: 12px; background: linear-gradient(135deg, #26aa99 0%, #1c8d7e 100%); font-size: 14px;">📊 Xem trên Dashboard Tĩnh</button>
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button id="btn-export-csv" class="btn-export" style="flex: 1;">⬇ Xuất CSV</button>
+            <button id="btn-restart" class="btn-outline-sm" style="flex: 1;">↺ Lọc lại</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="share-card.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

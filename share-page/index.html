@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Analytics — Xem thống kê chi tiêu của tôi!</title>
+
+  <!-- Open Graph for social sharing preview -->
+  <meta property="og:title" content="Xem thống kê chi tiêu Shopee của tôi!">
+  <meta property="og:description" content="Tôi đã chi tiêu bao nhiêu tiền trên Shopee? Khám phá cùng Shopee Analytics Pro.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #ee4d2d;
+      --green: #26aa99;
+      --dark: #1a1a2e;
+      --card: #16213e;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    .watermark {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: linear-gradient(145deg, #ee4d2d 0%, #c73516 60%, #a82d10 100%);
+      border-radius: 28px;
+      padding: 36px 28px 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(238, 77, 45, 0.35), 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    /* Decorative circles */
+    .card::before, .card::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+    }
+    .card::before { width: 320px; height: 320px; top: -100px; right: -80px; }
+    .card::after  { width: 200px; height: 200px; bottom: -60px; left: -50px; }
+
+    .card-inner { position: relative; z-index: 1; }
+
+    .card-header {
+      margin-bottom: 24px;
+    }
+    .app-name {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .total-amount {
+      font-size: clamp(36px, 8vw, 56px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .rank-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 18px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.15);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      backdrop-filter: blur(4px);
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+      margin: 4px 0 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: rgba(0,0,0,0.18);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .stat-value.green { color: #5fe8cc; }
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .top-shop-row {
+      background: rgba(0,0,0,0.18);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .top-shop-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 6px;
+    }
+    .top-shop-name {
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Percentile */
+    .percentile-section {
+      margin-bottom: 4px;
+    }
+    .percentile-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 8px;
+    }
+    .percentile-bar-bg {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
+    .percentile-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #5fe8cc, #26aa99);
+      transition: width 1s ease;
+    }
+    .percentile-hint {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 6px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .footer-brand {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 500;
+    }
+    .footer-date {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* CTA */
+    .cta-section {
+      margin-top: 28px;
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+    }
+    .cta-hint {
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 14px;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary) 0%, #ff8a5a 100%);
+      color: white;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(238, 77, 45, 0.4);
+      letter-spacing: 0.3px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(238, 77, 45, 0.5);
+    }
+
+    .error-msg {
+      max-width: 480px;
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.5);
+    }
+    .error-msg h2 { color: rgba(255,255,255,0.7); margin-bottom: 10px; }
+
+    @media (max-width: 420px) {
+      .card { padding: 28px 20px 22px; border-radius: 20px; }
+      .total-amount { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="watermark">Shopee Analytics Pro</div>
+  <div id="root"></div>
+
+  <script>
+    (function () {
+      const RANKS = {
+        1: 'Khách Tập Sự 👶',
+        2: 'Khách Quen 🤝',
+        3: 'Tín Đồ Cuồng Nhiệt 👑',
+        4: 'Cổ Đông Chiến Lược 💎'
+      };
+
+      function fmtVND(n) {
+        n = Math.round(n || 0);
+        if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu';
+        if (n >= 1000) return Math.round(n / 1000) + 'k';
+        return n.toLocaleString('vi-VN');
+      }
+
+      function fmtNum(n) {
+        return Math.round(n || 0).toLocaleString('vi-VN');
+      }
+
+      function fmtDate(ts) {
+        if (!ts) return '';
+        const d = new Date(ts * 1000);
+        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+      }
+
+      function parseData() {
+        try {
+          const hash = location.hash;
+          const match = hash.match(/[#&]d=([^&]+)/);
+          if (!match) return null;
+          const decoded = decodeURIComponent(escape(atob(match[1])));
+          return JSON.parse(decoded);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function renderError() {
+        document.getElementById('root').innerHTML = `
+          <div class="error-msg">
+            <h2>Không tìm thấy dữ liệu</h2>
+            <p>Link chia sẻ không hợp lệ hoặc đã hết hạn.</p>
+          </div>
+          <div class="cta-section">
+            <p class="cta-hint">Tự tạo thống kê của bạn:</p>
+            <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
+              Cài Shopee Analytics Pro
+            </a>
+          </div>
+        `;
+      }
+
+      function renderCard(d) {
+        const rankLabel = RANKS[d.r] || RANKS[2];
+        const beat = d.p || 0;
+        const topShopHtml = d.sh
+          ? `<div class="top-shop-row">
+               <div class="top-shop-label">🏆 Cửa hàng hàng đầu</div>
+               <div class="top-shop-name">${escHtml(d.sh)}</div>
+             </div>`
+          : '';
+
+        const html = `
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header">
+                <div class="app-name">Shopee Analytics Pro</div>
+                <div class="card-title">Tổng Kết Chi Tiêu Của Tôi</div>
+              </div>
+
+              <div class="total-amount">${fmtVND(d.t)}đ</div>
+              <div class="rank-pill">${escHtml(rankLabel)}</div>
+
+              <div class="divider"></div>
+
+              <div class="stats-grid">
+                <div class="stat">
+                  <div class="stat-value">${fmtNum(d.o)}</div>
+                  <div class="stat-label">Đơn hàng</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-value">${fmtNum(d.ip)}</div>
+                  <div class="stat-label">Sản phẩm</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-value green">${fmtVND(d.s)}đ</div>
+                  <div class="stat-label">Tiết kiệm được</div>
+                </div>
+                <div class="stat">
+                  <div class="stat-value">${beat}%</div>
+                  <div class="stat-label">Top chi tiêu VN</div>
+                </div>
+              </div>
+
+              ${topShopHtml}
+
+              <div class="percentile-section">
+                <div class="percentile-label">Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN (ước tính)</div>
+                <div class="percentile-bar-bg">
+                  <div class="percentile-bar-fill" id="pct-fill" style="width:0%"></div>
+                </div>
+                <div class="percentile-hint">*Số liệu ước tính dựa trên thói quen mua sắm trung bình</div>
+              </div>
+
+              <div class="card-footer">
+                <span class="footer-brand">Shopee Analytics Pro</span>
+                <span class="footer-date">${fmtDate(d.ts)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta-section">
+            <p class="cta-hint">Bạn muốn xem thống kê chi tiêu của mình?</p>
+            <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
+              Cài Shopee Analytics Pro Miễn Phí
+            </a>
+          </div>
+        `;
+
+        document.getElementById('root').innerHTML = html;
+
+        // Animate percentile bar
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const fill = document.getElementById('pct-fill');
+            if (fill) fill.style.width = beat + '%';
+          }, 300);
+        });
+      }
+
+      function escHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      // Main
+      const data = parseData();
+      if (!data || !data.t) {
+        renderError();
+      } else {
+        renderCard(data);
+      }
+    })();
+  </script>
+</body>
+</html>
