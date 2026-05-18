@@ -352,7 +352,11 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab || !tab.url.includes('shopee.vn')) {
-        errorMessage.textContent = '❌ Bạn cần truy cập vào trang Shopee.vn để sử dụng tiện ích này.';
+        errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để sử dụng tiện ích này.';
+        document.getElementById('link-go-to-shopee').addEventListener('click', (e) => {
+          e.preventDefault();
+          chrome.tabs.create({ url: 'https://shopee.vn' });
+        });
         return;
       }
       resetProgress();
