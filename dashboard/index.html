@@ -291,7 +291,7 @@
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-icon">🛍</div>
+    <img src="../extension/icons/icon128.png" style="width: 32px; height: 32px; border-radius: 8px;" alt="Logo" />
     <div>
       <h2>Analytics Pro</h2>
       <span>Shopee Statistics</span>
@@ -338,12 +338,22 @@
 
     <div class="grid-2">
       <div class="card" id="card-yearly">
-        <div class="card-title">📈 Chi Tiêu Theo Năm</div>
+        <div class="card-title">📈 Chi Tiêu Theo Năm <span style="font-size: 13px; font-weight: normal; color: var(--text-muted); float: right;">(Click vào cột)</span></div>
         <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
       </div>
       <div class="card" id="card-period">
         <div class="card-title">⏱ Thống Kê Gần Đây</div>
         <div class="period-grid" id="period-grid"></div>
+      </div>
+    </div>
+
+    <div class="card" id="card-yearly-items" style="display: none; margin-top: 24px;">
+      <div class="card-title" id="yearly-items-title">🛒 Top Sản Phẩm Năm</div>
+      <div class="table-wrap">
+        <table class="table" id="yearly-items-table">
+          <thead><tr><th>Sản Phẩm</th><th style="text-align: right;">Số Tiền</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -436,11 +446,10 @@
           <div class="control-group">
             <label>Giao diện (Theme)</label>
             <select id="share-theme-select" class="limit-select" style="padding: 8px; font-size: 14px;">
+              <option value="light">Trắng Sáng (Nổi Bật)</option>
+              <option value="minimal">Tối Giản</option>
               <option value="orange">Shopee Cam</option>
               <option value="dark">Đêm Huyền Bí</option>
-              <option value="mint">Xanh Mint</option>
-              <option value="purple">Tím Mộng Mơ</option>
-              <option value="gradient">Rainbow Gradient</option>
             </select>
           </div>
           <div class="control-group" style="margin-top: 10px;">
@@ -612,7 +621,7 @@
      Render: Yearly chart
   ───────────────────────────────────────────────── */
   let yearlyChart = null;
-  function renderYearlyChart(yd) {
+  function renderYearlyChart(yd, d) {
     const years = Object.keys(yd).sort();
     const vals  = years.map(y => yd[y].t);
     const maxV  = Math.max(...vals);
@@ -635,6 +644,17 @@
       },
       options: {
         ...CHART_CFG,
+        onClick: (e, elements) => {
+          if (elements && elements.length > 0) {
+            const index = elements[0].index;
+            const year = years[index];
+            showYearlyTopItems(year, d);
+            
+            const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
+            yearlyChart.data.datasets[0].backgroundColor = newColors;
+            yearlyChart.update();
+          }
+        },
         plugins: {
           ...CHART_CFG.plugins,
           tooltip: {
@@ -648,6 +668,45 @@
       }
     });
     reveal(document.getElementById('card-yearly'));
+  }
+
+  function showYearlyTopItems(year, d) {
+    const card = document.getElementById('card-yearly-items');
+    const tbody = document.querySelector('#yearly-items-table tbody');
+    document.getElementById('yearly-items-title').textContent = `🛒 Top Sản Phẩm Năm ${year}`;
+    
+    if (!d || !d.mi) return;
+    
+    const itemMap = {};
+    for (const ym in d.mi) {
+      if (ym.startsWith(year + '-')) {
+        const items = d.mi[ym];
+        for (const item of items) {
+          if (!itemMap[item.n]) itemMap[item.n] = { n: item.n, s: 0, c: 0 };
+          itemMap[item.n].s += item.s;
+          itemMap[item.n].c += (item.c || 1);
+        }
+      }
+    }
+    
+    const aggregatedItems = Object.values(itemMap).sort((a,b) => b.s - a.s).slice(0, 20); // Top 20
+    
+    if (aggregatedItems.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">Không có dữ liệu mua sắm cho năm ${year}.</td></tr>`;
+    } else {
+      tbody.innerHTML = aggregatedItems.map(item => `
+        <tr>
+          <td>
+            <div style="font-weight: 500; margin-bottom: 4px;">${item.n}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">${fmtNum(item.c)} lần mua</div>
+          </td>
+          <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}đ</td>
+        </tr>
+      `).join('');
+    }
+    
+    reveal(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   /* ─────────────────────────────────────────────────
@@ -1031,7 +1090,7 @@
       `${fmtVND(d.t)}đ tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
 
     renderKpi(d);
-    renderYearlyChart(d.yd || {});
+    renderYearlyChart(d.yd || {}, d);
     renderPeriod(d.ps || {});
     renderYearPills(d.yd || {}, yr => renderMonthly(d.yd, yr, d));
     renderTopItems(d.ti || []);
