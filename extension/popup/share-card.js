@@ -30,8 +30,8 @@
   function fmtVND(n) {
     n = Math.round(n || 0);
     if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu';
-    if (n >= 1000) return Math.round(n / 1000) + 'k';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
     return n.toLocaleString('vi-VN');
   }
 
@@ -128,7 +128,7 @@
     ctx.fillRect(PAD, 168, W - PAD * 2, 1);
 
     // === Main amount ===
-    const amtStr = fmtVND(data.tongtienhang) + 'đ';
+    const amtStr = fmtVND(data.tongtienhang);
     const amtSize = amtStr.length > 14 ? 68 : amtStr.length > 10 ? 82 : 96;
     txt(amtStr, PAD, 280, amtSize, '900', '#ffffff');
 
@@ -179,7 +179,7 @@
     txt(fmtVND(Math.max(0, data.tongTienTietKiem)) + 'đ', statColL, statY2, 38, '800', '#00d9ff');
     txt('TIẾT KIỆM', statColL, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
 
-    txt(fmtVND(data.tongPhiShip || 0) + 'đ', statColR, statY2, 38, '800', '#ffd23f');
+    txt(fmtVND(data.tongPhiShip || 0), statColR, statY2, 38, '800', '#ffd23f');
     txt('PHÍ SHIP', statColR, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
 
     // Modern divider

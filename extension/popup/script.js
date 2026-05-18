@@ -81,7 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Helpers ===
   function pxgPrice(number) {
     if (isNaN(number)) return 0;
-    return number.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    const n = Math.round(number);
+    if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0', '') + 'k';
+    return n.toLocaleString('vi-VN');
   }
   function getRankBadge(pri) {
     if (pri <= 10000000) return 'Khách Tập Sự 👶';
@@ -678,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderResults(data) {
     lastCompleteData = data;
 
-    totalSpentEl.textContent = pxgPrice(data.tongtienhang) + 'đ';
+    totalSpentEl.textContent = pxgPrice(data.tongtienhang);
     rankBadgeEl.textContent = getRankBadge(data.tongtienhang);
 
     renderTrendBadges(data.thongKeTheoNam);

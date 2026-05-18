@@ -503,8 +503,8 @@
   function fmtVND(n) {
     n = Math.round(n || 0);
     if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + ' triệu';
-    if (n >= 1e3) return Math.round(n / 1e3) + 'k';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0', '') + 'k';
     return n.toLocaleString('vi-VN');
   }
   function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
@@ -551,7 +551,7 @@
       titleColor: '#1e293b',
       bodyColor: 'rgba(30,41,59,0.8)',
       padding: 12,
-      callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) + 'đ' }
+      callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) }
     }},
     scales: {
       x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 12 } } },
@@ -612,10 +612,10 @@
   ───────────────────────────────────────────────── */
   function renderKpi(d) {
     const kpis = [
-      { label: 'Tổng Chi Tiêu',    val: fmtVND(d.t) + 'đ',    cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
+      { label: 'Tổng Chi Tiêu',    val: fmtVND(d.t),    cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
       { label: 'Sản Phẩm Đã Mua',  val: fmtNum(d.ip),          cls: '',       sub: 'sản phẩm' },
-      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s) + 'đ',    cls: 'green',  sub: 'từ khuyến mãi' },
-      { label: 'Phí Vận Chuyển',   val: fmtVND(d.ship) + 'đ', cls: '',       sub: 'tổng phí ship' }
+      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s),    cls: 'green',  sub: 'từ khuyến mãi' },
+      { label: 'Phí Vận Chuyển',   val: fmtVND(d.ship), cls: '',       sub: 'tổng phí ship' }
     ];
     const row = document.getElementById('kpi-row');
     row.innerHTML = kpis.map((k, i) => `
@@ -721,7 +721,7 @@
             <div style="font-weight: 500; margin-bottom: 4px;">${item.n}</div>
             <div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>
           </td>
-          <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}đ</td>
+          <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}</td>
         </tr>
       `).join('');
     }
@@ -743,7 +743,7 @@
     ];
     document.getElementById('period-grid').innerHTML = items.map(item => `
       <div class="period-box">
-        <div class="period-box-val">${fmtVND(item.val)}đ</div>
+        <div class="period-box-val">${fmtVND(item.val)}</div>
         <div class="period-box-label">${item.label} gần nhất</div>
       </div>`).join('');
     reveal(document.getElementById('card-period'));
@@ -836,9 +836,9 @@
           <div class="top-name-wrap">
             <div class="top-name">${escHtml(item.n)}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
-            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
-          <div class="top-val">${fmtVND(item.s)}đ</div>
+          <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
     }).join('');
   }
@@ -871,9 +871,9 @@
           <div class="top-name-wrap">
             <div class="top-name">${escHtml(item.n)}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" data-pct="${pct}"></div></div>
-            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
-          <div class="top-val">${fmtVND(item.s)}đ</div>
+          <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
     }).join('');
     list.querySelectorAll('.top-row').forEach(row => reveal(row));
@@ -942,9 +942,9 @@
           <div class="top-name-wrap">
             <div class="top-name">${escHtml(item.n)}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
-            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
-          <div class="top-val">${fmtVND(item.s)}đ</div>
+          <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
     }).join('');
     reveal(card);
@@ -966,7 +966,7 @@
         <div class="cat-row" data-cat="${escHtml(name)}" style="cursor:pointer" title="Click để xem sản phẩm">
           <div class="cat-label">${escHtml(name)}</div>
           <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
-          <div class="cat-val">${fmtVND(c.s)}đ</div>
+          <div class="cat-val">${fmtVND(c.s)}</div>
         </div>`;
     }).join('');
 
@@ -1021,7 +1021,7 @@
             borderWidth: 1,
             titleColor: '#1e293b',
             bodyColor: 'rgba(30,41,59,0.8)',
-            callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) + 'đ' }
+            callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) }
           }
         }
       }
@@ -1153,10 +1153,10 @@
   if (!d || !d.t) {
     renderNoData();
   } else {
-    document.title = `Dashboard — ${fmtVND(d.t)}đ · Shopee Analytics`;
+    document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
     document.getElementById('data-date').textContent = fmtDate(d.ts);
     document.getElementById('subtitle-overview').textContent =
-      `${fmtVND(d.t)}đ tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
+      `${fmtVND(d.t)} tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
 
     renderKpi(d);
     renderYearlyChart(d.yd || {}, d);

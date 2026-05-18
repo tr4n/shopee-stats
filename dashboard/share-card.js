@@ -24,12 +24,12 @@
   }
 
   function fmtVND(n, hide) {
-    if (hide) return '*** đ';
+    if (hide) return '***';
     n = Math.round(n || 0);
-    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ đ';
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu đ';
-    if (n >= 1000) return Math.round(n / 1000) + 'k đ';
-    return n.toLocaleString('vi-VN') + ' đ';
+    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+    return n.toLocaleString('vi-VN');
   }
 
   function fmtNum(n) {
