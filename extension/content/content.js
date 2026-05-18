@@ -251,13 +251,13 @@
 
       const cappedItemMap = capMap(itemMap, 500);
 
-      const topItems = Object.values(cappedItemMap)
+      const topItems = Object.values(itemMap)
         .sort((a, b) => b.spent - a.spent)
-        .slice(0, 5);
+        .slice(0, 50);
 
-      // Build category spending stats from all-time item map
+      // Build category spending stats from all-time item map (uncapped)
       const catStats = {};
-      for (const iv of Object.values(cappedItemMap)) {
+      for (const iv of Object.values(itemMap)) {
         const catKey = String(iv.catId || 0);
         if (catKey === '0') continue;
         if (!catStats[catKey]) catStats[catKey] = { spent: 0, count: 0 };

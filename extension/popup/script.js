@@ -25,20 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const trendRowEl = document.getElementById('trend-row');
   const percentileRowEl = document.getElementById('percentile-row');
   const percentileTextEl = document.getElementById('percentile-text');
-  const totalOrdersEl = document.getElementById('total-orders');
-  const totalItemsEl = document.getElementById('total-items');
-  const totalSavedEl = document.getElementById('total-saved');
-  const totalShippingEl = document.getElementById('total-shipping');
-
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabContentTime = document.getElementById('tab-time');
-  const tabContentYear = document.getElementById('tab-year');
-
-  const topItemsListEl = document.getElementById('top-items-list');
-  const catStatsSectionEl = document.getElementById('cat-stats-section');
-  const catStatsListEl = document.getElementById('cat-stats-list');
-
-  const periodPills = document.querySelectorAll('.period-pill');
 
   // === App State ===
   let cacheData = null;
@@ -177,52 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // === Tab Switching ===
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-      document.getElementById(btn.getAttribute('data-target')).classList.remove('hidden');
-    });
-  });
 
-  // === Period Filter (Top Items) ===
-  periodPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      periodPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-
-      if (!lastCompleteData) return;
-      const period = pill.getAttribute('data-period');
-
-      if (period === 'all') {
-        renderTopItems(lastCompleteData.topItems || [], false);
-        return;
-      }
-
-      const miniOrders = lastCompleteData.cachePayload && lastCompleteData.cachePayload.miniOrders;
-      if (!miniOrders || miniOrders.length === 0) return;
-
-      const now = Date.now() / 1000;
-      const cutoffs = {
-        '1y': now - 365 * 24 * 3600,
-        '3m': now - 90 * 24 * 3600,
-        '1m': now - 30 * 24 * 3600
-      };
-      const cutoff = cutoffs[period] || 0;
-
-      const { items, hasIlData } = computeTopItemsForPeriod(miniOrders, cutoff);
-      if (hasIlData && items.length > 0) {
-        renderTopItems(items, true);
-      } else if (!hasIlData) {
-        // Graceful fallback: show all-time items with a soft note
-        renderTopItems(lastCompleteData.topItems || [], false, 'Hiển thị toàn thời gian · Thống kê lại để lọc chính xác');
-      } else {
-        topItemsListEl.innerHTML = '<div class="empty-msg">Không có đơn hàng trong khoảng thời gian này</div>';
-      }
-    });
-  });
 
   // === State ===
   function showState(stateEl) {
@@ -303,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const rankNum = data.tongtienhang <= 10000000 ? 1 : data.tongtienhang <= 50000000 ? 2 : data.tongtienhang < 80000000 ? 3 : 4;
     const topItemName = (data.topItems && data.topItems[0]) ? data.topItems[0].name.substring(0, 30) : '';
 
-    // Yearly spending array [[year, amount], ...] for chart — last 5 years sorted asc
     const ydArr = Object.entries(data.thongKeTheoNam || {})
       .sort((a, b) => a[0] - b[0])
       .slice(-5)
@@ -454,32 +394,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
+
+  function buildDashboardUrl(data) {
+    const yd = {};
+    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
+      yd[yr] = {
+        t:  Math.round(ydata.total.tongTien),
+        o:  ydata.total.donHang,
+        ip: ydata.total.sanPham,
+        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+        m:  Object.fromEntries(
+          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
+        )
+      };
+    }
+    const ps = data.thongKeTheoThang || {};
+    const dashData = {
+      v:    1,
+      t:    Math.round(data.tongtienhang),
+      o:    data.tongDonHang,
+      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
+      ip:   data.tongSanPhamDaMua,
+      ship: Math.round(data.tongPhiShip || 0),
+      ts:   Math.floor(Date.now() / 1000),
+      yd,
+      ps: {
+        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
+        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
+        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
+        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
+      },
+      ti: (data.topItems || []).slice(0, 10).map(i => ({
+        n: i.name.substring(0, 50),
+        s: Math.round(i.spent),
+        c: i.count
+      })),
+      cs: Object.entries(data.catStats || {})
+        .sort((a, b) => b[1].spent - a[1].spent)
+        .slice(0, 12)
+        .map(([id, v]) => ({ id, s: Math.round(v.spent), c: v.count }))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
+    return `${DASHBOARD_BASE}/#d=${encoded}`;
+  }
+
   // === Render Results ===
   function renderResults(data) {
     lastCompleteData = data;
 
     totalSpentEl.textContent = pxgPrice(data.tongtienhang) + 'đ';
     rankBadgeEl.textContent = getRankBadge(data.tongtienhang);
-    totalOrdersEl.textContent = pxgPrice(data.tongDonHang);
-    totalItemsEl.textContent = pxgPrice(data.tongSanPhamDaMua);
-    totalSavedEl.textContent = pxgPrice(data.tongTienTietKiem) + 'đ';
-    totalShippingEl.textContent = pxgPrice(data.tongPhiShip || 0) + 'đ';
 
     renderTrendBadges(data.thongKeTheoNam);
     renderPercentile(data.thongKeTheoNam);
-    renderTopItems(data.topItems || [], false);
-    renderCatStats(data.catStats || {});
-    renderTimeData(data.thongKeTheoThang);
-    renderYearData(data.thongKeTheoNam);
-
-    // Reset UI controls to defaults
-    tabBtns.forEach(b => b.classList.remove('active'));
-    tabBtns[0].classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-    tabContentTime.classList.remove('hidden');
-
-    periodPills.forEach(p => p.classList.remove('active'));
-    periodPills[0].classList.add('active');
 
     showState(stateResult);
   }
@@ -529,124 +497,5 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       percentileRowEl.classList.add('hidden');
     }
-  }
-
-  // === Render Top Items ===
-  function renderTopItems(topItems, isPeriodFiltered, softNote) {
-    if (topItems && topItems.length > 0) {
-      const maxSpent = Math.max(...topItems.map(i => i.spent), 1);
-      let noteHtml = '';
-      if (softNote) {
-        noteHtml = `<div class="top-period-note">ℹ️ ${softNote}</div>`;
-      } else if (isPeriodFiltered) {
-        noteHtml = '<div class="top-period-note">Dựa trên dữ liệu trong kỳ đã chọn</div>';
-      }
-      topItemsListEl.innerHTML = noteHtml + topItems.map((item, idx) => {
-        const pct = Math.round((item.spent / maxSpent) * 100);
-        return `
-          <div class="top-item">
-            <div class="top-rank">${idx + 1}</div>
-            <div class="top-info">
-              <span class="top-name">${escapeHtml(item.name)}</span>
-              <span class="top-meta">${pxgPrice(item.count)} lượt mua</span>
-              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
-            </div>
-            <span class="top-value">${pxgPrice(item.spent)}đ</span>
-          </div>`;
-      }).join('');
-    } else {
-      topItemsListEl.innerHTML = '<div class="empty-msg">Không có dữ liệu sản phẩm</div>';
-    }
-  }
-
-  // === Render Category Stats ===
-  function renderCatStats(catStats) {
-    const entries = Object.entries(catStats)
-      .filter(([, v]) => v.spent > 0)
-      .sort((a, b) => b[1].spent - a[1].spent)
-      .slice(0, 6);
-
-    if (entries.length === 0) {
-      catStatsSectionEl.classList.add('hidden');
-      return;
-    }
-
-    const maxSpent = entries[0][1].spent;
-    catStatsListEl.innerHTML = entries.map(([catId, v]) => {
-      const name = CAT_NAMES[catId] || `Danh mục #${catId}`;
-      const pct = Math.round((v.spent / maxSpent) * 100);
-      return `
-        <div class="top-item">
-          <div class="top-info" style="flex:1">
-            <span class="top-name">${escapeHtml(name)}</span>
-            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
-          </div>
-          <span class="top-value">${pxgPrice(v.spent)}đ</span>
-        </div>`;
-    }).join('');
-    catStatsSectionEl.classList.remove('hidden');
-  }
-
-  // === Render Time Data ===
-  function renderTimeData(thongKeTheoThang) {
-    const mapKeys = [
-      { key: '1_thang', label: '1 Tháng Gần Nhất' },
-      { key: '3_thang', label: '3 Tháng Gần Nhất' },
-      { key: '6_thang', label: '6 Tháng Gần Nhất' },
-      { key: '1_nam', label: '1 Năm Gần Nhất' }
-    ];
-    const valid = mapKeys.filter(item => {
-      const d = thongKeTheoThang[item.key];
-      return d && (d.tongTien > 0 || d.donHang > 0);
-    });
-    if (!valid.length) {
-      tabContentTime.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted)">Không có dữ liệu trong thời gian gần đây</div>';
-      return;
-    }
-    const maxSpent = Math.max(...valid.map(item => thongKeTheoThang[item.key].tongTien), 1);
-    tabContentTime.innerHTML = valid.map(item => {
-      const d = thongKeTheoThang[item.key];
-      const saved = d.tienChuaGiam - d.tongTien;
-      const pct = Math.round((d.tongTien / maxSpent) * 100);
-      return `
-        <div class="list-item">
-          <div class="list-item-left">
-            <span class="list-title">${item.label}</span>
-            <span class="list-desc">${pxgPrice(d.donHang)} Đơn / ${pxgPrice(d.sanPham)} Sản phẩm</span>
-            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
-          </div>
-          <div style="text-align:right;margin-left:12px">
-            <span class="list-value">${pxgPrice(d.tongTien)}đ</span>
-            ${saved > 0 ? `<span class="list-value-saved">Giảm ${pxgPrice(saved)}đ</span>` : ''}
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  // === Render Year Data ===
-  function renderYearData(thongKeTheoNam) {
-    const sortedYears = Object.keys(thongKeTheoNam).sort((a, b) => b - a);
-    if (!sortedYears.length) {
-      tabContentYear.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted)">Chưa có dữ liệu theo năm</div>';
-      return;
-    }
-    const maxSpent = Math.max(...sortedYears.map(y => thongKeTheoNam[y].total.tongTien), 1);
-    tabContentYear.innerHTML = sortedYears.map(year => {
-      const d = thongKeTheoNam[year].total;
-      const saved = d.tienChuaGiam - d.tongTien;
-      const pct = Math.round((d.tongTien / maxSpent) * 100);
-      return `
-        <div class="list-item">
-          <div class="list-item-left">
-            <span class="list-title">Năm ${year}</span>
-            <span class="list-desc">${pxgPrice(d.donHang)} Đơn / ${pxgPrice(d.sanPham)} Sản phẩm</span>
-            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
-          </div>
-          <div style="text-align:right;margin-left:12px">
-            <span class="list-value">${pxgPrice(d.tongTien)}đ</span>
-            ${saved > 0 ? `<span class="list-value-saved">Giảm ${pxgPrice(saved)}đ</span>` : ''}
-          </div>
-        </div>`;
-    }).join('');
   }
 });

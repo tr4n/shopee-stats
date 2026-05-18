@@ -64,84 +64,9 @@
           </div>
         </div>
 
-        <div class="stats-grid">
-          <div class="stat-box">
-            <span class="icon">📦</span>
-            <div class="stat-info">
-              <span class="stat-label">Tổng Đơn Hàng</span>
-              <span class="stat-value" id="total-orders">0</span>
-            </div>
-          </div>
-          <div class="stat-box">
-            <span class="icon">🛍️</span>
-            <div class="stat-info">
-              <span class="stat-label">Sản Phẩm Đã Mua</span>
-              <span class="stat-value" id="total-items">0</span>
-            </div>
-          </div>
-          <div class="stat-box">
-            <span class="icon">🎉</span>
-            <div class="stat-info">
-              <span class="stat-label">Tiết Kiệm Được</span>
-              <span class="stat-value highlight-green" id="total-saved">0đ</span>
-            </div>
-          </div>
-          <div class="stat-box">
-            <span class="icon">🚚</span>
-            <div class="stat-info">
-              <span class="stat-label">Phí Vận Chuyển</span>
-              <span class="stat-value" id="total-shipping">0đ</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top 5 section -->
-        <div class="top-section">
-          <div class="top-header">
-            <span class="section-title">Top 5 Sản Phẩm Chi Tiêu</span>
-          </div>
-          <div class="period-filter-row">
-            <button class="period-pill active" data-period="all">Tất cả</button>
-            <button class="period-pill" data-period="1y">Năm nay</button>
-            <button class="period-pill" data-period="3m">3 Tháng</button>
-            <button class="period-pill" data-period="1m">Tháng này</button>
-          </div>
-          <div id="top-items-list">
-            <!-- populated by JS -->
-          </div>
-        </div>
-
-        <!-- Category Stats section -->
-        <div id="cat-stats-section" class="cat-section hidden">
-          <div class="section-title">Chi Tiêu Theo Danh Mục</div>
-          <div id="cat-stats-list"></div>
-        </div>
-
-        <div class="tabs-container">
-          <div class="tabs">
-            <button class="tab-btn active" data-target="tab-time">Thời Gian Gần Đây</button>
-            <button class="tab-btn" data-target="tab-year">Theo Năm</button>
-          </div>
-
-          <div class="tab-content" id="tab-time">
-            <!-- Will be populated by JS -->
-          </div>
-
-          <div class="tab-content hidden" id="tab-year">
-            <!-- Will be populated by JS -->
-          </div>
-        </div>
-
-        <div class="share-row">
-          <button id="btn-share-card" class="btn-share-img">🖼 Tạo ảnh</button>
-          <button id="btn-share-link" class="btn-share-link">🔗 Sao chép link</button>
-        </div>
-        <div class="action-row" style="flex-direction: column; gap: 10px;">
-          <button id="btn-open-dashboard" class="btn-primary" style="width: 100%; margin: 0; padding: 12px; background: linear-gradient(135deg, #26aa99 0%, #1c8d7e 100%); font-size: 14px;">📊 Xem trên Dashboard Tĩnh</button>
-          <div style="display: flex; gap: 10px; width: 100%;">
-            <button id="btn-export-csv" class="btn-export" style="flex: 1;">⬇ Xuất CSV</button>
-            <button id="btn-restart" class="btn-outline-sm" style="flex: 1;">↺ Lọc lại</button>
-          </div>
+        <div class="action-row" style="flex-direction: column; gap: 12px; margin-top: 30px;">
+          <button id="btn-open-dashboard" class="btn-primary" style="width: 100%; margin: 0; padding: 14px; background: linear-gradient(135deg, #26aa99 0%, #1c8d7e 100%); font-size: 15px; font-weight: bold;">📊 Xem chi tiết (Mở Dashboard)</button>
+          <button id="btn-restart" class="btn-outline-sm" style="width: 100%; padding: 12px; font-size: 14px;">↺ Thống kê lại</button>
         </div>
       </div>
     </main>
