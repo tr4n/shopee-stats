@@ -486,7 +486,8 @@
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  const CAT_NAMES = {
+  // Legacy map for backward compatibility with old dashboard URLs (format: { id, s, c })
+  const LEGACY_CAT_NAMES = {
     '11000001': '📱 Điện Thoại & Phụ Kiện',
     '11000027': '💻 Máy Tính & Laptop',
     '11000003': '🔌 Thiết Bị Điện Tử',
@@ -502,6 +503,13 @@
     '11000013': '⌚ Đồng Hồ',
     '11000012': '📷 Máy Ảnh'
   };
+  function resolveCatLabel(c) {
+    // New format: c.name is a resolved category name string
+    if (c.name) return c.name;
+    // Legacy format: c.id is a numeric Shopee category ID
+    if (c.id) return LEGACY_CAT_NAMES[c.id] || 'Danh mục #' + c.id;
+    return 'Khác';
+  }
 
   const CHART_CFG = {
     responsive: true,
@@ -829,7 +837,7 @@
     const maxS = Math.max(...cs.map(c => c.s), 1);
     const bars = document.getElementById('cat-bars');
     bars.innerHTML = cs.map(c => {
-      const name = CAT_NAMES[c.id] || `Danh mục #${c.id}`;
+      const name = resolveCatLabel(c);
       const pct  = Math.round((c.s / maxS) * 100);
       return `
         <div class="cat-row">
@@ -861,7 +869,7 @@
     catChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: cs.map(c => CAT_NAMES[c.id] || `#${c.id}`),
+        labels: cs.map(c => resolveCatLabel(c)),
         datasets: [{
           data: cs.map(c => c.s),
           backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),

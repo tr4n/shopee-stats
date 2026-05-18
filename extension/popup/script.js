@@ -88,24 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return 99;
   }
 
-  // === Category Names (Shopee VN — verified IDs may vary) ===
-  const CAT_NAMES = {
-    '11000001': '📱 Điện Thoại & Phụ Kiện',
-    '11000027': '💻 Máy Tính & Laptop',
-    '11000003': '🔌 Thiết Bị Điện Tử',
-    '11000028': '👔 Thời Trang Nam',
-    '11000004': '👗 Thời Trang Nữ',
-    '11000006': '🏠 Nhà Cửa & Đời Sống',
-    '11000007': '💊 Sức Khỏe & Làm Đẹp',
-    '11000010': '🍜 Thực Phẩm & Đồ Uống',
-    '11000011': '📚 Sách & Văn Phòng Phẩm',
-    '11000008': '⚽ Thể Thao & Du Lịch',
-    '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
-    '11000009': '🚗 Ô Tô & Xe Máy',
-    '11000013': '⌚ Đồng Hồ',
-    '11000012': '📷 Máy Ảnh & Máy Quay'
-  };
-
   // === Top Items Period Filter ===
   function computeTopItemsForPeriod(miniOrders, cutoffTs) {
     const itemMap = {};
@@ -327,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cs: Object.entries(data.catStats || {})
         .sort((a, b) => b[1].spent - a[1].spent)
         .slice(0, 12)
-        .map(([id, v]) => ({ id, s: Math.round(v.spent), c: v.count }))
+        .map(([name, v]) => ({ name, s: Math.round(v.spent), c: v.count }))
     };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
     return `${DASHBOARD_BASE}/#d=${encoded}`;
@@ -375,7 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
         listType,
         lastUpdated: useCache ? (cacheData.lastUpdated || 0) : 0,
         miniOrders: useCache ? cacheData.miniOrders : [],
-        itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
+        itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {},
+        catTree: useCache && cacheData.catTree ? cacheData.catTree : {}
       };
 
       await chrome.scripting.executeScript({

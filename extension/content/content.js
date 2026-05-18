@@ -6,6 +6,7 @@
   const LAST_UPDATED = cfg.lastUpdated || 0;
   const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
   const CACHED_ITEM_MAP = cfg.itemMap || {};
+  const CACHED_CAT_TREE = (cfg.catTree && cfg.catTree.map) ? cfg.catTree : {};
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -133,8 +134,105 @@
     return result;
   }
 
+  // Keyword-based classification fallback for items with no valid catId from API
+  const KEYWORD_CATS = [
+    { name: '📱 Điện Thoại & Phụ Kiện',  re: /điện thoại|smartphone|iphone|samsung galaxy|xiaomi|oppo|realme|vivo|poco|redmi|zenfone|nokia|huawei|tai nghe bluetooth|sạc nhanh|cáp sạc|ốp lưng|pin dự phòng|kính cường lực|cường lực|phụ kiện điện thoại/i },
+    { name: '💻 Máy Tính & Laptop',        re: /laptop|macbook|máy tính|pc desktop|cpu|ram ddr|ổ cứng ssd|ổ cứng hdd|mainboard|card đồ họa|gpu|bàn phím cơ|chuột gaming|màn hình máy tính|tản nhiệt|nguồn máy tính|case máy tính/i },
+    { name: '🔌 Thiết Bị Điện Tử',         re: /smart tv|tivi|máy lạnh|điều hòa|tủ lạnh|máy giặt|lò vi sóng|nồi cơm điện|quạt điện|máy hút bụi|máy lọc không khí|bình nóng lạnh|loa bluetooth|loa nghe nhạc|headphone|earphone|tai nghe|amplifier|thiết bị điện tử/i },
+    { name: '👔 Thời Trang Nam',            re: /áo nam|quần nam|áo thun nam|áo sơ mi nam|quần jean nam|quần tây nam|áo hoodie nam|áo khoác nam|bộ đồ nam|vest nam|áo polo nam|đồ bộ nam|trang phục nam/i },
+    { name: '👗 Thời Trang Nữ',             re: /váy|đầm|áo nữ|quần nữ|áo thun nữ|bộ đồ nữ|áo khoác nữ|đồ bộ nữ|blazer nữ|áo croptop|áo kiểu|crop top|chân váy|đầm dự tiệc|trang phục nữ/i },
+    { name: '👟 Giày Dép',                  re: /giày thể thao|giày tây|giày cao gót|giày lười|giày chạy bộ|sneaker|dép lê|dép sandal|boot cổ cao|high heel|giày da|giày vải|dép nam|dép nữ/i },
+    { name: '👜 Túi & Ví',                  re: /túi xách|ví da|balo|túi đeo chéo|clutch|handbag|tote bag|ví nam|ví nữ|túi tote|túi mini|túi đựng|balo laptop/i },
+    { name: '🏠 Nhà Cửa & Đời Sống',        re: /chăn ga gối|drap giường|rèm cửa|đèn led|nến thơm|cây xanh|chậu hoa|đồ dùng nhà bếp|nồi chiên|chảo không dính|dao bếp|thớt|hộp đựng|kệ sách|bàn làm việc|ghế văn phòng|thảm trải sàn|tủ quần áo|gương trang điểm/i },
+    { name: '💊 Sức Khỏe & Làm Đẹp',        re: /kem dưỡng|serum|son môi|phấn trang điểm|mascara|nước hoa|dầu gội|sữa tắm|kem chống nắng|nước tẩy trang|mặt nạ dưỡng|thực phẩm chức năng|vitamin|collagen|thực phẩm bảo vệ sức khỏe|máy massage|dụng cụ làm đẹp|mỹ phẩm/i },
+    { name: '🍜 Thực Phẩm & Đồ Uống',       re: /cà phê|trà sữa|sữa tươi|nước ngọt|snack|bánh kẹo|mì tôm|gạo|dầu ăn|nước mắm|tương ớt|thực phẩm|đồ ăn vặt|đồ uống|trái cây sấy|hạt điều|hạt macca|chocolate|kẹo|bánh mì/i },
+    { name: '📚 Sách & Văn Phòng Phẩm',     re: /sách|truyện tranh|manga|light novel|tiểu thuyết|bút bi|bút chì|vở ô ly|tập học sinh|bảng trắng|mực in|máy in|giấy a4|kẹp file|băng keo|thước kẻ|tẩy|bút highlight|file hồ sơ/i },
+    { name: '⚽ Thể Thao & Du Lịch',         re: /áo thể thao|quần thể thao|tập gym|bóng đá|bóng rổ|bóng bàn|cầu lông|yoga mat|xe đạp|balo du lịch|vali kéo|lều trại|áo khoác thể thao|giày thể thao|dụng cụ thể thao/i },
+    { name: '🧸 Đồ Trẻ Em & Đồ Chơi',       re: /đồ chơi|xe đẩy em bé|bình sữa em bé|tã bỉm|quần áo trẻ em|giày dép trẻ em|lego|xếp hình|búp bê|xe đồ chơi|sách trẻ em|balo trẻ em|đồ chơi giáo dục|đồ chơi trẻ sơ sinh/i },
+    { name: '🚗 Ô Tô & Xe Máy',              re: /phụ kiện xe hơi|phụ kiện ô tô|phụ kiện xe máy|lốp xe|nhớt xe máy|gương chiếu hậu|camera hành trình|ghế ô tô trẻ em|thảm lót sàn xe|đồ xe máy|đồ ô tô|lọc gió|phanh xe/i },
+    { name: '⌚ Đồng Hồ',                    re: /đồng hồ nam|đồng hồ nữ|đồng hồ đeo tay|smartwatch|đồng hồ thông minh|đồng hồ cơ|đồng hồ điện tử|dây đồng hồ/i },
+    { name: '📷 Máy Ảnh & Máy Quay',         re: /máy ảnh|camera dslr|máy quay phim|ống kính|lens máy ảnh|tripod|chân máy ảnh|đèn flash|gimbal|action cam|gopro|mirrorless|flycam/i },
+  ];
+
+  function classifyByName(name) {
+    const n = String(name || '');
+    for (const cat of KEYWORD_CATS) {
+      if (cat.re.test(n)) return cat.name;
+    }
+    return '🏷️ Khác';
+  }
+
+  // Fetch Shopee VN category tree and build a flat catId → top-level-name map
+  async function fetchCategoryTree() {
+    const CAT_TREE_TTL = 7 * 24 * 3600;
+    const now = Math.floor(Date.now() / 1000);
+    if (CACHED_CAT_TREE.ts && CACHED_CAT_TREE.map && (now - CACHED_CAT_TREE.ts) < CAT_TREE_TTL) {
+      return CACHED_CAT_TREE.map;
+    }
+    try {
+      const res = await fetchWithRetry('https://shopee.vn/api/v4/pages/get_category_tree');
+      const json = await res.json();
+      const list = Array.isArray(json.data) ? json.data
+        : (json.data && Array.isArray(json.data.category_list)) ? json.data.category_list
+        : [];
+      const map = {};
+      function walk(node, topName) {
+        const id = String(node.catid || node.cat_id || node.id || '');
+        const rawName = node.display_name || node.name || topName || '';
+        if (id && id !== '0') map[id] = topName || rawName;
+        const children = node.children || node.sub_category_list || [];
+        for (const child of children) walk(child, topName || rawName);
+      }
+      for (const cat of list) {
+        const topName = cat.display_name || cat.name || '';
+        walk(cat, topName);
+      }
+      return map;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // Emoji display names for top-level Shopee VN categories (maps API names → pretty names)
+  const PRETTY_CAT = {
+    'Điện Thoại & Phụ Kiện':   '📱 Điện Thoại & Phụ Kiện',
+    'Máy Tính & Laptop':        '💻 Máy Tính & Laptop',
+    'Thiết Bị Điện Tử':         '🔌 Thiết Bị Điện Tử',
+    'Thời Trang Nam':           '👔 Thời Trang Nam',
+    'Thời Trang Nữ':            '👗 Thời Trang Nữ',
+    'Nhà Cửa & Đời Sống':       '🏠 Nhà Cửa & Đời Sống',
+    'Sức Khỏe & Làm Đẹp':       '💊 Sức Khỏe & Làm Đẹp',
+    'Thực Phẩm & Đồ Uống':      '🍜 Thực Phẩm & Đồ Uống',
+    'Sách & Văn Phòng Phẩm':    '📚 Sách & Văn Phòng Phẩm',
+    'Sách & Văn Phòng':         '📚 Sách & Văn Phòng Phẩm',
+    'Thể Thao & Du Lịch':       '⚽ Thể Thao & Du Lịch',
+    'Đồ Trẻ Em & Đồ Chơi':      '🧸 Đồ Trẻ Em & Đồ Chơi',
+    'Ô Tô & Xe Máy':            '🚗 Ô Tô & Xe Máy',
+    'Đồng Hồ':                  '⌚ Đồng Hồ',
+    'Máy Ảnh & Máy Quay':       '📷 Máy Ảnh & Máy Quay',
+    'Giày Dép Nam':              '👟 Giày Dép',
+    'Giày Dép Nữ':               '👟 Giày Dép',
+    'Túi Ví Nam':                '👜 Túi & Ví',
+    'Túi Ví Nữ':                 '👜 Túi & Ví',
+    'Phụ Kiện Thời Trang':       '💍 Phụ Kiện Thời Trang',
+    'Balo & Túi Xách':           '👜 Túi & Ví',
+  };
+
+  function resolveCategory(catId, itemName, catIdMap) {
+    const key = String(catId || 0);
+    if (key !== '0' && catIdMap[key]) {
+      const raw = catIdMap[key];
+      return PRETTY_CAT[raw] || raw;
+    }
+    return classifyByName(itemName);
+  }
+
   async function startSpidering() {
     try {
+      // Fetch category tree first (uses cache if fresh enough)
+      const catIdMap = await fetchCategoryTree();
+      const catTreeTs = Math.floor(Date.now() / 1000);
+
       let offsetIndex = 0;
       const LIMIT = 20;
       let hasMoreData = true;
@@ -255,17 +353,14 @@
         .sort((a, b) => b.spent - a.spent)
         .slice(0, 50);
 
-      // Build category spending stats from all orders for complete coverage
-      // Using allMiniOrders (not itemMap) ensures items beyond the 500-cap are included
+      // Build category spending stats — all items are classified (catId=0 uses keyword fallback)
       const catStats = {};
       for (const order of allMiniOrders) {
         for (const item of (order.il || [])) {
-          if (!item.cat) continue;
-          const catKey = String(item.cat);
-          if (catKey === '0') continue;
-          if (!catStats[catKey]) catStats[catKey] = { spent: 0, count: 0 };
-          catStats[catKey].spent += item.s;
-          catStats[catKey].count += item.c;
+          const catName = resolveCategory(item.cat, item.n, catIdMap);
+          if (!catStats[catName]) catStats[catName] = { spent: 0, count: 0 };
+          catStats[catName].spent += item.s;
+          catStats[catName].count += item.c;
         }
       }
 
@@ -284,7 +379,8 @@
               lastUpdated: newLastUpdated || LAST_UPDATED,
               listType: LIST_TYPE,
               miniOrders: allMiniOrders,
-              itemMap: cappedItemMap
+              itemMap: cappedItemMap,
+              catTree: { ts: catTreeTs, map: catIdMap }
             }
           }
         });
