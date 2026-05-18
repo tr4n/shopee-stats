@@ -15,12 +15,12 @@
       --primary-dim:  rgba(238,77,45,0.12);
       --green:        #26aa99;
       --green-dim:    rgba(38,170,153,0.12);
-      --dark:         #0f0f1a;
-      --surface:      #161625;
-      --card:         #1e1e30;
-      --border:       rgba(255,255,255,0.07);
-      --text:         #f0f0f8;
-      --muted:        rgba(240,240,248,0.45);
+      --dark:         #f4f6f8;
+      --surface:      #ffffff;
+      --card:         #ffffff;
+      --border:       rgba(0,0,0,0.08);
+      --text:         #1e293b;
+      --muted:        rgba(30,41,59,0.55);
       --sidebar-w:    230px;
     }
 
@@ -64,7 +64,7 @@
     }
     .sidebar-logo h2 {
       font-size: 14px; font-weight: 800;
-      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     .sidebar-logo span {
@@ -99,7 +99,7 @@
       border-top: 1px solid var(--border);
     }
     .sidebar-footer p { font-size: 11px; color: var(--muted); line-height: 1.5; }
-    #data-date { color: rgba(255,255,255,0.5); font-weight: 600; }
+    #data-date { color: rgba(30,41,59,0.6); font-weight: 600; }
 
     /* ── Main ─────────────────────────────────────── */
     .main {
@@ -386,17 +386,17 @@
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false }, tooltip: {
-      backgroundColor: '#1e1e30',
-      borderColor: 'rgba(255,255,255,0.1)',
+      backgroundColor: '#ffffff',
+      borderColor: 'rgba(0,0,0,0.1)',
       borderWidth: 1,
-      titleColor: '#f0f0f8',
-      bodyColor: 'rgba(240,240,248,0.7)',
+      titleColor: '#1e293b',
+      bodyColor: 'rgba(30,41,59,0.8)',
       padding: 12,
       callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) + 'đ' }
     }},
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(240,240,248,0.5)', font: { size: 12 } } },
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(240,240,248,0.5)', font: { size: 11 }, callback: v => fmtVND(v) } }
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 12 } } },
+      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 11 }, callback: v => fmtVND(v) } }
     }
   };
 
@@ -442,7 +442,7 @@
     document.querySelector('.main').innerHTML = `
       <div class="no-data" style="margin-top:15vh">
         <div style="font-size:56px;margin-bottom:20px">📭</div>
-        <h2 style="font-size:22px;font-weight:800;color:#f0f0f8;margin-bottom:10px">Không có dữ liệu</h2>
+        <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:10px">Không có dữ liệu</h2>
         <p style="margin-bottom:20px">Mở extension Shopee Analytics Pro, chạy thống kê, rồi click "Dashboard".</p>
         <a href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">Cài Extension →</a>
       </div>`;
@@ -679,7 +679,7 @@
           data: cs.map(c => c.s),
           backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
           borderWidth: 2,
-          borderColor: '#1e1e30',
+          borderColor: '#ffffff',
           hoverOffset: 8
         }]
       },
@@ -690,12 +690,14 @@
         plugins: {
           legend: {
             display: true, position: 'right',
-            labels: { color: 'rgba(240,240,248,0.6)', font: { size: 11 }, boxWidth: 12, padding: 10 }
+            labels: { color: 'rgba(30,41,59,0.7)', font: { size: 11 }, boxWidth: 12, padding: 10 }
           },
           tooltip: {
-            backgroundColor: '#1e1e30',
-            borderColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: '#ffffff',
+            borderColor: 'rgba(0,0,0,0.1)',
             borderWidth: 1,
+            titleColor: '#1e293b',
+            bodyColor: 'rgba(30,41,59,0.8)',
             callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) + 'đ' }
           }
         }

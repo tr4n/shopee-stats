@@ -82,8 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function getSelectedListType() {
-    const checked = document.querySelector('input[name="list_type"]:checked');
-    return checked ? parseInt(checked.value) : 3;
+    return 3;
   }
 
   // === Percentile ===
@@ -171,9 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   checkCacheInfo(3);
-  document.querySelectorAll('input[name="list_type"]').forEach(r =>
-    r.addEventListener('change', () => checkCacheInfo(parseInt(r.value)))
-  );
   btnClearCache.addEventListener('click', () => {
     chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
