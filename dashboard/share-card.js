@@ -44,10 +44,36 @@
   }
 
   const THEMES = {
-    orange: { bg: ['#c73516', '#ee4d2d', '#e84629'], accent: '#5fe8cc' },
-    dark:   { bg: ['#0f172a', '#1e293b', '#0f172a'], accent: '#38bdf8' },
-    mint:   { bg: ['#047857', '#10b981', '#059669'], accent: '#fde047' },
-    purple: { bg: ['#581c87', '#7e22ce', '#6b21a8'], accent: '#f472b6' }
+    orange: { 
+      bg: ['#ff6b35', '#f7931e', '#ee4d2d'], 
+      accent: '#00d9ff',
+      secondary: '#ffd23f',
+      surface: 'rgba(255,255,255,0.1)'
+    },
+    dark: { 
+      bg: ['#1a1a2e', '#16213e', '#0f0f23'], 
+      accent: '#00d9ff',
+      secondary: '#ff6b6b',
+      surface: 'rgba(255,255,255,0.08)'
+    },
+    mint: { 
+      bg: ['#00b894', '#00cec9', '#74b9ff'], 
+      accent: '#fdcb6e',
+      secondary: '#fd79a8',
+      surface: 'rgba(255,255,255,0.12)'
+    },
+    purple: { 
+      bg: ['#6c5ce7', '#a29bfe', '#fd79a8'], 
+      accent: '#ffeaa7',
+      secondary: '#55a3ff',
+      surface: 'rgba(255,255,255,0.1)'
+    },
+    gradient: {
+      bg: ['#667eea', '#764ba2', '#f093fb'],
+      accent: '#4facfe',
+      secondary: '#43e97b',
+      surface: 'rgba(255,255,255,0.1)'
+    }
   };
 
   async function generateShareCard(d, options = {}) {
@@ -70,30 +96,49 @@
     const ctx = canvas.getContext('2d');
 
     const FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-    const PAD = 72;
+    const PAD = 60;
 
     const tColors = THEMES[theme] || THEMES.orange;
 
-    const bgGrad = ctx.createLinearGradient(0, 0, W * 0.6, H);
+    // Modern gradient background
+    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
     bgGrad.addColorStop(0, tColors.bg[0]);
-    bgGrad.addColorStop(0.5, tColors.bg[1]);
+    bgGrad.addColorStop(0.35, tColors.bg[1]);
     bgGrad.addColorStop(1, tColors.bg[2]);
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.globalAlpha = 0.12;
+    // Add subtle mesh gradient overlay
+    const meshGrad = ctx.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, W * 0.8);
+    meshGrad.addColorStop(0, 'rgba(255,255,255,0.08)');
+    meshGrad.addColorStop(1, 'rgba(0,0,0,0.05)');
+    ctx.fillStyle = meshGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Modern geometric decorative elements
+    ctx.globalAlpha = 0.08;
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(W * 0.88, H * 0.08, 340, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(W * 0.05, H * 0.82, 220, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(W * 0.5, H * 0.45, 420, 0, Math.PI * 2); ctx.fill();
+    // Large circles
+    ctx.beginPath(); ctx.arc(W * 0.85, H * 0.12, 280, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W * 0.15, H * 0.85, 200, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W * 0.65, H * 0.6, 350, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
 
-    ctx.globalAlpha = 0.06;
-    ctx.fillStyle = '#ffffff';
-    for (let x = 40; x < W; x += 50) {
-      for (let y = 40; y < H; y += 50) {
-        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
-      }
+    // Subtle grid pattern instead of dots
+    ctx.globalAlpha = 0.03;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 60) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+      ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 60) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
@@ -104,68 +149,131 @@
       ctx.fillText(t, x, y);
     }
 
-    // Header
-    txt('SHOPEE ANALYTICS PRO', PAD, 110, 26, '600', 'rgba(255,255,255,0.65)');
+    // Modern header with better spacing
+    txt('SHOPEE ANALYTICS', PAD, 100, 22, '700', 'rgba(255,255,255,0.8)');
     
     let titleStr = `Tổng Kết ${year}`;
     if (cardType === 'items') titleStr = `Top Sản Phẩm ${year}`;
     if (cardType === 'monthly') titleStr = `Tháng ${month}/${year}`;
-    txt(titleStr, PAD, 170, 60, '800', '#ffffff');
+    txt(titleStr, PAD, 150, 48, '900', '#ffffff');
 
+    // Modern accent line with gradient
     const lineGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
-    lineGrad.addColorStop(0, 'rgba(255,255,255,0.6)');
+    lineGrad.addColorStop(0, tColors.accent);
+    lineGrad.addColorStop(0.7, 'rgba(255,255,255,0.4)');
     lineGrad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = lineGrad;
-    ctx.fillRect(PAD, 188, W - PAD * 2, 2);
+    ctx.fillRect(PAD, 165, W - PAD * 2, 3);
+    
+    // Add subtle shadow line
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fillRect(PAD, 168, W - PAD * 2, 1);
 
     if (cardType === 'overview') {
       const amtStr = fmtVND(d.t, hideAmount);
-      const amtSize = amtStr.length > 14 ? 78 : amtStr.length > 10 ? 92 : 110;
-      txt(amtStr, PAD, 320, amtSize, '800', '#ffffff');
+      const amtSize = amtStr.length > 14 ? 68 : amtStr.length > 10 ? 82 : 96;
+      txt(amtStr, PAD, 280, amtSize, '900', '#ffffff');
 
       const rankStr = getRankStr(d.t);
-      ctx.font = `700 30px ${FONT}`;
-      const rankW = Math.min(ctx.measureText(rankStr).width + 48, W - PAD * 2);
-      roundedRect(ctx, PAD, 340, rankW, 56, 28, 'rgba(255,255,255,0.18)');
-      txt(rankStr, PAD + 24, 378, 28, '700', '#ffffff');
+      ctx.font = `800 26px ${FONT}`;
+      const rankW = Math.min(ctx.measureText(rankStr).width + 56, W - PAD * 2);
+      
+      // Modern pill with glass effect
+      const pillGrad = ctx.createLinearGradient(PAD, 310, PAD + rankW, 310);
+      pillGrad.addColorStop(0, tColors.surface);
+      pillGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+      roundedRect(ctx, PAD, 310, rankW, 48, 24, pillGrad);
+      
+      // Add border highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(PAD, 310, rankW, 48, 24);
+      ctx.stroke();
+      
+      txt(rankStr, PAD + 28, 342, 24, '800', '#ffffff');
 
-      roundedRect(ctx, PAD, 434, W - PAD * 2, 210, 20, 'rgba(0,0,0,0.22)');
+      // Modern glass card with better styling
+      const cardGrad = ctx.createLinearGradient(PAD, 390, PAD, 580);
+      cardGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
+      cardGrad.addColorStop(1, 'rgba(255,255,255,0.08)');
+      roundedRect(ctx, PAD, 390, W - PAD * 2, 190, 24, cardGrad);
+      
+      // Card border
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(PAD, 390, W - PAD * 2, 190, 24);
+      ctx.stroke();
 
-      const statColL = PAD + 36, statColR = W / 2 + 24;
-      const statY1 = 498, statY2 = 602;
+      const statColL = PAD + 40, statColR = W / 2 + 20;
+      const statY1 = 450, statY2 = 530;
 
-      txt(fmtNum(d.o), statColL, statY1, 52, '800', '#ffffff');
-      txt('đơn hàng', statColL, statY1 + 36, 22, '500', 'rgba(255,255,255,0.65)');
+      // Main stats with better typography
+      txt(fmtNum(d.o), statColL, statY1, 44, '900', '#ffffff');
+      txt('ĐƠN HÀNG', statColL, statY1 + 28, 18, '700', 'rgba(255,255,255,0.7)');
 
-      txt(fmtNum(d.ip), statColR, statY1, 52, '800', '#ffffff');
-      txt('sản phẩm', statColR, statY1 + 36, 22, '500', 'rgba(255,255,255,0.65)');
+      txt(fmtNum(d.ip), statColR, statY1, 44, '900', '#ffffff');
+      txt('SẢN PHẨM', statColR, statY1 + 28, 18, '700', 'rgba(255,255,255,0.7)');
 
-      txt(fmtVND(Math.max(0, d.s), hideAmount), statColL, statY2, 44, '800', tColors.accent);
-      txt('tiết kiệm', statColL, statY2 + 30, 22, '500', 'rgba(255,255,255,0.65)');
+      // Secondary stats with accent colors
+      txt(fmtVND(Math.max(0, d.s), hideAmount), statColL, statY2, 38, '800', tColors.accent);
+      txt('TIẾT KIỆM', statColL, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
 
-      txt(fmtVND(d.ship || 0, hideAmount), statColR, statY2, 44, '800', '#ffffff');
-      txt('phí ship', statColR, statY2 + 30, 22, '500', 'rgba(255,255,255,0.65)');
+      txt(fmtVND(d.ship || 0, hideAmount), statColR, statY2, 38, '800', tColors.secondary);
+      txt('PHÍ SHIP', statColR, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
 
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.fillRect(PAD, 684, W - PAD * 2, 1.5);
+      // Modern divider
+      const dividerGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+      dividerGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      dividerGrad.addColorStop(0.5, 'rgba(255,255,255,0.3)');
+      dividerGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = dividerGrad;
+      ctx.fillRect(PAD, 620, W - PAD * 2, 2);
 
-      let topY = 710;
+      let topY = 640;
       const hasTopItem = d.ti && d.ti.length > 0;
       if (hasTopItem) {
-        txt('🛒  Sản Phẩm Chi Tiêu Nhiều Nhất', PAD, topY + 44, 28, '600', 'rgba(255,255,255,0.75)');
-        const itemName = hideNames ? 'Sản phẩm đã ẩn tên' : truncate(d.ti[0].n, 36);
-        txt(itemName, PAD, topY + 96, 40, '800', '#ffffff');
-        txt(fmtVND(d.ti[0].s, hideAmount) + ' · ' + fmtNum(d.ti[0].c) + ' lần mua', PAD, topY + 132, 24, '400', 'rgba(255,255,255,0.6)');
+        // Icon with background circle
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.beginPath(); 
+        ctx.arc(PAD + 20, topY + 50, 20, 0, Math.PI * 2); 
+        ctx.fill();
+        txt('🛒', PAD + 15, topY + 57, 20, '400', '#ffffff');
+        
+        txt('SẢN PHẨM YÊU THÍCH', PAD + 50, topY + 36, 22, '700', 'rgba(255,255,255,0.8)');
+        const itemName = hideNames ? 'Sản phẩm đã ẩn tên' : truncate(d.ti[0].n, 32);
+        txt(itemName, PAD, topY + 80, 32, '800', '#ffffff');
+        txt(fmtVND(d.ti[0].s, hideAmount) + ' · ' + fmtNum(d.ti[0].c) + ' lần mua', PAD, topY + 110, 20, '500', 'rgba(255,255,255,0.65)');
       }
 
-      const pctY = 900;
-      roundedRect(ctx, PAD, pctY, W - PAD * 2, 160, 18, 'rgba(0,0,0,0.22)');
-      txt(`Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN`, PAD + 30, pctY + 52, 28, '600', 'rgba(255,255,255,0.88)');
-      txt(`ước tính năm ${year}`, PAD + 30, pctY + 88, 22, '400', 'rgba(255,255,255,0.55)');
+      const pctY = 780;
+      // Modern percentile card
+      const pctGrad = ctx.createLinearGradient(PAD, pctY, PAD, pctY + 140);
+      pctGrad.addColorStop(0, 'rgba(255,255,255,0.12)');
+      pctGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+      roundedRect(ctx, PAD, pctY, W - PAD * 2, 140, 20, pctGrad);
+      
+      // Border
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(PAD, pctY, W - PAD * 2, 140, 20);
+      ctx.stroke();
 
-      const barX = PAD + 30, barY2 = pctY + 114, barW = W - PAD * 2 - 60, barH = 12;
-      roundedRect(ctx, barX, barY2, barW, barH, 6, 'rgba(255,255,255,0.2)');
-      if (beat > 0) roundedRect(ctx, barX, barY2, barW * (beat / 100), barH, 6, tColors.accent);
+      txt(`Chi tiêu nhiều hơn ${beat}% người dùng`, PAD + 30, pctY + 42, 24, '700', 'rgba(255,255,255,0.9)');
+      txt(`Năm ${year}`, PAD + 30, pctY + 70, 18, '500', 'rgba(255,255,255,0.6)');
+
+      // Modern progress bar with gradient
+      const barX = PAD + 30, barY2 = pctY + 95, barW = W - PAD * 2 - 60, barH = 8;
+      roundedRect(ctx, barX, barY2, barW, barH, 4, 'rgba(255,255,255,0.15)');
+      
+      if (beat > 0) {
+        const progGrad = ctx.createLinearGradient(barX, 0, barX + barW * (beat / 100), 0);
+        progGrad.addColorStop(0, tColors.accent);
+        progGrad.addColorStop(1, tColors.secondary);
+        roundedRect(ctx, barX, barY2, barW * (beat / 100), barH, 4, progGrad);
+      }
 
     } else if (cardType === 'items' || cardType === 'monthly') {
       let items = [];
@@ -181,43 +289,82 @@
       }
       
       const amtStr = fmtVND(totalSpent, hideAmount);
-      txt('Tổng chi tiêu:', PAD, 250, 26, '500', 'rgba(255,255,255,0.7)');
-      txt(amtStr, PAD, 320, 78, '800', '#ffffff');
+      txt('TỔNG CHI TIÊU', PAD, 220, 20, '700', 'rgba(255,255,255,0.8)');
+      txt(amtStr, PAD, 270, 64, '900', '#ffffff');
       
-      roundedRect(ctx, PAD, 360, W - PAD * 2, 700, 24, 'rgba(0,0,0,0.22)');
+      // Modern container for items list
+      const listGrad = ctx.createLinearGradient(PAD, 320, PAD, 1020);
+      listGrad.addColorStop(0, 'rgba(255,255,255,0.12)');
+      listGrad.addColorStop(1, 'rgba(0,0,0,0.08)');
+      roundedRect(ctx, PAD, 320, W - PAD * 2, 600, 28, listGrad);
+      
+      // Border
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(PAD, 320, W - PAD * 2, 600, 28);
+      ctx.stroke();
       
       const top5 = items.slice(0, 5);
       if (top5.length === 0) {
-        txt('Không có dữ liệu mua sắm', PAD + 40, 430, 32, '600', 'rgba(255,255,255,0.5)');
+        txt('Không có dữ liệu mua sắm', PAD + 50, 450, 28, '600', 'rgba(255,255,255,0.6)');
       } else {
         const maxS = Math.max(...top5.map(i => i.s), 1);
-        let startY = 410;
+        let startY = 370;
+        
         top5.forEach((item, idx) => {
-          const itemName = hideNames ? 'Sản phẩm đã ẩn tên' : truncate(item.n, 36);
-          const pct = Math.max(0.02, item.s / maxS);
+          const itemName = hideNames ? 'Sản phẩm đã ẩn tên' : truncate(item.n, 32);
+          const pct = Math.max(0.05, item.s / maxS);
           
-          txt(`#${idx + 1}`, PAD + 36, startY + 36, 32, '800', 'rgba(255,255,255,0.4)');
-          txt(itemName, PAD + 100, startY + 28, 34, '700', '#ffffff');
-          txt(fmtVND(item.s, hideAmount) + ` · ${item.c} lần mua`, PAD + 100, startY + 66, 22, '500', 'rgba(255,255,255,0.6)');
+          // Rank badge
+          const rankBadgeSize = 32;
+          const rankGrad = ctx.createRadialGradient(PAD + 50, startY + 20, 0, PAD + 50, startY + 20, 16);
+          rankGrad.addColorStop(0, tColors.accent);
+          rankGrad.addColorStop(1, tColors.secondary);
+          ctx.fillStyle = rankGrad;
+          ctx.beginPath(); 
+          ctx.arc(PAD + 50, startY + 20, 16, 0, Math.PI * 2); 
+          ctx.fill();
           
-          // Bar
-          roundedRect(ctx, PAD + 100, startY + 90, W - PAD * 2 - 140, 8, 4, 'rgba(255,255,255,0.1)');
-          roundedRect(ctx, PAD + 100, startY + 90, (W - PAD * 2 - 140) * pct, 8, 4, tColors.accent);
+          txt(`${idx + 1}`, PAD + 50, startY + 26, 18, '800', '#ffffff', 'center');
           
-          startY += 130;
+          // Item info
+          txt(itemName, PAD + 80, startY + 16, 28, '700', '#ffffff');
+          txt(fmtVND(item.s, hideAmount) + ` • ${item.c} lần mua`, PAD + 80, startY + 46, 18, '500', 'rgba(255,255,255,0.7)');
+          
+          // Modern progress bar
+          const barX = PAD + 80, barY = startY + 65, barW = W - PAD * 2 - 120, barH = 6;
+          roundedRect(ctx, barX, barY, barW, barH, 3, 'rgba(255,255,255,0.1)');
+          
+          const progBarGrad = ctx.createLinearGradient(barX, 0, barX + barW * pct, 0);
+          progBarGrad.addColorStop(0, tColors.accent);
+          progBarGrad.addColorStop(1, tColors.secondary);
+          roundedRect(ctx, barX, barY, barW * pct, barH, 3, progBarGrad);
+          
+          startY += 110;
         });
       }
     }
 
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(PAD, 1108, W - PAD * 2, 1);
-    txt('Tạo bởi Shopee Analytics Pro', PAD, 1172, 24, '500', 'rgba(255,255,255,0.5)');
-    txt('bit.ly/shopee-analytics', W - PAD, 1172, 22, '400', 'rgba(255,255,255,0.4)', 'right');
+    // Clean minimal footer - removed URLs and excess info
+    const footerY = 1000;
+    
+    // Subtle divider
+    const footerDivGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+    footerDivGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    footerDivGrad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+    footerDivGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = footerDivGrad;
+    ctx.fillRect(PAD, footerY, W - PAD * 2, 1);
 
-    const tagline = cardType === 'overview' 
-      ? `${fmtNum(d.o)} đơn · ${fmtNum(d.ip)} sản phẩm · ${fmtVND(d.t, hideAmount)}`
-      : `Báo cáo chi tiết phân tích mua sắm Shopee`;
-    txt(tagline, W / 2, 1270, 26, '600', 'rgba(255,255,255,0.35)', 'center');
+    // Simple branding
+    txt('SHOPEE ANALYTICS', W / 2, footerY + 80, 20, '600', 'rgba(255,255,255,0.4)', 'center');
+    
+    // Clean summary without URLs
+    if (cardType === 'overview') {
+      const summary = `${fmtNum(d.o)} đơn hàng • ${fmtNum(d.ip)} sản phẩm`;
+      txt(summary, W / 2, footerY + 110, 22, '500', 'rgba(255,255,255,0.3)', 'center');
+    }
 
     return canvas.toDataURL('image/png');
   }
