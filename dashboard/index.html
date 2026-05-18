@@ -185,7 +185,13 @@
     .pill:hover { border-color: var(--primary); color: var(--primary); }
     .pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-    /* ── Top items table ─────────────────────────── */
+    /* ── Table ───────────────────────────────────── */
+    .table { width: 100%; border-collapse: collapse; text-align: left; }
+    .table th { padding: 12px 0; font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
+    .table td { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .table tr:last-child td { border-bottom: none; }
+
+    /* ── Top items list ──────────────────────────── */
     .top-list { display: flex; flex-direction: column; gap: 10px; }
     .top-row {
       display: flex; align-items: center; gap: 12px;
@@ -342,7 +348,7 @@
 
     <div class="grid-2">
       <div class="card" id="card-yearly">
-        <div class="card-title">📈 Chi Tiêu Theo Năm <span style="font-size: 13px; font-weight: normal; color: var(--text-muted); float: right;">(Click vào cột)</span></div>
+        <div class="card-title">📈 Chi Tiêu Theo Năm <span style="font-size: 13px; font-weight: normal; color: var(--muted); float: right;">(Click vào cột)</span></div>
         <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
       </div>
       <div class="card" id="card-period">
@@ -706,13 +712,14 @@
         <tr>
           <td>
             <div style="font-weight: 500; margin-bottom: 4px;">${item.n}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">${fmtNum(item.c)} lần mua</div>
+            <div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>
           </td>
           <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}đ</td>
         </tr>
       `).join('');
     }
     
+    card.style.display = 'block';
     reveal(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }

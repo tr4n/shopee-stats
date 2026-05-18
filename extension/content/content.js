@@ -150,8 +150,34 @@
     { name: '📚 Giải trí & Giáo dục', re: new RegExp(kwEdu, 'i') }
   ];
 
+  function cleanItemName(name) {
+    let s = String(name || '');
+    // Loại bỏ các tag quảng cáo [ ] ( ) { }
+    s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
+    // Loại bỏ emoji và ký tự đặc biệt, chỉ giữ lại chữ cái, số và khoảng trắng
+    s = s.replace(/[^\p{L}\p{N}\s]/gu, ' ');
+    // Chuyển thành chữ thường
+    s = s.toLowerCase();
+    
+    // Loại bỏ các từ khóa nhiễu
+    const noiseWords = [
+      'combo', 'set', 'sét', 'pack', 'vỉ', 'hộp', 'thùng', 
+      'chính hãng', 'cao cấp', 'nhập khẩu', 'giá rẻ', 'freeship', 
+      'hỏa tốc', 'quà tặng', 'gift', 'không bán', 'mới', 
+      'hàng loại 1', 'siêu mỏng', 'siêu bền', 'tặng kèm'
+    ];
+    s = ' ' + s + ' ';
+    for (const w of noiseWords) {
+      s = s.replace(new RegExp(' ' + w + ' ', 'g'), ' ');
+      s = s.replace(new RegExp(' ' + w + ' ', 'g'), ' ');
+    }
+    
+    // Chuẩn hóa khoảng trắng
+    return s.replace(/\s+/g, ' ').trim();
+  }
+
   function classifyByName(name) {
-    const n = String(name || '');
+    const n = cleanItemName(name);
     for (const cat of KEYWORD_CATS) {
       if (cat.re.test(n)) return cat.name;
     }
