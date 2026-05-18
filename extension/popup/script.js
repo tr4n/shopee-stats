@@ -301,10 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
         '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
         '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
       },
-      ti: (data.topItems || []).slice(0, 50).map(i => ({
+      ti: (data.topItems || []).slice(0, 100).map(i => ({
         n: i.name.substring(0, 50),
         s: Math.round(i.spent),
-        c: i.count
+        c: i.count,
+        cat: i.cat || ''
       })),
       cs: Object.entries(data.catStats || {})
         .sort((a, b) => b[1].spent - a[1].spent)

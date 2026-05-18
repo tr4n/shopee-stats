@@ -213,7 +213,10 @@
     }
     .limit-select:hover { border-color: var(--primary); }
 
-    .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 6px 8px; border-radius: 8px; transition: background .15s; }
+    .cat-row:hover { background: rgba(238,77,45,.07); }
+    .cat-row-active { background: rgba(238,77,45,.12) !important; }
+    .cat-row-active .cat-label { color: var(--primary); }
     .cat-label { font-size: 13px; font-weight: 600; width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cat-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
     .cat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green), #5fe8cc); width: 0%; transition: width 0.9s cubic-bezier(.16,1,.3,1); }
@@ -422,13 +425,17 @@
     </div>
     <div class="grid-2">
       <div class="card" id="card-cat-bars">
-        <div class="card-title">📊 So Sánh Danh Mục</div>
+        <div class="card-title">📊 So Sánh Danh Mục <small style="font-weight:400;font-size:12px;opacity:.6">— Click để xem sản phẩm</small></div>
         <div id="cat-bars"></div>
       </div>
       <div class="card" id="card-cat-pie">
         <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
         <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
       </div>
+    </div>
+    <div class="card" id="card-cat-items" style="display:none">
+      <div class="card-title" id="cat-items-title">🏷️ Sản Phẩm Danh Mục</div>
+      <div id="cat-items-list"></div>
     </div>
   </div>
 
@@ -889,7 +896,49 @@
      Render: Categories
   ───────────────────────────────────────────────── */
   let catChart = null;
-  function renderCategories(cs) {
+  let currentCatData = null;
+
+  function showCatItems(catName, ti) {
+    const card = document.getElementById('card-cat-items');
+    const title = document.getElementById('cat-items-title');
+    const list  = document.getElementById('cat-items-list');
+
+    const items = (ti || []).filter(i => i.cat === catName);
+
+    // Highlight selected bar
+    document.querySelectorAll('.cat-row').forEach(r => {
+      r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
+    });
+
+    title.textContent = catName + ' — Top Sản Phẩm';
+    card.style.display = 'block';
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="no-data">Không có sản phẩm nào trong danh mục này (thử chạy lại để cập nhật dữ liệu)</div>';
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+
+    const maxS = Math.max(...items.map(i => i.s), 1);
+    list.innerHTML = items.map((item, idx) => {
+      const pct = Math.round((item.s / maxS) * 100);
+      return `
+        <div class="top-row in">
+          <div class="top-num">${idx + 1}</div>
+          <div class="top-name-wrap">
+            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+          </div>
+          <div class="top-val">${fmtVND(item.s)}đ</div>
+        </div>`;
+    }).join('');
+    reveal(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function renderCategories(cs, ti) {
+    currentCatData = { cs, ti };
     if (!cs || cs.length === 0) {
       document.getElementById('cat-bars').innerHTML = '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
       return;
@@ -900,12 +949,17 @@
       const name = resolveCatLabel(c);
       const pct  = Math.round((c.s / maxS) * 100);
       return `
-        <div class="cat-row">
+        <div class="cat-row" data-cat="${escHtml(name)}" style="cursor:pointer" title="Click để xem sản phẩm">
           <div class="cat-label">${escHtml(name)}</div>
           <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
           <div class="cat-val">${fmtVND(c.s)}đ</div>
         </div>`;
     }).join('');
+
+    // Click handler
+    bars.querySelectorAll('.cat-row').forEach(row => {
+      row.addEventListener('click', () => showCatItems(row.getAttribute('data-cat'), ti));
+    });
 
     // Animate bars
     const bObs = new IntersectionObserver(([e]) => {
@@ -1095,7 +1149,7 @@
     renderPeriod(d.ps || {});
     renderYearPills(d.yd || {}, yr => renderMonthly(d.yd, yr, d));
     renderTopItems(d.ti || []);
-    renderCategories(d.cs || []);
+    renderCategories(d.cs || [], d.ti || []);
 
     // Add listeners for limits
     document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
