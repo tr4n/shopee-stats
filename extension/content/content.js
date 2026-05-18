@@ -142,13 +142,18 @@
   const kwFashion = "thời trang|fashion|phụ kiện|accessories|áo thun nam|áo phông nam|áo sơ mi nam|áo polo nam|áo khoác nam|áo gió nam|áo dạ nam|áo len nam|áo nỉ nam|áo hoodie nam|áo vest nam|blazer nam|quần tây nam|quần âu nam|quần kaki nam|quần jeans nam|quần bò nam|quần short nam|quần đùi nam|quần jogger nam|quần lót nam|sịp nam|boxer|đồ bộ nam|pijama nam|áo thun nữ|áo kiểu|áo sơ mi nữ|áo trễ vai|áo hai dây|áo croptop|áo khoác nữ|áo len nữ|áo dạ nữ|chân váy|váy xòe|váy chữ a|váy bút chì|váy maxi|váy đầm|đầm xòe|đầm suông|đầm dạ hội|đầm dự tiệc|váy cưới|quần jeans nữ|quần tây nữ|quần ống rộng|quần culottes|quần legging|quần short nữ|đồ lót nữ|áo ngực|áo lót|quần lót nữ|bra|bralette|bikini|đồ bơi nữ|đồ mặc nhà nữ|váy ngủ|giày thể thao nam|giày sneaker nam|giày tây nam|giày lười nam|giày slip on|giày boot nam|dép nam|dép quai hậu nam|sandal nam|giày thể thao nữ|sneaker nữ|giày cao gót|giày búp bê|giày bệt|giày boot nữ|dép nữ|guốc nữ|sandal nữ|tất nam|tất nữ|vớ nam|vớ nữ|quần tất|balo nam|balo laptop|ba lô nữ|túi xách nữ|túi đeo chéo|túi tote|túi vải|cặp xách|vali kéo|vali du lịch|túi trống|ví nam|ví da nam|bóp nam|ví nữ|bóp nữ|ví cầm tay|clutch|mũ lưỡi trai|nón kết|mũ vành|nón lá|mũ bảo hiểm|kính râm|kính mát|kính cận|gọng kính|thắt lưng nam|dây nịt nam|thắt lưng nữ|cà vạt|nơ|khăn choàng|khăn lụa|găng tay|bao tay|nhẫn nam|dây chuyền nam|bông tai nữ|khuyên tai|nhẫn nữ|vòng tay nữ|lắc tay|trâm cài tóc|băng đô|cột tóc|kẹp tóc|đồng hồ nam|đồng hồ nữ|uniqlo|zara|h&m|adidas|nike|gucci|dior|chanel|louis vuitton|lv|prada|coach|áo dạ|áo măng tô|áo phao|áo ống|áo dài|áo bà ba|chân váy chữ a|chân váy xòe|chân váy bút chì|chân váy midi|váy body|giày oxford|ủng|dép sục|dép xỏ ngón|tất cổ thấp|tất cổ cao|vớ da|chun buộc tóc|scrunchies|lắc chân|đồng hồ cơ|đồng hồ quartz|dây chuyền bạc|vàng|bạc|trang sức bạc|trang sức|jewelry";
   const kwEdu = "giải trí|giáo dục|entertainment|education|sách giáo khoa|sách tham khảo|sách bài tập|từ điển|truyện tranh|manga|comic|tiểu thuyết|truyện ngắn|tản văn|sách kinh tế|sách kỹ năng|sách tâm lý|sách nuôi dạy con|vở ô ly|vở kẻ ngang|sổ tay|sổ còng|giấy a4|giấy in|giấy note|bút bi|bút chì|bút máy|bút dạ|bút highlight|bút màu|hộp bút|bóp viết|thước kẻ|compa|tẩy|gôm|mực bơm|kẹp bướm|ghim bấm|keo dán|hồ dán|băng dính|đồ chơi trẻ em|đồ chơi gỗ|xếp hình|lego|rubik|yoyo|con quay|beyblade|búp bê|barbie|xe đồ chơi|máy bay điều khiển|ô tô điều khiển|mô hình|figure|gundam|gunpla|thẻ bài|pokemon|yugioh|board game|cờ vua|cờ tướng|cờ cá ngựa|cờ tỷ phú|ma sói|uno|mèo nổ|đất nặn|cát động lực|lều bóng|màu nước|màu sáp|màu acrylic|cọ vẽ|bảng pha màu|toan vẽ|canvas|khung tranh|sổ vẽ|sketchbook|len sợi|kim móc|kẽm nhung|giấy thủ công|keo sữa|đàn guitar|đàn piano|đàn organ|ukulele|sáo trúc|sáo recorder|kèn harmonica|trống|kalimba|dây đàn|phím gảy|capo|đĩa cd|đĩa than|vinyl|đĩa game|ps4|ps5|nintendo switch|thẻ game|nạp game|steam wallet|khóa học tiếng anh|khóa học lập trình|khóa học thiết kế|spotify premium|netflix|sách|book|bút|pen|pencil|vở|notebook|tập|giấy|paper|khóa học|course|học online|edumall|unica|hocmai|toán|văn|anh|lịch sử|địa lý|vật lý|hóa học|sinh học|ielts|toeic|toy|máy tính casio|máy tính bỏ túi|bảng|thước|nhạc cụ|album|nhạc|phim|game|video game|sách tô màu|tranh tô màu|sách thiếu nhi|sách ngoại ngữ|ruột bút bi|gọt bút chì|cặp sách|balo học sinh|bìa hồ sơ|file lá|bấm lỗ|học giao tiếp";
 
-  const KEYWORD_CATS = [
-    { name: '💻 Điện tử & Công nghệ', re: new RegExp(kwTech, 'i') },
-    { name: '💪 Thể thao & Sức khỏe', re: new RegExp(kwSport, 'i') },
-    { name: '🏠 Nhà cửa & Đời sống', re: new RegExp(kwHome, 'i') },
-    { name: '👕 Thời trang & Phụ kiện', re: new RegExp(kwFashion, 'i') },
-    { name: '📚 Giải trí & Giáo dục', re: new RegExp(kwEdu, 'i') }
+  const CAT_DEFS = [
+    { name: '💻 Điện tử & Công nghệ', kw: kwTech },
+    { name: '💪 Thể thao & Sức khỏe', kw: kwSport },
+    { name: '🏠 Nhà cửa & Đời sống', kw: kwHome },
+    { name: '👕 Thời trang & Phụ kiện', kw: kwFashion },
+    { name: '📚 Giải trí & Giáo dục', kw: kwEdu }
   ];
+
+  const SCORING_CATS = CAT_DEFS.map(cat => ({
+    name: cat.name,
+    words: cat.kw.split('|').map(w => w.trim().toLowerCase()).filter(Boolean).sort((a, b) => b.length - a.length)
+  }));
 
   function cleanItemName(name) {
     let s = String(name || '');
@@ -178,10 +183,34 @@
 
   function classifyByName(name) {
     const n = cleanItemName(name);
-    for (const cat of KEYWORD_CATS) {
-      if (cat.re.test(n)) return cat.name;
+    const paddedN = ' ' + n + ' ';
+    
+    let bestCat = '🏷️ Khác';
+    let maxScore = 0;
+
+    for (const cat of SCORING_CATS) {
+      let score = 0;
+      let temp = paddedN;
+      
+      for (const w of cat.words) {
+        const target = ' ' + w + ' ';
+        let idx = temp.indexOf(target);
+        while (idx !== -1) {
+          // Cộng điểm bằng với độ dài từ khóa (từ khóa dài/chi tiết sẽ được điểm cao hơn)
+          score += w.length;
+          // Xóa từ khóa đã match nhưng giữ lại 1 khoảng trắng để không ảnh hưởng các từ bên cạnh
+          temp = temp.substring(0, idx) + ' ' + temp.substring(idx + target.length - 1);
+          idx = temp.indexOf(target);
+        }
+      }
+
+      if (score > maxScore) {
+        maxScore = score;
+        bestCat = cat.name;
+      }
     }
-    return '🏷️ Khác';
+    
+    return bestCat;
   }
 
   // Fetch Shopee VN category tree and build a flat catId → top-level-name map
