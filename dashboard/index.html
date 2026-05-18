@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Analytics — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:      #ee4d2d;
+      --primary-dim:  rgba(238,77,45,0.12);
+      --green:        #26aa99;
+      --green-dim:    rgba(38,170,153,0.12);
+      --dark:         #0f0f1a;
+      --surface:      #161625;
+      --card:         #1e1e30;
+      --border:       rgba(255,255,255,0.07);
+      --text:         #f0f0f8;
+      --muted:        rgba(240,240,248,0.45);
+      --sidebar-w:    230px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Sidebar ─────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 10;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--primary), #ff7555);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .sidebar-logo h2 {
+      font-size: 14px; font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sidebar-logo span {
+      font-size: 10px; font-weight: 600;
+      color: var(--muted); display: block; line-height: 1;
+    }
+
+    .nav-section { padding: 16px 12px 8px; }
+    .nav-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); padding: 0 8px; margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border: none; background: none; width: 100%;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .nav-item:hover  { background: var(--border); color: var(--text); }
+    .nav-item.active { background: var(--primary-dim); color: var(--primary); }
+    .nav-item .ni    { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 20px 0;
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-footer p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    #data-date { color: rgba(255,255,255,0.5); font-weight: 600; }
+
+    /* ── Main ─────────────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 28px 32px 60px;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .page-title { font-size: 24px; font-weight: 800; }
+    .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Views ───────────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── KPI row ─────────────────────────────────── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .kpi.in { opacity: 1; transform: translateY(0); }
+    .kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+    .kpi-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .kpi-value.green  { color: #5fe8cc; }
+    .kpi-value.orange { color: var(--primary); }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Section title ───────────────────────────── */
+    .section-heading {
+      font-size: 14px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .8px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Card ────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .card.in { opacity: 1; transform: translateY(0); }
+    .card-title {
+      font-size: 15px; font-weight: 700; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Grid 2 columns ──────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    /* ── Chart containers ────────────────────────── */
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap.tall { height: 320px; }
+
+    /* ── Period pills ────────────────────────────── */
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .pill {
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: all .2s;
+    }
+    .pill:hover { border-color: var(--primary); color: var(--primary); }
+    .pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* ── Top items table ─────────────────────────── */
+    .top-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0; transform: translateX(-8px);
+      transition: opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+    }
+    .top-row:last-child { border-bottom: none; }
+    .top-row.in { opacity: 1; transform: translateX(0); }
+    .top-num { font-size: 13px; font-weight: 800; color: var(--muted); width: 22px; flex-shrink: 0; }
+    .top-name-wrap { flex: 1; min-width: 0; }
+    .top-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-bar-wrap { width: 120px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+    .top-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff8a5a); width: 0%; transition: width 0.8s cubic-bezier(.16,1,.3,1); }
+    .top-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .top-val { font-size: 14px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+    /* ── Category bars ───────────────────────────── */
+    .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .cat-label { font-size: 13px; font-weight: 600; width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cat-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green), #5fe8cc); width: 0%; transition: width 0.9s cubic-bezier(.16,1,.3,1); }
+    .cat-val { font-size: 12px; font-weight: 700; color: var(--muted); min-width: 80px; text-align: right; white-space: nowrap; }
+
+    /* ── Period stats grid ───────────────────────── */
+    .period-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+    .period-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px; text-align: center;
+    }
+    .period-box-val { font-size: 18px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+    .period-box-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+    /* ── No data ─────────────────────────────────── */
+    .no-data { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+    .no-data a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 16px; max-width: 100vw; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .cat-label { width: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🛍</div>
+    <div>
+      <h2>Analytics Pro</h2>
+      <span>Shopee Statistics</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Báo cáo</div>
+    <button class="nav-item active" data-view="overview">
+      <span class="ni">📊</span> Tổng quan
+    </button>
+    <button class="nav-item" data-view="monthly">
+      <span class="ni">📅</span> Theo tháng
+    </button>
+    <button class="nav-item" data-view="items">
+      <span class="ni">🛒</span> Top Sản phẩm
+    </button>
+    <button class="nav-item" data-view="categories">
+      <span class="ni">🏷️</span> Danh mục
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <p>Dữ liệu tại:<br><span id="data-date">—</span></p>
+  </div>
+</aside>
+
+<!-- Main content -->
+<main class="main">
+
+  <!-- Overview -->
+  <div id="view-overview" class="view active">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
+        <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
+      </div>
+    </div>
+
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <div class="grid-2">
+      <div class="card" id="card-yearly">
+        <div class="card-title">📈 Chi Tiêu Theo Năm</div>
+        <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
+      </div>
+      <div class="card" id="card-period">
+        <div class="card-title">⏱ Thống Kê Gần Đây</div>
+        <div class="period-grid" id="period-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly -->
+  <div id="view-monthly" class="view">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
+        <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
+      </div>
+    </div>
+    <div class="pill-row" id="year-pills"></div>
+    <div class="card" id="card-monthly">
+      <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
+      <div class="chart-wrap tall"><canvas id="chart-monthly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Top Items -->
+  <div id="view-items" class="view">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
+        <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
+      </div>
+    </div>
+    <div class="card" id="card-items">
+      <div class="card-title">🏆 Bảng Xếp Hạng</div>
+      <div class="top-list" id="items-list"></div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div id="view-categories" class="view">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
+        <p class="page-subtitle">Phân bổ chi tiêu theo từng danh mục Shopee</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" id="card-cat-bars">
+        <div class="card-title">📊 So Sánh Danh Mục</div>
+        <div id="cat-bars"></div>
+      </div>
+      <div class="card" id="card-cat-pie">
+        <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
+        <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  /* ─────────────────────────────────────────────────
+     Helpers
+  ───────────────────────────────────────────────── */
+  function fmtVND(n) {
+    n = Math.round(n || 0);
+    if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + ' triệu';
+    if (n >= 1e3) return Math.round(n / 1e3) + 'k';
+    return n.toLocaleString('vi-VN');
+  }
+  function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
+  function fmtDate(ts) {
+    const d = new Date((ts || Date.now() / 1000) * 1000);
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  const CAT_NAMES = {
+    '11000001': '📱 Điện Thoại & Phụ Kiện',
+    '11000027': '💻 Máy Tính & Laptop',
+    '11000003': '🔌 Thiết Bị Điện Tử',
+    '11000028': '👔 Thời Trang Nam',
+    '11000004': '👗 Thời Trang Nữ',
+    '11000006': '🏠 Nhà Cửa & Đời Sống',
+    '11000007': '💊 Sức Khỏe & Làm Đẹp',
+    '11000010': '🍜 Thực Phẩm & Đồ Uống',
+    '11000011': '📚 Sách & Văn Phòng',
+    '11000008': '⚽ Thể Thao & Du Lịch',
+    '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
+    '11000009': '🚗 Ô Tô & Xe Máy',
+    '11000013': '⌚ Đồng Hồ',
+    '11000012': '📷 Máy Ảnh'
+  };
+
+  const CHART_CFG = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: {
+      backgroundColor: '#1e1e30',
+      borderColor: 'rgba(255,255,255,0.1)',
+      borderWidth: 1,
+      titleColor: '#f0f0f8',
+      bodyColor: 'rgba(240,240,248,0.7)',
+      padding: 12,
+      callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) + 'đ' }
+    }},
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(240,240,248,0.5)', font: { size: 12 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(240,240,248,0.5)', font: { size: 11 }, callback: v => fmtVND(v) } }
+    }
+  };
+
+  /* ─────────────────────────────────────────────────
+     Parse data from URL hash
+  ───────────────────────────────────────────────── */
+  function parseData() {
+    try {
+      const match = location.hash.match(/[#&]d=([^&]+)/);
+      if (!match) return null;
+      return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+    } catch { return null; }
+  }
+
+  /* ─────────────────────────────────────────────────
+     Animate helpers
+  ───────────────────────────────────────────────── */
+  function animateCounter(el, target, duration) {
+    const match = String(target).match(/^([\d,\.]+)(.*)$/);
+    if (!match) { el.textContent = target; return; }
+    const num = parseFloat(match[1].replace(/,/g, ''));
+    const suffix = match[2];
+    const start = performance.now();
+    const step = now => {
+      const p = Math.min((now - start) / duration, 1);
+      const v = num * (1 - Math.pow(1 - p, 3));
+      el.textContent = Math.round(v).toLocaleString('vi-VN') + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    };
+    requestAnimationFrame(step);
+  }
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1 });
+  function reveal(el) { if (el) io.observe(el); }
+
+  /* ─────────────────────────────────────────────────
+     Render: No data
+  ───────────────────────────────────────────────── */
+  function renderNoData() {
+    document.querySelector('.main').innerHTML = `
+      <div class="no-data" style="margin-top:15vh">
+        <div style="font-size:56px;margin-bottom:20px">📭</div>
+        <h2 style="font-size:22px;font-weight:800;color:#f0f0f8;margin-bottom:10px">Không có dữ liệu</h2>
+        <p style="margin-bottom:20px">Mở extension Shopee Analytics Pro, chạy thống kê, rồi click "Dashboard".</p>
+        <a href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">Cài Extension →</a>
+      </div>`;
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: KPI row
+  ───────────────────────────────────────────────── */
+  function renderKpi(d) {
+    const kpis = [
+      { label: 'Tổng Chi Tiêu',    val: fmtVND(d.t) + 'đ',    cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
+      { label: 'Sản Phẩm Đã Mua',  val: fmtNum(d.ip),          cls: '',       sub: 'sản phẩm' },
+      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s) + 'đ',    cls: 'green',  sub: 'từ khuyến mãi' },
+      { label: 'Phí Vận Chuyển',   val: fmtVND(d.ship) + 'đ', cls: '',       sub: 'tổng phí ship' }
+    ];
+    const row = document.getElementById('kpi-row');
+    row.innerHTML = kpis.map((k, i) => `
+      <div class="kpi" style="transition-delay:${i * 0.08}s">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value ${k.cls}" data-target="${k.val}">${k.val}</div>
+        <div class="kpi-sub">${k.sub}</div>
+      </div>`).join('');
+    row.querySelectorAll('.kpi').forEach(el => {
+      reveal(el);
+      const vEl = el.querySelector('.kpi-value');
+      io.observe(el);
+      // Counter once visible
+      const obs = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        animateCounter(vEl, vEl.getAttribute('data-target'), 900);
+      });
+      obs.observe(el);
+    });
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: Yearly chart
+  ───────────────────────────────────────────────── */
+  let yearlyChart = null;
+  function renderYearlyChart(yd) {
+    const years = Object.keys(yd).sort();
+    const vals  = years.map(y => yd[y].t);
+    const maxV  = Math.max(...vals);
+    const colors = years.map(y =>
+      y === String(new Date().getFullYear()) ? '#ee4d2d' : 'rgba(238,77,45,0.4)'
+    );
+
+    const ctx = document.getElementById('chart-yearly').getContext('2d');
+    if (yearlyChart) yearlyChart.destroy();
+    yearlyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [{
+          data: vals,
+          backgroundColor: colors,
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        ...CHART_CFG,
+        plugins: {
+          ...CHART_CFG.plugins,
+          tooltip: {
+            ...CHART_CFG.plugins.tooltip,
+            callbacks: {
+              title: ctx => 'Năm ' + ctx[0].label,
+              label: ctx => '  ' + fmtVND(ctx.parsed.y) + 'đ  (' + fmtNum(yd[ctx.label].o) + ' đơn)'
+            }
+          }
+        }
+      }
+    });
+    reveal(document.getElementById('card-yearly'));
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: Period stats
+  ───────────────────────────────────────────────── */
+  function renderPeriod(ps) {
+    const items = [
+      { label: '1 Tháng',  val: ps['1m'] },
+      { label: '3 Tháng',  val: ps['3m'] },
+      { label: '6 Tháng',  val: ps['6m'] },
+      { label: '1 Năm',    val: ps['1y'] }
+    ];
+    document.getElementById('period-grid').innerHTML = items.map(item => `
+      <div class="period-box">
+        <div class="period-box-val">${fmtVND(item.val)}đ</div>
+        <div class="period-box-label">${item.label} gần nhất</div>
+      </div>`).join('');
+    reveal(document.getElementById('card-period'));
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: Monthly chart
+  ───────────────────────────────────────────────── */
+  let monthlyChart = null;
+  function renderMonthly(yd, year) {
+    const ydata = yd[year];
+    if (!ydata) return;
+    const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
+    const vals   = months.map(m => ydata.m[m] || 0);
+
+    document.getElementById('monthly-chart-title').textContent = `📅 Chi Tiêu Tháng — Năm ${year}`;
+    const ctx = document.getElementById('chart-monthly').getContext('2d');
+    if (monthlyChart) monthlyChart.destroy();
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+    gradient.addColorStop(0,   'rgba(238,77,45,0.4)');
+    gradient.addColorStop(1,   'rgba(238,77,45,0.02)');
+
+    monthlyChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: months.map(m => 'T' + m),
+        datasets: [{
+          data: vals,
+          backgroundColor: gradient,
+          borderColor: '#ee4d2d',
+          borderWidth: 1.5,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: CHART_CFG
+    });
+    reveal(document.getElementById('card-monthly'));
+  }
+
+  function renderYearPills(yd, onSelect) {
+    const years = Object.keys(yd).sort((a, b) => b - a);
+    const container = document.getElementById('year-pills');
+    container.innerHTML = years.map((y, i) => `
+      <button class="pill${i === 0 ? ' active' : ''}" data-year="${y}">Năm ${y}</button>`
+    ).join('');
+    container.querySelectorAll('.pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        onSelect(btn.getAttribute('data-year'));
+      });
+    });
+    if (years.length) onSelect(years[0]);
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: Top Items
+  ───────────────────────────────────────────────── */
+  function renderTopItems(ti) {
+    const list = document.getElementById('items-list');
+    if (!ti || ti.length === 0) {
+      list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
+      return;
+    }
+    const maxS = Math.max(...ti.map(i => i.s), 1);
+    list.innerHTML = ti.map((item, idx) => {
+      const pct = Math.round((item.s / maxS) * 100);
+      return `
+        <div class="top-row" style="transition-delay:${idx * 0.06}s">
+          <div class="top-num">${idx + 1}</div>
+          <div class="top-name-wrap">
+            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-bar-wrap"><div class="top-bar-fill" data-pct="${pct}"></div></div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+          </div>
+          <div class="top-val">${fmtVND(item.s)}đ</div>
+        </div>`;
+    }).join('');
+    list.querySelectorAll('.top-row').forEach(row => reveal(row));
+
+    // Animate bars
+    const barObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.querySelectorAll('.top-bar-fill').forEach((bar, i) => {
+          setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 80);
+        });
+      });
+    }, { threshold: 0.2 });
+    barObs.observe(list);
+
+    reveal(document.getElementById('card-items'));
+  }
+
+  /* ─────────────────────────────────────────────────
+     Render: Categories
+  ───────────────────────────────────────────────── */
+  let catChart = null;
+  function renderCategories(cs) {
+    if (!cs || cs.length === 0) {
+      document.getElementById('cat-bars').innerHTML = '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
+      return;
+    }
+    const maxS = Math.max(...cs.map(c => c.s), 1);
+    const bars = document.getElementById('cat-bars');
+    bars.innerHTML = cs.map(c => {
+      const name = CAT_NAMES[c.id] || `Danh mục #${c.id}`;
+      const pct  = Math.round((c.s / maxS) * 100);
+      return `
+        <div class="cat-row">
+          <div class="cat-label">${escHtml(name)}</div>
+          <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
+          <div class="cat-val">${fmtVND(c.s)}đ</div>
+        </div>`;
+    }).join('');
+
+    // Animate bars
+    const bObs = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      bObs.disconnect();
+      bars.querySelectorAll('.cat-bar-fill').forEach((bar, i) => {
+        setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 70);
+      });
+    }, { threshold: 0.2 });
+    bObs.observe(bars);
+    reveal(document.getElementById('card-cat-bars'));
+
+    // Donut chart
+    const PALETTE = [
+      '#ee4d2d','#ff7555','#ffa07a','#26aa99','#5fe8cc',
+      '#4a90d9','#a855f7','#f59e0b','#10b981','#ef4444',
+      '#8b5cf6','#06b6d4'
+    ];
+    const ctx = document.getElementById('chart-cat').getContext('2d');
+    if (catChart) catChart.destroy();
+    catChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: cs.map(c => CAT_NAMES[c.id] || `#${c.id}`),
+        datasets: [{
+          data: cs.map(c => c.s),
+          backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
+          borderWidth: 2,
+          borderColor: '#1e1e30',
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            display: true, position: 'right',
+            labels: { color: 'rgba(240,240,248,0.6)', font: { size: 11 }, boxWidth: 12, padding: 10 }
+          },
+          tooltip: {
+            backgroundColor: '#1e1e30',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) + 'đ' }
+          }
+        }
+      }
+    });
+    reveal(document.getElementById('card-cat-pie'));
+  }
+
+  /* ─────────────────────────────────────────────────
+     Navigation
+  ───────────────────────────────────────────────── */
+  const views   = document.querySelectorAll('.view');
+  const navBtns = document.querySelectorAll('.nav-item');
+  function switchView(name) {
+    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+    navBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-view') === name));
+  }
+  navBtns.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-view'))));
+
+  /* ─────────────────────────────────────────────────
+     Boot
+  ───────────────────────────────────────────────── */
+  const d = parseData();
+  if (!d || !d.t) {
+    renderNoData();
+  } else {
+    document.title = `Dashboard — ${fmtVND(d.t)}đ · Shopee Analytics`;
+    document.getElementById('data-date').textContent = fmtDate(d.ts);
+    document.getElementById('subtitle-overview').textContent =
+      `${fmtVND(d.t)}đ tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
+
+    renderKpi(d);
+    renderYearlyChart(d.yd || {});
+    renderPeriod(d.ps || {});
+    renderYearPills(d.yd || {}, yr => renderMonthly(d.yd, yr));
+    renderTopItems(d.ti || []);
+    renderCategories(d.cs || []);
+  }
+})();
+</script>
+</body>
+</html>

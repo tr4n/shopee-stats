@@ -118,11 +118,7 @@
         <!-- Top 5 section -->
         <div class="top-section">
           <div class="top-header">
-            <span class="section-title">Top 5 Chi Tiêu</span>
-            <div class="sub-tabs">
-              <button class="sub-tab-btn active" data-subtarget="sub-items">Sản Phẩm</button>
-              <button class="sub-tab-btn" data-subtarget="sub-shops">Cửa Hàng</button>
-            </div>
+            <span class="section-title">Top 5 Sản Phẩm Chi Tiêu</span>
           </div>
           <div class="period-filter-row">
             <button class="period-pill active" data-period="all">Tất cả</button>
@@ -130,12 +126,15 @@
             <button class="period-pill" data-period="3m">3 Tháng</button>
             <button class="period-pill" data-period="1m">Tháng này</button>
           </div>
-          <div id="sub-items" class="sub-tab-content">
+          <div id="top-items-list">
             <!-- populated by JS -->
           </div>
-          <div id="sub-shops" class="sub-tab-content hidden">
-            <!-- populated by JS -->
-          </div>
+        </div>
+
+        <!-- Category Stats section -->
+        <div id="cat-stats-section" class="cat-section hidden">
+          <div class="section-title">Chi Tiêu Theo Danh Mục</div>
+          <div id="cat-stats-list"></div>
         </div>
 
         <div class="tabs-container">

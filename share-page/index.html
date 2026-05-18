@@ -5,25 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopee Analytics — Xem thống kê chi tiêu của tôi!</title>
 
-  <!-- Open Graph for social sharing preview -->
   <meta property="og:title" content="Xem thống kê chi tiêu Shopee của tôi!">
   <meta property="og:description" content="Tôi đã chi tiêu bao nhiêu tiền trên Shopee? Khám phá cùng Shopee Analytics Pro.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --primary: #ee4d2d;
+      --primary-light: #ff7555;
       --green: #26aa99;
-      --dark: #1a1a2e;
-      --card: #16213e;
-      --border: rgba(255,255,255,0.08);
+      --dark: #0f0f1a;
+      --card-bg: #1a1a2e;
+      --surface: #16213e;
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -33,161 +35,280 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 48px;
+      padding: 0 16px 60px;
+      overflow-x: hidden;
     }
 
-    .watermark {
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-      margin-top: 8px;
+    /* Background decoration */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(238,77,45,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .card {
+    .page-wrap {
       width: 100%;
       max-width: 480px;
-      background: linear-gradient(145deg, #ee4d2d 0%, #c73516 60%, #a82d10 100%);
-      border-radius: 28px;
-      padding: 36px 28px 28px;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 32px 80px rgba(238, 77, 45, 0.35), 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 1;
     }
 
-    /* Decorative circles */
-    .card::before, .card::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-    }
-    .card::before { width: 320px; height: 320px; top: -100px; right: -80px; }
-    .card::after  { width: 200px; height: 200px; bottom: -60px; left: -50px; }
-
-    .card-inner { position: relative; z-index: 1; }
-
-    .card-header {
-      margin-bottom: 24px;
-    }
-    .app-name {
+    /* Header */
+    .watermark {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 32px 0 24px;
+    }
+
+    /* Card */
+    .card {
+      background: linear-gradient(160deg, #ee4d2d 0%, #c73516 55%, #9b2510 100%);
+      border-radius: 28px;
+      padding: 32px 28px 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 40px 80px rgba(238, 77, 45, 0.3),
+        0 12px 32px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .card.visible { opacity: 1; transform: translateY(0); }
+
+    /* Decorative blobs */
+    .card::before {
+      content: '';
+      position: absolute;
+      width: 380px; height: 380px;
+      top: -120px; right: -100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      width: 220px; height: 220px;
+      bottom: -70px; left: -60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+    .card-inner { position: relative; z-index: 1; }
+
+    /* App name */
+    .app-name {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
       margin-bottom: 6px;
     }
     .card-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
-      color: rgba(255,255,255,0.85);
+      color: rgba(255,255,255,0.88);
+      margin-bottom: 28px;
     }
 
+    /* Total amount — counter animation */
     .total-amount {
-      font-size: clamp(36px, 8vw, 56px);
-      font-weight: 800;
+      font-size: clamp(40px, 10vw, 60px);
+      font-weight: 900;
       color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 10px;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 14px;
+      font-variant-numeric: tabular-nums;
     }
 
+    /* Rank pill */
     .rank-pill {
       display: inline-flex;
       align-items: center;
-      padding: 8px 18px;
+      padding: 7px 18px;
       border-radius: 24px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.14);
       font-size: 14px;
       font-weight: 700;
-      margin-bottom: 24px;
-      backdrop-filter: blur(4px);
+      margin-bottom: 28px;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .divider {
       height: 1px;
-      background: rgba(255,255,255,0.15);
-      margin: 4px 0 20px;
+      background: rgba(255,255,255,0.12);
+      margin-bottom: 22px;
     }
 
+    /* Stats grid */
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
     .stat {
-      background: rgba(0,0,0,0.18);
+      background: rgba(0,0,0,0.2);
       border-radius: 14px;
-      padding: 14px 16px;
+      padding: 14px 15px;
+      border: 1px solid rgba(255,255,255,0.06);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
     }
+    .stat.visible { opacity: 1; transform: translateY(0); }
     .stat-value {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       color: #fff;
       line-height: 1.2;
+      font-variant-numeric: tabular-nums;
     }
     .stat-value.green { color: #5fe8cc; }
     .stat-label {
-      font-size: 12px;
-      color: rgba(255,255,255,0.55);
-      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 3px;
       font-weight: 500;
     }
 
-    .top-shop-row {
-      background: rgba(0,0,0,0.18);
+    /* Top item row */
+    .top-item-row {
+      background: rgba(0,0,0,0.2);
       border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
+      padding: 14px 15px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
     }
-    .top-shop-label {
-      font-size: 11px;
+    .top-item-row.visible { opacity: 1; transform: translateY(0); }
+    .top-item-label {
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.45);
       margin-bottom: 6px;
     }
-    .top-shop-name {
-      font-size: 16px;
+    .top-item-name {
+      font-size: 15px;
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
+    /* Year chart */
+    .chart-section {
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 16px 15px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .chart-section.visible { opacity: 1; transform: translateY(0); }
+    .chart-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 14px;
+    }
+    .chart-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 11px;
+    }
+    .chart-row:last-child { margin-bottom: 0; }
+    .chart-year {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      width: 38px;
+      flex-shrink: 0;
+    }
+    .chart-bar-wrap {
+      flex: 1;
+      height: 7px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .chart-bar-inner {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chart-bar-inner.past  { background: rgba(255,255,255,0.55); }
+    .chart-bar-inner.current { background: linear-gradient(90deg, #5fe8cc, #26aa99); }
+    .chart-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      min-width: 68px;
+      text-align: right;
+    }
+
     /* Percentile */
     .percentile-section {
-      margin-bottom: 4px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 14px;
+      padding: 16px 15px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
     }
+    .percentile-section.visible { opacity: 1; transform: translateY(0); }
     .percentile-label {
       font-size: 13px;
       font-weight: 600;
-      color: rgba(255,255,255,0.75);
-      margin-bottom: 8px;
+      color: rgba(255,255,255,0.78);
+      margin-bottom: 10px;
+      line-height: 1.4;
     }
     .percentile-bar-bg {
       height: 8px;
       border-radius: 4px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.12);
       overflow: hidden;
+      margin-bottom: 8px;
     }
     .percentile-bar-fill {
       height: 100%;
       border-radius: 4px;
       background: linear-gradient(90deg, #5fe8cc, #26aa99);
-      transition: width 1s ease;
+      width: 0%;
+      transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .percentile-hint {
       font-size: 11px;
-      color: rgba(255,255,255,0.4);
-      margin-top: 6px;
+      color: rgba(255,255,255,0.35);
     }
 
+    /* Footer */
     .card-footer {
       display: flex;
       justify-content: space-between;
@@ -196,28 +317,19 @@
       padding-top: 16px;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    .footer-brand {
-      font-size: 11px;
-      color: rgba(255,255,255,0.4);
-      font-weight: 500;
-    }
-    .footer-date {
-      font-size: 11px;
-      color: rgba(255,255,255,0.35);
-    }
+    .footer-brand { font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; }
+    .footer-date { font-size: 11px; color: rgba(255,255,255,0.28); }
 
-    /* CTA */
+    /* CTA section */
     .cta-section {
       margin-top: 28px;
       text-align: center;
-      width: 100%;
-      max-width: 480px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s ease 0.4s, transform 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s;
     }
-    .cta-hint {
-      font-size: 13px;
-      color: rgba(255,255,255,0.35);
-      margin-bottom: 14px;
-    }
+    .cta-section.visible { opacity: 1; transform: translateY(0); }
+    .cta-hint { font-size: 13px; color: rgba(255,255,255,0.3); margin-bottom: 14px; }
     .cta-btn {
       display: inline-block;
       background: linear-gradient(135deg, var(--primary) 0%, #ff8a5a 100%);
@@ -225,182 +337,368 @@
       text-decoration: none;
       font-size: 15px;
       font-weight: 700;
-      padding: 16px 32px;
+      padding: 16px 36px;
       border-radius: 14px;
-      box-shadow: 0 8px 24px rgba(238, 77, 45, 0.4);
+      box-shadow: 0 10px 28px rgba(238, 77, 45, 0.4);
       letter-spacing: 0.3px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .cta-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 36px rgba(238, 77, 45, 0.5);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(238, 77, 45, 0.55);
     }
 
+    /* Error */
     .error-msg {
-      max-width: 480px;
       text-align: center;
-      padding: 40px 20px;
-      color: rgba(255,255,255,0.5);
+      padding: 60px 20px;
+      color: rgba(255,255,255,0.4);
     }
-    .error-msg h2 { color: rgba(255,255,255,0.7); margin-bottom: 10px; }
+    .error-msg h2 { color: rgba(255,255,255,0.65); margin-bottom: 10px; font-size: 22px; }
 
     @media (max-width: 420px) {
-      .card { padding: 28px 20px 22px; border-radius: 20px; }
-      .total-amount { font-size: 36px; }
+      .card { padding: 26px 20px 22px; border-radius: 22px; }
+      .total-amount { font-size: 38px; }
+    }
+
+    /* Confetti canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 99;
     }
   </style>
 </head>
 <body>
-
-  <div class="watermark">Shopee Analytics Pro</div>
-  <div id="root"></div>
+  <canvas id="confetti-canvas"></canvas>
+  <div class="page-wrap">
+    <div class="watermark">Shopee Analytics Pro</div>
+    <div id="root"></div>
+  </div>
 
   <script>
-    (function () {
-      const RANKS = {
-        1: 'Khách Tập Sự 👶',
-        2: 'Khách Quen 🤝',
-        3: 'Tín Đồ Cuồng Nhiệt 👑',
-        4: 'Cổ Đông Chiến Lược 💎'
-      };
+  (function () {
+    /* ====================================================
+       Helpers
+    ==================================================== */
+    const RANKS = {
+      1: 'Khách Tập Sự 👶',
+      2: 'Khách Quen 🤝',
+      3: 'Tín Đồ Cuồng Nhiệt 👑',
+      4: 'Cổ Đông Chiến Lược 💎'
+    };
 
-      function fmtVND(n) {
-        n = Math.round(n || 0);
-        if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
-        if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu';
-        if (n >= 1000) return Math.round(n / 1000) + 'k';
-        return n.toLocaleString('vi-VN');
+    function fmtVND(n) {
+      n = Math.round(n || 0);
+      if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+      if (n >= 1000000)    return (n / 1000000).toFixed(1).replace('.0', '')    + ' triệu';
+      if (n >= 1000)       return Math.round(n / 1000) + 'k';
+      return n.toLocaleString('vi-VN');
+    }
+    function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
+    function fmtDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts * 1000);
+      return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+    }
+    function escHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* ====================================================
+       Counter animation
+    ==================================================== */
+    function animateCounter(el, targetText, duration) {
+      // Extract numeric prefix; animate it up from 0
+      const match = targetText.match(/^([\d,\.]+)(.*)$/);
+      if (!match) { el.textContent = targetText; return; }
+
+      const numStr = match[1].replace(/,/g, '');
+      const suffix = match[2];
+      const target = parseFloat(numStr);
+      const isFloat = numStr.includes('.');
+      const decimals = isFloat ? (numStr.split('.')[1] || '').length : 0;
+
+      const start = performance.now();
+      function step(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = target * eased;
+        const formatted = isFloat
+          ? current.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+          : Math.round(current).toLocaleString('vi-VN');
+        el.textContent = formatted + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = targetText;
       }
+      requestAnimationFrame(step);
+    }
 
-      function fmtNum(n) {
-        return Math.round(n || 0).toLocaleString('vi-VN');
-      }
+    /* ====================================================
+       Confetti (for top spenders: percentile >= 80)
+    ==================================================== */
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
 
-      function fmtDate(ts) {
-        if (!ts) return '';
-        const d = new Date(ts * 1000);
-        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-      }
+      const particles = Array.from({ length: 90 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 80,
+        vx: (Math.random() - 0.5) * 3,
+        vy: 2 + Math.random() * 3,
+        rot: Math.random() * 360,
+        rotV: (Math.random() - 0.5) * 8,
+        w: 8 + Math.random() * 6,
+        h: 4 + Math.random() * 4,
+        color: ['#ee4d2d','#ff8a5a','#5fe8cc','#ffd700','#fff'][Math.floor(Math.random() * 5)],
+        alpha: 1
+      }));
 
-      function parseData() {
-        try {
-          const hash = location.hash;
-          const match = hash.match(/[#&]d=([^&]+)/);
-          if (!match) return null;
-          const decoded = decodeURIComponent(escape(atob(match[1])));
-          return JSON.parse(decoded);
-        } catch (e) {
-          return null;
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.rotV;
+          p.vy += 0.06; // gravity
+          if (frame > 80) p.alpha -= 0.018;
+          if (p.alpha <= 0) continue;
+          alive = true;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
         }
+        frame++;
+        if (alive) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+      requestAnimationFrame(draw);
+    }
 
-      function renderError() {
-        document.getElementById('root').innerHTML = `
-          <div class="error-msg">
-            <h2>Không tìm thấy dữ liệu</h2>
-            <p>Link chia sẻ không hợp lệ hoặc đã hết hạn.</p>
-          </div>
-          <div class="cta-section">
-            <p class="cta-hint">Tự tạo thống kê của bạn:</p>
-            <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
-              Cài Shopee Analytics Pro
-            </a>
-          </div>
-        `;
-      }
+    /* ====================================================
+       IntersectionObserver – reveal on scroll
+    ==================================================== */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
 
-      function renderCard(d) {
-        const rankLabel = RANKS[d.r] || RANKS[2];
-        const beat = d.p || 0;
-        const topShopHtml = d.sh
-          ? `<div class="top-shop-row">
-               <div class="top-shop-label">🏆 Cửa hàng hàng đầu</div>
-               <div class="top-shop-name">${escHtml(d.sh)}</div>
-             </div>`
-          : '';
+    function observe(el) { if (el) observer.observe(el); }
 
-        const html = `
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-header">
-                <div class="app-name">Shopee Analytics Pro</div>
-                <div class="card-title">Tổng Kết Chi Tiêu Của Tôi</div>
+    /* ====================================================
+       Parse URL data
+    ==================================================== */
+    function parseData() {
+      try {
+        const match = location.hash.match(/[#&]d=([^&]+)/);
+        if (!match) return null;
+        return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+      } catch { return null; }
+    }
+
+    /* ====================================================
+       Render error
+    ==================================================== */
+    function renderError() {
+      document.getElementById('root').innerHTML = `
+        <div class="error-msg">
+          <h2>Không tìm thấy dữ liệu</h2>
+          <p>Link chia sẻ không hợp lệ hoặc đã hết hạn.</p>
+        </div>
+        <div class="cta-section visible" style="opacity:1;transform:none">
+          <p class="cta-hint">Tự tạo thống kê của bạn:</p>
+          <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
+            Cài Shopee Analytics Pro
+          </a>
+        </div>`;
+    }
+
+    /* ====================================================
+       Build year chart HTML
+    ==================================================== */
+    function buildYearChart(yd, currentYear) {
+      if (!Array.isArray(yd) || yd.length === 0) return '';
+      const maxVal = Math.max(...yd.map(([, v]) => v), 1);
+      const rows = yd.map(([y, v]) => {
+        const pct = Math.round((v / maxVal) * 100);
+        const cls = y === currentYear ? 'current' : 'past';
+        return `
+          <div class="chart-row">
+            <div class="chart-year">${y}</div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar-inner ${cls}" data-pct="${pct}"></div>
+            </div>
+            <div class="chart-val">${fmtVND(v)}đ</div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="chart-section" id="chart-section">
+          <div class="chart-section-title">📅 Chi Tiêu Theo Năm</div>
+          ${rows}
+        </div>`;
+    }
+
+    /* ====================================================
+       Main render
+    ==================================================== */
+    function renderCard(d) {
+      const rankLabel = RANKS[d.r] || RANKS[2];
+      const beat = d.p || 0;
+      const currentYear = new Date().getFullYear();
+
+      const topContentHtml = d.ti
+        ? `<div class="top-item-row" id="top-item-row">
+             <div class="top-item-label">🏆 Sản phẩm chi tiêu nhiều nhất</div>
+             <div class="top-item-name">${escHtml(d.ti)}</div>
+           </div>`
+        : (d.sh
+            ? `<div class="top-item-row" id="top-item-row">
+                 <div class="top-item-label">🏪 Cửa hàng hàng đầu</div>
+                 <div class="top-item-name">${escHtml(d.sh)}</div>
+               </div>`
+            : '');
+
+      const yearChartHtml = buildYearChart(d.yd, currentYear);
+
+      // Format total for counter animation
+      const totalFmt = fmtVND(d.t) + 'đ';
+
+      document.getElementById('root').innerHTML = `
+        <div class="card" id="main-card">
+          <div class="card-inner">
+            <div class="app-name">Shopee Analytics Pro</div>
+            <div class="card-title">Tổng Kết Chi Tiêu Của Tôi</div>
+
+            <div class="total-amount" id="total-counter">0đ</div>
+            <div class="rank-pill">${escHtml(rankLabel)}</div>
+
+            <div class="divider"></div>
+
+            <div class="stats-grid">
+              <div class="stat" id="stat-0">
+                <div class="stat-value" id="sv-orders">0</div>
+                <div class="stat-label">Đơn hàng</div>
               </div>
-
-              <div class="total-amount">${fmtVND(d.t)}đ</div>
-              <div class="rank-pill">${escHtml(rankLabel)}</div>
-
-              <div class="divider"></div>
-
-              <div class="stats-grid">
-                <div class="stat">
-                  <div class="stat-value">${fmtNum(d.o)}</div>
-                  <div class="stat-label">Đơn hàng</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-value">${fmtNum(d.ip)}</div>
-                  <div class="stat-label">Sản phẩm</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-value green">${fmtVND(d.s)}đ</div>
-                  <div class="stat-label">Tiết kiệm được</div>
-                </div>
-                <div class="stat">
-                  <div class="stat-value">${beat}%</div>
-                  <div class="stat-label">Top chi tiêu VN</div>
-                </div>
+              <div class="stat" id="stat-1">
+                <div class="stat-value" id="sv-items">0</div>
+                <div class="stat-label">Sản phẩm</div>
               </div>
-
-              ${topShopHtml}
-
-              <div class="percentile-section">
-                <div class="percentile-label">Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN (ước tính)</div>
-                <div class="percentile-bar-bg">
-                  <div class="percentile-bar-fill" id="pct-fill" style="width:0%"></div>
-                </div>
-                <div class="percentile-hint">*Số liệu ước tính dựa trên thói quen mua sắm trung bình</div>
+              <div class="stat" id="stat-2">
+                <div class="stat-value green" id="sv-saved">0đ</div>
+                <div class="stat-label">Tiết kiệm được</div>
               </div>
-
-              <div class="card-footer">
-                <span class="footer-brand">Shopee Analytics Pro</span>
-                <span class="footer-date">${fmtDate(d.ts)}</span>
+              <div class="stat" id="stat-3">
+                <div class="stat-value" id="sv-pct">${beat}%</div>
+                <div class="stat-label">Top chi tiêu VN</div>
               </div>
             </div>
+
+            ${topContentHtml}
+            ${yearChartHtml}
+
+            <div class="percentile-section" id="pct-section">
+              <div class="percentile-label">Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN (ước tính)</div>
+              <div class="percentile-bar-bg">
+                <div class="percentile-bar-fill" id="pct-fill"></div>
+              </div>
+              <div class="percentile-hint">*Số liệu ước tính dựa trên thói quen mua sắm trung bình</div>
+            </div>
+
+            <div class="card-footer">
+              <span class="footer-brand">Shopee Analytics Pro</span>
+              <span class="footer-date">${fmtDate(d.ts)}</span>
+            </div>
           </div>
+        </div>
 
-          <div class="cta-section">
-            <p class="cta-hint">Bạn muốn xem thống kê chi tiêu của mình?</p>
-            <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
-              Cài Shopee Analytics Pro Miễn Phí
-            </a>
-          </div>
-        `;
+        <div class="cta-section" id="cta-section">
+          <p class="cta-hint">Bạn muốn xem thống kê chi tiêu của mình?</p>
+          <a class="cta-btn" href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">
+            Cài Shopee Analytics Pro Miễn Phí
+          </a>
+        </div>
+      `;
 
-        document.getElementById('root').innerHTML = html;
+      /* --- Animate card entrance --- */
+      const card = document.getElementById('main-card');
+      observe(card);
 
-        // Animate percentile bar
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            const fill = document.getElementById('pct-fill');
-            if (fill) fill.style.width = beat + '%';
-          }, 300);
-        });
+      /* --- Animate stats with stagger --- */
+      for (let i = 0; i < 4; i++) {
+        const el = document.getElementById(`stat-${i}`);
+        if (!el) continue;
+        el.style.transitionDelay = `${0.1 + i * 0.08}s`;
+        observe(el);
       }
+      observe(document.getElementById('top-item-row'));
+      observe(document.getElementById('chart-section'));
+      observe(document.getElementById('pct-section'));
+      observe(document.getElementById('cta-section'));
 
-      function escHtml(str) {
-        return String(str || '')
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      }
+      /* --- Run animations once card is visible --- */
+      const cardObserver = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        cardObserver.disconnect();
 
-      // Main
-      const data = parseData();
-      if (!data || !data.t) {
-        renderError();
-      } else {
-        renderCard(data);
-      }
-    })();
+        // Counter animation for total amount
+        const totalEl = document.getElementById('total-counter');
+        if (totalEl) animateCounter(totalEl, totalFmt, 1200);
+
+        // Counter for stat values (after stagger)
+        setTimeout(() => {
+          const svOrders = document.getElementById('sv-orders');
+          const svItems  = document.getElementById('sv-items');
+          const svSaved  = document.getElementById('sv-saved');
+          if (svOrders) animateCounter(svOrders, fmtNum(d.o), 900);
+          if (svItems)  animateCounter(svItems,  fmtNum(d.ip), 900);
+          if (svSaved)  animateCounter(svSaved,  fmtVND(d.s) + 'đ', 900);
+        }, 350);
+
+        // Percentile bar animation
+        setTimeout(() => {
+          const fill = document.getElementById('pct-fill');
+          if (fill) fill.style.width = beat + '%';
+        }, 600);
+
+        // Year chart bars animation with stagger
+        setTimeout(() => {
+          document.querySelectorAll('.chart-bar-inner').forEach((bar, idx) => {
+            setTimeout(() => {
+              bar.style.width = bar.getAttribute('data-pct') + '%';
+            }, idx * 100);
+          });
+        }, 700);
+
+        // Confetti for big spenders
+        if (beat >= 80) {
+          setTimeout(launchConfetti, 800);
+        }
+      }, { threshold: 0.2 });
+
+      if (card) cardObserver.observe(card);
+    }
+
+    /* ====================================================
+       Boot
+    ==================================================== */
+    const data = parseData();
+    if (!data || !data.t) {
+      renderError();
+    } else {
+      renderCard(data);
+    }
+  })();
   </script>
 </body>
 </html>

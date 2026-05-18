@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabContentTime = document.getElementById('tab-time');
   const tabContentYear = document.getElementById('tab-year');
 
-  const subTabBtns = document.querySelectorAll('.sub-tab-btn');
-  const subItemsEl = document.getElementById('sub-items');
-  const subShopsEl = document.getElementById('sub-shops');
+  const topItemsListEl = document.getElementById('top-items-list');
+  const catStatsSectionEl = document.getElementById('cat-stats-section');
+  const catStatsListEl = document.getElementById('cat-stats-list');
 
   const periodPills = document.querySelectorAll('.period-pill');
 
@@ -103,27 +103,56 @@ document.addEventListener('DOMContentLoaded', () => {
     return 99;
   }
 
-  // === Top Shops Period Filter ===
-  function computeTopShopsForPeriod(miniOrders, cutoffTs) {
-    const shopMap = {};
+  // === Category Names (Shopee VN — verified IDs may vary) ===
+  const CAT_NAMES = {
+    '11000001': '📱 Điện Thoại & Phụ Kiện',
+    '11000027': '💻 Máy Tính & Laptop',
+    '11000003': '🔌 Thiết Bị Điện Tử',
+    '11000028': '👔 Thời Trang Nam',
+    '11000004': '👗 Thời Trang Nữ',
+    '11000006': '🏠 Nhà Cửa & Đời Sống',
+    '11000007': '💊 Sức Khỏe & Làm Đẹp',
+    '11000010': '🍜 Thực Phẩm & Đồ Uống',
+    '11000011': '📚 Sách & Văn Phòng Phẩm',
+    '11000008': '⚽ Thể Thao & Du Lịch',
+    '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
+    '11000009': '🚗 Ô Tô & Xe Máy',
+    '11000013': '⌚ Đồng Hồ',
+    '11000012': '📷 Máy Ảnh & Máy Quay'
+  };
+
+  // === Top Items Period Filter ===
+  function computeTopItemsForPeriod(miniOrders, cutoffTs) {
+    const itemMap = {};
+    let hasIlData = false;
     for (const order of miniOrders) {
-      if (cutoffTs && order.ts < cutoffTs) continue;
-      if (!Array.isArray(order.sl)) continue;
-      for (const shop of order.sl) {
-        if (!shop.i) continue;
-        if (!shopMap[shop.i]) shopMap[shop.i] = { name: shop.n, spent: 0, count: 0 };
-        shopMap[shop.i].spent += shop.s;
-        shopMap[shop.i].count += 1;
+      if (cutoffTs > 0 && order.ts < cutoffTs) continue;
+      if (!Array.isArray(order.il)) continue;
+      hasIlData = true;
+      for (const item of order.il) {
+        if (!item.i) continue;
+        if (!itemMap[item.i]) itemMap[item.i] = { name: item.n, spent: 0, count: 0 };
+        itemMap[item.i].spent += item.s;
+        itemMap[item.i].count += item.c;
       }
     }
-    return Object.values(shopMap).sort((a, b) => b.spent - a.spent).slice(0, 5);
+    const items = Object.values(itemMap).sort((a, b) => b.spent - a.spent).slice(0, 5);
+    return { items, hasIlData };
   }
 
   // === Cache Management ===
+  function isCacheValid(cache) {
+    if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
+    // Require il field (item list) on cached orders so period filter works without re-stat.
+    // Old cache format (with sl/shop data) is automatically invalidated here.
+    if (cache.miniOrders.length > 0 && !cache.miniOrders.some(o => Array.isArray(o.il))) return false;
+    return true;
+  }
+
   function checkCacheInfo(listType) {
     chrome.storage.local.get(['shopee_cache'], (result) => {
       const cache = result.shopee_cache;
-      if (cache && cache.listType === listType && cache.lastUpdated > 0 && Array.isArray(cache.miniOrders)) {
+      if (cache && cache.listType === listType && isCacheValid(cache)) {
         cacheData = cache;
         const elapsedMin = Math.round((Date.now() / 1000 - cache.lastUpdated) / 60);
         let timeStr;
@@ -133,6 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cacheBadgeText.textContent = `Cache: ${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
         cacheInfo.classList.remove('hidden');
       } else {
+        // Silently drop old-format cache so next run does a full re-fetch
+        if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
         cacheData = null;
         cacheInfo.classList.add('hidden');
       }
@@ -159,16 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(btn.getAttribute('data-target')).classList.remove('hidden');
     });
   });
-  subTabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      subTabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.sub-tab-content').forEach(tc => tc.classList.add('hidden'));
-      document.getElementById(btn.getAttribute('data-subtarget')).classList.remove('hidden');
-    });
-  });
 
-  // === Period Filter (Top Section) ===
+  // === Period Filter (Top Items) ===
   periodPills.forEach(pill => {
     pill.addEventListener('click', () => {
       periodPills.forEach(p => p.classList.remove('active'));
@@ -176,27 +199,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!lastCompleteData) return;
       const period = pill.getAttribute('data-period');
-      const miniOrders = lastCompleteData.cachePayload && lastCompleteData.cachePayload.miniOrders;
 
+      if (period === 'all') {
+        renderTopItems(lastCompleteData.topItems || [], false);
+        return;
+      }
+
+      const miniOrders = lastCompleteData.cachePayload && lastCompleteData.cachePayload.miniOrders;
       if (!miniOrders || miniOrders.length === 0) return;
 
       const now = Date.now() / 1000;
-      const cutoffs = { all: 0, '1y': now - 365 * 24 * 3600, '3m': now - 90 * 24 * 3600, '1m': now - 30 * 24 * 3600 };
+      const cutoffs = {
+        '1y': now - 365 * 24 * 3600,
+        '3m': now - 90 * 24 * 3600,
+        '1m': now - 30 * 24 * 3600
+      };
       const cutoff = cutoffs[period] || 0;
 
-      const filtered = computeTopShopsForPeriod(miniOrders, cutoff);
-
-      if (period === 'all') {
-        renderTopShops(lastCompleteData.topShops || [], false);
-        renderTopItems(lastCompleteData.topItems || [], false);
+      const { items, hasIlData } = computeTopItemsForPeriod(miniOrders, cutoff);
+      if (hasIlData && items.length > 0) {
+        renderTopItems(items, true);
+      } else if (!hasIlData) {
+        // Graceful fallback: show all-time items with a soft note
+        renderTopItems(lastCompleteData.topItems || [], false, 'Hiển thị toàn thời gian · Thống kê lại để lọc chính xác');
       } else {
-        const hasSl = miniOrders.some(o => Array.isArray(o.sl));
-        if (!hasSl) {
-          subShopsEl.innerHTML = '<div class="empty-msg">Hãy thống kê lại để lọc theo thời gian</div>';
-        } else {
-          renderTopShops(filtered, true);
-        }
-        renderTopItems(lastCompleteData.topItems || [], true);
+        topItemsListEl.innerHTML = '<div class="empty-msg">Không có đơn hàng trong khoảng thời gian này</div>';
       }
     });
   });
@@ -268,29 +295,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // === Share Link ===
-  // Replace [YOUR_GITHUB_USERNAME] with your actual GitHub Pages URL after deploying share-page/
-  const SHARE_PAGE_BASE = 'https://[YOUR_GITHUB_USERNAME].github.io/shopee-stats/share-page';
+  // === Share Link & Dashboard URLs ===
+  const SHARE_PAGE_BASE = 'https://tr4n.github.io/shopee-stats/share-page';
+  const DASHBOARD_BASE  = 'https://tr4n.github.io/shopee-stats/dashboard';
 
   function buildShareLink(data) {
     const curYear = new Date().getFullYear();
-    const annualSpent = (data.thongKeTheoNam && data.thongKeTheoNam[curYear])
-      ? data.thongKeTheoNam[curYear].total.tongTien : 0;
+    const annualData = data.thongKeTheoNam && data.thongKeTheoNam[curYear];
+    const annualSpent = annualData ? annualData.total.tongTien : 0;
+    const beat = getSpendingPercentile(annualSpent);
     const rankNum = data.tongtienhang <= 10000000 ? 1 : data.tongtienhang <= 50000000 ? 2 : data.tongtienhang < 80000000 ? 3 : 4;
-    const topShopName = (data.topShops && data.topShops[0]) ? data.topShops[0].name.substring(0, 25) : '';
+    const topItemName = (data.topItems && data.topItems[0]) ? data.topItems[0].name.substring(0, 30) : '';
+
+    // Yearly spending array [[year, amount], ...] for chart — last 5 years sorted asc
+    const ydArr = Object.entries(data.thongKeTheoNam || {})
+      .sort((a, b) => a[0] - b[0])
+      .slice(-5)
+      .map(([y, yd]) => [parseInt(y), Math.round(yd.total.tongTien)]);
+
     const shareData = {
-      v: 1,
+      v: 2,
       t: Math.round(data.tongtienhang),
       o: data.tongDonHang,
       s: Math.round(Math.max(0, data.tongTienTietKiem)),
       ip: data.tongSanPhamDaMua,
       r: rankNum,
-      p: getSpendingPercentile(annualSpent),
+      p: beat,
       ts: Math.floor(Date.now() / 1000),
-      sh: topShopName
+      ti: topItemName,
+      yd: ydArr
     };
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
     return `${SHARE_PAGE_BASE}/#d=${encoded}`;
+  }
+
+  function buildDashboardUrl(data) {
+    const yd = {};
+    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
+      yd[yr] = {
+        t:  Math.round(ydata.total.tongTien),
+        o:  ydata.total.donHang,
+        ip: ydata.total.sanPham,
+        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+        m:  Object.fromEntries(
+          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
+        )
+      };
+    }
+    const ps = data.thongKeTheoThang || {};
+    const dashData = {
+      v:    1,
+      t:    Math.round(data.tongtienhang),
+      o:    data.tongDonHang,
+      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
+      ip:   data.tongSanPhamDaMua,
+      ship: Math.round(data.tongPhiShip || 0),
+      ts:   Math.floor(Date.now() / 1000),
+      yd,
+      ps: {
+        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
+        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
+        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
+        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
+      },
+      ti: (data.topItems || []).slice(0, 10).map(i => ({
+        n: i.name.substring(0, 50),
+        s: Math.round(i.spent),
+        c: i.count
+      })),
+      cs: Object.entries(data.catStats || {})
+        .sort((a, b) => b[1].spent - a[1].spent)
+        .slice(0, 12)
+        .map(([id, v]) => ({ id, s: Math.round(v.spent), c: v.count }))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
+    return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
 
   btnShareLink.addEventListener('click', async () => {
@@ -310,7 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
-      chrome.tabs.create({ url: chrome.runtime.getURL('dashboard/index.html') });
+      const url = lastCompleteData
+        ? buildDashboardUrl(lastCompleteData)
+        : DASHBOARD_BASE + '/';
+      chrome.tabs.create({ url });
     });
   }
 
@@ -327,12 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
       showState(stateLoading);
 
       const listType = getSelectedListType();
+      const useCache = cacheData && cacheData.listType === listType && isCacheValid(cacheData);
       const configPayload = {
         listType,
-        lastUpdated: (cacheData && cacheData.listType === listType) ? (cacheData.lastUpdated || 0) : 0,
-        miniOrders: (cacheData && cacheData.listType === listType && Array.isArray(cacheData.miniOrders)) ? cacheData.miniOrders : [],
-        shopMap: (cacheData && cacheData.listType === listType && cacheData.shopMap) ? cacheData.shopMap : {},
-        itemMap: (cacheData && cacheData.listType === listType && cacheData.itemMap) ? cacheData.itemMap : {}
+        lastUpdated: useCache ? (cacheData.lastUpdated || 0) : 0,
+        miniOrders: useCache ? cacheData.miniOrders : [],
+        itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
       };
 
       await chrome.scripting.executeScript({
@@ -390,20 +472,15 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTrendBadges(data.thongKeTheoNam);
     renderPercentile(data.thongKeTheoNam);
     renderTopItems(data.topItems || [], false);
-    renderTopShops(data.topShops || [], false);
+    renderCatStats(data.catStats || {});
     renderTimeData(data.thongKeTheoThang);
     renderYearData(data.thongKeTheoNam);
 
-    // Reset all UI controls to defaults
+    // Reset UI controls to defaults
     tabBtns.forEach(b => b.classList.remove('active'));
     tabBtns[0].classList.add('active');
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
     tabContentTime.classList.remove('hidden');
-
-    subTabBtns.forEach(b => b.classList.remove('active'));
-    subTabBtns[0].classList.add('active');
-    document.querySelectorAll('.sub-tab-content').forEach(tc => tc.classList.add('hidden'));
-    subItemsEl.classList.remove('hidden');
 
     periodPills.forEach(p => p.classList.remove('active'));
     periodPills[0].classList.add('active');
@@ -459,48 +536,59 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === Render Top Items ===
-  function renderTopItems(topItems, isPeriodFiltered) {
+  function renderTopItems(topItems, isPeriodFiltered, softNote) {
     if (topItems && topItems.length > 0) {
       const maxSpent = Math.max(...topItems.map(i => i.spent), 1);
-      const note = isPeriodFiltered ? '<div class="top-period-note">Sản phẩm: toàn thời gian</div>' : '';
-      subItemsEl.innerHTML = note + topItems.map((item, idx) => {
+      let noteHtml = '';
+      if (softNote) {
+        noteHtml = `<div class="top-period-note">ℹ️ ${softNote}</div>`;
+      } else if (isPeriodFiltered) {
+        noteHtml = '<div class="top-period-note">Dựa trên dữ liệu trong kỳ đã chọn</div>';
+      }
+      topItemsListEl.innerHTML = noteHtml + topItems.map((item, idx) => {
         const pct = Math.round((item.spent / maxSpent) * 100);
         return `
           <div class="top-item">
             <div class="top-rank">${idx + 1}</div>
             <div class="top-info">
               <span class="top-name">${escapeHtml(item.name)}</span>
-              <span class="top-meta">${escapeHtml(item.shopName)} · ${pxgPrice(item.count)} lượt</span>
+              <span class="top-meta">${pxgPrice(item.count)} lượt mua</span>
               <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
             </div>
             <span class="top-value">${pxgPrice(item.spent)}đ</span>
           </div>`;
       }).join('');
     } else {
-      subItemsEl.innerHTML = '<div class="empty-msg">Không có dữ liệu sản phẩm</div>';
+      topItemsListEl.innerHTML = '<div class="empty-msg">Không có dữ liệu sản phẩm</div>';
     }
   }
 
-  // === Render Top Shops ===
-  function renderTopShops(topShops, isPeriodFiltered) {
-    if (topShops && topShops.length > 0) {
-      const maxSpent = Math.max(...topShops.map(s => s.spent), 1);
-      subShopsEl.innerHTML = topShops.map((shop, idx) => {
-        const pct = Math.round((shop.spent / maxSpent) * 100);
-        return `
-          <div class="top-item">
-            <div class="top-rank">${idx + 1}</div>
-            <div class="top-info">
-              <span class="top-name">${escapeHtml(shop.name)}</span>
-              <span class="top-meta">${pxgPrice(shop.count)} đơn hàng</span>
-              <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
-            </div>
-            <span class="top-value">${pxgPrice(shop.spent)}đ</span>
-          </div>`;
-      }).join('');
-    } else {
-      subShopsEl.innerHTML = '<div class="empty-msg">Không có dữ liệu cửa hàng</div>';
+  // === Render Category Stats ===
+  function renderCatStats(catStats) {
+    const entries = Object.entries(catStats)
+      .filter(([, v]) => v.spent > 0)
+      .sort((a, b) => b[1].spent - a[1].spent)
+      .slice(0, 6);
+
+    if (entries.length === 0) {
+      catStatsSectionEl.classList.add('hidden');
+      return;
     }
+
+    const maxSpent = entries[0][1].spent;
+    catStatsListEl.innerHTML = entries.map(([catId, v]) => {
+      const name = CAT_NAMES[catId] || `Danh mục #${catId}`;
+      const pct = Math.round((v.spent / maxSpent) * 100);
+      return `
+        <div class="top-item">
+          <div class="top-info" style="flex:1">
+            <span class="top-name">${escapeHtml(name)}</span>
+            <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+          <span class="top-value">${pxgPrice(v.spent)}đ</span>
+        </div>`;
+    }).join('');
+    catStatsSectionEl.classList.remove('hidden');
   }
 
   // === Render Time Data ===

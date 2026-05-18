@@ -143,21 +143,14 @@
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     ctx.fillRect(PAD, 684, W - PAD * 2, 1.5);
 
-    // === Top Section ===
+    // === Top Item Section ===
     let topY = 710;
-    const hasTopShop = data.topShops && data.topShops.length > 0;
     const hasTopItem = data.topItems && data.topItems.length > 0;
 
-    if (hasTopShop) {
-      txt('🏆  Cửa Hàng Hàng Đầu', PAD, topY + 44, 28, '600', 'rgba(255,255,255,0.75)');
-      txt(truncate(data.topShops[0].name, 32), PAD, topY + 96, 42, '800', '#ffffff');
-      txt(fmtVND(data.topShops[0].spent) + 'đ · ' + fmtNum(data.topShops[0].count) + ' đơn', PAD, topY + 132, 24, '400', 'rgba(255,255,255,0.6)');
-    }
     if (hasTopItem) {
-      const col2 = hasTopShop ? W / 2 + 12 : PAD;
-      txt('🛒  Sản Phẩm Ưa Thích', col2, topY + 44, 28, '600', 'rgba(255,255,255,0.75)');
-      txt(truncate(data.topItems[0].name, hasTopShop ? 22 : 32), col2, topY + 96, 38, '800', '#ffffff');
-      txt(fmtNum(data.topItems[0].count) + ' lần mua', col2, topY + 132, 24, '400', 'rgba(255,255,255,0.6)');
+      txt('🛒  Sản Phẩm Chi Tiêu Nhiều Nhất', PAD, topY + 44, 28, '600', 'rgba(255,255,255,0.75)');
+      txt(truncate(data.topItems[0].name, 36), PAD, topY + 96, 40, '800', '#ffffff');
+      txt(fmtVND(data.topItems[0].spent) + 'đ · ' + fmtNum(data.topItems[0].count) + ' lần mua', PAD, topY + 132, 24, '400', 'rgba(255,255,255,0.6)');
     }
 
     // === Percentile bar ===

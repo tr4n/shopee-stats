@@ -5,7 +5,6 @@
   const LIST_TYPE = cfg.listType || 3;
   const LAST_UPDATED = cfg.lastUpdated || 0;
   const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
-  const CACHED_SHOP_MAP = cfg.shopMap || {};
   const CACHED_ITEM_MAP = cfg.itemMap || {};
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -144,18 +143,12 @@
 
       const newMiniOrders = [];
 
-      // Deep copy cached maps to avoid mutating input
-      const shopMap = {};
-      for (const [k, v] of Object.entries(CACHED_SHOP_MAP)) {
-        shopMap[k] = Object.assign({}, v);
-      }
       const itemMap = {};
       for (const [k, v] of Object.entries(CACHED_ITEM_MAP)) {
         itemMap[k] = Object.assign({}, v);
       }
 
       while (hasMoreData && !hitCache) {
-        // Rate limiting: skip delay for first page
         if (offsetIndex > 0) await sleep(400);
 
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
@@ -172,7 +165,6 @@
         for (const order of orders) {
           const rawTs = getRawTs(order);
 
-          // Early stop if we've hit already-cached data
           if (LAST_UPDATED > 0 && rawTs > 0 && rawTs <= LAST_UPDATED) {
             hitCache = true;
             break;
@@ -184,7 +176,8 @@
 
           let rawCost = 0;
           let itemCount = 0;
-          const orderShopsSpent = {};
+          // Compact item list per order — enables period-filtered top items in popup
+          const orderItemList = [];
 
           const cards = infoCard.order_list_cards || [];
           for (const card of cards) {
@@ -192,65 +185,47 @@
             const groups = productInfo.item_groups || [];
 
             for (const grp of groups) {
-              const shopId = String(
-                grp.shop_id ||
-                productInfo.shop_id ||
-                (card.basic_info && (card.basic_info.shopid || card.basic_info.shop_id)) ||
-                ''
-              );
-              const shopName =
-                grp.shop_name ||
-                productInfo.shop_name ||
-                (card.basic_info && card.basic_info.shop_name) ||
-                'Shop';
-
+              // Try multiple possible catid fields from Shopee API
+              const catId = grp.catid || grp.cat_id || grp.main_cat_id || 0;
               const items = grp.items || [];
-              let grpSpent = 0;
 
               for (const it of items) {
                 const price = (it.order_price || 0) / 100000;
                 const qty = it.amount || 1;
                 rawCost += price;
                 itemCount += qty;
-                grpSpent += price;
 
                 const baseItemId = String(it.item_id || '');
                 const modelId = String(it.modelid || it.model_id || '');
                 const uniqueItemId = baseItemId + (modelId ? '_' + modelId : '');
-                
+
                 let itemName = it.name || it.item_name || 'Sản phẩm';
                 const modelName = it.model_name || '';
-                if (modelName) {
-                  itemName += ` - ${modelName}`;
-                }
+                if (modelName) itemName += ` - ${modelName}`;
+
+                // Item-level catid takes priority over group-level
+                const itemCatId = it.catid || it.cat_id || catId;
 
                 if (uniqueItemId) {
                   if (!itemMap[uniqueItemId]) {
-                    itemMap[uniqueItemId] = { name: itemName, shopName, spent: 0, count: 0 };
+                    itemMap[uniqueItemId] = { name: itemName, spent: 0, count: 0, catId: itemCatId };
                   }
                   itemMap[uniqueItemId].spent += price;
                   itemMap[uniqueItemId].count += qty;
                 }
-              }
 
-              if (shopId) {
-                if (!orderShopsSpent[shopId]) {
-                  orderShopsSpent[shopId] = { name: shopName, spent: 0 };
-                }
-                orderShopsSpent[shopId].spent += grpSpent;
+                orderItemList.push({
+                  i: uniqueItemId,
+                  n: itemName.substring(0, 40),
+                  s: price,
+                  c: qty,
+                  cat: itemCatId
+                });
               }
             }
           }
 
-          for (const [sid, sv] of Object.entries(orderShopsSpent)) {
-            if (!shopMap[sid]) shopMap[sid] = { name: sv.name, spent: 0, count: 0 };
-            shopMap[sid].spent += sv.spent;
-            shopMap[sid].count += 1;
-          }
-
-          // Compact shop list per order — enables period-filtered top-shops in popup
-          const shopList = Object.entries(orderShopsSpent).map(([id, sv]) => ({ i: id, n: sv.name, s: sv.spent }));
-          newMiniOrders.push({ ts: rawTs, finalCost, rawCost, itemCount, shippingFee, sl: shopList });
+          newMiniOrders.push({ ts: rawTs, finalCost, rawCost, itemCount, shippingFee, il: orderItemList });
         }
 
         offsetIndex += LIMIT;
@@ -274,17 +249,21 @@
       const allMiniOrders = [...newMiniOrders, ...CACHED_MINI_ORDERS];
       const stats = computeStats(allMiniOrders);
 
-      // Cap map sizes to prevent unbounded growth in storage
-      const cappedShopMap = capMap(shopMap, 200);
       const cappedItemMap = capMap(itemMap, 500);
-
-      const topShops = Object.values(cappedShopMap)
-        .sort((a, b) => b.spent - a.spent)
-        .slice(0, 5);
 
       const topItems = Object.values(cappedItemMap)
         .sort((a, b) => b.spent - a.spent)
         .slice(0, 5);
+
+      // Build category spending stats from all-time item map
+      const catStats = {};
+      for (const iv of Object.values(cappedItemMap)) {
+        const catKey = String(iv.catId || 0);
+        if (catKey === '0') continue;
+        if (!catStats[catKey]) catStats[catKey] = { spent: 0, count: 0 };
+        catStats[catKey].spent += iv.spent;
+        catStats[catKey].count += iv.count;
+      }
 
       const newLastUpdated = newMiniOrders.length > 0
         ? Math.max(...newMiniOrders.map(o => o.ts).filter(t => t > 0), 0)
@@ -295,13 +274,12 @@
           type: 'SHOPEE_STATS_COMPLETE',
           data: {
             ...stats,
-            topShops,
             topItems,
+            catStats,
             cachePayload: {
               lastUpdated: newLastUpdated || LAST_UPDATED,
               listType: LIST_TYPE,
               miniOrders: allMiniOrders,
-              shopMap: cappedShopMap,
               itemMap: cappedItemMap
             }
           }
