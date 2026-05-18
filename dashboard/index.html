@@ -204,6 +204,14 @@
     .top-val { font-size: 14px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 
     /* ── Category bars ───────────────────────────── */
+    .limit-select {
+      padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      cursor: pointer; outline: none;
+    }
+    .limit-select:hover { border-color: var(--primary); }
+
     .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
     .cat-label { font-size: 13px; font-weight: 600; width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cat-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
@@ -277,6 +285,10 @@
         <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
         <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
       </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+        <button id="btn-copy-img" class="pill" style="border-color: var(--primary); color: var(--primary); padding: 8px 16px; min-width: 130px; margin: 0;">📋 Copy Ảnh</button>
+        <button id="btn-download-img" class="pill active" style="padding: 8px 16px; min-width: 130px; margin: 0;">📸 Tải Ảnh Tổng Kết</button>
+      </div>
     </div>
 
     <div class="kpi-row" id="kpi-row"></div>
@@ -306,6 +318,17 @@
       <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
       <div class="chart-wrap tall"><canvas id="chart-monthly"></canvas></div>
     </div>
+    <div class="card" id="card-monthly-items" style="display: none; margin-top: 20px;">
+      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
+        <select id="monthly-limit-select" class="limit-select">
+          <option value="10">Top 10</option>
+          <option value="20" selected>Top 20</option>
+          <option value="50">Top 50</option>
+        </select>
+      </div>
+      <div class="top-list" id="monthly-items-list"></div>
+    </div>
   </div>
 
   <!-- Top Items -->
@@ -317,7 +340,14 @@
       </div>
     </div>
     <div class="card" id="card-items">
-      <div class="card-title">🏆 Bảng Xếp Hạng</div>
+      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>🏆 Bảng Xếp Hạng</span>
+        <select id="items-limit-select" class="limit-select">
+          <option value="10">Top 10</option>
+          <option value="20" selected>Top 20</option>
+          <option value="50">Top 50</option>
+        </select>
+      </div>
       <div class="top-list" id="items-list"></div>
     </div>
   </div>
@@ -344,6 +374,7 @@
 
 </main>
 
+<script src="share-card.js"></script>
 <script>
 (function () {
   /* ─────────────────────────────────────────────────
@@ -543,13 +574,17 @@
      Render: Monthly chart
   ───────────────────────────────────────────────── */
   let monthlyChart = null;
-  function renderMonthly(yd, year) {
+  function renderMonthly(yd, year, d) {
     const ydata = yd[year];
     if (!ydata) return;
     const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
     const vals   = months.map(m => ydata.m[m] || 0);
 
-    document.getElementById('monthly-chart-title').textContent = `📅 Chi Tiêu Tháng — Năm ${year}`;
+    document.getElementById('monthly-chart-title').textContent = `📅 Chi Tiêu Tháng — Năm ${year} (Click vào cột để xem sản phẩm)`;
+    
+    const miCard = document.getElementById('card-monthly-items');
+    if (miCard) miCard.style.display = 'none';
+
     const ctx = document.getElementById('chart-monthly').getContext('2d');
     if (monthlyChart) monthlyChart.destroy();
 
@@ -570,38 +605,81 @@
           borderSkipped: false
         }]
       },
-      options: CHART_CFG
+      options: {
+        ...CHART_CFG,
+        onClick: (event, elements) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            const monthStr = months[index];
+            showMonthlyItems(d, year, monthStr);
+          }
+        }
+      }
     });
     reveal(document.getElementById('card-monthly'));
   }
 
-  function renderYearPills(yd, onSelect) {
-    const years = Object.keys(yd).sort((a, b) => b - a);
-    const container = document.getElementById('year-pills');
-    container.innerHTML = years.map((y, i) => `
-      <button class="pill${i === 0 ? ' active' : ''}" data-year="${y}">Năm ${y}</button>`
-    ).join('');
-    container.querySelectorAll('.pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        onSelect(btn.getAttribute('data-year'));
-      });
-    });
-    if (years.length) onSelect(years[0]);
+  let currentMonthlyItems = [];
+  function showMonthlyItems(d, year, monthStr) {
+    const ym = year + '-' + monthStr;
+    currentMonthlyItems = (d.mi && d.mi[ym]) || [];
+    
+    document.getElementById('monthly-items-title').textContent = `🏆 Top Sản Phẩm Tháng ${monthStr}/${year}`;
+    
+    const container = document.getElementById('card-monthly-items');
+    container.style.display = 'block';
+    reveal(container);
+    
+    renderMonthlyItemsList();
+  }
+
+  function renderMonthlyItemsList() {
+    const list = document.getElementById('monthly-items-list');
+    const limit = parseInt(document.getElementById('monthly-limit-select').value, 10) || 20;
+    const items = currentMonthlyItems.slice(0, limit);
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
+      return;
+    }
+    
+    const maxS = Math.max(...items.map(i => i.s), 1);
+    list.innerHTML = items.map((item, idx) => {
+      const pct = Math.round((item.s / maxS) * 100);
+      return `
+        <div class="top-row in">
+          <div class="top-num">${idx + 1}</div>
+          <div class="top-name-wrap">
+            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
+            <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}đ</div>
+          </div>
+          <div class="top-val">${fmtVND(item.s)}đ</div>
+        </div>`;
+    }).join('');
   }
 
   /* ─────────────────────────────────────────────────
      Render: Top Items
   ───────────────────────────────────────────────── */
+  let currentTopItems = [];
   function renderTopItems(ti) {
+    currentTopItems = ti || [];
+    renderTopItemsList();
+    reveal(document.getElementById('card-items'));
+  }
+
+  function renderTopItemsList() {
     const list = document.getElementById('items-list');
-    if (!ti || ti.length === 0) {
+    const limit = parseInt(document.getElementById('items-limit-select').value, 10) || 20;
+    const items = currentTopItems.slice(0, limit);
+
+    if (items.length === 0) {
       list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
       return;
     }
-    const maxS = Math.max(...ti.map(i => i.s), 1);
-    list.innerHTML = ti.map((item, idx) => {
+    const maxS = Math.max(...items.map(i => i.s), 1);
+    list.innerHTML = items.map((item, idx) => {
       const pct = Math.round((item.s / maxS) * 100);
       return `
         <div class="top-row" style="transition-delay:${idx * 0.06}s">
@@ -621,13 +699,27 @@
       entries.forEach(e => {
         if (!e.isIntersecting) return;
         e.target.querySelectorAll('.top-bar-fill').forEach((bar, i) => {
-          setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 80);
+          setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 30);
         });
       });
     }, { threshold: 0.2 });
     barObs.observe(list);
+  }
 
-    reveal(document.getElementById('card-items'));
+  function renderYearPills(yd, onSelect) {
+    const years = Object.keys(yd).sort((a, b) => b - a);
+    const container = document.getElementById('year-pills');
+    container.innerHTML = years.map((y, i) => `
+      <button class="pill${i === 0 ? ' active' : ''}" data-year="${y}">Năm ${y}</button>`
+    ).join('');
+    container.querySelectorAll('.pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        onSelect(btn.getAttribute('data-year'));
+      });
+    });
+    if (years.length) onSelect(years[0]);
   }
 
   /* ─────────────────────────────────────────────────
@@ -718,6 +810,69 @@
   navBtns.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-view'))));
 
   /* ─────────────────────────────────────────────────
+     Share & Download
+  ───────────────────────────────────────────────── */
+  function setupShareButtons(d) {
+    const btnDownload = document.getElementById('btn-download-img');
+    const btnCopy = document.getElementById('btn-copy-img');
+    
+    const getBeat = (t) => {
+       if (t <= 1000000) return 10;
+       if (t <= 3000000) return 25;
+       if (t <= 8000000) return 45;
+       if (t <= 20000000) return 65;
+       if (t <= 50000000) return 82;
+       if (t <= 100000000) return 93;
+       return 99;
+    };
+    
+    btnDownload?.addEventListener('click', async () => {
+      if (!window.generateDashboardShareCard) return;
+      const orig = btnDownload.innerHTML;
+      btnDownload.innerHTML = 'Đang tạo...';
+      btnDownload.style.pointerEvents = 'none';
+      try {
+        const beat = getBeat(d.t);
+        const dataUrl = await window.generateDashboardShareCard(d, beat);
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = 'shopee-analytics-wrapped.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        btnDownload.innerHTML = orig;
+        btnDownload.style.pointerEvents = 'auto';
+      }
+    });
+
+    btnCopy?.addEventListener('click', async () => {
+      if (!window.generateDashboardShareCard) return;
+      const orig = btnCopy.innerHTML;
+      btnCopy.innerHTML = 'Đang copy...';
+      btnCopy.style.pointerEvents = 'none';
+      try {
+        const beat = getBeat(d.t);
+        const dataUrl = await window.generateDashboardShareCard(d, beat);
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        btnCopy.innerHTML = '✓ Đã copy!';
+      } catch (err) {
+        console.error(err);
+        btnCopy.innerHTML = '❌ Lỗi (Có thể trình duyệt không hỗ trợ)';
+      } finally {
+        setTimeout(() => { 
+          btnCopy.innerHTML = orig; 
+          btnCopy.style.pointerEvents = 'auto'; 
+        }, 2000);
+      }
+    });
+  }
+
+  /* ─────────────────────────────────────────────────
      Boot
   ───────────────────────────────────────────────── */
   const d = parseData();
@@ -732,9 +887,15 @@
     renderKpi(d);
     renderYearlyChart(d.yd || {});
     renderPeriod(d.ps || {});
-    renderYearPills(d.yd || {}, yr => renderMonthly(d.yd, yr));
+    renderYearPills(d.yd || {}, yr => renderMonthly(d.yd, yr, d));
     renderTopItems(d.ti || []);
     renderCategories(d.cs || []);
+
+    // Add listeners for limits
+    document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
+    document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
+
+    setupShareButtons(d);
   }
 })();
 </script>

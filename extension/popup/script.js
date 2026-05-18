@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Export CSV ===
-  btnExportCsv.addEventListener('click', () => { if (lastCompleteData) exportCSV(lastCompleteData); });
+  if (btnExportCsv) btnExportCsv.addEventListener('click', () => { if (lastCompleteData) exportCSV(lastCompleteData); });
   function exportCSV(data) {
     const rows = [['Năm', 'Tháng', 'Số đơn', 'Sản phẩm', 'Tổng chi tiêu (VND)', 'Giá gốc (VND)', 'Tiết kiệm (VND)']];
     const sortedYears = Object.keys(data.thongKeTheoNam).sort((a, b) => b - a);
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === Share Card ===
-  btnShareCard.addEventListener('click', async () => {
+  if (btnShareCard) btnShareCard.addEventListener('click', async () => {
     if (!lastCompleteData) return;
     const orig = btnShareCard.textContent;
     btnShareCard.textContent = 'Đang tạo...';
@@ -266,6 +266,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function buildDashboardUrl(data) {
+    const monthlyItems = {};
+    if (data.cachePayload && data.cachePayload.miniOrders) {
+      for (const order of data.cachePayload.miniOrders) {
+        if (!order.ts) continue;
+        const d_obj = new Date(order.ts * 1000);
+        const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
+        if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
+        for (const item of (order.il || [])) {
+           if (!item.i) continue;
+           if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
+           monthlyItems[y_m][item.i].s += item.s;
+           monthlyItems[y_m][item.i].c += item.c;
+        }
+      }
+    }
+    const mi = {};
+    for (const [ym, map] of Object.entries(monthlyItems)) {
+      mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 50).map(x => ({
+         n: x.n.substring(0, 50),
+         s: Math.round(x.s),
+         c: x.c
+      }));
+    }
+
     const yd = {};
     for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
       yd[yr] = {
@@ -288,13 +312,14 @@ document.addEventListener('DOMContentLoaded', () => {
       ship: Math.round(data.tongPhiShip || 0),
       ts:   Math.floor(Date.now() / 1000),
       yd,
+      mi,
       ps: {
         '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
         '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
         '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
         '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
       },
-      ti: (data.topItems || []).slice(0, 10).map(i => ({
+      ti: (data.topItems || []).slice(0, 50).map(i => ({
         n: i.name.substring(0, 50),
         s: Math.round(i.spent),
         c: i.count
@@ -308,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
 
-  btnShareLink.addEventListener('click', async () => {
+  if (btnShareLink) btnShareLink.addEventListener('click', async () => {
     if (!lastCompleteData) return;
     const url = buildShareLink(lastCompleteData);
     try {
@@ -394,50 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
 
-  function buildDashboardUrl(data) {
-    const yd = {};
-    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
-      yd[yr] = {
-        t:  Math.round(ydata.total.tongTien),
-        o:  ydata.total.donHang,
-        ip: ydata.total.sanPham,
-        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
-        m:  Object.fromEntries(
-          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
-        )
-      };
-    }
-    const ps = data.thongKeTheoThang || {};
-    const dashData = {
-      v:    1,
-      t:    Math.round(data.tongtienhang),
-      o:    data.tongDonHang,
-      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
-      ip:   data.tongSanPhamDaMua,
-      ship: Math.round(data.tongPhiShip || 0),
-      ts:   Math.floor(Date.now() / 1000),
-      yd,
-      ps: {
-        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
-        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
-        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
-        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
-      },
-      ti: (data.topItems || []).slice(0, 10).map(i => ({
-        n: i.name.substring(0, 50),
-        s: Math.round(i.spent),
-        c: i.count
-      })),
-      cs: Object.entries(data.catStats || {})
-        .sort((a, b) => b[1].spent - a[1].spent)
-        .slice(0, 12)
-        .map(([id, v]) => ({ id, s: Math.round(v.spent), c: v.count }))
-    };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
-    return `${DASHBOARD_BASE}/#d=${encoded}`;
-  }
 
   // === Render Results ===
   function renderResults(data) {
