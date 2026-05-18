@@ -17,8 +17,8 @@
   }
 
   window.addEventListener("message", event => {
-    // Only accept messages from the same frame
-    if (event.source !== window || !event.data) return;
+    // Only accept messages from the same frame or containing our specific type
+    if (!event.data || !event.data.type || !event.data.type.startsWith('SHOPEE_STATS_')) return;
     
     const messageData = event.data;
     

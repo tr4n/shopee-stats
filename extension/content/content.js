@@ -330,7 +330,12 @@
 
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
         const response = await fetchWithRetry(url);
-        const json = await response.json();
+        let json;
+        try {
+          json = await response.json();
+        } catch (e) {
+          throw new Error('Lỗi đọc dữ liệu từ Shopee (có thể do lỗi đăng nhập). Vui lòng F5 tải lại trang Shopee và thử lại.');
+        }
 
         if (offsetIndex === 0) {
           totalCount = (json && json.data && (json.data.total || json.data.total_count)) || 0;
@@ -420,7 +425,7 @@
               processed: currentTotal,
               total: totalCount,
               pct
-            });
+            }, '*');
           } catch (e) {}
         }
       }
@@ -452,7 +457,7 @@
       }
 
       const newLastUpdated = newMiniOrders.length > 0
-        ? Math.max(...newMiniOrders.map(o => o.ts).filter(t => t > 0), 0)
+        ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)
         : LAST_UPDATED;
 
       try {
@@ -463,6 +468,7 @@
             topItems,
             catStats,
             cachePayload: {
+              fetchTime: Math.floor(Date.now() / 1000),
               lastUpdated: newLastUpdated || LAST_UPDATED,
               listType: LIST_TYPE,
               miniOrders: allMiniOrders,
@@ -470,7 +476,7 @@
               catTree: { ts: catTreeTs, map: catIdMap }
             }
           }
-        });
+        }, '*');
       } catch (e) {}
 
     } catch (err) {
@@ -479,7 +485,7 @@
         window.postMessage({
           type: 'SHOPEE_STATS_ERROR',
           message: err.message || 'Lỗi truy xuất dữ liệu.'
-        });
+        }, '*');
       } catch (e) {}
     }
   }

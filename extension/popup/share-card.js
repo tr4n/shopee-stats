@@ -258,6 +258,10 @@
     const summary = `${fmtNum(data.tongDonHang)} đơn hàng • ${fmtNum(data.tongSanPhamDaMua)} sản phẩm`;
     txt(summary, W / 2, footerY + 110, 22, '500', 'rgba(255,255,255,0.3)', 'center');
 
+    if (window.APP_CONFIG) {
+      txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorEmail}`, W / 2, footerY + 150, 18, '500', 'rgba(255,255,255,0.3)', 'center');
+    }
+
     return canvas.toDataURL('image/png');
   }
 

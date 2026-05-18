@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let cacheData = null;
   let lastCompleteData = null;
 
+  // === App Config ===
+  const authorInfoEl = document.getElementById('author-info');
+  if (authorInfoEl && window.APP_CONFIG) {
+    authorInfoEl.innerHTML = `${window.APP_CONFIG.authorIcon} <a href="mailto:${window.APP_CONFIG.authorEmail}" style="color: var(--primary); text-decoration: none;">${window.APP_CONFIG.authorEmail}</a>`;
+  }
+
   // === Theme ===
   const SVGS = {
     sun: '<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.366a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM17 10a1 1 0 110 2h-1a1 1 0 110-2h1zm-2.414 5.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-5.657-2.414a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM4 10a1 1 0 110-2H3a1 1 0 110 2h1zm2.366-5.657a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>',
@@ -121,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const cache = result.shopee_cache;
       if (cache && cache.listType === listType && isCacheValid(cache)) {
         cacheData = cache;
-        const elapsedMin = Math.round((Date.now() / 1000 - cache.lastUpdated) / 60);
+        const elapsedMin = Math.round((Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated)) / 60);
         let timeStr;
         if (elapsedMin < 60) timeStr = `${elapsedMin} phút trước`;
         else if (elapsedMin < 1440) timeStr = `${Math.round(elapsedMin / 60)} giờ trước`;
@@ -392,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (message.type === 'error') {
       showState(stateInitial);
-      errorMessage.textContent = message.message || 'Đã có lỗi khi thu thập dữ liệu.';
+      errorMessage.textContent = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
     } else if (message.type === 'complete') {
       if (message.data && message.data.cachePayload) {
         chrome.storage.local.set({ shopee_cache: message.data.cachePayload }, () => {
