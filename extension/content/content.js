@@ -186,7 +186,7 @@
 
             for (const grp of groups) {
               // Try multiple possible catid fields from Shopee API
-              const catId = grp.catid || grp.cat_id || grp.main_cat_id || 0;
+              const catId = grp.catid || grp.cat_id || grp.main_cat_id || grp.category_id || grp.main_category_id || 0;
               const items = grp.items || [];
 
               for (const it of items) {
@@ -204,7 +204,7 @@
                 if (modelName) itemName += ` - ${modelName}`;
 
                 // Item-level catid takes priority over group-level
-                const itemCatId = it.catid || it.cat_id || catId;
+                const itemCatId = it.catid || it.cat_id || it.main_cat_id || it.category_id || catId;
 
                 if (uniqueItemId) {
                   if (!itemMap[uniqueItemId]) {
@@ -255,14 +255,18 @@
         .sort((a, b) => b.spent - a.spent)
         .slice(0, 50);
 
-      // Build category spending stats from all-time item map (uncapped)
+      // Build category spending stats from all orders for complete coverage
+      // Using allMiniOrders (not itemMap) ensures items beyond the 500-cap are included
       const catStats = {};
-      for (const iv of Object.values(itemMap)) {
-        const catKey = String(iv.catId || 0);
-        if (catKey === '0') continue;
-        if (!catStats[catKey]) catStats[catKey] = { spent: 0, count: 0 };
-        catStats[catKey].spent += iv.spent;
-        catStats[catKey].count += iv.count;
+      for (const order of allMiniOrders) {
+        for (const item of (order.il || [])) {
+          if (!item.cat) continue;
+          const catKey = String(item.cat);
+          if (catKey === '0') continue;
+          if (!catStats[catKey]) catStats[catKey] = { spent: 0, count: 0 };
+          catStats[catKey].spent += item.s;
+          catStats[catKey].count += item.c;
+        }
       }
 
       const newLastUpdated = newMiniOrders.length > 0
