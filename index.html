@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopee Analytics Pro - Tiện Ích Thống Kê Chi Tiêu Shopee Đỉnh Cao</title>
+  <meta name="description" content="Khám phá thói quen mua sắm của bạn với Shopee Analytics Pro. Phân tích chi tiêu, phân loại sản phẩm, bảo mật tuyệt đối 100% cục bộ trên trình duyệt của bạn.">
+  <link rel="icon" type="image/png" href="extension/icons/icon128.png">
+  
+  <!-- Premium Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #060913;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-hover: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --accent-orange: linear-gradient(135deg, #ff6b35 0%, #ee4d2d 100%);
+      --accent-orange-glow: rgba(238, 77, 45, 0.4);
+      --accent-teal: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      --accent-purple: linear-gradient(135deg, #b06ab3 0%, #4568dc 100%);
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background Ambient Lights */
+    .glowing-bg {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(150px);
+      opacity: 0.15;
+    }
+    
+    .glow-orange {
+      top: -100px;
+      right: -100px;
+      background: radial-gradient(circle, #ff6b35, transparent);
+    }
+
+    .glow-blue {
+      top: 500px;
+      left: -200px;
+      background: radial-gradient(circle, #00f2fe, transparent);
+      opacity: 0.1;
+    }
+
+    .glow-purple {
+      bottom: -100px;
+      right: 10%;
+      background: radial-gradient(circle, #b06ab3, transparent);
+      opacity: 0.12;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header / Navbar */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6, 9, 19, 0.7);
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-section img {
+      width: 40px;
+      height: 40px;
+      filter: drop-shadow(0 4px 10px rgba(238, 77, 45, 0.3));
+    }
+
+    .logo-section span {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 20px;
+      background: linear-gradient(135deg, #ffffff 50%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .btn-install-sm {
+      background: var(--accent-orange);
+      color: #fff !important;
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+      box-shadow: 0 4px 20px var(--accent-orange-glow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-install-sm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--accent-orange-glow);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 96px 0 80px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge-intro {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(255, 107, 53, 0.1);
+      border: 1px solid rgba(255, 107, 53, 0.2);
+      border-radius: 99px;
+      color: #ff8c5a;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h1 span {
+      background: var(--accent-orange);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 40px auto;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary-lg {
+      background: var(--accent-orange);
+      color: #fff;
+      text-decoration: none;
+      padding: 16px 36px;
+      border-radius: 99px;
+      font-weight: 800;
+      font-size: 16px;
+      font-family: var(--font-display);
+      box-shadow: 0 8px 30px var(--accent-orange-glow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-primary-lg:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px var(--accent-orange-glow);
+    }
+
+    .btn-secondary-lg {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      padding: 16px 36px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-secondary-lg:hover {
+      background: var(--card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Feature Grid Section */
+    .features {
+      padding: 80px 0;
+    }
+
+    .section-title-wrapper {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      background: var(--card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: transparent;
+      transition: background 0.3s;
+    }
+
+    .feature-card:hover::before {
+      background: var(--accent-orange);
+    }
+
+    .feature-card.blue:hover::before {
+      background: var(--accent-teal);
+    }
+
+    .feature-card.purple:hover::before {
+      background: var(--accent-purple);
+    }
+
+    .icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .feature-card.orange .icon-box {
+      background: rgba(255, 107, 53, 0.1);
+      color: #ff6b35;
+    }
+
+    .feature-card.blue .icon-box {
+      background: rgba(0, 242, 254, 0.1);
+      color: #00f2fe;
+    }
+
+    .feature-card.purple .icon-box {
+      background: rgba(176, 106, 179, 0.1);
+      color: #b06ab3;
+    }
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Privacy Highlight Section */
+    .privacy-focus {
+      padding: 100px 0;
+      background: radial-gradient(100% 100% at 50% 0%, rgba(255,107,53,0.05) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .privacy-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+
+    .privacy-content {
+      flex: 1 1 500px;
+    }
+
+    .privacy-content h2 {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .privacy-content p {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .security-badge span {
+      color: #00f2fe;
+    }
+
+    .privacy-graphic {
+      flex: 1 1 400px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .mockup-shield {
+      width: 240px;
+      height: 240px;
+      background: rgba(255,255,255,0.02);
+      border: 1.5px dashed rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotateDash 40s linear infinite;
+    }
+
+    .mockup-shield-inner {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      box-shadow: 0 0 50px rgba(238, 77, 45, 0.4);
+    }
+
+    @keyframes rotateDash {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    footer {
+      padding: 60px 0 40px 0;
+      background: #03050a;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand {
+      max-width: 320px;
+    }
+
+    .footer-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 80px;
+    }
+
+    .footer-column h4 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .footer-column ul {
+      list-style: none;
+    }
+
+    .footer-column ul li {
+      margin-bottom: 12px;
+    }
+
+    .footer-column ul li a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s;
+    }
+
+    .footer-column ul li a:hover {
+      color: var(--text);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .footer-bottom a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .footer-bottom a:hover {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      h1 { font-size: 52px; }
+      .privacy-banner { text-align: center; justify-content: center; }
+      .privacy-graphic { order: -1; }
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 40px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glow Lights -->
+  <div class="glowing-bg glow-orange"></div>
+  <div class="glowing-bg glow-blue"></div>
+  <div class="glowing-bg glow-purple"></div>
+
+  <!-- Header Navigation -->
+  <header id="navbar">
+    <div class="container nav-wrapper">
+      <a href="#" class="logo-section">
+        <img src="extension/icons/icon128.png" alt="Shopee Analytics Pro Logo">
+        <span>Shopee Analytics Pro</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Tính Năng</a>
+        <a href="#privacy">Bảo Mật</a>
+        <a href="PRIVACY_POLICY.md" target="_blank">Privacy Policy</a>
+        <a href="https://shopee.vn" target="_blank" class="btn-install-sm">🛒 Mở Shopee</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge-intro">✨ Mới & Cải Tiến Phiên Bản 2.0.2</div>
+      <h1>Biến Lịch Sử Mua Sắm Shopee<br>Thành <span>Số Liệu Thống Kê Tuyệt Đẹp</span></h1>
+      <p class="hero-desc">
+        Xem ngay tổng chi tiêu, phân loại mặt hàng, tối ưu hóa giao dịch của bạn với tiện ích bảo mật, nhanh gọn, chạy 100% cục bộ trên thiết bị của bạn.
+      </p>
+      <div class="hero-actions">
+        <a href="https://shopee.vn" target="_blank" class="btn-primary-lg">
+          🚀 Mở Trình Phân Tích
+        </a>
+        <a href="#features" class="btn-secondary-lg">
+          Khám Phá Tính Năng
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <div class="container">
+      <div class="section-title-wrapper">
+        <h2 class="section-title">Khám Phá Sức Mạnh Thực Sự</h2>
+        <p class="section-desc">Mọi thứ bạn cần để theo dõi, so sánh và chia sẻ bức tranh chi tiêu mua sắm của bạn.</p>
+      </div>
+      
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card orange">
+          <div class="icon-box">📊</div>
+          <h3>Thống Kê Chi Tiết</h3>
+          <p>Xem tổng quan số tiền chi tiêu, lượng đơn hàng đã hoàn thành, tổng sản phẩm và số tiền đã tiết kiệm được trên Shopee qua biểu đồ cực kỳ trực quan.</p>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="feature-card blue">
+          <div class="icon-box">🏷️</div>
+          <h3>Tự Động Phân Loại</h3>
+          <p>Tự động phân nhóm các sản phẩm đã mua vào 5 danh mục chính: Công nghệ, Thể thao, Nhà cửa, Thời trang, Giáo dục bằng hệ thống AI chuẩn hóa tinh gọn.</p>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="feature-card purple">
+          <div class="icon-box">✨</div>
+          <h3>Wrapped Shareable Cards</h3>
+          <p>Tạo và xuất ra những bức ảnh Wrapped tóm tắt cực đẹp, cực bắt mắt theo phong cách nghệ thuật cao cấp để sẵn sàng chia sẻ lên các mạng xã hội.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy Spotlight Section -->
+  <section id="privacy" class="privacy-focus">
+    <div class="container privacy-banner">
+      <div class="privacy-content">
+        <h2>Dữ Liệu Của Bạn,<br>Quyền Riêng Tư Tuyệt Đối</h2>
+        <p>
+          Shopee Analytics Pro được thiết kế dựa trên tiêu chuẩn bảo mật tuyệt đối. Tất cả các thao tác lấy dữ liệu giao dịch và phân tích chi tiêu đều được chạy cục bộ (100% locally) trên bộ cài tiện ích trong trình duyệt của bạn. Không một byte dữ liệu nào của bạn bị đẩy lên các server bên ngoài.
+        </p>
+        <div class="security-badge">
+          🛡️ Bảo mật chuẩn: <span>Local Storage Only</span>
+        </div>
+      </div>
+      <div class="privacy-graphic">
+        <div class="mockup-shield">
+          <div class="mockup-shield-inner">
+            🔒
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#" class="logo-section">
+            <img src="extension/icons/icon128.png" alt="Shopee Analytics Pro Logo">
+            <span style="color:#fff;">Shopee Analytics Pro</span>
+          </a>
+          <p class="footer-desc">
+            Tiện ích phân tích mua sắm Shopee chuyên nghiệp, giúp bạn thông thái hơn mỗi ngày.
+          </p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>Tài Nguyên</h4>
+            <ul>
+              <li><a href="#features">Tính năng</a></li>
+              <li><a href="#privacy">Bảo mật</a></li>
+              <li><a href="PRIVACY_POLICY.md" target="_blank">Chính sách bảo mật</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>Liên Hệ</h4>
+            <ul>
+              <li><a href="mailto:quanghuytran.hust@gmail.com">✉️ quanghuytran.hust@gmail.com</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Shopee Analytics Pro. Bảo lưu mọi quyền.</p>
+        <p>Phát triển bởi <a href="mailto:quanghuytran.hust@gmail.com" style="text-decoration: underline;">quanghuytran.hust@gmail.com</a></p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

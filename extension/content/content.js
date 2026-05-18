@@ -227,9 +227,11 @@
     const CAT_TREE_TTL = 7 * 24 * 3600;
     const now = Math.floor(Date.now() / 1000);
     if (CACHED_CAT_TREE.ts && CACHED_CAT_TREE.map && (now - CACHED_CAT_TREE.ts) < CAT_TREE_TTL) {
+      console.log('[ShopeeAnalytics] Sử dụng cached category tree');
       return CACHED_CAT_TREE.map;
     }
     try {
+      console.log('[ShopeeAnalytics] Đang tải category tree từ Shopee API...');
       const res = await fetchWithRetry('https://shopee.vn/api/v4/pages/get_category_tree');
       const json = await res.json();
       const list = Array.isArray(json.data) ? json.data
@@ -309,8 +311,40 @@
   }
 
   async function startSpidering() {
+    console.log('[ShopeeAnalytics] Bắt đầu quá trình thu thập dữ liệu...');
+    console.log('[ShopeeAnalytics] Current URL:', window.location.href);
+    console.log('[ShopeeAnalytics] User Agent:', navigator.userAgent);
+    
+    // Send heartbeat every 10 seconds to show the script is alive
+    const heartbeatInterval = setInterval(() => {
+      try {
+        console.log('[ShopeeAnalytics] Heartbeat - script is running...');
+        window.postMessage({
+          type: 'SHOPEE_STATS_HEARTBEAT',
+          timestamp: Date.now()
+        }, '*');
+      } catch (e) {
+        console.warn('[ShopeeAnalytics] Heartbeat failed:', e);
+      }
+    }, 10000);
+    
     try {
+      // Send initial message to indicate start
+      try {
+        console.log('[ShopeeAnalytics] Sending initial progress message...');
+        window.postMessage({
+          type: 'SHOPEE_STATS_PROGRESS',
+          message: 'Đang khởi tạo...',
+          processed: 0,
+          total: 0,
+          pct: -1
+        }, '*');
+      } catch (e) {
+        console.warn('[ShopeeAnalytics] Không thể gửi message khởi tạo:', e);
+      }
+
       // Fetch category tree first (uses cache if fresh enough)
+      console.log('[ShopeeAnalytics] Đang tải danh mục sản phẩm...');
       const catIdMap = await fetchCategoryTree();
       const catTreeTs = Math.floor(Date.now() / 1000);
 
@@ -330,14 +364,24 @@
       while (hasMoreData && !hitCache) {
         if (offsetIndex > 0) await sleep(400);
 
+        console.log(`[ShopeeAnalytics] Đang tải batch ${Math.floor(offsetIndex / LIMIT) + 1}...`);
+        
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
         const response = await fetchWithRetry(url);
         let json;
         try {
           json = await response.json();
+          
+          // Check if response is valid
+          if (!json || typeof json !== 'object') {
+            throw new Error('Dữ liệu trả về từ Shopee không hợp lệ');
+          }
+          
+          console.log(`[ShopeeAnalytics] Batch ${Math.floor(offsetIndex / LIMIT) + 1}: Nhận được ${(json.data?.details_list || []).length} đơn hàng`);
+          
         } catch (e) {
           console.error('[ShopeeAnalytics] Lỗi khi đọc JSON từ Shopee API:', e);
-          throw new Error('Lỗi đọc dữ liệu từ Shopee (có thể do lỗi đăng nhập). Vui lòng F5 tải lại trang Shopee và thử lại.');
+          throw new Error('Lỗi đọc dữ liệu từ Shopee (có thể do lỗi đăng nhập hoặc session hết hạn). Vui lòng F5 tải lại trang Shopee và thử lại.');
         }
 
         if (offsetIndex === 0) {
@@ -429,7 +473,9 @@
               total: totalCount,
               pct
             }, '*');
-          } catch (e) {}
+          } catch (e) {
+            console.warn('[ShopeeAnalytics] Không thể gửi message progress:', e);
+          }
         }
       }
 
@@ -463,6 +509,13 @@
         ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)
         : LAST_UPDATED;
 
+      // Clear heartbeat when done
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
+      
+      console.log('[ShopeeAnalytics] Hoàn thành! Đang gửi kết quả...');
+      
       try {
         window.postMessage({
           type: 'SHOPEE_STATS_COMPLETE',
@@ -480,16 +533,44 @@
             }
           }
         }, '*');
-      } catch (e) {}
+        
+        console.log('[ShopeeAnalytics] Đã gửi kết quả thành công!');
+      } catch (e) {
+        console.error('[ShopeeAnalytics] Lỗi khi gửi kết quả:', e);
+        window.postMessage({
+          type: 'SHOPEE_STATS_ERROR',
+          message: 'Lỗi khi gửi kết quả thống kê. Vui lòng thử lại.'
+        }, '*');
+      }
 
     } catch (err) {
+      // Clear heartbeat on error
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+      }
+      
       console.error('[ShopeeAnalytics] SP Analyzer Ext Error:', err);
+      console.error('[ShopeeAnalytics] Error stack:', err.stack);
+      
+      // Determine appropriate error message based on error type
+      let errorMessage = 'Lỗi truy xuất dữ liệu.';
+      
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.name === 'NetworkError') {
+        errorMessage = 'Lỗi mạng. Kiểm tra kết nối internet và thử lại.';
+      } else if (err.name === 'TypeError') {
+        errorMessage = 'Lỗi xử lý dữ liệu. Tải lại trang Shopee và thử lại.';
+      }
+      
       try {
         window.postMessage({
           type: 'SHOPEE_STATS_ERROR',
-          message: err.message || 'Lỗi truy xuất dữ liệu.'
+          message: errorMessage
         }, '*');
-      } catch (e) {}
+      } catch (e) {
+        console.error('[ShopeeAnalytics] Không thể gửi error message:', e);
+      }
     }
   }
 

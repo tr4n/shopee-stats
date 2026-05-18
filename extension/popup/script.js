@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBarFill = document.getElementById('progress-bar-fill');
   const cacheInfo = document.getElementById('cache-info');
   const cacheBadgeText = document.getElementById('cache-badge-text');
+  
+  // Debug elements
+  const debugHeartbeat = document.getElementById('debug-heartbeat');
+  const debugTimerEl = document.getElementById('debug-timer');
+  const debugUrl = document.getElementById('debug-url');
+  const debugStatus = document.getElementById('debug-status');
 
   const totalSpentEl = document.getElementById('total-spent');
   const rankBadgeEl = document.getElementById('rank-badge');
@@ -29,6 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // === App State ===
   let cacheData = null;
   let lastCompleteData = null;
+  let analysisTimeout = null;
+  let lastHeartbeat = null;
+  let heartbeatCount = 0;
+  let analysisStartTime = null;
+  let debugTimerInterval = null;
 
   // === App Config ===
   const authorInfoEl = document.getElementById('author-info');
@@ -164,6 +175,66 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBarFill.style.width = '0%';
     progressBarFill.classList.remove('indeterminate');
     progressText.textContent = 'Vui lòng chờ trong giây lát';
+    
+    // Clear any existing timeout
+    if (analysisTimeout) {
+      clearTimeout(analysisTimeout);
+      analysisTimeout = null;
+    }
+    
+    // Reset heartbeat tracking
+    lastHeartbeat = null;
+    heartbeatCount = 0;
+    analysisStartTime = null;
+    
+    if (debugTimerInterval) {
+      clearInterval(debugTimerInterval);
+      debugTimerInterval = null;
+    }
+    
+    // Reset debug info
+    if (debugHeartbeat) debugHeartbeat.textContent = 'Chưa có';
+    if (debugTimerEl) debugTimerEl.textContent = '0s';
+    if (debugUrl) debugUrl.textContent = '-';
+    if (debugStatus) debugStatus.textContent = 'Đang khởi tạo';
+  }
+  
+  function startAnalysisTimeout() {
+    // Set a 90-second timeout for the analysis (increased from 60s)
+    console.log('[ShopeeAnalytics] Starting 90-second timeout timer');
+    analysisTimeout = setTimeout(() => {
+      console.warn('[ShopeeAnalytics] Analysis timed out after 90 seconds');
+      
+      // Try to get more debug info
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id },
+            func: () => {
+              console.log('[ShopeeAnalytics DEBUG] Current page URL:', window.location.href);
+              console.log('[ShopeeAnalytics DEBUG] Shopee config exists:', !!window.__shopeeConfig);
+              console.log('[ShopeeAnalytics DEBUG] Network connectivity test...');
+              fetch('https://shopee.vn/api/v1/ping', { method: 'GET' })
+                .then(r => console.log('[ShopeeAnalytics DEBUG] Network test result:', r.status))
+                .catch(e => console.log('[ShopeeAnalytics DEBUG] Network test failed:', e));
+            },
+            world: 'MAIN'
+          }).catch(e => console.log('[ShopeeAnalytics DEBUG] Failed to run debug script:', e));
+        }
+      });
+      
+      showState(stateInitial);
+      errorMessage.innerHTML = '⏰ <strong>Quá trình thống kê đã hết thời gian chờ (10 phút).</strong><br><br>' +
+        'Điều này có thể do:<br>' +
+        '• <strong>Kết nối mạng chậm</strong> - Kiểm tra internet<br>' +
+        '• <strong>Số lượng đơn hàng quá lớn</strong> - Quá trình có thể mất nhiều thời gian<br>' +
+        '• <strong>Phiên đăng nhập Shopee hết hạn</strong> - Đăng nhập lại<br>' +
+        '• <strong>Content script không chạy</strong> - Kiểm tra console (F12)<br><br>' +
+        '🔍 <strong>Debug:</strong> Mở Developer Tools (F12) và kiểm tra Console tab để xem lỗi chi tiết.<br><br>' +
+        'Vui lòng tải lại trang Shopee và thử lại.';
+      
+      analysisTimeout = null;
+    }, 60000 * 10); // 10 minutes timeout (increased from 90 seconds)
   }
 
   // === Restart ===
@@ -351,7 +422,14 @@ document.addEventListener('DOMContentLoaded', () => {
     errorMessage.textContent = '';
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.url.includes('shopee.vn')) {
+      if (!tab) {
+        errorMessage.textContent = '❌ Không thể xác định tab hiện tại. Vui lòng thử lại.';
+        return;
+      }
+      
+      console.log('[ShopeeAnalytics] Current tab URL:', tab.url);
+      
+      if (!tab.url.includes('shopee.vn')) {
         errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để sử dụng tiện ích này.';
         document.getElementById('link-go-to-shopee').addEventListener('click', (e) => {
           e.preventDefault();
@@ -359,8 +437,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return;
       }
+      
+      // Additional URL checks
+      if (tab.url.includes('chrome-extension://') || tab.url.includes('chrome://') || tab.url.includes('moz-extension://')) {
+        errorMessage.textContent = '❌ Extension không thể chạy trên các trang hệ thống. Vui lòng mở trang Shopee.vn thông thường.';
+        return;
+      }
       resetProgress();
       showState(stateLoading);
+      startAnalysisTimeout(); // Start the timeout timer
+      
+      // Start debug tracking
+      analysisStartTime = Date.now();
+      if (debugUrl) debugUrl.textContent = tab.url;
+      if (debugStatus) debugStatus.textContent = 'Khởi tạo extension';
+      
+      // Update timer every second
+      debugTimerInterval = setInterval(() => {
+        if (analysisStartTime && debugTimerEl) {
+          const elapsed = Math.floor((Date.now() - analysisStartTime) / 1000);
+          debugTimerEl.textContent = `${elapsed}s`;
+        }
+      }, 1000);
 
       const listType = getSelectedListType();
       const useCache = cacheData && cacheData.listType === listType && isCacheValid(cacheData);
@@ -372,16 +470,107 @@ document.addEventListener('DOMContentLoaded', () => {
         catTree: useCache && cacheData.catTree ? cacheData.catTree : {}
       };
 
+      if (debugStatus) debugStatus.textContent = 'Đang tải cấu hình...';
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: (cfg) => { window.__shopeeConfig = cfg; },
         args: [configPayload],
         world: 'MAIN'
       });
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/bridge.js'] });
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'], world: 'MAIN' });
+      // Inject scripts with error handling
+      try {
+        if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/bridge.js'] });
+        console.log('[ShopeeAnalytics] Bridge script injected successfully');
+      } catch (e) {
+        console.error('[ShopeeAnalytics] Failed to inject bridge script:', e);
+        if (debugStatus) debugStatus.textContent = 'Lỗi: Không thể tải bridge script';
+        throw new Error('Lỗi khi tải bridge script. Vui lòng thử lại.');
+      }
+      
+      try {
+        if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'], world: 'MAIN' });
+        console.log('[ShopeeAnalytics] Content script injected successfully');
+        if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
+        
+        // Test if the script is actually running by checking for immediate response
+        setTimeout(async () => {
+          if (!lastHeartbeat && heartbeatCount === 0) {
+            console.warn('[ShopeeAnalytics] No heartbeat received after 15 seconds - script may not be running');
+            if (debugStatus) debugStatus.textContent = 'Cảnh báo: Không nhận được phản hồi';
+            
+            try {
+              // Try to inject a test script to see what's happening
+              await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                  console.log('[ShopeeAnalytics TEST] Test script running...');
+                  console.log('[ShopeeAnalytics TEST] Current domain:', window.location.hostname);
+                  console.log('[ShopeeAnalytics TEST] URL:', window.location.href);
+                  console.log('[ShopeeAnalytics TEST] Document ready state:', document.readyState);
+                  console.log('[ShopeeAnalytics TEST] Shopee config exists:', !!window.__shopeeConfig);
+                  console.log('[ShopeeAnalytics TEST] jQuery exists:', !!window.$);
+                  console.log('[ShopeeAnalytics TEST] React exists:', !!window.React);
+                  console.log('[ShopeeAnalytics TEST] Fetch available:', !!window.fetch);
+                  
+                  // Check if there are any errors in console
+                  if (window.console && window.console.error) {
+                    console.log('[ShopeeAnalytics TEST] Console available for logging');
+                  }
+                  
+                  // Try to send a test message
+                  try {
+                    window.postMessage({
+                      type: 'SHOPEE_STATS_PROGRESS',
+                      message: 'Test message từ debug script',
+                      processed: 0,
+                      total: 0,
+                      pct: -1
+                    }, '*');
+                    console.log('[ShopeeAnalytics TEST] Test message sent successfully');
+                  } catch (e) {
+                    console.error('[ShopeeAnalytics TEST] Failed to send test message:', e);
+                  }
+                },
+                world: 'MAIN'
+              });
+            } catch (e) {
+              console.error('[ShopeeAnalytics] Failed to run debug script:', e);
+              if (debugStatus) debugStatus.textContent = 'Lỗi: Không thể chạy debug script';
+            }
+          }
+        }, 15000);
+        
+        // Another check after 30 seconds
+        setTimeout(() => {
+          if (!lastHeartbeat && heartbeatCount === 0) {
+            console.error('[ShopeeAnalytics] Still no response after 30 seconds - likely a critical issue');
+            if (debugStatus) debugStatus.textContent = 'Lỗi: Script không khởi chạy được';
+            
+            // Show more specific error message
+            progressText.innerHTML = '❌ <strong>Không nhận được phản hồi từ content script</strong><br>' +
+              'Có thể do:<br>' +
+              '• Trang web chặn script injection<br>' +
+              '• Extension permissions bị hạn chế<br>' +
+              '• Trang không phải Shopee.vn hợp lệ<br><br>' +
+              'Kiểm tra console (F12) để xem chi tiết.';
+          }
+        }, 30000);
+        
+      } catch (e) {
+        console.error('[ShopeeAnalytics] Failed to inject content script:', e);
+        throw new Error('Lỗi khi tải content script. Vui lòng thử lại.');
+      }
     } catch (err) {
       console.error('[ShopeeAnalytics] Popup script execution error:', err);
+      
+      // Clear timeout on error
+      if (analysisTimeout) {
+        clearTimeout(analysisTimeout);
+        analysisTimeout = null;
+      }
+      
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
     }
@@ -389,6 +578,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Message Listener ===
   chrome.runtime.onMessage.addListener((message) => {
+    console.log('[ShopeeAnalytics] Received message in popup:', message.type);
+    
+    // Clear timeout on any message received (shows the process is active)
+    if (analysisTimeout) {
+      clearTimeout(analysisTimeout);
+      // Restart timeout to give more time
+      startAnalysisTimeout();
+    }
+    
     if (message.type === 'progress') {
       const processed = message.processed || 0;
       const pct = typeof message.pct === 'number' ? message.pct : -1;
@@ -398,13 +596,56 @@ document.addEventListener('DOMContentLoaded', () => {
         progressText.textContent = `Đã xử lý ${processed.toLocaleString()}/${(message.total || 0).toLocaleString()} đơn (${pct}%)`;
       } else {
         progressBarFill.classList.add('indeterminate');
-        progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
+        const heartbeatInfo = lastHeartbeat ? ` [❤️ ${heartbeatCount}]` : '';
+        progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...${heartbeatInfo}`;
+      }
+    } else if (message.type === 'heartbeat') {
+      // Update heartbeat info
+      lastHeartbeat = Date.now();
+      heartbeatCount++;
+      console.log(`[ShopeeAnalytics] Heartbeat received #${heartbeatCount}`);
+      
+      // Update debug info
+      if (debugHeartbeat) debugHeartbeat.textContent = `${heartbeatCount} nhịp (${new Date(lastHeartbeat).toLocaleTimeString()})`;
+      if (debugStatus) debugStatus.textContent = 'Content script đang chạy bình thường';
+      
+      // Update progress text to show script is alive
+      if (progressText.textContent.includes('đơn hàng')) {
+        const currentText = progressText.textContent.replace(/\s*\[❤️.*?\]/, '');
+        progressText.textContent = `${currentText} [❤️ ${heartbeatCount}]`;
       }
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
+      
+      // Clear timeout on error
+      if (analysisTimeout) {
+        clearTimeout(analysisTimeout);
+        analysisTimeout = null;
+      }
+      
+      if (debugTimerInterval) {
+        clearInterval(debugTimerInterval);
+        debugTimerInterval = null;
+      }
+      
+      if (debugStatus) debugStatus.textContent = 'Lỗi: ' + (message.message || 'Không xác định');
+      
       showState(stateInitial);
       errorMessage.textContent = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
     } else if (message.type === 'complete') {
+      // Clear timeout on successful completion
+      if (analysisTimeout) {
+        clearTimeout(analysisTimeout);
+        analysisTimeout = null;
+      }
+      
+      if (debugTimerInterval) {
+        clearInterval(debugTimerInterval);
+        debugTimerInterval = null;
+      }
+      
+      if (debugStatus) debugStatus.textContent = 'Hoàn thành thành công!';
+      
       if (message.data && message.data.cachePayload) {
         chrome.storage.local.set({ shopee_cache: message.data.cachePayload }, () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);
