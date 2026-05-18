@@ -917,7 +917,11 @@
     const title = document.getElementById('cat-items-title');
     const list  = document.getElementById('cat-items-list');
 
-    const items = (ti || []).filter(i => i.cat === catName).slice(0, 100);
+    const items = (ti || []).filter(i => {
+      if (i.cat === catName) return true;
+      if (resolveCatLabel({ id: i.cat }) === catName) return true;
+      return false;
+    }).slice(0, 100);
 
     // Highlight selected bar
     document.querySelectorAll('.cat-row').forEach(r => {
