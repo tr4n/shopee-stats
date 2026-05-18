@@ -15,6 +15,7 @@
     let lastErr;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
+        console.log(`[ShopeeAnalytics] Đang gọi API Shopee (Lần ${attempt}/${MAX_RETRIES}): ${url}`);
         const res = await fetch(url);
         if (res.status === 401 || res.status === 403) {
           throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại Shopee.');
@@ -29,6 +30,7 @@
         return res;
       } catch (err) {
         lastErr = err;
+        console.warn(`[ShopeeAnalytics] Lỗi kết nối ở lần thử ${attempt}:`, err);
         const isFatal = err.message && (
           err.message.includes('đăng nhập') ||
           err.message.includes('máy chủ')
@@ -334,6 +336,7 @@
         try {
           json = await response.json();
         } catch (e) {
+          console.error('[ShopeeAnalytics] Lỗi khi đọc JSON từ Shopee API:', e);
           throw new Error('Lỗi đọc dữ liệu từ Shopee (có thể do lỗi đăng nhập). Vui lòng F5 tải lại trang Shopee và thử lại.');
         }
 
@@ -480,7 +483,7 @@
       } catch (e) {}
 
     } catch (err) {
-      console.warn('SP Analyzer Ext Error:', err);
+      console.error('[ShopeeAnalytics] SP Analyzer Ext Error:', err);
       try {
         window.postMessage({
           type: 'SHOPEE_STATS_ERROR',

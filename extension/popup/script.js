@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/bridge.js'] });
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'], world: 'MAIN' });
     } catch (err) {
-      console.error(err);
+      console.error('[ShopeeAnalytics] Popup script execution error:', err);
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
     }
@@ -397,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
       }
     } else if (message.type === 'error') {
+      console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
       showState(stateInitial);
       errorMessage.textContent = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
     } else if (message.type === 'complete') {
