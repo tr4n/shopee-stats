@@ -21,10 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const cacheBadgeText = document.getElementById('cache-badge-text');
   
   // Debug elements
+  const debugPanel = document.getElementById('debug-panel');
   const debugHeartbeat = document.getElementById('debug-heartbeat');
   const debugTimerEl = document.getElementById('debug-timer');
   const debugUrl = document.getElementById('debug-url');
   const debugStatus = document.getElementById('debug-status');
+
+  // Show debug panel only in development mode (Load unpacked)
+  if (chrome.management && chrome.management.getSelf) {
+    chrome.management.getSelf((info) => {
+      if (info.installType === 'development' && debugPanel) {
+        debugPanel.style.display = 'block';
+      }
+    });
+  }
 
   const totalSpentEl = document.getElementById('total-spent');
   const rankBadgeEl = document.getElementById('rank-badge');
@@ -237,7 +247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 60000 * 10); // 10 minutes timeout (increased from 90 seconds)
   }
 
-  // === Restart ===
+  // === Restart / Cancel ===
+  const btnCancelDebug = document.getElementById('btn-cancel-debug');
+  if (btnCancelDebug) {
+    btnCancelDebug.addEventListener('click', () => {
+      showState(stateInitial);
+    });
+  }
+
   btnRestart.addEventListener('click', () => {
     showState(stateInitial);
     errorMessage.textContent = '';

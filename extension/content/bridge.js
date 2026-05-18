@@ -57,7 +57,7 @@
 
   window.addEventListener("message", event => {
     // Only accept messages from the same frame
-    if (event.source !== window) return;
+    // Bỏ qua check event.source !== window vì chạy khác world (MAIN và ISOLATED)
     
     // Only accept messages containing our specific type
     if (!event.data || !event.data.type || !event.data.type.startsWith('SHOPEE_STATS_')) {

@@ -53,7 +53,7 @@
         </div>
         
         <!-- Debug Panel -->
-        <div id="debug-panel" class="debug-panel" style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+        <div id="debug-panel" class="debug-panel" style="display: none; margin-top: 15px; font-size: 12px; opacity: 0.7;">
           <details>
             <summary style="cursor: pointer;">🔍 Thông tin debug</summary>
             <div class="debug-content" style="margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; font-family: monospace;">
@@ -61,11 +61,10 @@
               <div><strong>Thời gian:</strong> <span id="debug-timer">0s</span></div>
               <div><strong>URL:</strong> <span id="debug-url">-</span></div>
               <div><strong>Status:</strong> <span id="debug-status">Đang khởi tạo</span></div>
+              <button id="btn-cancel-debug" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 8px;">Hủy tiến trình</button>
             </div>
           </details>
         </div>
-        
-        <button id="btn-restart" class="btn-secondary">Hủy</button>
       </div>
 
       <!-- Result State -->
