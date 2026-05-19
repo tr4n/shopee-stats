@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elapsedMin < 60) timeStr = `${elapsedMin} phút trước`;
         else if (elapsedMin < 1440) timeStr = `${Math.round(elapsedMin / 60)} giờ trước`;
         else timeStr = `${Math.round(elapsedMin / 1440)} ngày trước`;
-        cacheBadgeText.textContent = `Cache: ${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
+        cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
         cacheInfo.classList.remove('hidden');
       } else {
         // Silently drop old-format cache so next run does a full re-fetch

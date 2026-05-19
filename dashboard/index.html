@@ -341,7 +341,7 @@
         <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
       </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="pill active btn-share-trigger" data-type="overview" style="padding: 8px 16px; min-width: 130px; margin: 0; display: flex; align-items: center; gap: 6px;">✨ Tạo Ảnh Tổng Kết</button>
+        <button class="pill active btn-share-trigger" data-type="overview" style="padding: 8px 16px; min-width: 130px; margin: 0; display: flex; align-items: center; gap: 6px;">✨ Tạo Ảnh</button>
       </div>
     </div>
 
@@ -450,7 +450,7 @@
   <div id="share-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>✨ Tạo Ảnh Chia Sẻ</h2>
+        <h2>✨ Tạo Ảnh</h2>
         <button id="btn-close-modal" class="btn-close">&times;</button>
       </div>
       <div class="modal-body">
@@ -599,12 +599,52 @@
   ───────────────────────────────────────────────── */
   function renderNoData() {
     document.querySelector('.main').innerHTML = `
-      <div class="no-data" style="margin-top:15vh">
-        <div style="font-size:56px;margin-bottom:20px">📭</div>
-        <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:10px">Không có dữ liệu</h2>
-        <p style="margin-bottom:20px">Mở extension Shopee Analytics Pro, chạy thống kê, rồi click "Dashboard".</p>
-        <a href="https://chrome.google.com/webstore/search/shopee%20analytics%20pro" target="_blank">Cài Extension →</a>
-      </div>`;
+      <div class="no-data" style="margin-top:10vh; max-width: 600px; margin-left: auto; margin-right: auto; padding: 40px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center;">
+        <div style="font-size:64px;margin-bottom:16px; animation: float 3s ease-in-out infinite;">🛒</div>
+        <h2 style="font-size:28px;font-weight:800;color:var(--text);margin-bottom:12px">Bắt đầu thống kê chi tiêu!</h2>
+        <p style="color:var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px;">Bạn chưa có dữ liệu nào được tải lên. Vui lòng làm theo các bước sau để lấy dữ liệu từ Shopee:</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 16px; text-align: left; margin-bottom: 32px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px; background: var(--surface); padding: 16px; border-radius: 16px;">
+            <div style="background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-weight: 700; color: var(--text);">Cài đặt tiện ích</h4>
+              <p style="margin: 0; font-size: 14px; color: var(--muted);">Thêm Shopee Analytics Pro vào trình duyệt Chrome của bạn.</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px; background: var(--surface); padding: 16px; border-radius: 16px;">
+            <div style="background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-weight: 700; color: var(--text);">Mở Shopee & Tiện ích</h4>
+              <p style="margin: 0; font-size: 14px; color: var(--muted);">Đăng nhập vào Shopee.vn, nhấn vào biểu tượng tiện ích ở góc trên phải và chọn "Bắt Đầu Quét".</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px; background: var(--surface); padding: 16px; border-radius: 16px;">
+            <div style="background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+            <div>
+              <h4 style="margin: 0 0 4px 0; font-weight: 700; color: var(--text);">Xem báo cáo</h4>
+              <p style="margin: 0; font-size: 14px; color: var(--muted);">Sau khi quét xong, nhấn "Mở Dashboard" để xem thống kê chi tiết của bạn.</p>
+            </div>
+          </div>
+        </div>
+        
+        <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(238, 77, 45, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+          Thêm vào Chrome miễn phí ✨
+        </a>
+      </div>
+      <style>
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
+        }
+      </style>
+    `;
+    
+    // Hide sidebar on no data screen for better focus
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.style.display = 'none';
+    document.querySelector('.main').style.marginLeft = '0';
   }
 
   /* ─────────────────────────────────────────────────
