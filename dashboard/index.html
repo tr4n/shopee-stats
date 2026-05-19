@@ -614,9 +614,11 @@
     const kpis = [
       { label: 'Tổng Chi Tiêu',    val: fmtVND(d.t),    cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
       { label: 'Sản Phẩm Đã Mua',  val: fmtNum(d.ip),          cls: '',       sub: 'sản phẩm' },
-      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s),    cls: 'green',  sub: 'từ khuyến mãi' },
-      { label: 'Phí Vận Chuyển',   val: fmtVND(d.ship), cls: '',       sub: 'tổng phí ship' }
+      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s),    cls: 'green',  sub: 'từ khuyến mãi' }
     ];
+    if (d.ship && d.ship > 0) {
+      kpis.push({ label: 'Phí Vận Chuyển',   val: fmtVND(d.ship), cls: '',       sub: 'tổng phí ship' });
+    }
     const row = document.getElementById('kpi-row');
     row.innerHTML = kpis.map((k, i) => `
       <div class="kpi" style="transition-delay:${i * 0.08}s">
@@ -920,6 +922,10 @@
     const items = (ti || []).filter(i => {
       if (i.cat === catName) return true;
       if (resolveCatLabel({ id: i.cat }) === catName) return true;
+      if (resolveCatLabel({ name: i.cat }) === catName) return true;
+      if (catName === 'Khác' || catName === '🏷️ Khác') {
+        if (!i.cat || i.cat === 'Khác' || i.cat === '🏷️ Khác') return true;
+      }
       return false;
     }).slice(0, 100);
 

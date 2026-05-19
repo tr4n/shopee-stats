@@ -242,8 +242,9 @@
       drawStatBox(PAD + boxW + 40, statsY, boxW, boxH, 'SẢN PHẨM', fmtNum(d.ip), tColors.text, '🛍️');
       
       drawStatBox(PAD, statsY + boxH + 40, boxW, boxH, 'ĐÃ TIẾT KIỆM', fmtVND(Math.max(0, d.s), hideAmount), tColors.accent, '💰');
-      drawStatBox(PAD + boxW + 40, statsY + boxH + 40, boxW, boxH, 'PHÍ VẬN CHUYỂN', fmtVND(d.ship || 0, hideAmount), tColors.secondary, '🚚');
-
+      if (d.ship && d.ship > 0) {
+        drawStatBox(PAD + boxW + 40, statsY + boxH + 40, boxW, boxH, 'PHÍ VẬN CHUYỂN', fmtVND(d.ship, hideAmount), tColors.secondary, '🚚');
+      }
       // Top Item Card
       let topItemY = statsY + boxH * 2 + 100;
       const hasTopItem = d.ti && d.ti.length > 0;

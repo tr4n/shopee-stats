@@ -399,12 +399,24 @@ document.addEventListener('DOMContentLoaded', () => {
         '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
         '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
       },
-      ti: (data.topItems || []).slice(0, 100).map(i => ({
-        n: i.name.substring(0, 50),
-        s: Math.round(i.spent),
-        c: i.count,
-        cat: i.cat || ''
-      })),
+      ti: (() => {
+        const allItems = data.topItems || [];
+        const top100 = allItems.slice(0, 100);
+        const catMap = {};
+        allItems.forEach(i => {
+          const cat = i.cat || 'Khác';
+          if (!catMap[cat]) catMap[cat] = [];
+          if (catMap[cat].length < 30) catMap[cat].push(i);
+        });
+        const combined = new Set([...top100]);
+        Object.values(catMap).forEach(arr => arr.forEach(i => combined.add(i)));
+        return Array.from(combined).map(i => ({
+          n: i.name.substring(0, 50),
+          s: Math.round(i.spent),
+          c: i.count,
+          cat: i.cat || ''
+        }));
+      })(),
       cs: Object.entries(data.catStats || {})
         .sort((a, b) => b[1].spent - a[1].spent)
         .slice(0, 12)
