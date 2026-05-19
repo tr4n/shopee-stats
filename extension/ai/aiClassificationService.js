@@ -1,36 +1,188 @@
 // Chrome Built-in AI (Gemini Nano) classification service.
-// Only activates on Chrome >= 138 when LanguageModel is available.
-// Called as a last resort after rule-based pipeline returns 🏷️ Khác.
+// Supports LanguageModel (Chrome 138+), ai.languageModel, chrome.aiOriginTrial.languageModel.
 const ShopeeAIService = (() => {
   'use strict';
 
-  const CATEGORIES = [
-    '💻 Điện tử & Công nghệ',
-    '💪 Thể thao & Sức khỏe',
-    '🏠 Nhà cửa & Đời sống',
-    '👕 Thời trang & Phụ kiện',
-    '📚 Giải trí & Giáo dục',
-    '🏷️ Khác'
-  ];
+  const CATEGORY_CODES = {
+    tech:    '💻 Điện tử & Công nghệ',
+    sport:   '💪 Thể thao & Sức khỏe',
+    home:    '🏠 Nhà cửa & Đời sống',
+    fashion: '👕 Thời trang & Phụ kiện',
+    edu:     '📚 Giải trí & Giáo dục',
+    other:   '🏷️ Khác'
+  };
+  const CATEGORY_KEYS = Object.keys(CATEGORY_CODES);
+
+  const SYSTEM_PROMPT = [
+    'You are a Vietnamese e-commerce product classifier.',
+    'Classify multiple product names into categories: tech, sport, home, fashion, edu, other.',
+    'For each product, respond with just the category code on a new line.',
+    'Example input: "iPhone 15\\nÁo thun\\nSách toán"',
+    'Example output: "tech\\nfashion\\nedu"'
+  ].join(' ');
 
   const CACHE_KEY = 'aiClassificationCache';
-  const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+  const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-  // Gate: Chrome >= 138 AND LanguageModel global exists
-  function isSupported() {
-    const m = navigator.userAgent.match(/Chrome\/(\d+)/);
-    return !!(m && parseInt(m[1], 10) >= 138 && typeof LanguageModel !== 'undefined');
+  function getChromeMajor() {
+    if (navigator.userAgentData?.brands) {
+      const b = navigator.userAgentData.brands.find(x => /chrom/i.test(x.brand));
+      if (b) return parseInt(b.version, 10) || 0;
+    }
+    const m = navigator.userAgent.match(/(?:Chrom(?:e|ium)|Edg)\/(\d+)/i);
+    return m ? parseInt(m[1], 10) : 0;
   }
 
-  // Returns true if Gemini Nano is ready or can be downloaded
-  async function checkAIAvailability() {
-    if (!isSupported()) return false;
-    try {
-      const status = await LanguageModel.availability();
+  // Try all known Prompt API entry points (varies by Chrome version / trial / flags).
+  function resolveModelEntry() {
+    if (typeof globalThis.LanguageModel !== 'undefined') {
+      return { kind: 'LanguageModel', api: globalThis.LanguageModel };
+    }
+    if (globalThis.ai?.languageModel) {
+      return { kind: 'ai.languageModel', api: globalThis.ai.languageModel };
+    }
+    if (typeof chrome !== 'undefined' && chrome.aiOriginTrial?.languageModel) {
+      return { kind: 'chrome.aiOriginTrial', api: chrome.aiOriginTrial.languageModel };
+    }
+    return null;
+  }
+
+  function isSupported() {
+    return resolveModelEntry() !== null;
+  }
+
+  function getDiagnostics() {
+    const entry = resolveModelEntry();
+    const chromeMajor = getChromeMajor();
+    return {
+      supported: !!entry,
+      entryKind: entry?.kind || null,
+      chromeMajor,
+      hasLanguageModel: typeof globalThis.LanguageModel !== 'undefined',
+      hasAiLanguageModel: !!globalThis.ai?.languageModel,
+      hasChromeAiOriginTrial: !!(typeof chrome !== 'undefined' && chrome.aiOriginTrial?.languageModel),
+      userAgent: navigator.userAgent
+    };
+  }
+
+  async function checkAvailability(entry) {
+    const { kind, api } = entry;
+    if (kind === 'LanguageModel') {
+      const status = await api.availability();
+      console.log('[ShopeeAI] LanguageModel.availability() =', status);
       return status !== 'unavailable';
-    } catch {
+    }
+    const cap = await api.capabilities();
+    console.log('[ShopeeAI] capabilities() =', cap);
+    const a = cap?.available ?? cap?.availability ?? '';
+    return a === 'readily' || a === 'available' || a === 'after-download' ||
+      a === 'downloadable' || a === 'downloading';
+  }
+
+  async function checkAIAvailability() {
+    const entry = resolveModelEntry();
+    if (!entry) {
+      console.warn('[ShopeeAI] Không tìm thấy API (LanguageModel / ai.languageModel / chrome.aiOriginTrial)');
       return false;
     }
+    try {
+      return await checkAvailability(entry);
+    } catch (e) {
+      console.warn('[ShopeeAI] checkAvailability failed:', e);
+      return false;
+    }
+  }
+
+  function parseCategoryCode(raw) {
+    const token = String(raw || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+    if (CATEGORY_KEYS.includes(token)) return token;
+    // Fallback: first word only
+    const first = String(raw || '').trim().toLowerCase().split(/\s+/)[0]?.replace(/[^a-z]/g, '');
+    return CATEGORY_KEYS.includes(first) ? first : null;
+  }
+
+  async function createModelSession(entry, onProgress) {
+    const { kind, api } = entry;
+
+    if (kind === 'LanguageModel') {
+      let params = null;
+      try {
+        params = await api.params();
+        console.log('[ShopeeAI] LanguageModel.params() =', params);
+      } catch (e) {
+        console.warn('[ShopeeAI] params() unavailable:', e);
+      }
+
+      const sessionConfig = {
+        monitor(m) {
+          m.addEventListener('downloadprogress', e => {
+            const pct = Math.round(e.loaded * 100);
+            console.log(`[ShopeeAI] Model download: ${pct}%`);
+            if (onProgress) onProgress(pct, 100, 'download');
+          });
+        },
+        initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }]
+      };
+      if (params) {
+        sessionConfig.temperature = 0.1;
+        sessionConfig.topK = 1;
+      }
+
+      const session = await api.create(sessionConfig);
+      return {
+        kind: 'LanguageModel',
+        session,
+        async classify(input) {
+          // Check if input contains multiple items (has newlines)
+          const isMultiple = input.includes('\n');
+          
+          if (isMultiple) {
+            // Batch processing - no responseConstraint for multiple items
+            return await session.prompt(
+              `Classify these products (one category per line):\n${input}\n\nCategories:`
+            );
+          } else {
+            // Single item - can use responseConstraint
+            const schema = { type: 'string', enum: CATEGORY_KEYS };
+            try {
+              return await session.prompt(input, { responseConstraint: schema });
+            } catch (e) {
+              console.warn('[ShopeeAI] responseConstraint failed, retry plain prompt:', e);
+              return await session.prompt(
+                `Product: ${input}\nReply with one code only: tech, sport, home, fashion, edu, or other`
+              );
+            }
+          }
+        },
+        destroy() { session.destroy(); }
+      };
+    }
+
+    // Legacy: ai.languageModel / chrome.aiOriginTrial.languageModel
+    const legacySession = await api.create({
+      systemPrompt: SYSTEM_PROMPT,
+      temperature: 0.1,
+      topK: 1
+    });
+    return {
+      kind: 'legacy',
+      session: legacySession,
+      async classify(input) {
+        const isMultiple = input.includes('\n');
+        if (isMultiple) {
+          return legacySession.prompt(
+            `Classify these products (one category per line):\n${input}\n\nCategories:`
+          );
+        } else {
+          return legacySession.prompt(
+            `Product: ${input}\nCategory code (tech/sport/home/fashion/edu/other):`
+          );
+        }
+      },
+      destroy() {
+        if (typeof legacySession.destroy === 'function') legacySession.destroy();
+      }
+    };
   }
 
   function makeCacheKey(name) {
@@ -47,18 +199,39 @@ const ShopeeAIService = (() => {
     return new Promise(resolve => chrome.storage.local.set({ [CACHE_KEY]: cache }, resolve));
   }
 
-  // items: [{ id: string, name: string }]
-  // onProgress: (done: number, total: number, phase: 'download' | 'classify') => void
-  // Returns: { [id]: category }
+  // Persistent session — created once, reused across all classifyItemsBatch calls.
+  // The Gemini Nano model is downloaded once by Chrome and stays cached on disk.
+  // Keeping the session alive avoids re-initialization overhead on subsequent scans.
+  let _persistentSession = null;
+
+  async function getOrCreateSession(entry, onProgress) {
+    if (_persistentSession) return _persistentSession;
+    _persistentSession = await createModelSession(entry, onProgress);
+    console.log(`[ShopeeAI] Persistent session created via ${entry.kind}`);
+    return _persistentSession;
+  }
+
+  function destroySession() {
+    if (_persistentSession) {
+      try { _persistentSession.destroy(); } catch {}
+      _persistentSession = null;
+    }
+  }
+
   async function classifyItemsBatch(items, onProgress) {
     if (!items.length) return {};
+
+    const entry = resolveModelEntry();
+    if (!entry) {
+      console.error('[ShopeeAI] classifyItemsBatch: no model API');
+      return {};
+    }
 
     const now = Date.now();
     const cache = await loadCache();
     const results = {};
     const needsClassify = [];
 
-    // Cache lookup first — skip items already classified
     for (const item of items) {
       const key = makeCacheKey(item.name);
       const hit = cache[key];
@@ -71,64 +244,77 @@ const ShopeeAIService = (() => {
 
     if (!needsClassify.length) return results;
 
-    let session;
+    console.log(`[ShopeeAI] Classifying ${needsClassify.length} items (entry: ${entry.kind})`);
+
+    let modelSession;
     try {
-      session = await LanguageModel.create({
-        monitor(m) {
-          m.addEventListener('downloadprogress', e => {
-            if (onProgress) onProgress(Math.round(e.loaded * 100), 100, 'download');
-          });
-        },
-        initialPrompts: [
-          {
-            role: 'system',
-            content: [
-              'Phân loại tên sản phẩm thương mại điện tử Việt Nam vào đúng một danh mục.',
-              'Trả về chính xác tên danh mục, không thêm bất kỳ nội dung nào khác:',
-              '- 💻 Điện tử & Công nghệ',
-              '- 💪 Thể thao & Sức khỏe',
-              '- 🏠 Nhà cửa & Đời sống',
-              '- 👕 Thời trang & Phụ kiện',
-              '- 📚 Giải trí & Giáo dục',
-              '- 🏷️ Khác'
-            ].join('\n')
-          }
-        ]
-      });
+      modelSession = await getOrCreateSession(entry, onProgress);
     } catch (e) {
-      console.warn('[ShopeeAI] Không thể khởi tạo AI session:', e);
+      console.error('[ShopeeAI] Session init failed:', e);
+      _persistentSession = null;
       return results;
     }
 
-    const schema = { type: 'string', enum: CATEGORIES };
+    const BATCH_SIZE = 20;
     const cacheUpdates = {};
 
     try {
-      for (let i = 0; i < needsClassify.length; i++) {
-        const item = needsClassify[i];
+      for (let batchStart = 0; batchStart < needsClassify.length; batchStart += BATCH_SIZE) {
+        const batch = needsClassify.slice(batchStart, batchStart + BATCH_SIZE);
+        const batchInput = batch.map(item => item.name).join('\n');
+
         try {
-          const raw = await session.prompt(`"${item.name}"`, { responseConstraint: schema });
-          const cat = raw.trim();
-          results[item.id] = CATEGORIES.includes(cat) ? cat : '🏷️ Khác';
-        } catch {
-          results[item.id] = '🏷️ Khác';
+          const rawResponse = await modelSession.classify(batchInput);
+          const lines = String(rawResponse).split('\n').map(l => l.trim()).filter(Boolean);
+
+          for (let i = 0; i < batch.length; i++) {
+            const item = batch[i];
+            const code = parseCategoryCode(lines[i] || 'other');
+            const fullCat = code ? CATEGORY_CODES[code] : '🏷️ Khác';
+            console.log(`[ShopeeAI] "${item.name}" → "${fullCat}"`);
+            results[item.id] = fullCat;
+            cacheUpdates[makeCacheKey(item.name)] = { cat: fullCat, ts: now };
+          }
+        } catch (e) {
+          console.warn('[ShopeeAI] Batch failed, retrying individually:', e);
+          // Session may be stale — reset and retry with a fresh one
+          _persistentSession = null;
+          try {
+            modelSession = await getOrCreateSession(entry, null);
+          } catch { /* give up on this batch */ }
+
+          for (const item of batch) {
+            try {
+              const raw = await modelSession.classify(item.name);
+              const code = parseCategoryCode(raw);
+              results[item.id] = code ? CATEGORY_CODES[code] : '🏷️ Khác';
+            } catch {
+              results[item.id] = '🏷️ Khác';
+            }
+            cacheUpdates[makeCacheKey(item.name)] = { cat: results[item.id], ts: now };
+          }
         }
-        cacheUpdates[makeCacheKey(item.name)] = { cat: results[item.id], ts: now };
-        if (onProgress) onProgress(i + 1, needsClassify.length, 'classify');
+
+        if (onProgress) {
+          onProgress(Math.min(batchStart + BATCH_SIZE, needsClassify.length), needsClassify.length, 'classify');
+        }
       }
-    } finally {
-      session.destroy();
+    } catch (e) {
+      console.error('[ShopeeAI] classifyItemsBatch error:', e);
+      _persistentSession = null;
     }
 
-    // Merge updates and evict expired entries in one pass
     const merged = Object.fromEntries(
       Object.entries({ ...cache, ...cacheUpdates })
         .filter(([, v]) => (now - v.ts) < CACHE_TTL_MS)
     );
     await saveCache(merged);
-
     return results;
   }
 
-  return { isSupported, checkAIAvailability, classifyItemsBatch };
+  return { isSupported, checkAIAvailability, classifyItemsBatch, destroySession, getDiagnostics, resolveModelEntry };
 })();
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.ShopeeAIService = ShopeeAIService;
+}

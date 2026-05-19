@@ -174,6 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
       cacheData = null;
       cacheInfo.classList.add('hidden');
     });
+    // Reset persistent AI session so it will be recreated on next run
+    chrome.runtime.sendMessage({ type: 'AI_RESET_SESSION' }).catch(() => {});
+    if (window.ShopeeAIService?.destroySession) ShopeeAIService.destroySession();
   });
 
 
@@ -693,16 +696,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // === AI Enhancement ===
+  function logAIDiagnostics(diag) {
+    console.warn('[ShopeeAI] ❌ Prompt API không khả dụng trong extension.');
+    console.warn('[ShopeeAI] Diagnostics:', diag);
+    console.warn(
+      '[ShopeeAI] Cần: Chrome 138+ (chrome://version), bật flags:\n' +
+      '  • chrome://flags/#optimization-guide-on-device-model → Enabled\n' +
+      '  • chrome://flags/#prompt-api-for-gemini-nano → Enabled\n' +
+      '  Hoặc đăng ký Origin Trial cho extension: https://developer.chrome.com/origintrials\n' +
+      '  Kiểm tra model: chrome://on-device-internals'
+    );
+  }
+
+  async function getAIDiagnostics() {
+    if (window.ShopeeAIService) return ShopeeAIService.getDiagnostics();
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'AI_DIAG' });
+      return resp?.diag || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function isAIAvailable() {
+    if (window.ShopeeAIService?.isSupported()) {
+      return ShopeeAIService.checkAIAvailability();
+    }
+    try {
+      const resp = await chrome.runtime.sendMessage({ type: 'AI_CHECK' });
+      return !!resp?.available;
+    } catch {
+      return false;
+    }
+  }
+
+  async function classifyViaExtension(items, onProgress) {
+    if (window.ShopeeAIService?.isSupported()) {
+      return ShopeeAIService.classifyItemsBatch(items, onProgress);
+    }
+    const resp = await chrome.runtime.sendMessage({ type: 'AI_CLASSIFY', items });
+    if (resp?.ok) return resp.results;
+    if (resp?.error) console.error('[ShopeeAI] background classify error:', resp.error);
+    return null;
+  }
+
   // Runs after rule-based pipeline; only classifies items still at 🏷️ Khác.
-  // Transparent on Chrome < 138 or when LanguageModel is unavailable.
   async function enhanceWithAI(data) {
-    if (!window.ShopeeAIService || !ShopeeAIService.isSupported()) return data;
+    const diag = await getAIDiagnostics();
+    console.log('[ShopeeAI] diagnostics:', diag);
+
+    if (!diag?.supported) {
+      logAIDiagnostics(diag);
+      return data;
+    }
 
     const kharItems = (data.topItems || []).filter(item => item.cat === '🏷️ Khác');
     if (!kharItems.length) return data;
 
-    const available = await ShopeeAIService.checkAIAvailability();
-    if (!available) return data;
+    const available = await isAIAvailable();
+    if (!available) {
+      console.warn('[ShopeeAI] ❌ Model chưa sẵn sàng (availability/capabilities). Xem chrome://on-device-internals');
+      return data;
+    }
 
     // Deduplicate by name before sending to AI
     const seen = new Set();
@@ -713,24 +768,31 @@ document.addEventListener('DOMContentLoaded', () => {
         uniqueItems.push({ id: item.name, name: item.name });
       }
     }
+    console.log('[ShopeeAI] Unique items sẽ gửi AI:', uniqueItems.length);
 
-    progressText.textContent = `Đang phân loại nâng cao ${uniqueItems.length} sản phẩm...`;
-
-    const aiMap = await ShopeeAIService.classifyItemsBatch(uniqueItems, (done, total, phase) => {
-      if (phase === 'download') {
-        progressText.textContent = `Đang tải mô hình AI (${done}%)...`;
-      } else {
-        progressText.textContent = `AI phân loại (${done}/${total})...`;
-      }
-    });
+    let aiMap = {};
+    try {
+      const batchResult = await classifyViaExtension(uniqueItems, null);
+      if (!batchResult) return data;
+      aiMap = batchResult;
+      console.log('[ShopeeAI] classify hoàn tất. Sample:', Object.entries(aiMap).slice(0, 5));
+    } catch (e) {
+      console.error('[ShopeeAI] ❌ classify bị lỗi:', e);
+      return data;
+    }
 
     // Patch topItems with AI-resolved categories
+    let patched = 0;
     for (const item of data.topItems) {
       if (item.cat === '🏷️ Khác') {
         const aiCat = aiMap[item.name];
-        if (aiCat && aiCat !== '🏷️ Khác') item.cat = aiCat;
+        if (aiCat && aiCat !== '🏷️ Khác') {
+          item.cat = aiCat;
+          patched++;
+        }
       }
     }
+    console.log(`[ShopeeAI] ✅ Đã patch ${patched} items từ Khác sang category AI.`);
 
     // Rebuild catStats from updated topItems (topItems is the full aggregation)
     const catStats = {};
@@ -740,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
       catStats[item.cat].count += item.count;
     }
     data.catStats = catStats;
+    console.log('[ShopeeAI] catStats cuối:', catStats);
 
     return data;
   }

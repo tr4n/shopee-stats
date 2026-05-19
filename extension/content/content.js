@@ -1,6 +1,8 @@
 (function() {
   'use strict';
 
+  const DEBUG_AI_ONLY = false;
+
   const cfg = window.__shopeeConfig || {};
   const LIST_TYPE = cfg.listType || 3;
   const LAST_UPDATED = cfg.lastUpdated || 0;
@@ -290,6 +292,9 @@
   };
 
   function resolveCategory(catId, itemName, catIdMap) {
+    // ⚠️ DEBUG_AI_ONLY: skip all rule-based classification; let Chrome AI handle everything.
+    if (DEBUG_AI_ONLY) return '🏷️ Khác';
+
     if (catId && catIdMap && catIdMap[catId]) {
       const topLevelName = catIdMap[catId].trim();
       
