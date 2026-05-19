@@ -3,14 +3,32 @@
 
   const DEBUG_AI_ONLY = false;
 
-  const cfg = window.__shopeeConfig || {};
-  const LIST_TYPE = cfg.listType || 3;
-  const LAST_UPDATED = cfg.lastUpdated || 0;
-  const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
-  const CACHED_ITEM_MAP = cfg.itemMap || {};
-  const CACHED_CAT_TREE = (cfg.catTree && cfg.catTree.map) ? cfg.catTree : {};
+  // Guard against "Extension context invalidated" errors
+  // that occur when the extension is reloaded while the content script is running.
+  function safeSend(msg) {
+    try {
+      if (!chrome.runtime?.id) {
+        console.warn('[ShopeeAnalytics] Extension context invalidated, dropping message:', msg.type);
+        return;
+      }
+      chrome.runtime.sendMessage(msg).catch(() => {});
+    } catch (e) {
+      // Silently ignore — popup may have been closed
+    }
+  }
 
-  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+  chrome.storage.local.get(['shopee_temp_config'], (res) => {
+    const cfg = res.shopee_temp_config || {};
+    const LIST_TYPE = cfg.listType || 3;
+    const LAST_UPDATED = cfg.lastUpdated || 0;
+    const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
+    const CACHED_ITEM_MAP = cfg.itemMap || {};
+    const CACHED_CAT_TREE = (cfg.catTree && cfg.catTree.map) ? cfg.catTree : {};
+
+    // Clean up temporary config immediately
+    chrome.storage.local.remove(['shopee_temp_config']);
+
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   async function fetchWithRetry(url) {
     const MAX_RETRIES = 3;
@@ -323,31 +341,14 @@
     
     // Send heartbeat every 10 seconds to show the script is alive
     const heartbeatInterval = setInterval(() => {
-      try {
-        console.log('[ShopeeAnalytics] Heartbeat - script is running...');
-        window.postMessage({
-          type: 'SHOPEE_STATS_HEARTBEAT',
-          timestamp: Date.now()
-        }, '*');
-      } catch (e) {
-        console.warn('[ShopeeAnalytics] Heartbeat failed:', e);
-      }
+      console.log('[ShopeeAnalytics] Heartbeat - script is running...');
+      safeSend({ type: 'heartbeat', timestamp: Date.now() });
     }, 10000);
     
     try {
       // Send initial message to indicate start
-      try {
-        console.log('[ShopeeAnalytics] Sending initial progress message...');
-        window.postMessage({
-          type: 'SHOPEE_STATS_PROGRESS',
-          message: 'Đang khởi tạo...',
-          processed: 0,
-          total: 0,
-          pct: -1
-        }, '*');
-      } catch (e) {
-        console.warn('[ShopeeAnalytics] Không thể gửi message khởi tạo:', e);
-      }
+      console.log('[ShopeeAnalytics] Sending initial progress message...');
+      safeSend({ type: 'progress', message: 'Đang khởi tạo...', processed: 0, total: 0, pct: -1 });
 
       // Fetch category tree first (uses cache if fresh enough)
       console.log('[ShopeeAnalytics] Đang tải danh mục sản phẩm...');
@@ -472,16 +473,7 @@
           const pct = totalCount > 0
             ? Math.min(Math.round((currentTotal / totalCount) * 100), 99)
             : -1;
-          try {
-            window.postMessage({
-              type: 'SHOPEE_STATS_PROGRESS',
-              processed: currentTotal,
-              total: totalCount,
-              pct
-            }, '*');
-          } catch (e) {
-            console.warn('[ShopeeAnalytics] Không thể gửi message progress:', e);
-          }
+          safeSend({ type: 'progress', processed: currentTotal, total: totalCount, pct });
         }
       }
 
@@ -532,33 +524,23 @@
       }
       
       console.log('[ShopeeAnalytics] Hoàn thành! Đang gửi kết quả...');
-      
-      try {
-        window.postMessage({
-          type: 'SHOPEE_STATS_COMPLETE',
-          data: {
-            ...stats,
-            topItems,
-            catStats,
-            cachePayload: {
-              fetchTime: Math.floor(Date.now() / 1000),
-              lastUpdated: newLastUpdated || LAST_UPDATED,
-              listType: LIST_TYPE,
-              miniOrders: allMiniOrders,
-              itemMap: cappedItemMap,
-              catTree: { ts: catTreeTs, map: catIdMap }
-            }
+      safeSend({
+        type: 'complete',
+        data: {
+          ...stats,
+          topItems,
+          catStats,
+          cachePayload: {
+            fetchTime: Math.floor(Date.now() / 1000),
+            lastUpdated: newLastUpdated || LAST_UPDATED,
+            listType: LIST_TYPE,
+            miniOrders: allMiniOrders,
+            itemMap: cappedItemMap,
+            catTree: { ts: catTreeTs, map: catIdMap }
           }
-        }, '*');
-        
-        console.log('[ShopeeAnalytics] Đã gửi kết quả thành công!');
-      } catch (e) {
-        console.error('[ShopeeAnalytics] Lỗi khi gửi kết quả:', e);
-        window.postMessage({
-          type: 'SHOPEE_STATS_ERROR',
-          message: 'Lỗi khi gửi kết quả thống kê. Vui lòng thử lại.'
-        }, '*');
-      }
+        }
+      });
+      console.log('[ShopeeAnalytics] Đã gửi kết quả thành công!');
 
     } catch (err) {
       // Clear heartbeat on error
@@ -580,17 +562,11 @@
         errorMessage = 'Lỗi xử lý dữ liệu. Tải lại trang Shopee và thử lại.';
       }
       
-      try {
-        window.postMessage({
-          type: 'SHOPEE_STATS_ERROR',
-          message: errorMessage
-        }, '*');
-      } catch (e) {
-        console.error('[ShopeeAnalytics] Không thể gửi error message:', e);
-      }
+      safeSend({ type: 'error', message: errorMessage });
     }
   }
 
   startSpidering();
 
+  }); // end chrome.storage.local.get
 })();

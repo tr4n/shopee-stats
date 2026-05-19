@@ -519,27 +519,14 @@ document.addEventListener('DOMContentLoaded', () => {
         catTree: useCache && cacheData.catTree ? cacheData.catTree : {}
       };
 
-      if (debugStatus) debugStatus.textContent = 'Đang tải cấu hình...';
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: (cfg) => { window.__shopeeConfig = cfg; },
-        args: [configPayload],
-        world: 'MAIN'
+      if (debugStatus) debugStatus.textContent = 'Đang lưu cấu hình...';
+      await new Promise((resolve) => {
+        chrome.storage.local.set({ 'shopee_temp_config': configPayload }, resolve);
       });
-      // Inject scripts with error handling
-      try {
-        if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
-        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/bridge.js'] });
-        console.log('[ShopeeAnalytics] Bridge script injected successfully');
-      } catch (e) {
-        console.error('[ShopeeAnalytics] Failed to inject bridge script:', e);
-        if (debugStatus) debugStatus.textContent = 'Lỗi: Không thể tải bridge script';
-        throw new Error('Lỗi khi tải bridge script. Vui lòng thử lại.');
-      }
       
       try {
         if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
-        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'], world: 'MAIN' });
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
         console.log('[ShopeeAnalytics] Content script injected successfully');
         if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
         
@@ -550,7 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (debugStatus) debugStatus.textContent = 'Cảnh báo: Không nhận được phản hồi';
             
             try {
-              // Try to inject a test script to see what's happening
               await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: () => {
@@ -558,31 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   console.log('[ShopeeAnalytics TEST] Current domain:', window.location.hostname);
                   console.log('[ShopeeAnalytics TEST] URL:', window.location.href);
                   console.log('[ShopeeAnalytics TEST] Document ready state:', document.readyState);
-                  console.log('[ShopeeAnalytics TEST] Shopee config exists:', !!window.__shopeeConfig);
-                  console.log('[ShopeeAnalytics TEST] jQuery exists:', !!window.$);
-                  console.log('[ShopeeAnalytics TEST] React exists:', !!window.React);
                   console.log('[ShopeeAnalytics TEST] Fetch available:', !!window.fetch);
-                  
-                  // Check if there are any errors in console
-                  if (window.console && window.console.error) {
-                    console.log('[ShopeeAnalytics TEST] Console available for logging');
-                  }
-                  
-                  // Try to send a test message
-                  try {
-                    window.postMessage({
-                      type: 'SHOPEE_STATS_PROGRESS',
-                      message: 'Test message từ debug script',
-                      processed: 0,
-                      total: 0,
-                      pct: -1
-                    }, '*');
-                    console.log('[ShopeeAnalytics TEST] Test message sent successfully');
-                  } catch (e) {
-                    console.error('[ShopeeAnalytics TEST] Failed to send test message:', e);
-                  }
-                },
-                world: 'MAIN'
+                }
               });
             } catch (e) {
               console.error('[ShopeeAnalytics] Failed to run debug script:', e);
@@ -596,8 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!lastHeartbeat && heartbeatCount === 0) {
             console.error('[ShopeeAnalytics] Still no response after 30 seconds - likely a critical issue');
             if (debugStatus) debugStatus.textContent = 'Lỗi: Script không khởi chạy được';
-            
-            // Show more specific error message
             progressText.innerHTML = '❌ <strong>Không nhận được phản hồi từ content script</strong><br>' +
               'Có thể do:<br>' +
               '• Trang web chặn script injection<br>' +
