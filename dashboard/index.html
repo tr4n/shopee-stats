@@ -862,12 +862,23 @@
   function renderInsightCard(id, insightItems) {
     const card = document.getElementById(id);
     const list = document.getElementById(id + '-list');
+    
+    console.log(`[Dashboard] renderInsightCard('${id}')`, {
+      card: !!card,
+      list: !!list, 
+      itemCount: insightItems?.length || 0,
+      items: insightItems?.slice(0, 2) || []
+    });
+    
     if (!card || !list || !insightItems || !insightItems.length) return;
 
     list.innerHTML = insightItems.map(item =>
-      `<li><span class="ins-icon">${item.icon}</span><span>${escapeHtml(item.text)}</span></li>`
+      `<li><span class="ins-icon">${item.icon}</span><span>${escHtml(item.text)}</span></li>`
     ).join('');
     card.style.display = '';
+    reveal(card);
+    
+    console.log(`[Dashboard] ✅ Insight card '${id}' rendered with ${insightItems.length} items`);
   }
 
   /* ─────────────────────────────────────────────────
@@ -1247,6 +1258,7 @@
   ───────────────────────────────────────────────── */
   let currentTopItems = [];
   function renderTopItems(ti) {
+    console.log('[Dashboard] renderTopItems', { itemCount: (ti || []).length, sampleItems: (ti || []).slice(0, 2) });
     currentTopItems = ti || [];
     renderTopItemsList();
     reveal(document.getElementById('card-items'));
@@ -1557,7 +1569,15 @@
      Boot
   ───────────────────────────────────────────────── */
   const d = parseData();
+  console.log('[Dashboard] Parsed data:', { 
+    hasData: !!d, 
+    totalSpend: d?.t, 
+    topItemsCount: (d?.ti || []).length,
+    categoriesCount: (d?.cs || []).length
+  });
+  
   if (!d || !d.t) {
+    console.warn('[Dashboard] No data or invalid data, showing no-data view');
     renderNoData();
   } else {
     document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
