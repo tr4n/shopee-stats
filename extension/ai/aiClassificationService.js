@@ -231,12 +231,32 @@ const ShopeeAIService = (() => {
   // Keeping the session alive avoids re-initialization overhead on subsequent scans.
   let _persistentSession = null;
 
+  // Circuit breaker: once set, all AI calls are short-circuited for this page lifecycle.
+  // Triggered by fatal errors like "model process crashed too many times".
+  let _modelDisabled = false;
+
+  function isFatalModelError(error) {
+    const msg = String(error?.message || error || '').toLowerCase();
+    return msg.includes('crashed too many times') ||
+           msg.includes('unable to create a session') ||
+           msg.includes('model not available');
+  }
+
   async function getOrCreateSession(entry, onProgress) {
+    if (_modelDisabled) return null;
     if (_persistentSession) return _persistentSession;
     // Chrome requires an availability check before calling create()
-    const available = await checkAvailability(entry);
-    if (!available) {
-      console.warn(`[ShopeeAI] Model not available via ${entry.kind}, skipping session creation`);
+    try {
+      const available = await checkAvailability(entry);
+      if (!available) {
+        console.warn(`[ShopeeAI] Model not available via ${entry.kind}, skipping session creation`);
+        return null;
+      }
+    } catch (e) {
+      if (isFatalModelError(e)) {
+        console.error(`[ShopeeAI] Fatal model error during availability check, disabling AI:`, e);
+        _modelDisabled = true;
+      }
       return null;
     }
     _persistentSession = await createModelSession(entry, onProgress);
@@ -252,7 +272,7 @@ const ShopeeAIService = (() => {
   }
 
   async function classifyItemsBatch(items, onProgress) {
-    if (!items.length) return {};
+    if (!items.length || _modelDisabled) return {};
 
     const entry = resolveModelEntry();
     if (!entry) {
@@ -285,6 +305,7 @@ const ShopeeAIService = (() => {
     } catch (e) {
       console.error('[ShopeeAI] Session init failed:', e);
       _persistentSession = null;
+      if (isFatalModelError(e)) _modelDisabled = true;
       return results;
     }
     if (!modelSession) {
@@ -313,12 +334,34 @@ const ShopeeAIService = (() => {
             cacheUpdates[makeCacheKey(item.name)] = { cat: fullCat, ts: now };
           }
         } catch (e) {
+          // If the model is fatally broken, stop all retries immediately
+          if (isFatalModelError(e)) {
+            console.error('[ShopeeAI] Fatal model error, disabling AI for this session:', e);
+            _modelDisabled = true;
+            _persistentSession = null;
+            // Assign fallback category to remaining items
+            for (const item of batch) {
+              results[item.id] = '🏷️ Khác';
+              cacheUpdates[makeCacheKey(item.name)] = { cat: '🏷️ Khác', ts: now };
+            }
+            break;
+          }
+
           console.warn('[ShopeeAI] Batch failed, retrying individually:', e);
           // Session may be stale — reset and retry with a fresh one
           _persistentSession = null;
           try {
             modelSession = await getOrCreateSession(entry, null);
           } catch { /* give up on this batch */ }
+
+          if (!modelSession) {
+            // Session creation failed — assign fallback and stop
+            for (const item of batch) {
+              results[item.id] = '🏷️ Khác';
+              cacheUpdates[makeCacheKey(item.name)] = { cat: '🏷️ Khác', ts: now };
+            }
+            break;
+          }
 
           for (const item of batch) {
             try {
@@ -339,6 +382,7 @@ const ShopeeAIService = (() => {
     } catch (e) {
       console.error('[ShopeeAI] classifyItemsBatch error:', e);
       _persistentSession = null;
+      if (isFatalModelError(e)) _modelDisabled = true;
     }
 
     const merged = Object.fromEntries(

@@ -976,21 +976,37 @@
   ].join(' ');
 
   let _aiInsightSession = null;
+  let _aiInsightDisabled = false;
+
+  function isAIFatalError(error) {
+    const msg = String(error?.message || error || '').toLowerCase();
+    return msg.includes('crashed too many times') ||
+           msg.includes('unable to create a session') ||
+           msg.includes('model not available');
+  }
+
   async function getAIInsightSession() {
+    if (_aiInsightDisabled) return null;
     if (_aiInsightSession) return _aiInsightSession;
     if (typeof LanguageModel === 'undefined') return null;
     try {
       const status = await LanguageModel.availability();
       if (status === 'unavailable') return null;
       _aiInsightSession = await LanguageModel.create({
-        expectedOutputLanguage: 'vi',
         initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }]
       });
       return _aiInsightSession;
-    } catch { return null; }
+    } catch (e) {
+      if (isAIFatalError(e)) {
+        console.warn('[Dashboard] AI model fatally broken, disabling AI insights:', e.message);
+        _aiInsightDisabled = true;
+      }
+      return null;
+    }
   }
 
   async function enrichWithAI(cardId, context, specificPrompt) {
+    if (_aiInsightDisabled) return;
     const aiEl = document.getElementById(cardId + '-ai');
     if (!aiEl) return;
     aiEl.classList.add('loading');
@@ -1006,7 +1022,7 @@
         'Hãy đưa ra nhận xét chuyên gia về xu hướng chi tiêu, so sánh với thói quen tiêu dùng phổ biến, và đề xuất cải thiện cụ thể.'
       ].join('\n\n');
       
-      const result = await session.prompt(fullPrompt, { outputLanguage: 'vi' });
+      const result = await session.prompt(fullPrompt);
       if (result && result.trim()) {
         aiEl.innerHTML = `<span class="insight-ai-badge">🤖 AI</span>${escHtml(result.trim())}`;
       } else {
@@ -1014,6 +1030,10 @@
       }
     } catch (e) {
       console.warn('[Dashboard] AI insight failed:', e);
+      if (isAIFatalError(e)) {
+        _aiInsightDisabled = true;
+        _aiInsightSession = null;
+      }
       aiEl.remove();
     } finally {
       aiEl.classList.remove('loading');
