@@ -885,10 +885,11 @@
      AI narrative — Chrome 148+ web LanguageModel
   ───────────────────────────────────────────────── */
   const AI_INSIGHT_SYSTEM = [
-    'You are a friendly Vietnamese spending analyst.',
-    'Given a user\'s shopping statistics, write ONE short, natural-sounding Vietnamese sentence',
-    '(max 40 words) that gives a helpful observation or encouragement about their spending habit.',
-    'Be specific with numbers. No markdown, no lists, plain text only.'
+    'Bạn là chuyên gia phân tích tài chính cá nhân với 10 năm kinh nghiệm tư vấn chi tiêu thông minh.',
+    'Dựa trên dữ liệu mua sắm, hãy đưa ra MỘT nhận xét chuyên sâu bằng tiếng Việt (tối đa 60 từ).',
+    'Bao gồm: phân tích xu hướng, so sánh với chuẩn mực, gợi ý tối ưu hóa cụ thể.',
+    'Sử dụng số liệu chính xác, thuật ngữ tài chính phù hợp. Giọng điệu chuyên nghiệp nhưng dễ hiểu.',
+    'Không dùng markdown, chỉ văn bản thuần túy.'
   ].join(' ');
 
   let _aiInsightSession = null;
@@ -905,7 +906,7 @@
     } catch { return null; }
   }
 
-  async function enrichWithAI(cardId, promptText) {
+  async function enrichWithAI(cardId, context, specificPrompt) {
     const aiEl = document.getElementById(cardId + '-ai');
     if (!aiEl) return;
     aiEl.classList.add('loading');
@@ -914,13 +915,21 @@
     if (!session) { aiEl.remove(); return; }
 
     try {
-      const result = await session.prompt(promptText);
+      // Enhanced prompt with context and specific analysis request
+      const fullPrompt = [
+        `Bối cảnh: ${context}`,
+        `Yêu cầu phân tích: ${specificPrompt}`,
+        'Hãy đưa ra nhận xét chuyên gia về xu hướng chi tiêu, so sánh với thói quen tiêu dùng phổ biến, và đề xuất cải thiện cụ thể.'
+      ].join('\n\n');
+      
+      const result = await session.prompt(fullPrompt);
       if (result && result.trim()) {
-        aiEl.innerHTML = `<span class="insight-ai-badge">AI</span>${escapeHtml(result.trim())}`;
+        aiEl.innerHTML = `<span class="insight-ai-badge">🤖 AI</span>${escHtml(result.trim())}`;
       } else {
         aiEl.remove();
       }
-    } catch {
+    } catch (e) {
+      console.warn('[Dashboard] AI insight failed:', e);
       aiEl.remove();
     } finally {
       aiEl.classList.remove('loading');
@@ -1593,9 +1602,10 @@
       // Re-render monthly insight when year changes
       const monthlyItems = computeMonthlyInsights(d.yd, yr);
       renderInsightCard('insight-monthly', monthlyItems);
+      const yearData = d.yd[yr] || {};
       enrichWithAI('insight-monthly',
-        `Năm ${yr}: chi tiêu tổng ${fmtVND((d.yd[yr]?.t || 0))}. ` +
-        monthlyItems.slice(0, 2).map(i => i.text).join('. ')
+        `Người dùng chi tiêu ${fmtVND(yearData.t || 0)} trong năm ${yr} qua ${fmtNum(yearData.o || 0)} đơn hàng. Trung bình ${fmtVND(Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1)))} mỗi đơn. ${monthlyItems.slice(0, 2).map(i => i.text).join('. ')}`,
+        'Phân tích xu hướng chi tiêu theo tháng và đánh giá hiệu quả quản lý ngân sách cá nhân'
       );
     });
     renderTopItems(d.ti || []);
@@ -1621,17 +1631,30 @@
     // AI narrative — runs lazily after paint, no-op if Chrome < 148
     requestAnimationFrame(() => {
       const yearlyItems = computeYearlyInsights(d.yd || {}, d);
+      const avgOrderValue = Math.round((d.t || 0) / Math.max(d.o || 1, 1));
+      const savingsRate = Math.round(((d.s || 0) / Math.max((d.t || 0) + (d.s || 0), 1)) * 100);
+      
       enrichWithAI('insight-yearly',
-        `Tổng chi tiêu: ${fmtVND(d.t)}, ${fmtNum(d.o)} đơn hàng. ` +
-        yearlyItems.slice(0, 2).map(i => i.text).join('. ')
+        `Tổng chi tiêu ${fmtVND(d.t)} qua ${fmtNum(d.o)} đơn hàng, trung bình ${fmtVND(avgOrderValue)}/đơn. Tiết kiệm ${fmtVND(d.s)} (${savingsRate}% từ khuyến mãi). ${yearlyItems.slice(0, 2).map(i => i.text).join('. ')}`,
+        'Đánh giá tổng quan hiệu quả chi tiêu và khả năng tiết kiệm so với chuẩn mực người tiêu dùng Việt Nam'
       );
+      
+      const topItems = (d.ti || []).slice(0, 5);
+      const topSpend = topItems.reduce((s, i) => s + i.s, 0);
+      const concentration = Math.round((topSpend / Math.max(d.t || 1, 1)) * 100);
+      
       enrichWithAI('insight-items',
-        `Tổng ${fmtNum((d.ti || []).length)} sản phẩm. ` +
-        computeItemInsights(d.ti || [], d.t).slice(0, 2).map(i => i.text).join('. ')
+        `Tổng ${fmtNum((d.ti || []).length)} sản phẩm khác nhau. Top 5 sản phẩm chiếm ${concentration}% tổng chi tiêu. ${computeItemInsights(d.ti || [], d.t).slice(0, 2).map(i => i.text).join('. ')}`,
+        'Phân tích mức độ tập trung chi tiêu và đưa ra gợi ý đa dạng hóa danh mục mua sắm'
       );
+      
+      const topCategories = (d.cs || []).slice(0, 3);
+      const catSpend = topCategories.reduce((s, c) => s + c.s, 0);
+      const catShare = Math.round((catSpend / Math.max(d.t || 1, 1)) * 100);
+      
       enrichWithAI('insight-categories',
-        `Chi tiêu theo ${(d.cs || []).length} danh mục. ` +
-        computeCategoryInsights(d.cs || [], d.t).slice(0, 2).map(i => i.text).join('. ')
+        `Chi tiêu trải đều ${(d.cs || []).length} danh mục. Top 3 danh mục (${topCategories.map(c => c.name).join(', ')}) chiếm ${catShare}% tổng. ${computeCategoryInsights(d.cs || [], d.t).slice(0, 2).map(i => i.text).join('. ')}`,
+        'Phân tích cân bằng danh mục chi tiêu và đề xuất tối ưu phân bổ ngân sách theo nhu cầu thiết yếu'
       );
     });
   }
