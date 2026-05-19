@@ -135,6 +135,10 @@ const ShopeeAIService = (() => {
             if (onProgress) onProgress(pct, 100, 'download');
           });
         },
+        // Output is always one of the English category codes (tech/sport/home/fashion/edu/other)
+        expectedOutputLanguage: 'en',
+        // Product names are in Vietnamese; declare so the model can optimise tokenisation
+        expectedInputLanguages: ['vi'],
         initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }]
       };
       if (params) {
@@ -176,7 +180,9 @@ const ShopeeAIService = (() => {
     const legacySession = await api.create({
       systemPrompt: SYSTEM_PROMPT,
       temperature: 0.1,
-      topK: 1
+      topK: 1,
+      expectedOutputLanguage: 'en',
+      expectedInputLanguages: ['vi']
     });
     return {
       kind: 'legacy',
