@@ -542,8 +542,29 @@
     }
 
     @media (max-width: 768px) {
-      h1 { font-size: 40px; }
-      .nav-links { display: none; }
+      h1 { font-size: 36px; }
+      .nav-links a:not(.btn-install-sm) { display: none; }
+      .nav-links { gap: 12px; }
+      .logo-section span { font-size: 16px; }
+      .btn-install-sm { padding: 8px 16px; font-size: 12px !important; }
+      
+      .hero { padding: 60px 0 40px 0; }
+      .hero-desc { font-size: 16px; margin-bottom: 32px; }
+      .hero-actions { flex-direction: column; width: 100%; gap: 16px; }
+      .hero-actions a { width: 100%; justify-content: center; }
+      
+      .section-title-wrapper { margin-bottom: 40px; }
+      .section-title { font-size: 32px; }
+      .features { padding: 50px 0; }
+      .feature-card { padding: 30px; }
+      
+      .privacy-focus { padding: 60px 0; }
+      .privacy-content h2 { font-size: 32px; }
+      .mockup-shield { width: 200px; height: 200px; }
+      .mockup-shield-inner { width: 140px; height: 140px; font-size: 56px; }
+      
+      .footer-top { flex-direction: column; gap: 32px; }
+      .footer-links { flex-direction: column; gap: 24px; }
     }
   </style>
 </head>

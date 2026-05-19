@@ -289,10 +289,36 @@
     @media (max-width: 768px) {
       .modal-body { flex-direction: column; }
       .modal-controls { width: 100%; }
-      .sidebar { display: none; }
-      .main { margin-left: 0; padding: 16px; max-width: 100vw; }
+      .sidebar {
+        width: 100%; height: 65px; min-height: auto;
+        flex-direction: row; top: auto; bottom: 0;
+        border-right: none; border-top: 1px solid var(--border);
+        padding: 0; z-index: 100;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+      }
+      .sidebar-logo, .sidebar-footer, .nav-label { display: none !important; }
+      .nav-section {
+        padding: 0 8px; display: flex; flex-direction: row;
+        width: 100%; justify-content: space-around; align-items: center; height: 100%;
+      }
+      .nav-item {
+        flex-direction: column; gap: 4px; padding: 6px 4px;
+        border-radius: 8px; text-align: center; font-size: 11px;
+        justify-content: center; width: auto; flex: 1;
+        margin: 0 2px; background: transparent; height: 100%;
+      }
+      .nav-item:hover { background: transparent; }
+      .nav-item.active { background: transparent; color: var(--primary); font-weight: 700; }
+      .nav-item .ni { font-size: 22px; width: auto; margin-bottom: 0; }
+      .main { margin-left: 0; padding: 16px 16px 85px 16px; max-width: 100vw; }
       .grid-2 { grid-template-columns: 1fr; }
       .cat-label { width: 120px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+      .page-header > div:last-child { width: 100%; justify-content: flex-start !important; }
+      .btn-share-trigger { width: 100%; justify-content: center; }
+      .pill-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+      .pill-row::-webkit-scrollbar { display: none; }
+      .pill { white-space: nowrap; }
     }
   </style>
 </head>
@@ -341,7 +367,7 @@
         <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
       </div>
       <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="pill active btn-share-trigger" data-type="overview" style="padding: 8px 16px; min-width: 130px; margin: 0; display: flex; align-items: center; gap: 6px;">✨ Tạo Ảnh</button>
+        <button class="pill active btn-share-trigger" data-type="overview" style="padding: 8px 16px; min-width: 130px; margin: 0; display: flex; align-items: center; gap: 6px;">✨ Chia sẻ</button>
       </div>
     </div>
 
@@ -450,7 +476,7 @@
   <div id="share-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>✨ Tạo Ảnh</h2>
+        <h2>✨ Chia sẻ</h2>
         <button id="btn-close-modal" class="btn-close">&times;</button>
       </div>
       <div class="modal-body">
