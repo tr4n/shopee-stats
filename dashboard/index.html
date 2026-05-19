@@ -885,11 +885,10 @@
      AI narrative — Chrome 148+ web LanguageModel
   ───────────────────────────────────────────────── */
   const AI_INSIGHT_SYSTEM = [
-    'Bạn là chuyên gia phân tích tài chính cá nhân với 10 năm kinh nghiệm tư vấn chi tiêu thông minh.',
-    'Dựa trên dữ liệu mua sắm, hãy đưa ra MỘT nhận xét chuyên sâu bằng tiếng Việt (tối đa 60 từ).',
-    'Bao gồm: phân tích xu hướng, so sánh với chuẩn mực, gợi ý tối ưu hóa cụ thể.',
-    'Sử dụng số liệu chính xác, thuật ngữ tài chính phù hợp. Giọng điệu chuyên nghiệp nhưng dễ hiểu.',
-    'Không dùng markdown, chỉ văn bản thuần túy.'
+    'You are a friendly Vietnamese spending analyst.',
+    'Given a user\'s shopping statistics, write ONE short, natural-sounding Vietnamese sentence',
+    '(max 100 words) that gives a helpful observation or encouragement about their spending habit.',
+    'Be specific with numbers. No markdown, no lists, plain text only.'
   ].join(' ');
 
   let _aiInsightSession = null;
