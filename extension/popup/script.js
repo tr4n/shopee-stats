@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkCacheInfo(3);
   btnClearCache.addEventListener('click', () => {
-    chrome.storage.local.remove(['shopee_cache'], () => {
+    chrome.storage.local.remove(['shopee_cache', 'aiClassificationCache'], () => {
       cacheData = null;
       cacheInfo.classList.add('hidden');
     });
@@ -684,11 +684,65 @@ document.addEventListener('DOMContentLoaded', () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);
         });
       }
-      renderResults(message.data);
+      enhanceWithAI(message.data)
+        .then(renderResults)
+        .catch(() => renderResults(message.data));
     }
   });
 
 
+
+  // === AI Enhancement ===
+  // Runs after rule-based pipeline; only classifies items still at 🏷️ Khác.
+  // Transparent on Chrome < 138 or when LanguageModel is unavailable.
+  async function enhanceWithAI(data) {
+    if (!window.ShopeeAIService || !ShopeeAIService.isSupported()) return data;
+
+    const kharItems = (data.topItems || []).filter(item => item.cat === '🏷️ Khác');
+    if (!kharItems.length) return data;
+
+    const available = await ShopeeAIService.checkAIAvailability();
+    if (!available) return data;
+
+    // Deduplicate by name before sending to AI
+    const seen = new Set();
+    const uniqueItems = [];
+    for (const item of kharItems) {
+      if (!seen.has(item.name)) {
+        seen.add(item.name);
+        uniqueItems.push({ id: item.name, name: item.name });
+      }
+    }
+
+    progressText.textContent = `Đang phân loại nâng cao ${uniqueItems.length} sản phẩm...`;
+
+    const aiMap = await ShopeeAIService.classifyItemsBatch(uniqueItems, (done, total, phase) => {
+      if (phase === 'download') {
+        progressText.textContent = `Đang tải mô hình AI (${done}%)...`;
+      } else {
+        progressText.textContent = `AI phân loại (${done}/${total})...`;
+      }
+    });
+
+    // Patch topItems with AI-resolved categories
+    for (const item of data.topItems) {
+      if (item.cat === '🏷️ Khác') {
+        const aiCat = aiMap[item.name];
+        if (aiCat && aiCat !== '🏷️ Khác') item.cat = aiCat;
+      }
+    }
+
+    // Rebuild catStats from updated topItems (topItems is the full aggregation)
+    const catStats = {};
+    for (const item of data.topItems) {
+      if (!catStats[item.cat]) catStats[item.cat] = { spent: 0, count: 0 };
+      catStats[item.cat].spent += item.spent;
+      catStats[item.cat].count += item.count;
+    }
+    data.catStats = catStats;
+
+    return data;
+  }
 
   // === Render Results ===
   function renderResults(data) {
