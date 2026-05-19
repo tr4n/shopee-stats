@@ -30,31 +30,66 @@
 
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+  // Relay fetch through the MAIN-world bridge (bridge.js) via CustomEvent so the
+  // request is indistinguishable from the page's own requests, bypassing Shopee's
+  // bot/extension detection that causes 403 from an isolated-world fetch.
+  function fetchViaMainWorldBridge(url, timeoutMs = 30000) {
+    return new Promise((resolve, reject) => {
+      const id = Math.random().toString(36).slice(2);
+      const timer = setTimeout(() => {
+        window.removeEventListener('__sa_fetch_res', handler);
+        reject(new Error('Lỗi mạng. Kiểm tra kết nối internet.'));
+      }, timeoutMs);
+
+      function handler(ev) {
+        if (ev.detail.id !== id) return;
+        window.removeEventListener('__sa_fetch_res', handler);
+        clearTimeout(timer);
+        resolve(ev.detail);
+      }
+      window.addEventListener('__sa_fetch_res', handler);
+      window.dispatchEvent(new CustomEvent('__sa_fetch_req', { detail: { id, url } }));
+    });
+  }
+
   async function fetchWithRetry(url) {
     const MAX_RETRIES = 3;
     let lastErr;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         console.log(`[ShopeeAnalytics] Đang gọi API Shopee (Lần ${attempt}/${MAX_RETRIES}): ${url}`);
-        const res = await fetch(url);
-        if (res.status === 401 || res.status === 403) {
-          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại Shopee.');
+        const result = await fetchViaMainWorldBridge(url);
+
+        if (result.networkError) throw new Error('Lỗi mạng. Kiểm tra kết nối internet.');
+
+        if (result.status === 401) {
+          const err = new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại Shopee.');
+          err.fatal = true;
+          throw err;
         }
-        if (res.status === 429) {
+        if (result.status === 403) {
+          const err = new Error('Shopee từ chối yêu cầu (lỗi 403). Vui lòng tải lại trang Shopee (F5) và thử lại. Nếu vẫn lỗi, hãy đăng nhập lại Shopee.');
+          err.fatal = true;
+          throw err;
+        }
+        if (result.status === 429) {
           await sleep(2000 * attempt);
           continue;
         }
-        if (!res.ok) {
-          throw new Error('Lỗi máy chủ (HTTP ' + res.status + '). Vui lòng thử lại.');
+        if (!result.ok) {
+          throw new Error('Lỗi máy chủ (HTTP ' + result.status + '). Vui lòng thử lại.');
         }
-        return res;
+        if (result.parseError || result.data === null) {
+          throw new Error('Lỗi đọc dữ liệu từ Shopee. Vui lòng tải lại trang và thử lại.');
+        }
+        return result.data;
       } catch (err) {
         lastErr = err;
         console.warn(`[ShopeeAnalytics] Lỗi kết nối ở lần thử ${attempt}:`, err);
-        const isFatal = err.message && (
+        const isFatal = err.fatal || (err.message && (
           err.message.includes('đăng nhập') ||
           err.message.includes('máy chủ')
-        );
+        ));
         if (isFatal) throw err;
         if (attempt < MAX_RETRIES) await sleep(1000 * attempt);
       }
@@ -253,8 +288,7 @@
     }
     try {
       console.log('[ShopeeAnalytics] Đang tải category tree từ Shopee API...');
-      const res = await fetchWithRetry('https://shopee.vn/api/v4/pages/get_category_tree');
-      const json = await res.json();
+      const json = await fetchWithRetry('https://shopee.vn/api/v4/pages/get_category_tree');
       const list = Array.isArray(json.data) ? json.data
         : (json.data && Array.isArray(json.data.category_list)) ? json.data.category_list
         : [];
@@ -374,22 +408,13 @@
         console.log(`[ShopeeAnalytics] Đang tải batch ${Math.floor(offsetIndex / LIMIT) + 1}...`);
         
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
-        const response = await fetchWithRetry(url);
-        let json;
-        try {
-          json = await response.json();
-          
-          // Check if response is valid
-          if (!json || typeof json !== 'object') {
-            throw new Error('Dữ liệu trả về từ Shopee không hợp lệ');
-          }
-          
-          console.log(`[ShopeeAnalytics] Batch ${Math.floor(offsetIndex / LIMIT) + 1}: Nhận được ${(json.data?.details_list || []).length} đơn hàng`);
-          
-        } catch (e) {
-          console.error('[ShopeeAnalytics] Lỗi khi đọc JSON từ Shopee API:', e);
-          throw new Error('Lỗi đọc dữ liệu từ Shopee (có thể do lỗi đăng nhập hoặc session hết hạn). Vui lòng F5 tải lại trang Shopee và thử lại.');
+        const json = await fetchWithRetry(url);
+
+        if (!json || typeof json !== 'object') {
+          throw new Error('Dữ liệu trả về từ Shopee không hợp lệ. Vui lòng tải lại trang và thử lại.');
         }
+
+        console.log(`[ShopeeAnalytics] Batch ${Math.floor(offsetIndex / LIMIT) + 1}: Nhận được ${(json.data?.details_list || []).length} đơn hàng`);
 
         if (offsetIndex === 0) {
           totalCount = (json && json.data && (json.data.total || json.data.total_count)) || 0;

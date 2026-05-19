@@ -157,17 +157,22 @@ const ShopeeAIService = (() => {
           if (isMultiple) {
             // Batch processing - no responseConstraint for multiple items
             return await session.prompt(
-              `Classify these products (one category per line):\n${input}\n\nCategories:`
+              `Classify these products (one category per line):\n${input}\n\nCategories:`,
+              { outputLanguage: 'en' }
             );
           } else {
             // Single item - can use responseConstraint
             const schema = { type: 'string', enum: CATEGORY_KEYS };
             try {
-              return await session.prompt(input, { responseConstraint: schema });
+              return await session.prompt(input, { 
+                responseConstraint: schema,
+                outputLanguage: 'en'
+              });
             } catch (e) {
               console.warn('[ShopeeAI] responseConstraint failed, retry plain prompt:', e);
               return await session.prompt(
-                `Product: ${input}\nReply with one code only: tech, sport, home, fashion, edu, or other`
+                `Product: ${input}\nReply with one code only: tech, sport, home, fashion, edu, or other`,
+                { outputLanguage: 'en' }
               );
             }
           }
@@ -191,11 +196,13 @@ const ShopeeAIService = (() => {
         const isMultiple = input.includes('\n');
         if (isMultiple) {
           return legacySession.prompt(
-            `Classify these products (one category per line):\n${input}\n\nCategories:`
+            `Classify these products (one category per line):\n${input}\n\nCategories:`,
+            { outputLanguage: 'en' }
           );
         } else {
           return legacySession.prompt(
-            `Product: ${input}\nCategory code (tech/sport/home/fashion/edu/other):`
+            `Product: ${input}\nCategory code (tech/sport/home/fashion/edu/other):`,
+            { outputLanguage: 'en' }
           );
         }
       },

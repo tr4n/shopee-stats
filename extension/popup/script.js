@@ -2,10 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Element References ===
   const btnStart = document.getElementById('btn-start');
   const btnRestart = document.getElementById('btn-restart');
-  const btnExportCsv = document.getElementById('btn-export-csv');
   const btnClearCache = document.getElementById('btn-clear-cache');
-  const btnShareCard = document.getElementById('btn-share-card');
-  const btnShareLink = document.getElementById('btn-share-link');
   const btnOpenDashboard = document.getElementById('btn-open-dashboard');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
@@ -261,85 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     checkCacheInfo(getSelectedListType());
   });
 
-  // === Export CSV ===
-  if (btnExportCsv) btnExportCsv.addEventListener('click', () => { if (lastCompleteData) exportCSV(lastCompleteData); });
-  function exportCSV(data) {
-    const rows = [['Năm', 'Tháng', 'Số đơn', 'Sản phẩm', 'Tổng chi tiêu (VND)', 'Giá gốc (VND)', 'Tiết kiệm (VND)']];
-    const sortedYears = Object.keys(data.thongKeTheoNam).sort((a, b) => b - a);
-    for (const year of sortedYears) {
-      const yData = data.thongKeTheoNam[year];
-      for (const month of Object.keys(yData.months).sort((a, b) => b - a)) {
-        const m = yData.months[month];
-        const saved = m.tienChuaGiam - m.tongTien;
-        rows.push([year, month, m.donHang, m.sanPham, Math.round(m.tongTien), Math.round(m.tienChuaGiam), Math.round(saved > 0 ? saved : 0)]);
-      }
-    }
-    const bom = '\uFEFF';
-    const blob = new Blob([bom + rows.map(r => r.join(',')).join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'shopee_thong_ke.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  // === Share Card ===
-  if (btnShareCard) btnShareCard.addEventListener('click', async () => {
-    if (!lastCompleteData) return;
-    const orig = btnShareCard.textContent;
-    btnShareCard.textContent = 'Đang tạo...';
-    btnShareCard.disabled = true;
-    try {
-      const dataUrl = await window.generateShareCard(lastCompleteData, getSpendingPercentile);
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = 'shopee-analytics.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Share card error:', err);
-    } finally {
-      btnShareCard.textContent = orig;
-      btnShareCard.disabled = false;
-    }
-  });
-
-  // === Share Link & Dashboard URLs ===
-  const SHARE_PAGE_BASE = 'https://tr4n.github.io/shopee-stats/share-page';
-  const DASHBOARD_BASE  = 'https://tr4n.github.io/shopee-stats/dashboard';
-
-  function buildShareLink(data) {
-    const curYear = new Date().getFullYear();
-    const annualData = data.thongKeTheoNam && data.thongKeTheoNam[curYear];
-    const annualSpent = annualData ? annualData.total.tongTien : 0;
-    const beat = getSpendingPercentile(annualSpent);
-    const rankNum = data.tongtienhang <= 10000000 ? 1 : data.tongtienhang <= 50000000 ? 2 : data.tongtienhang < 80000000 ? 3 : 4;
-    const topItemName = (data.topItems && data.topItems[0]) ? data.topItems[0].name.substring(0, 30) : '';
-
-    const ydArr = Object.entries(data.thongKeTheoNam || {})
-      .sort((a, b) => a[0] - b[0])
-      .slice(-5)
-      .map(([y, yd]) => [parseInt(y), Math.round(yd.total.tongTien)]);
-
-    const shareData = {
-      v: 2,
-      t: Math.round(data.tongtienhang),
-      o: data.tongDonHang,
-      s: Math.round(Math.max(0, data.tongTienTietKiem)),
-      ip: data.tongSanPhamDaMua,
-      r: rankNum,
-      p: beat,
-      ts: Math.floor(Date.now() / 1000),
-      ti: topItemName,
-      yd: ydArr
-    };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
-    return `${SHARE_PAGE_BASE}/#d=${encoded}`;
-  }
+  // === Dashboard URL ===
+  const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
 
   function buildDashboardUrl(data) {
     const monthlyItems = {};
@@ -422,20 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
 
-  if (btnShareLink) btnShareLink.addEventListener('click', async () => {
-    if (!lastCompleteData) return;
-    const url = buildShareLink(lastCompleteData);
-    try {
-      await navigator.clipboard.writeText(url);
-      const orig = btnShareLink.textContent;
-      btnShareLink.textContent = '✓ Đã sao chép!';
-      btnShareLink.classList.add('copied');
-      setTimeout(() => { btnShareLink.textContent = orig; btnShareLink.classList.remove('copied'); }, 2500);
-    } catch {
-      window.open(url, '_blank');
-    }
-  });
-
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
@@ -467,26 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Request permission for Shopee domain if not already granted
-      try {
-        const hasPermission = await chrome.permissions.contains({
-          origins: ['https://shopee.vn/*']
-        });
-        
-        if (!hasPermission) {
-          const granted = await chrome.permissions.request({
-            origins: ['https://shopee.vn/*']
-          });
-          
-          if (!granted) {
-            errorMessage.textContent = 'Extension cần quyền truy cập Shopee để hoạt động. Vui lòng cho phép và thử lại.';
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn('[ShopeeAnalytics] Permission check failed:', error);
-      }
-      
       // Additional URL checks
       if (tab.url.includes('chrome-extension://') || tab.url.includes('chrome://') || tab.url.includes('moz-extension://')) {
         errorMessage.textContent = '❌ Extension không thể chạy trên các trang hệ thống. Vui lòng mở trang Shopee.vn thông thường.';
@@ -525,6 +411,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       try {
+        if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
+        // Inject bridge first in MAIN world so fetch calls are native page requests (avoids 403)
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content/bridge.js'],
+          world: 'MAIN'
+        });
+        console.log('[ShopeeAnalytics] Bridge script injected (MAIN world)');
+
         if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
         console.log('[ShopeeAnalytics] Content script injected successfully');
@@ -641,7 +536,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (debugStatus) debugStatus.textContent = 'Lỗi: ' + (message.message || 'Không xác định');
       
       showState(stateInitial);
-      errorMessage.textContent = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
+      
+      const errorMsg = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
+      
+      if (errorMsg.includes('đăng nhập')) {
+        errorMessage.innerHTML = '❌ ' + errorMsg + '<br><br>' +
+          '💡 <strong>Giải pháp:</strong><br>' +
+          '1. Đăng nhập lại tài khoản Shopee<br>' +
+          '2. Tải lại trang (F5) và thử lại';
+      } else if (errorMsg.includes('403') || errorMsg.includes('Shopee từ chối')) {
+        errorMessage.innerHTML = '❌ ' + errorMsg + '<br><br>' +
+          '💡 <strong>Giải pháp:</strong><br>' +
+          '1. Tải lại trang Shopee (F5)<br>' +
+          '2. Đảm bảo đã đăng nhập Shopee<br>' +
+          '3. Bấm "Bắt Đầu Thống Kê" lại';
+      } else {
+        errorMessage.textContent = errorMsg;
+      }
     } else if (message.type === 'complete') {
       // Clear timeout on successful completion
       if (analysisTimeout) {
