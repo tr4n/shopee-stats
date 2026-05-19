@@ -352,9 +352,9 @@
     if (cardType === 'overview') {
       const summary = `${fmtNum(d.o)} đơn hàng  •  ${fmtNum(d.ip)} sản phẩm`;
       txt(summary, W / 2, footerY + 40, 20, '600', tColors.textFaint, 'center');
-      if (window.APP_CONFIG) txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorEmail}`, W / 2, footerY + 80, 18, '500', tColors.textFaint, 'center');
+      if (window.APP_CONFIG) txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorText}`, W / 2, footerY + 80, 18, '500', tColors.textFaint, 'center');
     } else {
-      if (window.APP_CONFIG) txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorEmail}`, W / 2, footerY + 40, 18, '500', tColors.textFaint, 'center');
+      if (window.APP_CONFIG) txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorText}`, W / 2, footerY + 40, 18, '500', tColors.textFaint, 'center');
     }
 
     return canvas.toDataURL('image/png', 0.9);

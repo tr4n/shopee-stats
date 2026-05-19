@@ -1,4 +1,5 @@
 window.APP_CONFIG = {
-  authorEmail: "quanghuytran.hust@gmail.com",
-  authorIcon: "✉️"
+  authorLink: "https://tr4n.github.io/shopee-stats/",
+  authorText: "tr4n.github.io/shopee-stats",
+  authorIcon: "🌐"
 };

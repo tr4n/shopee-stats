@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // === App Config ===
   const authorInfoEl = document.getElementById('author-info');
   if (authorInfoEl && window.APP_CONFIG) {
-    authorInfoEl.innerHTML = `${window.APP_CONFIG.authorIcon} <a href="mailto:${window.APP_CONFIG.authorEmail}" style="color: var(--primary); text-decoration: none;">${window.APP_CONFIG.authorEmail}</a>`;
+    authorInfoEl.innerHTML = `${window.APP_CONFIG.authorIcon} <a href="${window.APP_CONFIG.authorLink}" target="_blank" style="color: var(--primary); text-decoration: none;">${window.APP_CONFIG.authorText}</a>`;
   }
 
   // === Theme ===

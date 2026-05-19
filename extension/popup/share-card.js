@@ -259,7 +259,7 @@
     txt(summary, W / 2, footerY + 110, 22, '500', 'rgba(255,255,255,0.3)', 'center');
 
     if (window.APP_CONFIG) {
-      txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorEmail}`, W / 2, footerY + 150, 18, '500', 'rgba(255,255,255,0.3)', 'center');
+      txt(`${window.APP_CONFIG.authorIcon} ${window.APP_CONFIG.authorText}`, W / 2, footerY + 150, 18, '500', 'rgba(255,255,255,0.3)', 'center');
     }
 
     return canvas.toDataURL('image/png');
