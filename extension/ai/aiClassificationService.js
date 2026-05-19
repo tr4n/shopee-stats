@@ -34,21 +34,35 @@ const ShopeeAIService = (() => {
   }
 
   // Try all known Prompt API entry points (varies by Chrome version / trial / flags).
+  // NOTE: These APIs are experimental and may not be available in all Chrome installations
   function resolveModelEntry() {
-    if (typeof globalThis.LanguageModel !== 'undefined') {
-      return { kind: 'LanguageModel', api: globalThis.LanguageModel };
-    }
-    if (globalThis.ai?.languageModel) {
-      return { kind: 'ai.languageModel', api: globalThis.ai.languageModel };
-    }
-    if (typeof chrome !== 'undefined' && chrome.aiOriginTrial?.languageModel) {
-      return { kind: 'chrome.aiOriginTrial', api: chrome.aiOriginTrial.languageModel };
+    try {
+      // Standard API (Chrome 138+)
+      if (typeof globalThis.LanguageModel !== 'undefined') {
+        return { kind: 'LanguageModel', api: globalThis.LanguageModel };
+      }
+      // Built-in AI API (experimental)
+      if (globalThis.ai?.languageModel) {
+        return { kind: 'ai.languageModel', api: globalThis.ai.languageModel };
+      }
+      // Origin Trial API (deprecated, fallback only)
+      if (typeof chrome !== 'undefined' && chrome.aiOriginTrial?.languageModel) {
+        console.warn('[ShopeeAI] Using deprecated Origin Trial API - may not be available');
+        return { kind: 'chrome.aiOriginTrial', api: chrome.aiOriginTrial.languageModel };
+      }
+    } catch (error) {
+      console.warn('[ShopeeAI] Error accessing AI APIs:', error);
     }
     return null;
   }
 
   function isSupported() {
-    return resolveModelEntry() !== null;
+    const entry = resolveModelEntry();
+    if (!entry) {
+      console.info('[ShopeeAI] Chrome Built-in AI is not available. Classification will use fallback logic.');
+      return false;
+    }
+    return true;
   }
 
   function getDiagnostics() {

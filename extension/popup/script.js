@@ -27,14 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugUrl = document.getElementById('debug-url');
   const debugStatus = document.getElementById('debug-status');
 
-  // Show debug panel only in development mode (Load unpacked)
-  if (chrome.management && chrome.management.getSelf) {
-    chrome.management.getSelf((info) => {
-      if (info.installType === 'development' && debugPanel) {
-        debugPanel.style.display = 'block';
-      }
-    });
-  }
+  // Debug panel removed for Chrome Web Store compliance
 
   const totalSpentEl = document.getElementById('total-spent');
   const rankBadgeEl = document.getElementById('rank-badge');
@@ -472,6 +465,26 @@ document.addEventListener('DOMContentLoaded', () => {
           chrome.tabs.create({ url: 'https://shopee.vn' });
         });
         return;
+      }
+
+      // Request permission for Shopee domain if not already granted
+      try {
+        const hasPermission = await chrome.permissions.contains({
+          origins: ['https://shopee.vn/*']
+        });
+        
+        if (!hasPermission) {
+          const granted = await chrome.permissions.request({
+            origins: ['https://shopee.vn/*']
+          });
+          
+          if (!granted) {
+            errorMessage.textContent = 'Extension cần quyền truy cập Shopee để hoạt động. Vui lòng cho phép và thử lại.';
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('[ShopeeAnalytics] Permission check failed:', error);
       }
       
       // Additional URL checks
