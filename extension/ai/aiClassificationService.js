@@ -233,6 +233,12 @@ const ShopeeAIService = (() => {
 
   async function getOrCreateSession(entry, onProgress) {
     if (_persistentSession) return _persistentSession;
+    // Chrome requires an availability check before calling create()
+    const available = await checkAvailability(entry);
+    if (!available) {
+      console.warn(`[ShopeeAI] Model not available via ${entry.kind}, skipping session creation`);
+      return null;
+    }
     _persistentSession = await createModelSession(entry, onProgress);
     console.log(`[ShopeeAI] Persistent session created via ${entry.kind}`);
     return _persistentSession;
@@ -279,6 +285,10 @@ const ShopeeAIService = (() => {
     } catch (e) {
       console.error('[ShopeeAI] Session init failed:', e);
       _persistentSession = null;
+      return results;
+    }
+    if (!modelSession) {
+      console.warn('[ShopeeAI] Model unavailable, returning cached results only');
       return results;
     }
 
