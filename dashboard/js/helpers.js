@@ -27,6 +27,19 @@ function capFirst(s) {
   return String(s).charAt(0).toUpperCase() + String(s).slice(1);
 }
 
+function renderAnalyzeButton(cardId) {
+  return `<div class="ai-analyze-wrap">
+    <button class="ai-analyze-btn" onclick="runAIInsight('${cardId}')">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
+        <path d="M12 8v4l3 3"></path>
+      </svg>
+      Phân tích bởi Chrome AI
+    </button>
+    <span class="ai-analyze-hint">Nhấn để phân tích bằng Chrome AI</span>
+  </div>`;
+}
+
 function renderAIInsight(text, cardId) {
   const paragraphs = text
     .split(/\n+/)

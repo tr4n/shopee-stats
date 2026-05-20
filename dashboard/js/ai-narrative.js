@@ -49,34 +49,50 @@ async function getAIInsightSession() {
 }
 
 // cacheKey: optional override for cache lookup (used for per-year monthly insights)
-async function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
-  // Always persist call args so the refresh button can re-trigger this call
+function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
+  // Always persist call args so buttons can re-trigger this analysis
   _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey };
 
   if (_aiInsightDisabled) return;
+  if (typeof LanguageModel === 'undefined') return;
+
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
   const ck = cacheKey || cardId;
 
-  // Serve from cache if available — no AI call needed
+  // Serve from cache immediately — no user action needed
   if (_dashCache?.insights[ck]) {
     aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
     return;
   }
 
+  // Show "Phân tích..." button — user must click to trigger AI
+  aiEl.innerHTML = renderAnalyzeButton(cardId);
+}
+
+// Internal AI runner — called by both runAIInsight and rerunAIInsight
+async function _executeAIInsight(cardId) {
+  const args = _aiInsightCallArgs[cardId];
+  if (!args || _aiInsightDisabled) return;
+
+  const aiEl = document.getElementById(cardId + '-ai');
+  if (!aiEl) return;
+
+  aiEl.innerHTML = '';
   aiEl.classList.add('loading');
 
   const session = await getAIInsightSession();
   if (!session) { aiEl.remove(); return; }
 
   try {
-    const fullPrompt = `DỮ LIỆU CHI TIÊU:\n${context}\n\nYÊU CẦU: ${specificPrompt}`;
+    const fullPrompt = `DỮ LIỆU CHI TIÊU:\n${args.context}\n\nYÊU CẦU: ${args.specificPrompt}`;
     const result = await session.prompt(fullPrompt);
     if (result && result.trim()) {
       const text = result.trim();
       aiEl.innerHTML = renderAIInsight(text, cardId);
       if (_dashCache) {
+        const ck = args.cacheKey || cardId;
         _dashCache.insights[ck] = text;
         saveDashCache();
       }
@@ -89,17 +105,24 @@ async function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
       _aiInsightDisabled = true;
       _aiInsightSession = null;
     }
-    aiEl.remove();
+    // Show button again so user can retry
+    aiEl.innerHTML = renderAnalyzeButton(cardId);
   } finally {
     aiEl.classList.remove('loading');
   }
 }
 
+// User-triggered: called by the "Phân tích..." button
+window.runAIInsight = async function (cardId) {
+  await _executeAIInsight(cardId);
+};
+
+// User-triggered: clear cache then re-run AI ("Phân tích lại" button)
 window.rerunAIInsight = async function (cardId) {
   const args = _aiInsightCallArgs[cardId];
   if (!args) return;
 
-  // Show spinner on the button immediately
+  // Show spinner on the refresh button immediately
   const aiEl = document.getElementById(cardId + '-ai');
   if (aiEl) {
     const btn = aiEl.querySelector('.ai-refresh-btn');
@@ -115,12 +138,12 @@ window.rerunAIInsight = async function (cardId) {
     }
   }
 
-  // Clear cached result for this card so enrichWithAI will call the model again
+  // Clear cached result so the AI will be called fresh
   const ck = args.cacheKey || cardId;
   if (_dashCache?.insights) {
     delete _dashCache.insights[ck];
     saveDashCache();
   }
 
-  await enrichWithAI(cardId, args.context, args.specificPrompt, args.cacheKey);
+  await _executeAIInsight(cardId);
 };

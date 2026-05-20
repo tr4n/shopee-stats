@@ -228,8 +228,18 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
     );
   }
 
-  function getItemsForYear(mi, year) {
+  function getItemsForYear(mi, year, tiItems) {
     const prefix = year + '-';
+
+    // Build name→cat lookup from the already-classified global tiItems
+    const catLookup = {};
+    for (const item of (tiItems || [])) {
+      if (item.cat && item.cat !== '🏷️ Khác') {
+        const k = item.n.toLowerCase().substring(0, 120);
+        catLookup[k] = item.cat;
+      }
+    }
+
     const map = {};
     for (const key of Object.keys(mi || {})) {
       if (!key.startsWith(prefix)) continue;
@@ -237,7 +247,9 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
         const k = item.n.toLowerCase().substring(0, 120);
         if (!map[k]) {
           map[k] = { n: item.n, s: 0, c: 0 };
-          if (_dashCache.cats[k]) map[k].cat = _dashCache.cats[k];
+          // Prefer tiItems classification, fallback to cache
+          if (catLookup[k]) map[k].cat = catLookup[k];
+          else if (_dashCache.cats[k]) map[k].cat = _dashCache.cats[k];
         }
         map[k].s += item.s || 0;
         map[k].c += item.c || 0;
@@ -277,7 +289,7 @@ Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identi
       const sub = document.getElementById('cat-subtitle');
       if (sub) sub.textContent = 'Phân bổ chi tiêu theo từng danh mục Shopee';
     } else {
-      ti = getItemsForYear(d.mi, year);
+      ti = getItemsForYear(d.mi, year, tiItems);
       for (const item of ti) {
         if (!item.cat) item.cat = '🏷️ Khác';
       }
