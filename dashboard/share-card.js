@@ -26,8 +26,8 @@
   function fmtVND(n, hide) {
     if (hide) return '***';
     n = Math.round(n || 0);
-    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + 'b';
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'm';
+    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
     if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
     return n.toLocaleString('vi-VN');
   }
