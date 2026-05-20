@@ -1686,19 +1686,17 @@
           // Ensure categories are loaded for AI prompt
           await initializeCategories();
           
-          // Generate dynamic prompt based on loaded categories
+          // Generate optimized prompt - shorter for memory efficiency  
           const categoriesDesc = _categoriesData.categories.map(cat => 
-            `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚]/g, '').trim()}`
+            `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚 ]/g, '')}`
           ).join(', ');
           
           _dashCatSession = await LanguageModel.create({
             initialPrompts: [{
               role: 'system', content:
-                'You classify Vietnamese e-commerce product names. ' +
-                `Categories: ${categoriesDesc}. ` +
-                'Reply with exactly one code per line in the same order as input. No other text.'
+                `Classify Vietnamese products. Categories: ${categoriesDesc}. Return one code per line.`
             }],
-            temperature: 0.1
+            temperature: 0.05
           });
           return _dashCatSession;
         } catch (e) {
@@ -1707,66 +1705,100 @@
         }
       }
 
-      // Classifies top-item entries still at '🏷️ Khác' via AI (keyword pre-pass already ran).
-      // Mutates ti in-place; re-renders top items and categories after completion.
+      // Optimized AI classification with batching and resource management
       async function classifyKharItems(ti, d) {
         if (!ti || !ti.length || !_dashCache) return;
 
-        // Apply any cached overrides that may have been missed (safety net)
+        // Apply cached overrides first (fastest path)
         for (const item of ti) {
           if (item.cat && item.cat !== '🏷️ Khác') continue;
           const key = item.n.toLowerCase().substring(0, 120);
           if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
         }
 
-        // Collect still-uncategorized unique items (max 20 — same guard as extension)
+        // Collect uncategorized items with smart limits for performance
         const toClassify = [];
         const seen = new Set();
         for (const item of ti) {
           if (item.cat !== '🏷️ Khác') continue;
           const key = item.n.toLowerCase().substring(0, 120);
-          if (!seen.has(key)) { seen.add(key); toClassify.push({ item, key }); }
+          if (!seen.has(key)) { 
+            seen.add(key); 
+            toClassify.push({ item, key }); 
+          }
         }
+        
         if (!toClassify.length) return;
-        if (toClassify.length > 20) return;
+        
+        // Process in smaller batches to reduce memory pressure and improve responsiveness
+        const BATCH_SIZE = 8; // Reduced from 20 to minimize AI memory usage
+        const MAX_ITEMS = 32; // Total limit to prevent overwhelming AI
+        
+        if (toClassify.length > MAX_ITEMS) {
+          // Prioritize high-spend items for classification
+          toClassify.sort((a, b) => (b.item.s || 0) - (a.item.s || 0));
+          toClassify.splice(MAX_ITEMS);
+        }
 
         const session = await getDashCatSession();
         if (!session) return;
 
-        try {
-          const names = toClassify.map(x => x.item.n).join('\n');
-          const raw = await session.prompt(`Classify these products (one code per line):\n${names}`);
-          const lines = String(raw).split('\n')
-            .map(l => l.trim().toLowerCase().replace(/[^a-z]/g, ''))
-            .filter(Boolean);
+        let totalPatched = 0;
+        
+        // Process in batches with yield points for better UX
+        for (let i = 0; i < toClassify.length; i += BATCH_SIZE) {
+          try {
+            // Yield to browser between batches for smooth UI
+            if (i > 0) await new Promise(resolve => setTimeout(resolve, 50));
+            
+            const batch = toClassify.slice(i, i + BATCH_SIZE);
+            const names = batch.map(x => x.item.n).join('\n');
+            
+            // Optimized prompt - shorter and more direct
+            const raw = await session.prompt(`Classify (one code per line):\n${names}`);
+            const lines = String(raw).split('\n')
+              .map(l => l.trim().toLowerCase().replace(/[^a-z_]/g, ''))
+              .filter(Boolean);
 
-          let patched = 0;
-          for (let i = 0; i < toClassify.length; i++) {
+            let batchPatched = 0;
             const dashCatCodes = getDashCatCodes();
-            const resolved = dashCatCodes[lines[i]];
-            if (!resolved) continue;
-            const { key } = toClassify[i];
-            // Apply to all ti items sharing this name key
-            for (const item of ti) {
-              if (item.cat === '🏷️ Khác' && item.n.toLowerCase().substring(0, 120) === key) {
-                item.cat = resolved;
-                patched++;
+            
+            for (let j = 0; j < batch.length && j < lines.length; j++) {
+              const resolved = dashCatCodes[lines[j]];
+              if (!resolved) continue;
+              
+              const { key } = batch[j];
+              // Apply to all matching items
+              for (const item of ti) {
+                if (item.cat === '🏷️ Khác' && item.n.toLowerCase().substring(0, 120) === key) {
+                  item.cat = resolved;
+                  batchPatched++;
+                }
               }
+              _dashCache.cats[key] = resolved;
             }
-            _dashCache.cats[key] = resolved;
+            
+            totalPatched += batchPatched;
+            
+          } catch (e) {
+            console.warn(`[Dashboard] Batch ${Math.floor(i/BATCH_SIZE) + 1} classification failed:`, e);
+            if (isAIFatalError(e)) { 
+              _dashCatDisabled = true; 
+              _dashCatSession = null; 
+              break;
+            }
           }
+        }
 
-          if (patched > 0) {
-            saveDashCache();
-            d.cs = buildCsFromTi(ti);
-            // Re-render components that display item categories
+        if (totalPatched > 0) {
+          saveDashCache();
+          d.cs = buildCsFromTi(ti);
+          // Re-render with slight delay to avoid blocking UI
+          requestAnimationFrame(() => {
             renderTopItems(ti);
             renderCategories(d.cs, ti);
-            console.log(`[Dashboard] AI classified ${patched} items → cache saved`);
-          }
-        } catch (e) {
-          console.warn('[Dashboard] Category classification failed:', e);
-          if (isAIFatalError(e)) { _dashCatDisabled = true; _dashCatSession = null; }
+          });
+          console.log(`[Dashboard] AI classified ${totalPatched} items in ${Math.ceil(toClassify.length/BATCH_SIZE)} batches → cache saved`);
         }
       }
 
@@ -2626,12 +2658,16 @@
 
         setupShareButtons(d);
 
-        // AI category classification — runs lazily after paint.
-        // Applies cached overrides immediately, then calls Chrome AI for remaining '🏷️ Khác' items.
-        // Results are persisted to localStorage so subsequent reloads use cache (no AI call).
-        requestAnimationFrame(() => {
-          classifyKharItems(d.ti || [], d);
-        });
+        // AI category classification — runs lazily with throttling to avoid UI blocking
+        // Use setTimeout with longer delay to ensure UI is fully rendered and responsive
+        // Only run if there are uncategorized items to avoid unnecessary AI calls
+        const uncategorizedCount = (d.ti || []).filter(item => item.cat === '🏷️ Khác').length;
+        if (uncategorizedCount > 0) {
+          console.log(`[Dashboard] Scheduling AI classification for ${uncategorizedCount} items`);
+          setTimeout(() => {
+            classifyKharItems(d.ti || [], d);
+          }, 1500); // Delay increased from immediate to 1.5s for better UX
+        }
 
         // AI narrative — runs lazily after paint, no-op if Chrome < 148
         requestAnimationFrame(() => {
