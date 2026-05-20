@@ -554,8 +554,11 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
           const k40 = item.n.toLowerCase().substring(0, 40);
           if (!map[k]) {
             map[k] = { n: item.n, s: 0, c: 0 };
+            // 0. Use item.cat if already present in d.mi
+            if (item.cat && item.cat !== '🏷️ Khác') {
+              map[k].cat = item.cat;
             // 1. Prefer tiItems classification (matched on 40-char prefix)
-            if (catLookup[k40]) {
+            } else if (catLookup[k40]) {
               map[k].cat = catLookup[k40];
             // 2. Fallback to cache (try both full key and 40-char prefix)
             } else if (_dashCache.cats[k] || _dashCache.cats[k40]) {
@@ -571,6 +574,35 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
         }
       }
       return Object.values(map).sort((a, b) => b.s - a.s);
+    }
+
+    function categorizeMiItems(d, tiItems) {
+      if (!d.mi) return;
+      const catLookup = {};
+      for (const item of (tiItems || [])) {
+        if (item.cat && item.cat !== '🏷️ Khác') {
+          const k = item.n.toLowerCase().substring(0, 40);
+          catLookup[k] = item.cat;
+        }
+      }
+
+      for (const key of Object.keys(d.mi)) {
+        for (const item of (d.mi[key] || [])) {
+          if (item.cat && item.cat !== '🏷️ Khác') continue;
+
+          const k = item.n.toLowerCase().substring(0, 120);
+          const k40 = item.n.toLowerCase().substring(0, 40);
+
+          if (catLookup[k40]) {
+            item.cat = catLookup[k40];
+          } else if (_dashCache.cats[k] || _dashCache.cats[k40]) {
+            item.cat = _dashCache.cats[k] || _dashCache.cats[k40];
+          } else {
+            const kwCat = classifyByNameSync(item.n);
+            item.cat = kwCat || '🏷️ Khác';
+          }
+        }
+      }
     }
 
     function triggerCategoryAIInsight(cs, ti, total, cacheKey) {
@@ -749,6 +781,9 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
         if (!item.cat) item.cat = '🏷️ Khác';
       }
 
+      // 2b. Categorize mi items with whatever is currently available (cached / keyword)
+      categorizeMiItems(d, tiItems);
+
       // 3. Build initial catStats from classified ti
       d.cs = buildCsFromTi(tiItems);
 
@@ -838,6 +873,7 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
 
       // 7. Categorization is now 100% finished — update final state
       _categorizationFinished = true;
+      categorizeMiItems(d, tiItems);
       d.cs = buildCsFromTi(tiItems);
 
       // Persist final classified data so next load skips all classification steps
