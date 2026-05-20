@@ -54,7 +54,6 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey };
 
   if (_aiInsightDisabled) return;
-  if (typeof LanguageModel === 'undefined') return;
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
@@ -64,6 +63,15 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   // Serve from cache immediately — no user action needed
   if (_dashCache?.insights[ck]) {
     aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
+    return;
+  }
+
+  // Chrome AI (Prompt API) not available — show info instead of silently hiding
+  if (typeof LanguageModel === 'undefined') {
+    aiEl.innerHTML = `<div class="ai-unavailable">
+      🤖 Chrome AI chưa khả dụng.
+      <a href="chrome://flags/#optimization-guide-on-device-model" target="_blank" class="ai-unavailable-link">Bật tại chrome://flags</a>
+    </div>`;
     return;
   }
 

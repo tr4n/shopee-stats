@@ -471,6 +471,21 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
     }
 
     async function initDashboard() {
+      // Fallback: if ti is absent from the export, derive it by aggregating mi (monthly items)
+      if (!d.ti || !d.ti.length) {
+        const miMap = {};
+        for (const key of Object.keys(d.mi || {})) {
+          for (const item of (d.mi[key] || [])) {
+            const k = item.n.toLowerCase().substring(0, 120);
+            if (!miMap[k]) miMap[k] = { n: item.n, s: 0, c: 0 };
+            miMap[k].s += item.s || 0;
+            miMap[k].c += item.c || 0;
+          }
+        }
+        d.ti = Object.values(miMap).sort((a, b) => b.s - a.s);
+        console.log('[Dashboard] ti derived from mi:', d.ti.length, 'items');
+      }
+
       const tiItems = d.ti || [];
 
       // 1. Apply cached AI overrides from previous sessions
