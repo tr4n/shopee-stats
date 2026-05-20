@@ -1002,6 +1002,39 @@
       gap: 8px;
       margin-bottom: 10px;
     }
+    .ai-refresh-btn {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: 1px solid var(--border, rgba(0,0,0,0.1));
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ai-refresh-btn:hover {
+      background: var(--surface);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .ai-refresh-btn:active {
+      transform: scale(0.95);
+    }
+    .ai-refresh-btn .spin {
+      display: inline-block;
+      animation: ai-spin 0.9s linear infinite;
+    }
+    @keyframes ai-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
 
     .insight-ai-badge {
       display: inline-flex;
@@ -1290,6 +1323,7 @@
       /* ─────────────────────────────────────────────────
          Helpers
       ───────────────────────────────────────────────── */
+
       function fmtVND(n) {
         n = Math.round(n || 0);
         if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
@@ -1823,6 +1857,8 @@
 
       let _aiInsightSession = null;
       let _aiInsightDisabled = false;
+      // Stores call args per cardId so re-analysis can be triggered without re-running the full pipeline
+      const _aiInsightCallArgs = {};
 
       function isAIFatalError(error) {
         const msg = String(error?.message || error || '').toLowerCase();
@@ -1853,6 +1889,9 @@
 
       // cacheKey: optional override for cache lookup (used for per-year monthly insights)
       async function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
+        // Always persist call args so the refresh button can re-trigger this call
+        _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey };
+
         if (_aiInsightDisabled) return;
         const aiEl = document.getElementById(cardId + '-ai');
         if (!aiEl) return;
@@ -1861,7 +1900,7 @@
 
         // Serve from cache if available — no AI call needed
         if (_dashCache?.insights[ck]) {
-          aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck]);
+          aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
           return;
         }
 
@@ -1875,7 +1914,7 @@
           const result = await session.prompt(fullPrompt);
           if (result && result.trim()) {
             const text = result.trim();
-            aiEl.innerHTML = renderAIInsight(text);
+            aiEl.innerHTML = renderAIInsight(text, cardId);
             // Save to cache
             if (_dashCache) {
               _dashCache.insights[ck] = text;
@@ -1895,6 +1934,31 @@
           aiEl.classList.remove('loading');
         }
       }
+
+      // Re-run AI analysis for a specific card, bypassing cache
+      window.rerunAIInsight = async function(cardId) {
+        const args = _aiInsightCallArgs[cardId];
+        if (!args) return;
+
+        // Show spinner on the button immediately
+        const aiEl = document.getElementById(cardId + '-ai');
+        if (aiEl) {
+          const btn = aiEl.querySelector('.ai-refresh-btn');
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spin">🔄</span> Đang phân tích...';
+          }
+        }
+
+        // Clear cached result for this card so enrichWithAI will call the model again
+        const ck = args.cacheKey || cardId;
+        if (_dashCache?.insights) {
+          delete _dashCache.insights[ck];
+          saveDashCache();
+        }
+
+        await enrichWithAI(cardId, args.context, args.specificPrompt, args.cacheKey);
+      };
 
       /* ─────────────────────────────────────────────────
          Parse data from URL hash
@@ -1993,9 +2057,7 @@
           { label: 'Sản Phẩm Đã Mua', val: fmtNum(d.ip), cls: '', sub: 'sản phẩm' },
           { label: 'Tiết Kiệm Được', val: fmtVND(d.s), cls: 'green', sub: 'từ khuyến mãi' }
         ];
-        if (d.ship && d.ship > 0) {
-          kpis.push({ label: 'Phí Vận Chuyển', val: fmtVND(d.ship), cls: '', sub: 'tổng phí ship' });
-        }
+
         const row = document.getElementById('kpi-row');
         row.innerHTML = kpis.map((k, i) => `
       <div class="kpi" style="transition-delay:${i * 0.08}s">
@@ -2640,9 +2702,6 @@
           const prevYear = years[1];
           const avgOrderValue = Math.round((d.t || 0) / Math.max(d.o || 1, 1));
           const savingsRate = Math.round(((d.s || 0) / Math.max((d.t || 0) + (d.s || 0), 1)) * 100);
-          const shipFee = d.ship || 0;
-          const shipPct = Math.round((shipFee / Math.max(d.t || 1, 1)) * 100);
-          const shipPerOrder = Math.round(shipFee / Math.max(d.o || 1, 1));
 
           // YoY trend text
           let yoyLine = '';
@@ -2665,7 +2724,6 @@
             [
               `Tổng chi: ${fmtVND(d.t)} / ${fmtNum(d.o)} đơn / trung bình ${fmtVND(avgOrderValue)}/đơn.`,
               `Tiết kiệm voucher toàn lịch sử: ${fmtVND(d.s)} (${savingsRate}% giá gốc).`,
-              `Phí ship: ${fmtVND(shipFee)} (${shipPct}% tổng, trung bình ${fmtVND(shipPerOrder)}/đơn).`,
               `Lịch sử từng năm: ${yearSummaryLines.join('; ')}.`,
               yoyLine
             ].filter(Boolean).join(' '),
