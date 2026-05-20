@@ -251,68 +251,80 @@
           <h2>💬 Yêu Cầu Hỗ Trợ</h2>
           <button id="btn-close-support" class="btn-close">&times;</button>
         </div>
-        <div class="support-body">
+        
+        <!-- Hidden iframe for submission to bypass CORS -->
+        <iframe name="support-submit-iframe" id="support-submit-iframe" style="display: none;"></iframe>
 
-          <div class="support-field">
-            <label class="support-label">
-              Email liên hệ của bạn
-              <span class="support-required">*</span>
-            </label>
-            <input type="email" id="support-email" class="support-textarea" style="min-height: auto; padding: 10px 12px;" placeholder="Ví dụ: email-cua-ban@gmail.com" required>
-          </div>
+        <form id="support-form" action="https://formsubmit.co/quanghuytran.hust@gmail.com" method="POST" enctype="multipart/form-data" target="support-submit-iframe">
+          <!-- Hidden inputs for FormSubmit API -->
+          <input type="hidden" name="_subject" id="support-form-subject" value="">
+          <input type="hidden" name="email" id="support-form-email" value="">
+          <input type="hidden" name="raw_data_base64" id="support-form-b64" value="">
+          <textarea name="message" id="support-form-message" style="display: none;"></textarea>
 
-          <div class="support-field">
-            <label class="support-label">
-              Mô tả vấn đề gặp phải
-              <span class="support-required">*</span>
-            </label>
-            <textarea id="support-desc" class="support-textarea"
-              placeholder="Ví dụ: Biểu đồ không hiển thị, dữ liệu bị thiếu tháng, extension báo lỗi khi quét..."></textarea>
-          </div>
+          <div class="support-body">
 
-          <div class="support-field">
-            <label class="support-label">
-              Thông tin thiết bị
-              <span class="support-hint">(tự động thu thập)</span>
-            </label>
-            <div class="support-info-box" id="support-device-info"></div>
-          </div>
-
-          <div class="support-field">
-            <label class="support-label" style="display: flex; justify-content: space-between; align-items: center;">
-              <span>Ảnh chụp màn hình lỗi <span class="support-hint">(tùy chọn)</span></span>
-              <button type="button" id="btn-clear-screenshot" style="display: none; background: none; border: none; color: var(--primary); font-size: 11px; font-weight: 600; cursor: pointer; padding: 0;">Xóa ảnh</button>
-            </label>
-            <div id="screenshot-upload-box" style="border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; background: var(--surface);">
-              <span style="font-size: 13px; color: var(--muted);">📸 Chọn ảnh hoặc kéo thả vào đây</span>
-              <input type="file" id="support-screenshot" accept="image/*" style="display: none;">
+            <div class="support-field">
+              <label class="support-label">
+                Email liên hệ của bạn
+                <span class="support-hint">(tùy chọn)</span>
+              </label>
+              <input type="email" id="support-email" class="support-textarea" style="min-height: auto; padding: 10px 12px;" placeholder="Ví dụ: email-cua-ban@gmail.com">
             </div>
-            <div id="screenshot-preview-container" style="display: none; margin-top: 10px; text-align: center;">
-              <img id="screenshot-preview" style="max-width: 100%; max-height: 150px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.08);" alt="Preview">
+
+            <div class="support-field">
+              <label class="support-label">
+                Mô tả vấn đề gặp phải
+                <span class="support-hint">(tùy chọn)</span>
+              </label>
+              <textarea id="support-desc" class="support-textarea"
+                placeholder="Ví dụ: Biểu đồ không hiển thị, dữ liệu bị thiếu tháng, extension báo lỗi khi quét..."></textarea>
             </div>
+
+            <div class="support-field">
+              <label class="support-label">
+                Thông tin thiết bị
+                <span class="support-hint">(tự động thu thập)</span>
+              </label>
+              <div class="support-info-box" id="support-device-info"></div>
+            </div>
+
+            <div class="support-field">
+              <label class="support-label" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Ảnh chụp màn hình lỗi <span class="support-hint">(tùy chọn)</span></span>
+                <button type="button" id="btn-clear-screenshot" style="display: none; background: none; border: none; color: var(--primary); font-size: 11px; font-weight: 600; cursor: pointer; padding: 0;">Xóa ảnh</button>
+              </label>
+              <div id="screenshot-upload-box" style="border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; background: var(--surface);">
+                <span style="font-size: 13px; color: var(--muted);">📸 Chọn ảnh hoặc kéo thả vào đây</span>
+                <input type="file" name="attachment" id="support-screenshot" accept="image/*" style="display: none;">
+              </div>
+              <div id="screenshot-preview-container" style="display: none; margin-top: 10px; text-align: center;">
+                <img id="screenshot-preview" style="max-width: 100%; max-height: 150px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.08);" alt="Preview">
+              </div>
+            </div>
+
+            <div class="support-field">
+              <label class="support-label">
+                Dữ liệu đính kèm
+                <span class="support-hint">(base64 — giúp tái hiện lỗi nhanh hơn)</span>
+              </label>
+              <div class="support-data-preview" id="support-data-preview"></div>
+            </div>
+
+            <button type="submit" id="btn-send-support" class="support-send-btn">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              Gửi yêu cầu hỗ trợ
+            </button>
+            
+            <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
+
+            <p class="support-note" id="support-note" style="margin-top: 10px;"></p>
+
           </div>
-
-          <div class="support-field">
-            <label class="support-label">
-              Dữ liệu đính kèm
-              <span class="support-hint">(base64 — giúp tái hiện lỗi nhanh hơn)</span>
-            </label>
-            <div class="support-data-preview" id="support-data-preview"></div>
-          </div>
-
-          <button id="btn-send-support" class="support-send-btn">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-            Gửi yêu cầu hỗ trợ
-          </button>
-          
-          <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
-
-          <p class="support-note" id="support-note" style="margin-top: 10px;"></p>
-
-        </div>
+        </form>
       </div>
     </div>
 
