@@ -113,8 +113,20 @@
 
       function tryParse(raw) {
         if (!raw) return null;
-        try { return JSON.parse(decodeURIComponent(escape(atob(raw.replace(/ /g, '+'))))); } catch { /* noop */ }
-        try { return JSON.parse(decodeURIComponent(escape(atob(raw)))); } catch { /* noop */ }
+        const trimmed = raw.trim();
+
+        // Try raw JSON first (in case someone pastes JSON directly)
+        try { return JSON.parse(trimmed); } catch { /* noop */ }
+
+        // Try base64 — restore + chars that URL encoding may have turned into spaces
+        for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+          try {
+            const bin = atob(s);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return JSON.parse(new TextDecoder().decode(bytes));
+          } catch { /* noop */ }
+        }
         return null;
       }
 
@@ -128,9 +140,10 @@
         document.getElementById('btn-reload').style.display = 'inline-block';
       }
 
-      // Detect data from ?d= query param only (for offline testing)
+      // Detect data from #d= hash (priority) or ?d= query param
+      const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
       const qMatch = location.search.match(/[?&]d=([^&]*)/);
-      const raw = qMatch?.[1];
+      const raw = hashMatch?.[1] || qMatch?.[1];
 
       if (!raw) {
         showError('Không tìm thấy dữ liệu trong URL. Hãy mở lại từ extension Shopee Analytics.');

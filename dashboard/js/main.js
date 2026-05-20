@@ -68,10 +68,18 @@ function parseData() {
 const _hasRawDataParam = (function () {
   function tryParse(raw) {
     if (!raw) return null;
-    // Attempt 1: restore + characters that URLSearchParams/browser may have turned into spaces
-    try { return JSON.parse(decodeURIComponent(escape(atob(raw.replace(/ /g, '+'))))); } catch { /* noop */ }
-    // Attempt 2: decode as-is
-    try { return JSON.parse(decodeURIComponent(escape(atob(raw)))); } catch { /* noop */ }
+    const trimmed = raw.trim();
+    // Try raw JSON first
+    try { return JSON.parse(trimmed); } catch { /* noop */ }
+    // Try base64 with TextDecoder for proper UTF-8 (Vietnamese)
+    for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+      try {
+        const bin = atob(s);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch { /* noop */ }
+    }
     return null;
   }
 
