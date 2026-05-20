@@ -11,7 +11,7 @@ if (authorInfoEl && window.APP_CONFIG) {
 
 /* ── Navigation ──────────────────────────────── */
 const views = document.querySelectorAll('.view');
-const navBtns = document.querySelectorAll('.nav-item');
+const navBtns = document.querySelectorAll('.nav-item[data-view]');
 
 function switchView(name) {
   views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
@@ -102,6 +102,142 @@ const _hasRawDataParam = (function () {
   console.error('[Dashboard] Failed to parse data from URL (hash or query param)');
   return false;
 })();
+
+/* ── Support Modal ───────────────────────────── */
+function setupSupportButton(d) {
+  const btn = document.getElementById('btn-support');
+  const modal = document.getElementById('support-modal');
+  const closeBtn = document.getElementById('btn-close-support');
+  const sendBtn = document.getElementById('btn-send-support');
+  const descEl = document.getElementById('support-desc');
+  const noteEl = document.getElementById('support-note');
+
+  if (!btn || !modal) return;
+
+  function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown', bVersion = '';
+
+    const matchers = [
+      [/Edg\/([\d.]+)/, 'Edge'],
+      [/OPR\/([\d.]+)/, 'Opera'],
+      [/Chrome\/([\d.]+)/, 'Chrome'],
+      [/Firefox\/([\d.]+)/, 'Firefox'],
+      [/Version\/([\d.]+).*Safari/, 'Safari'],
+    ];
+    for (const [re, name] of matchers) {
+      const m = ua.match(re);
+      if (m) { browser = name; bVersion = m[1]; break; }
+    }
+
+    let os = 'Unknown';
+    if (/Windows NT 10|Windows NT 11/.test(ua)) os = 'Windows 10/11';
+    else if (/Windows/.test(ua)) os = 'Windows';
+    else if (/Mac OS X ([\d_]+)/.test(ua)) os = 'macOS ' + ua.match(/Mac OS X ([\d_]+)/)[1].replace(/_/g, '.');
+    else if (/Android ([\d.]+)/.test(ua)) os = 'Android ' + ua.match(/Android ([\d.]+)/)[1];
+    else if (/iPhone OS ([\d_]+)/.test(ua)) os = 'iOS ' + ua.match(/iPhone OS ([\d_]+)/)[1].replace(/_/g, '.');
+    else if (/Linux/.test(ua)) os = 'Linux';
+
+    return {
+      browser: `${browser} ${bVersion}`.trim(),
+      os,
+      screen: `${screen.width}×${screen.height}`,
+      dpr: window.devicePixelRatio || 1,
+      viewport: `${window.innerWidth}×${window.innerHeight}`,
+      dataDate: d?.ts ? fmtDate(d.ts) : '—',
+      summary: d ? `${fmtVND(d.t)} · ${fmtNum(d.o)} đơn` : '—',
+    };
+  }
+
+  // Build a compact base64 payload (key stats only, keeps email size small)
+  function buildSupportPayload() {
+    if (!d) return '';
+    try {
+      const payload = {
+        t: d.t,
+        o: d.o,
+        s: d.s,
+        ts: d.ts,
+        yd: Object.fromEntries(
+          Object.entries(d.yd || {}).map(([y, v]) => [y, { t: v.t, o: v.o }])
+        ),
+        ti: (d.ti || []).slice(0, 10).map(i => ({ n: i.n, s: i.s, c: i.c })),
+        cs: (d.cs || []).slice(0, 5).map(c => ({ name: c.name, s: c.s, c: c.c })),
+      };
+      const json = JSON.stringify(payload);
+      const bytes = new TextEncoder().encode(json);
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    } catch {
+      return '';
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    const info = getDeviceInfo();
+    const b64 = buildSupportPayload();
+
+    document.getElementById('support-device-info').innerHTML = [
+      `Trình duyệt : ${escHtml(info.browser)}`,
+      `Hệ điều hành: ${escHtml(info.os)}`,
+      `Màn hình    : ${escHtml(info.screen)} (DPR ${info.dpr})`,
+      `Viewport    : ${escHtml(info.viewport)}`,
+      `Dữ liệu tại : ${escHtml(info.dataDate)}`,
+      `Tóm tắt     : ${escHtml(info.summary)}`,
+    ].join('<br>');
+
+    const previewEl = document.getElementById('support-data-preview');
+    previewEl.textContent = b64
+      ? b64.substring(0, 300) + (b64.length > 300 ? ' …' : '')
+      : '(Không có dữ liệu)';
+
+    const email = window.APP_CONFIG?.email || '';
+    noteEl.innerHTML = email
+      ? `Email sẽ gửi tới <strong>${escHtml(email)}</strong> — nội dung đã soạn sẵn, bạn có thể xem lại trước khi nhấn Gửi.`
+      : 'Không tìm thấy địa chỉ email hỗ trợ.';
+
+    modal.classList.add('active');
+    setTimeout(() => descEl.focus(), 150);
+  });
+
+  closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+  sendBtn.addEventListener('click', () => {
+    const info = getDeviceInfo();
+    const b64 = buildSupportPayload();
+    const desc = descEl.value.trim() || '(Chưa nhập mô tả)';
+    const email = window.APP_CONFIG?.email || '';
+
+    if (!email) {
+      noteEl.textContent = '⚠️ Không tìm thấy địa chỉ email hỗ trợ trong cấu hình.';
+      return;
+    }
+
+    const subject = `[Shopee Analytics] Yêu cầu hỗ trợ — ${info.browser} / ${info.os}`;
+    const body = [
+      'MÔ TẢ VẤN ĐỀ:',
+      desc,
+      '',
+      '─────────────────────────────────────',
+      'THÔNG TIN THIẾT BỊ:',
+      `• Trình duyệt : ${info.browser}`,
+      `• Hệ điều hành: ${info.os}`,
+      `• Màn hình    : ${info.screen} (DPR ${info.dpr})`,
+      `• Viewport    : ${info.viewport}`,
+      `• Dữ liệu tại : ${info.dataDate}`,
+      `• Tóm tắt     : ${info.summary}`,
+      '',
+      '─────────────────────────────────────',
+      'DỮ LIỆU (BASE64):',
+      b64 || '(không có)',
+    ].join('\n');
+
+    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  });
+}
 
 /* ── Share Modal ─────────────────────────────── */
 function setupShareButtons(d) {
@@ -552,6 +688,7 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
       document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
 
       setupShareButtons(d);
+      setupSupportButton(d);
 
       // 5. Run async keyword classification (background)
       const alreadyCategorized = tiItems.every(item => item.cat !== '🏷️ Khác');

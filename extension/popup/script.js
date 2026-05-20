@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBarFill = document.getElementById('progress-bar-fill');
   const cacheInfo = document.getElementById('cache-info');
   const cacheBadgeText = document.getElementById('cache-badge-text');
-  
+
   // Debug elements
   const debugPanel = document.getElementById('debug-panel');
   const debugHeartbeat = document.getElementById('debug-heartbeat');
@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function pxgPrice(number) {
     if (isNaN(number)) return 0;
     const n = Math.round(number);
-    if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + 'b';
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'm';
     if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0', '') + 'k';
     return n.toLocaleString('vi-VN');
   }
@@ -93,13 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Percentile ===
   const PERCENTILE_THRESHOLDS = [
-    { max: 1000000,   beat: 10 },
-    { max: 3000000,   beat: 25 },
-    { max: 8000000,   beat: 45 },
-    { max: 20000000,  beat: 65 },
-    { max: 50000000,  beat: 82 },
+    { max: 1000000, beat: 10 },
+    { max: 3000000, beat: 25 },
+    { max: 8000000, beat: 45 },
+    { max: 20000000, beat: 65 },
+    { max: 50000000, beat: 82 },
     { max: 100000000, beat: 93 },
-    { max: Infinity,  beat: 99 }
+    { max: Infinity, beat: 99 }
   ];
   function getSpendingPercentile(annualSpent) {
     for (const t of PERCENTILE_THRESHOLDS) {
@@ -178,25 +178,25 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBarFill.style.width = '0%';
     progressBarFill.classList.remove('indeterminate');
     progressText.textContent = 'Vui lòng chờ trong giây lát';
-    
-    
+
+
     // Reset heartbeat tracking
     lastHeartbeat = null;
     heartbeatCount = 0;
     analysisStartTime = null;
-    
+
     if (debugTimerInterval) {
       clearInterval(debugTimerInterval);
       debugTimerInterval = null;
     }
-    
+
     // Reset debug info
     if (debugHeartbeat) debugHeartbeat.textContent = 'Chưa có';
     if (debugTimerEl) debugTimerEl.textContent = '0s';
     if (debugUrl) debugUrl.textContent = '-';
     if (debugStatus) debugStatus.textContent = 'Đang khởi tạo';
   }
-  
+
 
   // === Restart / Cancel ===
   const btnCancelDebug = document.getElementById('btn-cancel-debug');
@@ -219,18 +219,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Noise words sorted by length DESC (longer phrases must match before their substrings)
   const NOISE_WORDS = [
-    'freeship extra plus','miễn phí vận chuyển','giao hỏa tốc 2h','cam kết chính hãng',
-    'bảo hành trọn đời','hoàn xu extra','ship hỏa tốc','hỏa tốc 2h','freeship extra',
-    'rẻ vô địch','giá hủy diệt','mua 1 tặng 1','flash sale','date mới nhất',
-    'hàng nội địa','nguyên seal','chính ngạch','tận xưởng','hot trend','siêu hot',
-    'mẫu mới','xịn xò','cực xinh',
-    'khuyến mãi','giảm giá','flashsale','siêu sale','deal sốc','hoàn xu',
-    'quà tặng','tặng kèm','kèm quà','thanh lý','xả hàng','xả kho',
-    'giá sỉ','sỉ lẻ','chuẩn auth','hàng chuẩn','bảo hành','cam kết',
-    'tem phụ','loại 1','giao ngay','siêu tốc','hỏa tốc','nowship','xách tay',
-    'date mới','fullbox','cao cấp','chính hãng','nhập khẩu',
-    'freeship','authentic','hoàn tiền','uy tín',
-    'auth','real','fake','grab','ship','mới nhất','new','cũ','trend','hot','deal','sale','mới'
+    'freeship extra plus', 'miễn phí vận chuyển', 'giao hỏa tốc 2h', 'cam kết chính hãng',
+    'bảo hành trọn đời', 'hoàn xu extra', 'ship hỏa tốc', 'hỏa tốc 2h', 'freeship extra',
+    'rẻ vô địch', 'giá hủy diệt', 'mua 1 tặng 1', 'flash sale', 'date mới nhất',
+    'hàng nội địa', 'nguyên seal', 'chính ngạch', 'tận xưởng', 'hot trend', 'siêu hot',
+    'mẫu mới', 'xịn xò', 'cực xinh',
+    'khuyến mãi', 'giảm giá', 'flashsale', 'siêu sale', 'deal sốc', 'hoàn xu',
+    'quà tặng', 'tặng kèm', 'kèm quà', 'thanh lý', 'xả hàng', 'xả kho',
+    'giá sỉ', 'sỉ lẻ', 'chuẩn auth', 'hàng chuẩn', 'bảo hành', 'cam kết',
+    'tem phụ', 'loại 1', 'giao ngay', 'siêu tốc', 'hỏa tốc', 'nowship', 'xách tay',
+    'date mới', 'fullbox', 'cao cấp', 'chính hãng', 'nhập khẩu',
+    'freeship', 'authentic', 'hoàn tiền', 'uy tín',
+    'auth', 'real', 'fake', 'grab', 'ship', 'mới nhất', 'new', 'cũ', 'trend', 'hot', 'deal', 'sale', 'mới'
   ].sort((a, b) => b.length - a.length);
 
   function compactItemName(name) {
@@ -291,20 +291,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ps = data.thongKeTheoThang || {};
     const payload = {
-      v:    1,
-      t:    Math.round(data.tongtienhang),
-      o:    data.tongDonHang,
-      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
-      ip:   data.tongSanPhamDaMua,
+      v: 1,
+      t: Math.round(data.tongtienhang),
+      o: data.tongDonHang,
+      s: Math.round(Math.max(0, data.tongTienTietKiem)),
+      ip: data.tongSanPhamDaMua,
       ship: Math.round(data.tongPhiShip || 0),
-      ts:   Math.floor(Date.now() / 1000),
+      ts: Math.floor(Date.now() / 1000),
       yd,
       mi,
       ps: {
         '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
         '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
         '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
-        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
+        '1y': Math.round((ps['1_nam'] || {}).tongTien || 0)
       },
       // Top 150 items — names pre-cleaned, dashboard classifies categories
       ti: (data.topItems || []).slice(0, 150).map(i => ({
@@ -347,9 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.textContent = '❌ Không thể xác định tab hiện tại. Vui lòng thử lại.';
         return;
       }
-      
+
       console.log('[ShopeeAnalytics] Current tab URL:', tab.url);
-      
+
       if (!tab.url.includes('shopee.vn')) {
         errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để sử dụng tiện ích này.';
         document.getElementById('link-go-to-shopee').addEventListener('click', (e) => {
@@ -366,12 +366,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       resetProgress();
       showState(stateLoading);
-      
+
       // Start debug tracking
       analysisStartTime = Date.now();
       if (debugUrl) debugUrl.textContent = tab.url;
       if (debugStatus) debugStatus.textContent = 'Khởi tạo extension';
-      
+
       // Update timer every second
       debugTimerInterval = setInterval(() => {
         if (analysisStartTime && debugTimerEl) {
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await new Promise((resolve) => {
         chrome.storage.local.set({ 'shopee_temp_config': configPayload }, resolve);
       });
-      
+
       try {
         if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
         // Inject bridge first in MAIN world so fetch calls are native page requests (avoids 403)
@@ -408,15 +408,15 @@ document.addEventListener('DOMContentLoaded', () => {
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
         console.log('[ShopeeAnalytics] Content script injected successfully');
         if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
-        
+
       } catch (e) {
         console.error('[ShopeeAnalytics] Failed to inject content script:', e);
         throw new Error('Lỗi khi tải content script. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('[ShopeeAnalytics] Popup script execution error:', err);
-      
-      
+
+
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
     }
@@ -425,8 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Message Listener ===
   chrome.runtime.onMessage.addListener((message) => {
     console.log('[ShopeeAnalytics] Received message in popup:', message.type);
-    
-    
+
+
     if (message.type === 'progress') {
       const processed = message.processed || 0;
       const pct = typeof message.pct === 'number' ? message.pct : -1;
@@ -444,11 +444,11 @@ document.addEventListener('DOMContentLoaded', () => {
       lastHeartbeat = Date.now();
       heartbeatCount++;
       console.log(`[ShopeeAnalytics] Heartbeat received #${heartbeatCount}`);
-      
+
       // Update debug info
       if (debugHeartbeat) debugHeartbeat.textContent = `${heartbeatCount} nhịp (${new Date(lastHeartbeat).toLocaleTimeString()})`;
       if (debugStatus) debugStatus.textContent = 'Content script đang chạy bình thường';
-      
+
       // Update progress text to show script is alive
       if (progressText.textContent.includes('đơn hàng')) {
         const currentText = progressText.textContent.replace(/\s*\[❤️.*?\]/, '');
@@ -456,20 +456,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
-      
 
-      
+
+
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);
         debugTimerInterval = null;
       }
-      
+
       if (debugStatus) debugStatus.textContent = 'Lỗi: ' + (message.message || 'Không xác định');
-      
+
       showState(stateInitial);
-      
+
       const errorMsg = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
-      
+
       if (errorMsg.includes('đăng nhập')) {
         errorMessage.innerHTML = `<div class="error-card">
           <div class="error-card-icon">❌</div>
@@ -501,14 +501,14 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
       }
     } else if (message.type === 'complete') {
-      
+
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);
         debugTimerInterval = null;
       }
-      
+
       if (debugStatus) debugStatus.textContent = 'Hoàn thành thành công!';
-      
+
       if (message.data && message.data.cachePayload) {
         chrome.storage.local.set({ shopee_cache: message.data.cachePayload }, () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);

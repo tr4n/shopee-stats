@@ -39,6 +39,10 @@
       <button class="nav-item" data-view="categories">
         <span class="ni">🏷️</span> Danh mục
       </button>
+      <div class="nav-support-divider"></div>
+      <button class="nav-item nav-item--support" id="btn-support">
+        <span class="ni">💬</span> Hỗ trợ
+      </button>
     </div>
 
     <div class="sidebar-footer">
@@ -236,6 +240,54 @@
                 Về</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div id="support-modal" class="modal-overlay">
+      <div class="modal-content modal-support-content">
+        <div class="modal-header">
+          <h2>💬 Yêu Cầu Hỗ Trợ</h2>
+          <button id="btn-close-support" class="btn-close">&times;</button>
+        </div>
+        <div class="support-body">
+
+          <div class="support-field">
+            <label class="support-label">
+              Mô tả vấn đề gặp phải
+              <span class="support-required">*</span>
+            </label>
+            <textarea id="support-desc" class="support-textarea"
+              placeholder="Ví dụ: Biểu đồ không hiển thị, dữ liệu bị thiếu tháng, extension báo lỗi khi quét..."></textarea>
+          </div>
+
+          <div class="support-field">
+            <label class="support-label">
+              Thông tin thiết bị
+              <span class="support-hint">(tự động thu thập)</span>
+            </label>
+            <div class="support-info-box" id="support-device-info"></div>
+          </div>
+
+          <div class="support-field">
+            <label class="support-label">
+              Dữ liệu đính kèm
+              <span class="support-hint">(base64 — giúp tái hiện lỗi nhanh hơn)</span>
+            </label>
+            <div class="support-data-preview" id="support-data-preview"></div>
+          </div>
+
+          <button id="btn-send-support" class="support-send-btn">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Mở ứng dụng email để gửi
+          </button>
+
+          <p class="support-note" id="support-note"></p>
+
         </div>
       </div>
     </div>

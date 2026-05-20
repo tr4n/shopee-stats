@@ -26,8 +26,8 @@
   function fmtVND(n, hide) {
     if (hide) return '***';
     n = Math.round(n || 0);
-    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
+    if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + 'b';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'm';
     if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
     return n.toLocaleString('vi-VN');
   }
@@ -44,8 +44,8 @@
   }
 
   const THEMES = {
-    light: { 
-      bg: ['#ffffff', '#f8f9fa', '#f1f3f5'], 
+    light: {
+      bg: ['#ffffff', '#f8f9fa', '#f1f3f5'],
       accent: '#ee4d2d',
       secondary: '#00b894',
       surface: '#ffffff',
@@ -68,8 +68,8 @@
       divider: '#eaeaea',
       shadow: 'rgba(0,0,0,0.02)'
     },
-    orange: { 
-      bg: ['#ff6b35', '#f7931e', '#ee4d2d'], 
+    orange: {
+      bg: ['#ff6b35', '#f7931e', '#ee4d2d'],
       accent: '#ffffff',
       secondary: '#ffd23f',
       surface: 'rgba(255,255,255,0.1)',
@@ -80,8 +80,8 @@
       divider: 'rgba(255,255,255,0.15)',
       shadow: 'rgba(0,0,0,0.1)'
     },
-    dark: { 
-      bg: ['#0f172a', '#1e293b', '#020617'], 
+    dark: {
+      bg: ['#0f172a', '#1e293b', '#020617'],
       accent: '#38bdf8',
       secondary: '#f43f5e',
       surface: 'rgba(255,255,255,0.03)',
@@ -126,7 +126,7 @@
   }
 
   async function generateShareCard(d, options = {}) {
-    try { await document.fonts.ready; } catch (e) {}
+    try { await document.fonts.ready; } catch (e) { }
 
     const {
       theme = 'light',
@@ -188,11 +188,11 @@
     } else {
       txt('SHOPEE ANALYTICS', PAD, headY - 3, 24, '800', tColors.textMuted);
     }
-    
+
     let titleStr = `Tổng Quan Chi Tiêu`;
     if (cardType === 'items') titleStr = `Top Sản Phẩm Chi Tiêu`;
     if (cardType === 'monthly') titleStr = month ? `Tháng ${month} / ${year}` : `Chi Tiêu Năm ${year}`;
-    
+
     txt(titleStr, PAD, headY + 70, 56, '900', tColors.text);
 
     // Accent line
@@ -214,12 +214,12 @@
       const rankStr = getRankStr(d.t);
       ctx.font = `800 28px ${FONT}`;
       const rankW = Math.min(ctx.measureText(rankStr).width + 60, W - PAD * 2);
-      
+
       roundedRect(ctx, PAD, amtY + 30, rankW, 56, 28, tColors.surface, tColors.shadow);
       ctx.strokeStyle = tColors.surfaceBorder;
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.roundRect(PAD, amtY + 30, rankW, 56, 28); ctx.stroke();
-      
+
       txt(rankStr, PAD + 30, amtY + 68, 26, '800', tColors.accent);
 
       // Grid of stats
@@ -232,7 +232,7 @@
         ctx.strokeStyle = tColors.surfaceBorder;
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.roundRect(x, y, w, h, 30); ctx.stroke();
-        
+
         txt(icon, x + 40, y + 60, 36, '400', tColors.text);
         txt(label, x + 40, y + 120, 20, '600', tColors.textMuted);
         txt(val, x + 40, y + 175, 42, '800', valColor);
@@ -240,7 +240,7 @@
 
       drawStatBox(PAD, statsY, boxW, boxH, 'ĐƠN HÀNG', fmtNum(d.o), tColors.text, '📦');
       drawStatBox(PAD + boxW + 40, statsY, boxW, boxH, 'SẢN PHẨM', fmtNum(d.ip), tColors.text, '🛍️');
-      
+
       drawStatBox(PAD, statsY + boxH + 40, boxW, boxH, 'ĐÃ TIẾT KIỆM', fmtVND(Math.max(0, d.s), hideAmount), tColors.accent, '💰');
       if (d.ship && d.ship > 0) {
         drawStatBox(PAD + boxW + 40, statsY + boxH + 40, boxW, boxH, 'PHÍ VẬN CHUYỂN', fmtVND(d.ship, hideAmount), tColors.secondary, '🚚');
@@ -272,7 +272,7 @@
 
       const barX = PAD + 40, barY2 = pctY + 125, barW = W - PAD * 2 - 80, barH = 10;
       roundedRect(ctx, barX, barY2, barW, barH, 5, tColors.divider);
-      
+
       if (beat > 0) {
         const progGrad = ctx.createLinearGradient(barX, 0, barX + barW * (beat / 100), 0);
         progGrad.addColorStop(0, tColors.accent);
@@ -283,7 +283,7 @@
     } else if (cardType === 'items' || cardType === 'monthly') {
       let items = [];
       let totalSpent = 0;
-      
+
       if (cardType === 'items') {
         items = d.ti || [];
         totalSpent = d.t;
@@ -292,46 +292,46 @@
         items = (d.mi && d.mi[ym]) || [];
         totalSpent = (d.yd && d.yd[year] && d.yd[year].m && d.yd[year].m[month]) ? d.yd[year].m[month] : items.reduce((a, b) => a + b.s, 0);
       }
-      
+
       const amtStr = fmtVND(totalSpent, hideAmount);
       txt('TỔNG CHI TIÊU', PAD, headY + 220, 24, '700', tColors.textMuted);
       txt(amtStr, PAD, headY + 300, 84, '900', tColors.text);
-      
+
       const listY = headY + 380;
       roundedRect(ctx, PAD, listY, W - PAD * 2, 1100, 40, tColors.surface, tColors.shadow);
       ctx.strokeStyle = tColors.surfaceBorder;
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.roundRect(PAD, listY, W - PAD * 2, 1100, 40); ctx.stroke();
-      
+
       const top6 = items.slice(0, 6);
       if (top6.length === 0) {
         txt('Không có dữ liệu', PAD + 60, listY + 100, 32, '600', tColors.textMuted);
       } else {
         const maxS = Math.max(...top6.map(i => i.s), 1);
         let startY = listY + 70;
-        
+
         top6.forEach((item, idx) => {
           const itemName = hideNames ? 'Sản phẩm đã ẩn tên' : truncate(item.n, 36);
           const pct = Math.max(0.05, item.s / maxS);
-          
+
           const rankGrad = ctx.createLinearGradient(PAD + 60, startY, PAD + 100, startY + 40);
           rankGrad.addColorStop(0, tColors.accent);
           rankGrad.addColorStop(1, tColors.secondary);
           roundedRect(ctx, PAD + 60, startY - 10, 44, 44, 12, rankGrad);
-          
+
           txt(`${idx + 1}`, PAD + 82, startY + 20, 22, '800', '#ffffff', 'center');
-          
+
           txt(itemName, PAD + 130, startY + 5, 30, '700', tColors.text);
           txt(fmtVND(item.s, hideAmount) + `  •  ${item.c} lần mua`, PAD + 130, startY + 45, 22, '500', tColors.textMuted);
-          
+
           const barX = PAD + 130, barY = startY + 70, barW = W - PAD * 2 - 190, barH = 8;
           roundedRect(ctx, barX, barY, barW, barH, 4, tColors.divider);
-          
+
           const progBarGrad = ctx.createLinearGradient(barX, 0, barX + barW * pct, 0);
           progBarGrad.addColorStop(0, tColors.accent);
           progBarGrad.addColorStop(1, tColors.secondary);
           roundedRect(ctx, barX, barY, barW * pct, barH, 4, progBarGrad);
-          
+
           startY += 160;
         });
       }
@@ -339,7 +339,7 @@
 
     // Footer
     const footerY = H - 120;
-    
+
     const footerDivGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
     footerDivGrad.addColorStop(0, 'transparent');
     footerDivGrad.addColorStop(0.5, tColors.divider);
@@ -348,7 +348,7 @@
     ctx.fillRect(PAD, footerY - 40, W - PAD * 2, 2);
 
     txt('SHOPEE ANALYTICS PRO', W / 2, footerY, 24, '800', tColors.textFaint, 'center');
-    
+
     if (cardType === 'overview') {
       const summary = `${fmtNum(d.o)} đơn hàng  •  ${fmtNum(d.ip)} sản phẩm`;
       txt(summary, W / 2, footerY + 40, 20, '600', tColors.textFaint, 'center');

@@ -913,6 +913,10 @@ body {
   .pill {
     white-space: nowrap;
   }
+
+  .nav-support-divider {
+    display: none;
+  }
 }
 
 /* ── Insight Cards ───────────────────────────── */
@@ -1132,4 +1136,159 @@ body {
   color: var(--blue, #4a90d9);
   text-decoration: underline;
   margin-left: 4px;
+}
+
+/* ── Support nav divider ─────────────────────── */
+.nav-support-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 10px;
+}
+
+.nav-item--support {
+  color: #4a90d9;
+}
+
+.nav-item--support:hover {
+  background: rgba(74, 144, 217, 0.1);
+  color: #3472bc;
+}
+
+/* ── Support modal ───────────────────────────── */
+.modal-support-content {
+  max-width: 520px;
+}
+
+.support-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.support-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.support-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.support-required {
+  color: var(--primary);
+  margin-left: 2px;
+}
+
+.support-hint {
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.support-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.support-textarea:focus {
+  border-color: var(--primary);
+}
+
+.support-textarea::placeholder {
+  color: var(--muted);
+}
+
+.support-info-box {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 1.9;
+  color: rgba(30, 41, 59, 0.7);
+}
+
+.support-data-preview {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: var(--muted);
+  word-break: break-all;
+  max-height: 64px;
+  overflow: hidden;
+  position: relative;
+  line-height: 1.5;
+}
+
+.support-data-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(transparent, var(--dark));
+  border-radius: 0 0 8px 8px;
+  pointer-events: none;
+}
+
+.support-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4a90d9 0%, #3472bc 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+}
+
+.support-send-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(74, 144, 217, 0.4);
+}
+
+.support-send-btn:active {
+  transform: scale(0.98);
+}
+
+.support-note {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.support-note strong {
+  color: var(--text);
 }
