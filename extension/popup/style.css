@@ -212,11 +212,47 @@ body {
 }
 
 .error-text {
-  color: #ff3b30;
   margin-top: 16px;
   font-size: 13px;
-  text-align: center;
+  text-align: left;
+  width: 100%;
+}
+.error-text:empty {
+  display: none;
+}
+.error-card {
+  background: rgba(255, 59, 48, 0.06);
+  border: 1px solid rgba(255, 59, 48, 0.15);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  animation: fadeIn 0.4s ease;
+}
+.error-card-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.error-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ff3b30;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+[data-theme="dark"] .error-card-title {
+  color: #ff6b6b;
+}
+.error-card-body {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
   font-weight: 500;
+}
+.error-card-body strong {
+  color: var(--text-main);
+}
+[data-theme="dark"] .error-card {
+  background: rgba(255, 59, 48, 0.08);
+  border-color: rgba(255, 59, 48, 0.2);
 }
 
 /* Loading State */

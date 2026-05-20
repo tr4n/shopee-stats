@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // === App State ===
   let cacheData = null;
   let lastCompleteData = null;
-  let analysisTimeout = null;
   let lastHeartbeat = null;
   let heartbeatCount = 0;
   let analysisStartTime = null;
@@ -180,11 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBarFill.classList.remove('indeterminate');
     progressText.textContent = 'Vui lòng chờ trong giây lát';
     
-    // Clear any existing timeout
-    if (analysisTimeout) {
-      clearTimeout(analysisTimeout);
-      analysisTimeout = null;
-    }
     
     // Reset heartbeat tracking
     lastHeartbeat = null;
@@ -203,43 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (debugStatus) debugStatus.textContent = 'Đang khởi tạo';
   }
   
-  function startAnalysisTimeout() {
-    // Set a 90-second timeout for the analysis (increased from 60s)
-    console.log('[ShopeeAnalytics] Starting 90-second timeout timer');
-    analysisTimeout = setTimeout(() => {
-      console.warn('[ShopeeAnalytics] Analysis timed out after 90 seconds');
-      
-      // Try to get more debug info
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]) {
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id },
-            func: () => {
-              console.log('[ShopeeAnalytics DEBUG] Current page URL:', window.location.href);
-              console.log('[ShopeeAnalytics DEBUG] Shopee config exists:', !!window.__shopeeConfig);
-              console.log('[ShopeeAnalytics DEBUG] Network connectivity test...');
-              fetch('https://shopee.vn/api/v1/ping', { method: 'GET' })
-                .then(r => console.log('[ShopeeAnalytics DEBUG] Network test result:', r.status))
-                .catch(e => console.log('[ShopeeAnalytics DEBUG] Network test failed:', e));
-            },
-            world: 'MAIN'
-          }).catch(e => console.log('[ShopeeAnalytics DEBUG] Failed to run debug script:', e));
-        }
-      });
-      
-      showState(stateInitial);
-      errorMessage.innerHTML = '⏰ <strong>Quá trình thống kê đã hết thời gian chờ (10 phút).</strong><br><br>' +
-        'Điều này có thể do:<br>' +
-        '• <strong>Kết nối mạng chậm</strong> - Kiểm tra internet<br>' +
-        '• <strong>Số lượng đơn hàng quá lớn</strong> - Quá trình có thể mất nhiều thời gian<br>' +
-        '• <strong>Phiên đăng nhập Shopee hết hạn</strong> - Đăng nhập lại<br>' +
-        '• <strong>Content script không chạy</strong> - Kiểm tra console (F12)<br><br>' +
-        '🔍 <strong>Debug:</strong> Mở Developer Tools (F12) và kiểm tra Console tab để xem lỗi chi tiết.<br><br>' +
-        'Vui lòng tải lại trang Shopee và thử lại.';
-      
-      analysisTimeout = null;
-    }, 60000 * 10); // 10 minutes timeout (increased from 90 seconds)
-  }
 
   // === Restart / Cancel ===
   const btnCancelDebug = document.getElementById('btn-cancel-debug');
@@ -409,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       resetProgress();
       showState(stateLoading);
-      startAnalysisTimeout(); // Start the timeout timer
       
       // Start debug tracking
       analysisStartTime = Date.now();
@@ -453,44 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[ShopeeAnalytics] Content script injected successfully');
         if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
         
-        // Test if the script is actually running by checking for immediate response
-        setTimeout(async () => {
-          if (!lastHeartbeat && heartbeatCount === 0) {
-            console.warn('[ShopeeAnalytics] No heartbeat received after 15 seconds - script may not be running');
-            if (debugStatus) debugStatus.textContent = 'Cảnh báo: Không nhận được phản hồi';
-            
-            try {
-              await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => {
-                  console.log('[ShopeeAnalytics TEST] Test script running...');
-                  console.log('[ShopeeAnalytics TEST] Current domain:', window.location.hostname);
-                  console.log('[ShopeeAnalytics TEST] URL:', window.location.href);
-                  console.log('[ShopeeAnalytics TEST] Document ready state:', document.readyState);
-                  console.log('[ShopeeAnalytics TEST] Fetch available:', !!window.fetch);
-                }
-              });
-            } catch (e) {
-              console.error('[ShopeeAnalytics] Failed to run debug script:', e);
-              if (debugStatus) debugStatus.textContent = 'Lỗi: Không thể chạy debug script';
-            }
-          }
-        }, 15000);
-        
-        // Another check after 30 seconds
-        setTimeout(() => {
-          if (!lastHeartbeat && heartbeatCount === 0) {
-            console.error('[ShopeeAnalytics] Still no response after 30 seconds - likely a critical issue');
-            if (debugStatus) debugStatus.textContent = 'Lỗi: Script không khởi chạy được';
-            progressText.innerHTML = '❌ <strong>Không nhận được phản hồi từ content script</strong><br>' +
-              'Có thể do:<br>' +
-              '• Trang web chặn script injection<br>' +
-              '• Extension permissions bị hạn chế<br>' +
-              '• Trang không phải Shopee.vn hợp lệ<br><br>' +
-              'Kiểm tra console (F12) để xem chi tiết.';
-          }
-        }, 30000);
-        
       } catch (e) {
         console.error('[ShopeeAnalytics] Failed to inject content script:', e);
         throw new Error('Lỗi khi tải content script. Vui lòng thử lại.');
@@ -498,11 +416,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('[ShopeeAnalytics] Popup script execution error:', err);
       
-      // Clear timeout on error
-      if (analysisTimeout) {
-        clearTimeout(analysisTimeout);
-        analysisTimeout = null;
-      }
       
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
@@ -513,12 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener((message) => {
     console.log('[ShopeeAnalytics] Received message in popup:', message.type);
     
-    // Clear timeout on any message received (shows the process is active)
-    if (analysisTimeout) {
-      clearTimeout(analysisTimeout);
-      // Restart timeout to give more time
-      startAnalysisTimeout();
-    }
     
     if (message.type === 'progress') {
       const processed = message.processed || 0;
@@ -550,11 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
       
-      // Clear timeout on error
-      if (analysisTimeout) {
-        clearTimeout(analysisTimeout);
-        analysisTimeout = null;
-      }
+
       
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);
@@ -568,25 +471,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const errorMsg = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
       
       if (errorMsg.includes('đăng nhập')) {
-        errorMessage.innerHTML = '❌ ' + errorMsg + '<br><br>' +
-          '💡 <strong>Giải pháp:</strong><br>' +
-          '1. Đăng nhập lại tài khoản Shopee<br>' +
-          '2. Tải lại trang (F5) và thử lại';
+        errorMessage.innerHTML = `<div class="error-card">
+          <div class="error-card-icon">❌</div>
+          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
+          <div class="error-card-body">
+            <strong>💡 Giải pháp:</strong><br>
+            1. Đăng nhập lại tài khoản Shopee<br>
+            2. Tải lại trang (F5) và thử lại
+          </div>
+        </div>`;
       } else if (errorMsg.includes('403') || errorMsg.includes('Shopee từ chối')) {
-        errorMessage.innerHTML = '❌ ' + errorMsg + '<br><br>' +
-          '💡 <strong>Giải pháp:</strong><br>' +
-          '1. Tải lại trang Shopee (F5)<br>' +
-          '2. Đảm bảo đã đăng nhập Shopee<br>' +
-          '3. Bấm "Bắt Đầu Thống Kê" lại';
+        errorMessage.innerHTML = `<div class="error-card">
+          <div class="error-card-icon">🚫</div>
+          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
+          <div class="error-card-body">
+            <strong>💡 Giải pháp:</strong><br>
+            1. Tải lại trang Shopee (F5)<br>
+            2. Đảm bảo đã đăng nhập Shopee<br>
+            3. Bấm "Bắt Đầu Thống Kê" lại
+          </div>
+        </div>`;
       } else {
-        errorMessage.textContent = errorMsg;
+        errorMessage.innerHTML = `<div class="error-card">
+          <div class="error-card-icon">⚠️</div>
+          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
+          <div class="error-card-body">
+            Tải lại trang Shopee và thử lại nhé.
+          </div>
+        </div>`;
       }
     } else if (message.type === 'complete') {
-      // Clear timeout on successful completion
-      if (analysisTimeout) {
-        clearTimeout(analysisTimeout);
-        analysisTimeout = null;
-      }
       
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);
