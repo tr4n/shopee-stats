@@ -103,6 +103,40 @@ const _hasRawDataParam = (function () {
   return false;
 })();
 
+/* ── Chrome AI Support Check ─────────────────── */
+let chromeAISupportStatus = 'Đang kiểm tra...';
+(async () => {
+  try {
+    if (typeof LanguageModel !== 'undefined') {
+      const status = await LanguageModel.availability();
+      if (status === 'readily') {
+        chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng)';
+      } else if (status === 'after-download') {
+        chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model)';
+      } else {
+        chromeAISupportStatus = `Không hỗ trợ (Trạng thái: ${status})`;
+      }
+    } else if (typeof ai !== 'undefined' && ai.languageModel) {
+      const capabilities = await ai.languageModel.capabilities();
+      if (capabilities && capabilities.available !== 'no') {
+        if (capabilities.available === 'readily') {
+          chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng - window.ai)';
+        } else if (capabilities.available === 'after-download') {
+          chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model - window.ai)';
+        } else {
+          chromeAISupportStatus = `Không hỗ trợ (window.ai: ${capabilities.available})`;
+        }
+      } else {
+        chromeAISupportStatus = 'Không hỗ trợ (window.ai không khả dụng)';
+      }
+    } else {
+      chromeAISupportStatus = 'Không hỗ trợ (Trình duyệt không có API Chrome AI)';
+    }
+  } catch (e) {
+    chromeAISupportStatus = `Không hỗ trợ (Lỗi: ${e.message})`;
+  }
+})();
+
 /* ── Support Modal ───────────────────────────── */
 function setupSupportButton(d) {
   const btn = document.getElementById('btn-support');
@@ -146,6 +180,7 @@ function setupSupportButton(d) {
       viewport: `${window.innerWidth}×${window.innerHeight}`,
       dataDate: d?.ts ? fmtDate(d.ts) : '—',
       summary: d ? `${fmtVND(d.t)} · ${fmtNum(d.o)} đơn` : '—',
+      chromeAI: chromeAISupportStatus,
     };
   }
 
@@ -185,6 +220,7 @@ function setupSupportButton(d) {
       `Viewport    : ${escHtml(info.viewport)}`,
       `Dữ liệu tại : ${escHtml(info.dataDate)}`,
       `Tóm tắt     : ${escHtml(info.summary)}`,
+      `Chrome AI   : ${escHtml(info.chromeAI)}`,
     ].join('<br>');
 
     const previewEl = document.getElementById('support-data-preview');
@@ -228,6 +264,7 @@ function setupSupportButton(d) {
       `• Viewport    : ${info.viewport}`,
       `• Dữ liệu tại : ${info.dataDate}`,
       `• Tóm tắt     : ${info.summary}`,
+      `• Chrome AI   : ${info.chromeAI}`,
       '',
       '─────────────────────────────────────',
       'DỮ LIỆU (BASE64):',
