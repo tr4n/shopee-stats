@@ -444,11 +444,13 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
     function getItemsForYear(mi, year, tiItems) {
       const prefix = year + '-';
 
-      // Build name→cat lookup from the already-classified global tiItems
+      // Build name→cat lookup from the already-classified global tiItems.
+      // mi item names are truncated to 40 chars at source; ti names to 45 chars.
+      // Use a 40-char prefix as key so both sides align on the same substring.
       const catLookup = {};
       for (const item of (tiItems || [])) {
         if (item.cat && item.cat !== '🏷️ Khác') {
-          const k = item.n.toLowerCase().substring(0, 120);
+          const k = item.n.toLowerCase().substring(0, 40);
           catLookup[k] = item.cat;
         }
       }
@@ -458,11 +460,20 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
         if (!key.startsWith(prefix)) continue;
         for (const item of (mi[key] || [])) {
           const k = item.n.toLowerCase().substring(0, 120);
+          const k40 = item.n.toLowerCase().substring(0, 40);
           if (!map[k]) {
             map[k] = { n: item.n, s: 0, c: 0 };
-            // Prefer tiItems classification, fallback to cache
-            if (catLookup[k]) map[k].cat = catLookup[k];
-            else if (_dashCache.cats[k]) map[k].cat = _dashCache.cats[k];
+            // 1. Prefer tiItems classification (matched on 40-char prefix)
+            if (catLookup[k40]) {
+              map[k].cat = catLookup[k40];
+            // 2. Fallback to cache (try both full key and 40-char prefix)
+            } else if (_dashCache.cats[k] || _dashCache.cats[k40]) {
+              map[k].cat = _dashCache.cats[k] || _dashCache.cats[k40];
+            // 3. Keyword classification for items not in tiItems top list
+            } else {
+              const kwCat = classifyByNameSync(item.n);
+              if (kwCat !== '🏷️ Khác') map[k].cat = kwCat;
+            }
           }
           map[k].s += item.s || 0;
           map[k].c += item.c || 0;

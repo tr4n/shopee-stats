@@ -32,8 +32,7 @@ async function initializeCategories() {
   return DASH_SCORING_CATS;
 }
 
-async function classifyByNameDash(name) {
-  if (DASH_SCORING_CATS.length === 0) await initializeCategories();
+function _scoreByKeywords(name) {
   const n = String(name || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
   const paddedN = ' ' + n + ' ';
   let bestCat = '🏷️ Khác';
@@ -53,6 +52,17 @@ async function classifyByNameDash(name) {
     if (score > maxScore) { maxScore = score; bestCat = cat.name; }
   }
   return maxScore >= MIN_DASH_SCORE ? bestCat : '🏷️ Khác';
+}
+
+// Sync version — returns '🏷️ Khác' if categories not yet loaded (safe to call anytime)
+function classifyByNameSync(name) {
+  if (DASH_SCORING_CATS.length === 0) return '🏷️ Khác';
+  return _scoreByKeywords(name);
+}
+
+async function classifyByNameDash(name) {
+  if (DASH_SCORING_CATS.length === 0) await initializeCategories();
+  return _scoreByKeywords(name);
 }
 
 function buildCsFromTi(ti) {
