@@ -308,7 +308,21 @@
                 "louis vuitton",
                 "lv",
                 "prada",
-                "coach"
+                "coach",
+                "giữ nhiệt",
+                "giữ ấm",
+                "dây buộc tóc",
+                "buộc tóc",
+                "buộc tóc lò xo",
+                "vòng đeo tay",
+                "chống nắng mưa",
+                "chống tia uv",
+                "tia uv",
+                "ô dù",
+                "dù che",
+                "ô che",
+                "dù gấp",
+                "ô gấp"
             ]
         },
         {
@@ -575,7 +589,15 @@
                 "smart band",
                 "dây sạc đồng hồ",
                 "vention",
-                "topk"
+                "topk",
+                "ốp silicon",
+                "vsmart",
+                "bộ chuyển đổi",
+                "cáp chuyển đổi",
+                "cổng chuyển đổi",
+                "dây silicon",
+                "airpods",
+                "airpod"
             ]
         },
         {
@@ -966,7 +988,45 @@
                 "hỗ trợ di chuyển",
                 "total cleaner",
                 "enito",
-                "dung dịch vệ sinh nhà cửa"
+                "dung dịch vệ sinh nhà cửa",
+                "pin",
+                "alkaline",
+                "pin aa",
+                "pin aaa",
+                "pin alkaline",
+                "pin tiểu",
+                "pin sạc",
+                "khóa số",
+                "khóa mini",
+                "ổ khóa",
+                "khóa cửa",
+                "pít tông",
+                "tay đẩy",
+                "thủy lực",
+                "tay đẩy thủy lực",
+                "piston",
+                "lá cờ",
+                "quốc kỳ",
+                "cờ việt nam",
+                "tay nắm cao su",
+                "bao tay nắm",
+                "lưới lọc rác",
+                "giỏ lọc rác",
+                "lọc rác",
+                "nạo gọt",
+                "dao nạo",
+                "nạo rau củ",
+                "gọt rau củ",
+                "tưới cây",
+                "tưới tự động",
+                "tưới nhỏ giọt",
+                "khay làm đá",
+                "khay đá",
+                "khuôn đá",
+                "khuôn làm đá",
+                "kệ đa năng",
+                "kệ chia ngăn",
+                "chia ngăn"
             ]
         },
         {
@@ -1170,7 +1230,16 @@
                 "reebok",
                 "lõi gang",
                 "tạ lõi",
-                "gang đặc"
+                "gang đặc",
+                "đồ thể thao",
+                "bộ thể thao",
+                "bộ đồ thể thao",
+                "massage",
+                "mát xa",
+                "đai chống gù",
+                "chống gù",
+                "đai chống gù lưng",
+                "decathlo"
             ]
         },
         {
@@ -1393,7 +1462,8 @@
                 "skullpanda",
                 "dimoo",
                 "crybaby",
-                "capybara"
+                "capybara",
+                "dây đeo thẻ"
             ]
         }
     ]

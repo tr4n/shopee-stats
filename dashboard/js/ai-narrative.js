@@ -48,12 +48,25 @@ async function getAIInsightSession() {
   }
 }
 
+let _isAIAvailable = false;
+const _aiAvailabilityPromise = (async () => {
+  if (typeof LanguageModel === 'undefined') return false;
+  try {
+    const status = await LanguageModel.availability();
+    return status !== 'unavailable';
+  } catch (e) {
+    return false;
+  }
+})();
+
+_aiAvailabilityPromise.then(avail => {
+  _isAIAvailable = avail;
+});
+
 // cacheKey: optional override for cache lookup (used for per-year monthly insights)
 function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   // Always persist call args so buttons can re-trigger this analysis
   _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey };
-
-  if (_aiInsightDisabled) return;
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
@@ -63,20 +76,27 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   // Serve from cache immediately — no user action needed
   if (_dashCache?.insights[ck]) {
     aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
+    aiEl.style.display = ''; // Ensure visible
     return;
   }
 
-  // Chrome AI (Prompt API) not available — show info instead of silently hiding
-  if (typeof LanguageModel === 'undefined') {
-    aiEl.innerHTML = `<div class="ai-unavailable">
-      🤖 Chrome AI chưa khả dụng.
-      <a href="chrome://flags/#optimization-guide-on-device-model" target="_blank" class="ai-unavailable-link">Bật tại chrome://flags</a>
-    </div>`;
-    return;
-  }
+  // Hide it by default until availability check resolves
+  aiEl.style.display = 'none';
+  aiEl.innerHTML = '';
 
-  // Show "Phân tích..." button — user must click to trigger AI
-  aiEl.innerHTML = renderAnalyzeButton(cardId);
+  if (_aiInsightDisabled) return;
+
+  _aiAvailabilityPromise.then(avail => {
+    if (!avail || _aiInsightDisabled) {
+      aiEl.style.display = 'none';
+      aiEl.innerHTML = '';
+      return;
+    }
+
+    // AI is available, show the analyze button
+    aiEl.style.display = '';
+    aiEl.innerHTML = renderAnalyzeButton(cardId);
+  });
 }
 
 // Internal AI runner — called by both runAIInsight and rerunAIInsight
