@@ -1847,15 +1847,16 @@
          AI narrative — Chrome 148+ web LanguageModel
       ───────────────────────────────────────────────── */
       const AI_INSIGHT_SYSTEM = [
-        'Bạn là Chuyên gia Kế hoạch Tài chính Cá nhân người Việt.',
-        'Nhiệm vụ: phân tích dữ liệu chi tiêu MUA HÀNG THỰC TẾ trên Shopee — gồm tên sản phẩm cụ thể, giá tiền, số lần mua — và đưa ra nhận xét THẲNG THẮN, cực kỳ CÁ NHÂN HÓA.',
-        'Quy tắc bắt buộc:',
-        '(1) Luôn dùng đúng số liệu VÀ TÊN SẢN PHẨM từ dữ liệu được cung cấp — không bịa hoặc nói chung chung.',
-        '(2) Nêu đích danh ít nhất 1 sản phẩm hoặc danh mục cụ thể trong phân tích.',
-        '(3) Đề xuất ít nhất 1 hành động CẮT GIẢM hoặc TIẾT KIỆM thực tế có thể làm ngay — gắn liền với sản phẩm đã mua.',
-        '(4) Tối đa 3 câu ngắn gọn, súc tích. KHÔNG dùng markdown, KHÔNG dùng danh sách bullet, KHÔNG lặp lại số liệu nhàm chán.',
-        '(5) Giọng điệu: thẳng thắn, hài hước nhẹ, như người bạn hiểu tiền bạc đang nói chuyện trực tiếp.',
-        '(6) Nếu có sản phẩm mua lặp nhiều lần, hãy bình luận về thói quen đó.'
+        'You are a Vietnamese Personal Finance Expert.',
+        'Analyze the provided REAL Shopee shopping spend data (including specific product names, costs, order counts) and provide HONEST, highly PERSONALIZED feedback.',
+        'CRITICAL RULES:',
+        '(1) Always output the final analysis in VIETNAMESE. Do not output in English.',
+        '(2) Use the exact numbers and product names from the provided context—do not hallucinate or speak in general terms.',
+        '(3) Mention at least one specific product name or category in the analysis.',
+        '(4) Suggest at least one actionable, realistic cost-cutting or saving advice tied directly to the purchased items.',
+        '(5) Keep the response concise, maximum of 3 sentences. DO NOT use markdown lists or bullet points. DO NOT repeat boring statistics.',
+        '(6) Tone: candid, slightly humorous, like an honest financially-savvy friend talking directly to them.',
+        '(7) If there are items bought repeatedly, comment on that buying habit.'
       ].join(' ');
 
       let _aiInsightSession = null;
@@ -2684,11 +2685,20 @@
           // Build prompt tailored to temporal context
           let specificPrompt;
           if (isCurrentYear) {
-            specificPrompt = `Đây là dữ liệu chi tiêu năm NAY (${yr}). Xác định chính xác 1 tháng có tổng chi tiêu cao nhất. Dựa vào tổng tiền và số đơn hàng của tháng đó, hãy phân tích xem họ đang 'cháy túi' vì mua 1-2 món đồ giá trị cao (như đồ công nghệ) hay do nghiện chốt hàng chục đơn lặt vặt. Nêu tên 1 sản phẩm tiêu biểu của tháng đó. Đưa ra lời khuyên thiết lập hạn mức tiền cụ thể cho các tháng có chung tính chất (như tháng siêu sale, tháng sinh nhật) để không lặp lại lỗi này. Trình bày thành 2 đoạn: đoạn 1 phân tích tháng cao điểm, đoạn 2 lời khuyên hạn mức. Dùng **in đậm** cho tên tháng, tên sản phẩm và các con số hạn mức.`;
+            specificPrompt = `This is the spend data for THIS current year (${yr}):
+1. Identify the exact month with the highest total spend. Based on the monthly total and order count, analyze whether they went broke due to purchasing 1-2 high-value items (like tech gadgets) or due to an addiction to ordering dozens of micro-items. Name 1 representative product bought in that month.
+2. Propose advice on setting a specific budget limit for months with similar characteristics (such as mega-sale months, birthday months) to avoid repeating this mistake.
+Requirements: Output in VIETNAMESE. Structure into 2 paragraphs: Paragraph 1 analyzes the peak month, Paragraph 2 gives budget limits advice. Use **bold** for the month name, product name, and budget numbers.`;
           } else if (isLastYear) {
-            specificPrompt = `Đây là dữ liệu chi tiêu năm NGOÁI (${yr}). Xác định chính xác 1 tháng có tổng chi tiêu cao nhất. Phân tích xem tháng đó bị 'cháy túi' do mua hàng giá trị cao hay do chốt hàng chục đơn lặt vặt. Nêu tên 1 sản phẩm tiêu biểu của tháng đó. Rút ra bài học cụ thể cho năm nay (${currentYear}) — có thói quen mua sắm theo mùa/dịp nào cần đặt hạn mức trước không? Trình bày thành 2 đoạn, dùng **in đậm** cho tên tháng, tên sản phẩm và lời khuyên chính.`;
+            specificPrompt = `This is the spend data for LAST year (${yr}):
+1. Identify the exact month with the highest total spend. Analyze if the high spend was due to high-value purchases or ordering dozens of micro-items. Name 1 representative product from that month.
+2. Draw a concrete lesson for this year (${currentYear})—are there seasonal/holiday shopping habits where they should set budget limits in advance?
+Requirements: Output in VIETNAMESE. Structure into 2 paragraphs. Use **bold** for the month name, product name, and main advice.`;
           } else {
-            specificPrompt = `Đây là dữ liệu chi tiêu từ ${yearDiff} năm trước (${yr}). Xác định 1 tháng chi tiêu cao nhất thời điểm đó, phân tích nguyên nhân (đơn lớn hay đơn lặt vặt). Nêu 1 sản phẩm tiêu biểu. Rút ra nhận xét hồi tưởng về quy luật mùa vụ trong hành vi mua sắm thời điểm đó và gợi ý xem thói quen này có đang lặp lại ở các năm gần đây không. Trình bày 2 đoạn rõ ràng, dùng **in đậm** cho tên tháng và các nhận xét quan trọng.`;
+            specificPrompt = `This is the spend data from ${yearDiff} years ago (${yr}):
+1. Identify the month with the highest spend, and analyze the root cause (major purchase vs. micro-orders). Name 1 representative product.
+2. Reflect on the seasonal patterns in their shopping behavior back then, and suggest whether this habit might be repeating in recent years.
+Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** for the month name and important observations.`;
           }
 
           enrichWithAI('insight-monthly',
@@ -2730,7 +2740,11 @@
               `Lịch sử từng năm: ${yearSummaryLines.join('; ')}.`,
               yoyLine
             ].filter(Boolean).join(' '),
-            `Dựa vào dữ liệu tổng tiền chi tiêu, số lượng đơn hàng và tiền tiết kiệm từ voucher. Hãy so sánh năm có mức chi tiêu cao nhất với các năm còn lại. Hãy đánh giá tính hiệu quả: nếu số lượng đơn hàng rất lớn nhưng tổng tiền tiết kiệm (voucher) chiếm tỷ lệ quá nhỏ so với tổng chi, hãy phê bình thói quen mua lặt vặt không biết tận dụng mã giảm giá. Đề xuất một quy tắc gom đơn cụ thể để tăng tỷ lệ tiết kiệm cho năm tới. Trình bày phân tích theo từng đoạn rõ ràng, dùng **in đậm** cho các con số và nhận xét chủ chốt.`
+            `Based on the total spend, order count, and voucher savings data:
+1. Compare the year with the highest spend against the other historical years.
+2. Evaluate the purchasing efficiency: if the order count is extremely high but total savings (from vouchers) is a tiny fraction of the total spend, criticize the habit of buying minor items frequently without utilizing discount codes.
+3. Propose a specific order bundling rule to increase the savings rate for the upcoming year.
+Requirements: Output in VIETNAMESE. Write in distinct paragraphs. Use **bold** for key numbers and major remarks.`
           );
 
           // 2. Items Card AI Insight (insight-items) - specific products only
@@ -2750,7 +2764,10 @@
               `Top 5 chiếm ${concentration}% tổng chi.`,
               repeatNote
             ].filter(Boolean).join(' '),
-            `Quét danh sách Top sản phẩm chi tiêu nhiều nhất. Bắt buộc nêu đích danh sản phẩm ngốn tổng tiền cao nhất và đánh giá xem đây là khoản đầu tư xứng đáng hay bốc đồng. Tiếp theo, tìm sản phẩm có số lượt mua lặp lại cao nhất. Châm biếm thói quen mua lẻ tẻ sản phẩm đó và yêu cầu họ chuyển sang mua combo/mua sỉ hoặc dung tích lớn để tối ưu trung bình giá mỗi lượt mua. Trình bày 2 phân tích thành 2 đoạn riêng biệt, dùng **in đậm** cho tên sản phẩm và các con số chính.`
+            `Scan the top spend products list:
+1. Explicitly name the product with the highest total spend. Evaluate whether this was a worthy investment or an impulsive purchase.
+2. Identify the product with the highest repeat purchase count. Satirize the habit of buying this item in separate small orders. Instruct them to switch to buying in combos/bulk or choosing a larger volume/capacity to optimize the average cost per purchase.
+Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate paragraphs. Use **bold** for product names and key numbers.`
           );
 
           // 3. Categories Card AI Insight (insight-categories) - categories only, excluding "Khác"
@@ -2764,7 +2781,11 @@
 
           enrichWithAI('insight-categories',
             `Phân bổ chi tiêu theo danh mục: ${catLines}.`,
-            `Tuyệt đối bỏ qua danh mục '🏷️ Khác'. Tìm danh mục chiếm tỷ trọng phần trăm (%) chi tiêu cao nhất và gọi nó là 'bẫy chi tiêu'. Bắt buộc trích dẫn chính xác tên 2 sản phẩm cụ thể mà họ đã mua trong danh mục này để làm bằng chứng cho thói quen vung tay quá trán. Dựa trên tính chất của 2 sản phẩm đó (nhu cầu thiết yếu hay mua vui), hãy đề xuất một quy tắc hãm phanh tài chính (ví dụ: luật chờ 24h trước khi thanh toán). Trình bày thành 2 đoạn: đoạn 1 nêu bẫy chi tiêu với bằng chứng sản phẩm, đoạn 2 đưa ra quy tắc hãm phanh. Dùng **in đậm** cho tên danh mục, tên sản phẩm và tên quy tắc.`
+            `Ignore the category '🏷️ Khác' entirely:
+1. Find the category with the highest percentage (%) of total spend and label it as the 'spending trap'.
+2. You MUST cite the exact names of 2 specific products purchased under this category as evidence of overspending.
+3. Based on the nature of these 2 products (essential need vs. impulse buy for fun), suggest a financial brake rule (e.g., the 24-hour waiting rule before checking out).
+Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identifies the spending trap with product evidence, Paragraph 2 proposes the financial brake rule. Use **bold** for category names, product names, and rule names.`
           );
 
           // 4. Trigger monthly insight for current active year
