@@ -1248,8 +1248,9 @@
       <div class="page-header">
         <div>
           <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
-          <p class="page-subtitle">Phân bổ chi tiêu theo từng danh mục Shopee</p>
+          <p class="page-subtitle" id="cat-subtitle">Phân bổ chi tiêu theo từng danh mục Shopee</p>
         </div>
+        <div class="pill-row" id="cat-year-pills" style="margin-bottom:0; align-items:flex-end; flex-shrink:0"></div>
       </div>
       <div class="grid-2">
         <div class="card" id="card-cat-pie">
@@ -2728,6 +2729,101 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
           );
         }
 
+        /* ─────────────────────────────────────────────────
+           Category Year Filter helpers
+        ───────────────────────────────────────────────── */
+
+        let _activeCatYear = 'all';
+
+        function getItemsForYear(mi, year) {
+          const prefix = year + '-';
+          const map = {};
+          for (const key of Object.keys(mi || {})) {
+            if (!key.startsWith(prefix)) continue;
+            for (const item of (mi[key] || [])) {
+              const k = item.n.toLowerCase().substring(0, 120);
+              if (!map[k]) {
+                map[k] = { n: item.n, s: 0, c: 0 };
+                if (_dashCache.cats[k]) map[k].cat = _dashCache.cats[k];
+              }
+              map[k].s += item.s || 0;
+              map[k].c += item.c || 0;
+            }
+          }
+          return Object.values(map).sort((a, b) => b.s - a.s);
+        }
+
+        function triggerCategoryAIInsight(cs, ti, total, cacheKey) {
+          const filteredCs = (cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác');
+          if (!filteredCs.length) return;
+          const catLines = filteredCs.map(c => {
+            const pct = Math.round((c.s / Math.max(total || 1, 1)) * 100);
+            const catItems = (ti || []).filter(i => i.cat === c.name).slice(0, 2);
+            const catItemStr = catItems.length > 0 ? ` (vd: ${catItems.map(i => `"${i.n}"`).join(', ')})` : '';
+            return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)${catItemStr}`;
+          }).join('; ');
+          enrichWithAI('insight-categories',
+            `Phân bổ chi tiêu theo danh mục: ${catLines}.`,
+            `Ignore the category '🏷️ Khác' entirely:
+1. Find the category with the highest percentage (%) of total spend and label it as the 'spending trap'.
+2. You MUST cite the exact names of 2 specific products purchased under this category as evidence of overspending.
+3. Based on the nature of these 2 products (essential need vs. impulse buy for fun), suggest a financial brake rule (e.g., the 24-hour waiting rule before checking out).
+Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identifies the spending trap with product evidence, Paragraph 2 proposes the financial brake rule. Use **bold** for category names, product names, and rule names.`,
+            cacheKey
+          );
+        }
+
+        function switchCategoryYear(year, d, tiItems) {
+          _activeCatYear = year;
+
+          let cs, ti, total;
+          if (year === 'all') {
+            cs = d.cs;
+            ti = tiItems;
+            total = d.t;
+            const sub = document.getElementById('cat-subtitle');
+            if (sub) sub.textContent = 'Phân bổ chi tiêu theo từng danh mục Shopee';
+          } else {
+            ti = getItemsForYear(d.mi, year);
+            for (const item of ti) {
+              if (!item.cat) item.cat = '🏷️ Khác';
+            }
+            cs = buildCsFromTi(ti);
+            total = (d.yd[year] || {}).t || 0;
+            const sub = document.getElementById('cat-subtitle');
+            if (sub) sub.textContent = `Danh mục năm ${year} · dữ liệu top 20 sản phẩm/tháng`;
+          }
+
+          document.getElementById('card-cat-items').style.display = 'none';
+          document.querySelectorAll('#cat-bars .cat-row').forEach(r => r.classList.remove('cat-row-active'));
+
+          renderCategories(cs, ti);
+          renderInsightCard('insight-categories', computeCategoryInsights(cs, total));
+
+          if (_categorizationFinished) {
+            const key = year === 'all' ? 'insight-categories-all' : `insight-categories-${year}`;
+            triggerCategoryAIInsight(cs, ti, total, key);
+          }
+        }
+
+        function renderCatYearPills(d, tiItems) {
+          const years = Object.keys(d.yd || {}).sort((a, b) => b - a);
+          if (!years.length) return;
+          const container = document.getElementById('cat-year-pills');
+          if (!container) return;
+          const allPills = ['all', ...years];
+          container.innerHTML = allPills.map((y, i) =>
+            `<button class="pill${i === 0 ? ' active' : ''}" data-catyear="${y}">${y === 'all' ? 'Tất cả' : 'Năm ' + y}</button>`
+          ).join('');
+          container.querySelectorAll('.pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+              container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+              btn.classList.add('active');
+              switchCategoryYear(btn.getAttribute('data-catyear'), d, tiItems);
+            });
+          });
+        }
+
         function runAIInsightsNarrative(d) {
           console.log('[Dashboard] Starting AI insights narrative...');
           const years = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
@@ -2790,23 +2886,10 @@ Requirements: Output in VIETNAMESE. Write in distinct paragraphs. Use **bold** f
 Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate paragraphs. Use **bold** for product names and key numbers.`
           );
 
-          // 3. Categories Card AI Insight (insight-categories) - categories only, excluding "Khác"
-          const filteredCs = (d.cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác');
-          const catLines = filteredCs.map(c => {
-            const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
-            const catItems = (d.ti || []).filter(i => i.cat === c.name).slice(0, 2);
-            const catItemStr = catItems.length > 0 ? ` (vd: ${catItems.map(i => `"${i.n}"`).join(', ')})` : '';
-            return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)${catItemStr}`;
-          }).join('; ');
-
-          enrichWithAI('insight-categories',
-            `Phân bổ chi tiêu theo danh mục: ${catLines}.`,
-            `Ignore the category '🏷️ Khác' entirely:
-1. Find the category with the highest percentage (%) of total spend and label it as the 'spending trap'.
-2. You MUST cite the exact names of 2 specific products purchased under this category as evidence of overspending.
-3. Based on the nature of these 2 products (essential need vs. impulse buy for fun), suggest a financial brake rule (e.g., the 24-hour waiting rule before checking out).
-Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identifies the spending trap with product evidence, Paragraph 2 proposes the financial brake rule. Use **bold** for category names, product names, and rule names.`
-          );
+          // 3. Categories Card AI Insight — only for 'all' view; year-specific handled by switchCategoryYear
+          if (_activeCatYear === 'all') {
+            triggerCategoryAIInsight(d.cs, d.ti, d.t, 'insight-categories-all');
+          }
 
           // 4. Trigger monthly insight for current active year
           if (_activeYear) {
@@ -2856,6 +2939,7 @@ Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identi
           
           renderTopItems(tiItems);
           renderCategories(d.cs, tiItems);
+          renderCatYearPills(d, tiItems);
 
           // Render static insights cards
           renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
@@ -2913,12 +2997,18 @@ Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identi
           d.cs = buildCsFromTi(tiItems);
           
           renderTopItems(tiItems);
-          renderCategories(d.cs, tiItems);
-          
+
           // Re-render static rule-based cards with the final categorized data
           renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
           renderInsightCard('insight-items', computeItemInsights(tiItems, d.t));
-          renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+
+          // Re-render categories respecting the active year filter
+          if (_activeCatYear !== 'all') {
+            switchCategoryYear(_activeCatYear, d, tiItems);
+          } else {
+            renderCategories(d.cs, tiItems);
+            renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+          }
 
           // 8. Run AI narrative insights using final clean categorization
           runAIInsightsNarrative(d);
