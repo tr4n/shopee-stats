@@ -1582,29 +1582,53 @@
          happens here — keyword first, then AI fallback.
       ───────────────────────────────────────────────── */
 
-      // Keyword lists mirror content.js keyword definitions (source of truth moved here)
-      const _DASH_KW = {
-        beauty: "son|son môi|son dưỡng|son kem|son lì|son bóng|tint|phấn nền|phấn phủ|phấn nước|cushion|kem nền|foundation|bb cream|cc cream|che khuyết điểm|concealer|mascara|eyeliner|kẻ mắt|kẻ mày|chì kẻ mày|phấn mắt|phấn má|tạo khối|highlight|tẩy trang|nước hoa hồng|toner|serum|tinh chất|kem dưỡng|lotion|xịt khoáng|mặt nạ|mask|kem chống nắng|kcn|sữa rửa mặt|srm|tẩy da chết|tẩy tế bào chết|peeling|retinol|bha|aha|niacinamide|vitamin c|trị mụn|thâm nám|sữa tắm|dầu gội|dầu xả|kem ủ tóc|dưỡng tóc|xịt bưởi|mọc tóc|lăn nách|lăn khử mùi|xịt khử mùi|dung dịch vệ sinh|ddvs|băng vệ sinh|bvs|cốc nguyệt san|kem tẩy lông|wax lông|sữa dưỡng thể|body lotion|nước hoa|bodymist|cọ trang điểm|mút trang điểm|kẹp mi|máy rửa mặt|máy đẩy tinh chất|nhíp|dao cạo|bông tẩy trang|thực phẩm chức năng|tpcn|collagen|vitamin|omega 3|canxi|kẽm|sắt|biotin|giảm cân|tăng cân|đốt mỡ|yến sào|đông trùng hạ thảo|bao cao su|bcs|que thử thai|mac|3ce|romand|black rouge|merzy|innisfree|laneige|la roche posay|vichy|cerave|cetaphil|cocoon|the ordinary|obagi|paula's choice",
-        fashion: "áo|áo thun|áo phông|áo sơ mi|áo polo|áo khoác|áo gió|áo dạ|áo len|áo nỉ|áo hoodie|áo vest|blazer|trench coat|áo tweed|áo kiểu|áo trễ vai|áo hai dây|áo ống|áo croptop|bra|bralette|quần|quần tây|quần âu|quần kaki|quần jeans|quần bò|quần short|quần đùi|quần jogger|quần ống rộng|quần culottes|quần ống loe|quần legging|quần lót|lọt khe|đồ lót|sịp|boxer|đồ bộ|đồ mặc nhà|váy ngủ|pijama|chân váy|váy|váy xòe|váy xếp ly|váy chữ a|váy maxi|đầm|đầm xòe|đầm suông|đầm body|đầm dạ hội|váy cưới|bikini|đồ bơi|giày|giày thể thao|sneaker|giày tây|giày lười|giày slip on|giày boot|bốt|dép|sandal|giày cao gót|giày búp bê|mary jane|giày bệt|guốc|dép sục|dép xỏ ngón|tất|vớ|quần tất|balo|ba lô|túi|túi xách|túi đeo chéo|túi tote|túi kẹp nách|cặp xách|vali|ví|ví da|bóp|clutch|mũ|nón|mũ lưỡi trai|mũ nồi|beret|bucket|kính râm|kính mát|gọng kính|thắt lưng|dây nịt|cà vạt|khăn|găng tay|nhẫn|dây chuyền|bông tai|khuyên tai|vòng tay|lắc tay|lắc chân|choker|băng đô|cột tóc|kẹp tóc|kẹp càng cua|chun buộc tóc|scrunchies|đồng hồ|vàng|bạc|trang sức|jewelry",
-        tech: "điện thoại|samsung|apple|iphone|ipad|macbook|lg|sony|xiaomi|oppo|vivo|laptop|máy tính bảng|màn hình|pc|mainboard|cpu|vga|card màn hình|ram|ssd|hdd|vỏ case|nguồn|tản nhiệt|chuột|chuột không dây|chuột gaming|lót chuột|bàn phím|bàn phím cơ|keycap|switch|tai nghe|tai nghe bluetooth|tai nghe true wireless|loa bluetooth|loa|router wifi|modem|cáp mạng|usb|cáp sạc|cáp type c|cáp lightning|củ sạc|sạc nhanh|sạc dự phòng|ốp lưng|cường lực|giá đỡ điện thoại|gậy selfie|tripod|tay cầm chơi game|máy ảnh|ống kính|lens|thẻ nhớ|tivi|máy chiếu|máy in|camera quan sát|camera hành trình|nhà thông minh|smart home|apple watch|kindle|airtag|quạt tản nhiệt điện thoại|gimbal|đèn livestream|logitech|razer|corsair|anker|baseus|ugreen",
-        home: "chăn|mền|ga trải giường|drap|gối|đệm|nệm|chiếu|màn|rèm|tủ|kệ|bàn|ghế|sofa|tranh|gương|lọ hoa|nến thơm|tinh dầu|thảm|nồi|chảo|bát|chén|đĩa|đũa|thìa|ly|cốc|dao|kéo|thớt|rổ|bình giữ nhiệt|hộp đựng|màng bọc|máy giặt|máy sấy|bàn ủi|bàn là|móc treo|chổi|cây lau nhà|máy hút bụi|robot hút bụi|nước lau sàn|bột giặt|nước giặt|nước xả|giấy vệ sinh|khăn giấy|túi rác|kìm|búa|cờ lê|tuốc nơ vít|khoan|ốc vít|băng keo|thang|chậu cây|phân bón|hạt giống|vòi tưới|ổ cắm|bóng đèn|máy lọc nước|máy lọc không khí|bình nóng lạnh|tủ lạnh|máy lạnh|điều hòa|quạt|khăn tắm|phụ kiện ô tô|phụ kiện xe máy|nhớt xe|mũ bảo hiểm|bạt phủ xe|nước mắm|dầu ăn|gia vị|mì gói|gạo|đồ ăn vặt|bánh|kẹo|sô cô la|bia|rượu|nước ngọt|trà|cafe|sữa|bỉm|tã|đồ sơ sinh|bình sữa|xe đẩy em bé|thức ăn chó mèo|cát vệ sinh|locknlock|sunhouse|kangaroo|philips",
-        sport: "bóng đá|bóng rổ|bóng chuyền|cầu lông|quần vợt|tennis|bóng bàn|golf|bơi lội|chạy bộ|đạp xe|võ thuật|boxing|mma|muay thái|yoga|gym|thể hình|vợt|quả cầu lông|bóng|găng tay thủ môn|giày đá bóng|giày đinh|giày training|đồ bơi|kính bơi|mũ bơi|phao bơi|gậy golf|túi golf|xe đạp thể thao|đồng hồ thể thao|garmin|coros|tạ tay|tạ đòn|ghế tập tạ|xà đơn|máy chạy bộ|xe đạp tập|thảm yoga|bóng yoga|con lăn tập bụng|dây nhảy|dây kháng lực|quấn cổ tay|băng bảo vệ|đai nịt bụng|áo tập|quần tập|bra thể thao|bình lắc|whey|mass gainer|bcaa|eaa|creatine|pre-workout|patin|leo núi|cắm trại|camping|lều|câu cá|cần câu|mồi câu|túi ngủ|yonex|victor|lining|decathlon|asics|mizuno",
-        edu: "sách|truyện|manga|comic|tiểu thuyết|từ điển|giáo trình|vở|sổ|giấy|bút|thước|tẩy|gôm|kẹp|đồ chơi|lego|rubik|yoyo|búp bê|mô hình|figure|gundam|board game|cờ|đất nặn|màu nước|toan vẽ|len|kim móc|nhạc cụ|đàn|guitar|piano|ukulele|sáo|trống|đĩa cd|đĩa game|ps5|nintendo|khóa học|tài khoản|netflix|spotify|balo học sinh|flashcard"
-      };
+      // Dynamic category loading from categories.json
+      let _categoriesData = null;
 
-      // Pre-process keyword lists into sorted word arrays (longest first to avoid partial overlap)
-      const DASH_SCORING_CATS = [
-        { name: '💄 Sức khỏe & Làm đẹp', words: _DASH_KW.beauty.split('|').sort((a, b) => b.length - a.length) },
-        { name: '👗 Thời trang & Phụ kiện', words: _DASH_KW.fashion.split('|').sort((a, b) => b.length - a.length) },
-        { name: '💻 Điện tử & Công nghệ', words: _DASH_KW.tech.split('|').sort((a, b) => b.length - a.length) },
-        { name: '🏠 Nhà cửa & Đời sống', words: _DASH_KW.home.split('|').sort((a, b) => b.length - a.length) },
-        { name: '💪 Thể thao & Dã ngoại', words: _DASH_KW.sport.split('|').sort((a, b) => b.length - a.length) },
-        { name: '📚 Giải trí & Giáo dục', words: _DASH_KW.edu.split('|').sort((a, b) => b.length - a.length) }
-      ];
+      // Load categories from JSON file
+      async function loadCategories() {
+        if (_categoriesData) return _categoriesData;
+        
+        try {
+          const response = await fetch('./categories.json');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          _categoriesData = await response.json();
+          return _categoriesData;
+        } catch (error) {
+          console.error('Failed to load categories:', error);
+          // Fallback to default categories if loading fails
+          _categoriesData = {
+            categories: [
+              { id: 'other', name: '🏷️ Khác', keywords: [] }
+            ]
+          };
+          return _categoriesData;
+        }
+      }
 
-      // Synchronous keyword classifier — same scoring logic as the former content.js version
-      const MIN_DASH_SCORE = 5;
-      function classifyByNameDash(name) {
+      // Dynamic category scoring setup
+      let DASH_SCORING_CATS = [];
+
+      // Initialize categories from loaded data
+      async function initializeCategories() {
+        const data = await loadCategories();
+        DASH_SCORING_CATS = data.categories.map(cat => ({
+          name: cat.name,
+          words: cat.keywords.sort((a, b) => b.length - a.length)
+        }));
+        return DASH_SCORING_CATS;
+      }
+
+      // Async keyword classifier — same scoring logic as the former content.js version
+      const MIN_DASH_SCORE = 4;
+      async function classifyByNameDash(name) {
+        // Ensure categories are loaded
+        if (DASH_SCORING_CATS.length === 0) {
+          await initializeCategories();
+        }
+        
         const n = String(name || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
         const paddedN = ' ' + n + ' ';
         let bestCat = '🏷️ Khác';
@@ -1638,14 +1662,16 @@
         return Object.values(map).sort((a, b) => b.s - a.s);
       }
 
-      const DASH_CAT_CODES = {
-        tech: '💻 Điện tử & Công nghệ',
-        beauty: '💄 Sức khỏe & Làm đẹp',
-        fashion: '👗 Thời trang & Phụ kiện',
-        sport: '💪 Thể thao & Dã ngoại',
-        home: '🏠 Nhà cửa & Đời sống',
-        edu: '📚 Giải trí & Giáo dục'
-      };
+      // Dynamic category codes mapping
+      function getDashCatCodes() {
+        const codes = {};
+        if (_categoriesData && _categoriesData.categories) {
+          _categoriesData.categories.forEach(cat => {
+            codes[cat.id] = cat.name;
+          });
+        }
+        return codes;
+      }
 
       let _dashCatSession = null;
       let _dashCatDisabled = false;
@@ -1657,13 +1683,19 @@
         try {
           const status = await LanguageModel.availability();
           if (status === 'unavailable') return null;
+          // Ensure categories are loaded for AI prompt
+          await initializeCategories();
+          
+          // Generate dynamic prompt based on loaded categories
+          const categoriesDesc = _categoriesData.categories.map(cat => 
+            `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚]/g, '').trim()}`
+          ).join(', ');
+          
           _dashCatSession = await LanguageModel.create({
             initialPrompts: [{
               role: 'system', content:
                 'You classify Vietnamese e-commerce product names. ' +
-                'Categories: tech=electronics/devices, beauty=cosmetics/skincare/health, ' +
-                'fashion=clothing/shoes/bags/accessories, sport=sports/outdoors, ' +
-                'home=home/kitchen/groceries, edu=books/toys/hobbies. ' +
+                `Categories: ${categoriesDesc}. ` +
                 'Reply with exactly one code per line in the same order as input. No other text.'
             }],
             temperature: 0.1
@@ -1710,7 +1742,8 @@
 
           let patched = 0;
           for (let i = 0; i < toClassify.length; i++) {
-            const resolved = DASH_CAT_CODES[lines[i]];
+            const dashCatCodes = getDashCatCodes();
+            const resolved = dashCatCodes[lines[i]];
             if (!resolved) continue;
             const { key } = toClassify[i];
             // Apply to all ti items sharing this name key
@@ -1742,13 +1775,14 @@
       ───────────────────────────────────────────────── */
       const AI_INSIGHT_SYSTEM = [
         'Bạn là Chuyên gia Kế hoạch Tài chính Cá nhân người Việt.',
-        'Nhiệm vụ: phân tích dữ liệu chi tiêu thực tế trên Shopee và đưa ra nhận xét THẲNG THẮN, CÁ NHÂN HÓA.',
+        'Nhiệm vụ: phân tích dữ liệu chi tiêu MUA HÀNG THỰC TẾ trên Shopee — gồm tên sản phẩm cụ thể, giá tiền, số lần mua — và đưa ra nhận xét THẲNG THẮN, cực kỳ CÁ NHÂN HÓA.',
         'Quy tắc bắt buộc:',
-        '(1) Luôn dùng đúng số liệu từ dữ liệu được cung cấp.',
-        '(2) Chỉ đích danh sản phẩm hoặc danh mục cụ thể — không nói chung chung.',
-        '(3) Đề xuất ít nhất 1 hành động cắt giảm hoặc tiết kiệm thực tế có thể làm ngay.',
-        '(4) Tối đa 3 câu ngắn gọn, súc tích. Không dùng markdown, không dùng danh sách.',
-        '(5) Giọng điệu: thẳng thắn nhưng thân thiện, như người bạn tư vấn tài chính thực sự.'
+        '(1) Luôn dùng đúng số liệu VÀ TÊN SẢN PHẨM từ dữ liệu được cung cấp — không bịa hoặc nói chung chung.',
+        '(2) Nêu đích danh ít nhất 1 sản phẩm hoặc danh mục cụ thể trong phân tích.',
+        '(3) Đề xuất ít nhất 1 hành động CẮT GIẢM hoặc TIẾT KIỆM thực tế có thể làm ngay — gắn liền với sản phẩm đã mua.',
+        '(4) Tối đa 3 câu ngắn gọn, súc tích. KHÔNG dùng markdown, KHÔNG dùng danh sách bullet, KHÔNG lặp lại số liệu nhàm chán.',
+        '(5) Giọng điệu: thẳng thắn, hài hước nhẹ, như người bạn hiểu tiền bạc đang nói chuyện trực tiếp.',
+        '(6) Nếu có sản phẩm mua lặp nhiều lần, hãy bình luận về thói quen đó.'
       ].join(' ');
 
       let _aiInsightSession = null;
@@ -2484,20 +2518,47 @@
         _dashCache = loadDashCache(d.ts);
         console.log(`[Dashboard] Cache ${Object.keys(_dashCache.cats).length} categories, ${Object.keys(_dashCache.insights).length} insights`);
 
-        // === Synchronous pre-classification (runs before first paint) ===
-        // 1. Apply cached AI overrides from previous sessions
+        // === Initial synchronous classification (use cached data if available) ===
         const tiItems = d.ti || [];
+        // 1. Apply cached AI overrides from previous sessions
         for (const item of tiItems) {
           if (item.cat) continue;
           const key = item.n.toLowerCase().substring(0, 120);
           if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
         }
-        // 2. Keyword-classify remaining unclassified items (synchronous, O(n*keywords))
+        
+        // 2. Initialize with default category for unclassified items (will be updated async)
         for (const item of tiItems) {
-          if (!item.cat) item.cat = classifyByNameDash(item.n);
+          if (!item.cat) item.cat = '🏷️ Khác';
         }
-        // 3. Build catStats from classified ti (replaces the old cs from URL)
+        
+        // 3. Build initial catStats from classified ti
         d.cs = buildCsFromTi(tiItems);
+
+        // === Async keyword classification (runs in background, updates UI when done) ===
+        (async () => {
+          try {
+            let hasUpdates = false;
+            for (const item of tiItems) {
+              if (item.cat === '🏷️ Khác') {
+                const newCat = await classifyByNameDash(item.n);
+                if (newCat !== '🏷️ Khác') {
+                  item.cat = newCat;
+                  hasUpdates = true;
+                }
+              }
+            }
+            
+            if (hasUpdates) {
+              // Rebuild categories and update UI
+              d.cs = buildCsFromTi(tiItems);
+              renderCategories(d.cs, d.ti || []);
+              console.log('[Dashboard] Categories updated after async classification');
+            }
+          } catch (error) {
+            console.error('[Dashboard] Error in async classification:', error);
+          }
+        })();
 
         document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
         document.getElementById('data-date').textContent = fmtDate(d.ts);
@@ -2514,11 +2575,22 @@
           renderInsightCard('insight-monthly', monthlyItems);
           const yearData = d.yd[yr] || {};
           const avgPerOrder = Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1));
-          const monthBreakdown = Object.entries(yearData.m || {})
+          const monthEntries = Object.entries(yearData.m || {})
             .sort((a, b) => Number(a[0]) - Number(b[0]))
-            .map(([m, v]) => `T${m}:${fmtVND(v)}`).join(', ');
-          const activeMonths = Object.values(yearData.m || {}).filter(v => v > 0).length;
+            .filter(([, v]) => v > 0);
+          const monthBreakdown = monthEntries.map(([m, v]) => `T${m}:${fmtVND(v)}`).join(', ');
+          const activeMonths = monthEntries.length;
           const avgPerMonth = activeMonths > 0 ? Math.round((yearData.t || 0) / activeMonths) : 0;
+          // Peak month items from d.mi
+          let peakMonthItems = '';
+          if (monthEntries.length > 0) {
+            const peakEntry = monthEntries.reduce((a, b) => a[1] >= b[1] ? a : b);
+            const peakKey = `${yr}-${peakEntry[0]}`;
+            const peakItems = (d.mi || {})[peakKey] || [];
+            if (peakItems.length > 0) {
+              peakMonthItems = `Sản phẩm mua trong tháng ${peakEntry[0]}: ${peakItems.slice(0, 5).map(i => `"${i.n}" ${fmtVND(i.s)}`).join(', ')}.`;
+            }
+          }
           // Recent period data for trend detection
           const recent1m = fmtVND(d.ps?.['1m'] || 0);
           const recent3m = fmtVND(d.ps?.['3m'] || 0);
@@ -2527,9 +2599,10 @@
               `Năm ${yr}: tổng ${fmtVND(yearData.t || 0)} / ${fmtNum(yearData.o || 0)} đơn / trung bình ${fmtVND(avgPerOrder)}/đơn.`,
               `Chi theo tháng: ${monthBreakdown || 'không có dữ liệu'}.`,
               `Trung bình ${fmtVND(avgPerMonth)}/tháng (${activeMonths} tháng có mua sắm).`,
+              peakMonthItems,
               `Gần đây: 1 tháng qua ${recent1m}, 3 tháng qua ${recent3m}.`
-            ].join(' '),
-            `Tháng nào bị "nghiện" mua sắm nhất? Tần suất ${fmtNum(yearData.o || 0)} đơn/${activeMonths} tháng có đáng lo không? Xu hướng chi tiêu gần đây đang tăng hay giảm và cần điều chỉnh gì?`,
+            ].filter(Boolean).join(' '),
+            `Tháng nào đang "đốt tiền" nhiều nhất và mua những gì? Điểm tên sản phẩm cụ thể nếu có. Xu hướng gần đây (1-3 tháng) đang tốt hay đáng báo động?`,
             `insight-monthly-${yr}` // per-year cache key
           );
         });
@@ -2584,37 +2657,55 @@
             return `${c.name} ${fmtVND(c.s)} (${pct}%)`;
           }).join(', ');
 
+          // Top 5 items for yearly context
+          const top5ForYear = (d.ti || []).slice(0, 5);
+          const top5ItemsDesc = top5ForYear.map(i => `"${i.n}": ${fmtVND(i.s)}, mua ${i.c} lần`).join('; ');
+
           enrichWithAI('insight-yearly',
             [
               `Tổng chi: ${fmtVND(d.t)} / ${fmtNum(d.o)} đơn / trung bình ${fmtVND(avgOrderValue)}/đơn.`,
               `Phí ship: ${fmtVND(shipFee)} (${shipPct}% tổng, trung bình ${fmtVND(shipPerOrder)}/đơn).`,
               `Tiết kiệm voucher: ${fmtVND(d.s)} (${savingsRate}% giá gốc).`,
               yoyLine,
-              `Top danh mục: ${topCats}.`
+              `Top danh mục: ${topCats}.`,
+              top5ItemsDesc ? `Sản phẩm chi nhiều nhất: ${top5ItemsDesc}.` : ''
             ].filter(Boolean).join(' '),
-            `Chẩn đoán: lỗ hổng tài chính lớn nhất là gì (tiền ship, mua lẻ, hay chi tiêu 1 danh mục quá nhiều)? Đề xuất 1 hành động cắt giảm ngay trong tháng tới.`
+            `Nhìn vào danh sách sản phẩm cụ thể trên, lỗ hổng tài chính lớn nhất là gì? Sản phẩm nào đang ngốn tiền không tương xứng với giá trị? Đề xuất 1 thay đổi cụ thể có thể tiết kiệm ngay tháng tới.`
           );
 
-          // Top 8 items with spend + count
-          const top8 = (d.ti || []).slice(0, 8);
-          const top5sum = top8.slice(0, 5).reduce((s, i) => s + i.s, 0);
+          // Top 10 items with spend + count + avg price per purchase
+          const top10 = (d.ti || []).slice(0, 10);
+          const top5sum = top10.slice(0, 5).reduce((s, i) => s + i.s, 0);
           const concentration = Math.round((top5sum / Math.max(d.t || 1, 1)) * 100);
-          const itemLines = top8.map(i => `"${i.n}": ${fmtVND(i.s)}, ${i.c} lần mua`).join('; ');
+          const itemLines = top10.map(i => {
+            const avgP = i.c > 0 ? Math.round(i.s / i.c) : i.s;
+            return `"${i.n}": tổng ${fmtVND(i.s)}, ${i.c} lần mua (~${fmtVND(avgP)}/lần)`;
+          }).join('; ');
+          // Most repeat-bought item
+          const mostRepeat = [...top10].sort((a, b) => b.c - a.c)[0];
+          const repeatNote = mostRepeat && mostRepeat.c > 2 ? `Mua lặp nhiều nhất: "${mostRepeat.n}" (${mostRepeat.c} lần).` : '';
 
           enrichWithAI('insight-items',
-            `Top sản phẩm: ${itemLines}. Top 5 chiếm ${concentration}% tổng chi.`,
-            `Sản phẩm nào là lãng phí/tiêu sản (mua theo trend, ít dùng)? Sản phẩm nào đang bị mua lặp quá nhiều? Gợi ý cắt giảm hoặc thay thế thông minh hơn.`
+            [
+              `Danh sách sản phẩm đã mua: ${itemLines}.`,
+              `Top 5 chiếm ${concentration}% tổng chi.`,
+              repeatNote
+            ].filter(Boolean).join(' '),
+            `Gọi tên sản phẩm cụ thể: cái nào là lãng phí (mua theo trend rồi bỏ)? Cái nào mua lặp quá nhiều lần có thể mua gộp để rẻ hơn? Đề xuất 1 sản phẩm nên bỏ hoặc thay thế bằng lựa chọn tiết kiệm hơn.`
           );
 
-          // Category breakdown with percentages
+          // Category breakdown with sample items per category
           const catLines = (d.cs).map(c => {
             const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
-            return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)`;
+            // Find top 2 items in this category
+            const catItems = (d.ti || []).filter(i => i.cat === c.name).slice(0, 2);
+            const catItemStr = catItems.length > 0 ? ` (vd: ${catItems.map(i => `"${i.n}"`).join(', ')})` : '';
+            return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)${catItemStr}`;
           }).join('; ');
 
           enrichWithAI('insight-categories',
-            `Phân bổ chi tiêu: ${catLines}.`,
-            `Danh mục nào là "bẫy chi tiêu" không cần thiết? Tỷ lệ này cân bằng hay đang lệch về nhóm tiêu sản (làm đẹp, thời trang trend)? Nên điều chỉnh phân bổ thế nào?`
+            `Phân bổ chi tiêu theo danh mục: ${catLines}.`,
+            `Danh mục nào và sản phẩm nào cụ thể đang là "bẫy chi tiêu" không cần thiết? Tỷ lệ chi tiêu này có đang lệch quá về nhóm tiêu sản không? Nên cắt hoặc giảm danh mục nào trước?`
           );
         });
       }
