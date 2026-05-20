@@ -1,0 +1,134 @@
+/* ─────────────────────────────────────────────────
+   Render: Categories view
+   renderCategories, showCatItems.
+   Depends on helpers.js.
+───────────────────────────────────────────────── */
+
+let catChart = null;
+let currentCatData = null;
+
+function showCatItems(catName, ti) {
+  const card = document.getElementById('card-cat-items');
+  const title = document.getElementById('cat-items-title');
+  const list = document.getElementById('cat-items-list');
+
+  const items = (ti || []).filter(i => {
+    if (i.cat === catName) return true;
+    if (resolveCatLabel({ id: i.cat }) === catName) return true;
+    if (resolveCatLabel({ name: i.cat }) === catName) return true;
+    if (catName === 'Khác' || catName === '🏷️ Khác') {
+      if (!i.cat || i.cat === 'Khác' || i.cat === '🏷️ Khác') return true;
+    }
+    return false;
+  }).slice(0, 100);
+
+  // Highlight selected bar
+  document.querySelectorAll('.cat-row').forEach(r => {
+    r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
+  });
+
+  title.textContent = catName + ' — Top Sản Phẩm';
+  card.style.display = 'block';
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="no-data">Không có sản phẩm nào trong danh mục này (thử chạy lại để cập nhật dữ liệu)</div>';
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
+  const maxS = Math.max(...items.map(i => i.s), 1);
+  list.innerHTML = items.map((item, idx) => {
+    const pct = Math.round((item.s / maxS) * 100);
+    return `
+      <div class="top-row in">
+        <div class="top-num">${idx + 1}</div>
+        <div class="top-name-wrap">
+          <div class="top-name">${escHtml(capFirst(item.n))}</div>
+          <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
+          <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
+        </div>
+        <div class="top-val">${fmtVND(item.s)}</div>
+      </div>`;
+  }).join('');
+  reveal(card);
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderCategories(cs, ti) {
+  currentCatData = { cs, ti };
+  if (!cs || cs.length === 0) {
+    document.getElementById('cat-bars').innerHTML =
+      '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
+    return;
+  }
+
+  const maxS = Math.max(...cs.map(c => c.s), 1);
+  const bars = document.getElementById('cat-bars');
+  bars.innerHTML = cs.map(c => {
+    const name = resolveCatLabel(c);
+    const pct = Math.round((c.s / maxS) * 100);
+    return `
+      <div class="cat-row" data-cat="${escHtml(name)}" style="cursor:pointer" title="Click để xem sản phẩm">
+        <div class="cat-label">${escHtml(name)}</div>
+        <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
+        <div class="cat-val">${fmtVND(c.s)}</div>
+      </div>`;
+  }).join('');
+
+  bars.querySelectorAll('.cat-row').forEach(row => {
+    row.addEventListener('click', () => showCatItems(row.getAttribute('data-cat'), ti));
+  });
+
+  // Animate bars on scroll into view
+  const bObs = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    bObs.disconnect();
+    bars.querySelectorAll('.cat-bar-fill').forEach((bar, i) => {
+      setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 70);
+    });
+  }, { threshold: 0.2 });
+  bObs.observe(bars);
+  reveal(document.getElementById('card-cat-bars'));
+
+  // Donut chart
+  const PALETTE = [
+    '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
+    '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
+    '#8b5cf6', '#06b6d4'
+  ];
+  const ctx = document.getElementById('chart-cat').getContext('2d');
+  if (catChart) catChart.destroy();
+  catChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: cs.map(c => resolveCatLabel(c)),
+      datasets: [{
+        data: cs.map(c => c.s),
+        backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
+        borderWidth: 2,
+        borderColor: '#ffffff',
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          display: true, position: 'right',
+          labels: { color: 'rgba(30,41,59,0.7)', font: { size: 11 }, boxWidth: 12, padding: 10 }
+        },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          borderColor: 'rgba(0,0,0,0.1)',
+          borderWidth: 1,
+          titleColor: '#1e293b',
+          bodyColor: 'rgba(30,41,59,0.8)',
+          callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) }
+        }
+      }
+    }
+  });
+  reveal(document.getElementById('card-cat-pie'));
+}
