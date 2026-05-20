@@ -1310,14 +1310,14 @@
         return String(s).charAt(0).toUpperCase() + String(s).slice(1);
       }
       function renderAIInsight(text) {
-        // Split text into sentences for prettier display
-        const bullets = ['💡', '📌', '⚡', '🎯', '💰'];
-        const sentences = text
-          .split(/(?<=[.!?])\s+/)
-          .map(s => s.trim())
-          .filter(s => s.length > 0);
-        const items = sentences.map((s, i) =>
-          `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${escHtml(s)}</span></div>`
+        // Split text by newlines into paragraphs/ideas
+        const paragraphs = text
+          .split(/\n+/)
+          .map(p => p.trim())
+          .filter(p => p.length > 0);
+        const bullets = ['💡', '⚡', '🎯', '💰', '📌'];
+        const items = paragraphs.map((p, i) =>
+          `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${escHtml(p)}</span></div>`
         ).join('');
         return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span></div><div class="insight-ai-body">${items}</div>`;
       }
@@ -2550,61 +2550,10 @@
         _dashCache = loadDashCache(d.ts);
         console.log(`[Dashboard] Cache ${Object.keys(_dashCache.cats).length} categories, ${Object.keys(_dashCache.insights).length} insights`);
 
-        // === Initial synchronous classification (use cached data if available) ===
-        const tiItems = d.ti || [];
-        // 1. Apply cached AI overrides from previous sessions
-        for (const item of tiItems) {
-          if (item.cat) continue;
-          const key = item.n.toLowerCase().substring(0, 120);
-          if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
-        }
-        
-        // 2. Initialize with default category for unclassified items (will be updated async)
-        for (const item of tiItems) {
-          if (!item.cat) item.cat = '🏷️ Khác';
-        }
-        
-        // 3. Build initial catStats from classified ti
-        d.cs = buildCsFromTi(tiItems);
+        let _categorizationFinished = false;
+        let _activeYear = null;
 
-        // === Async keyword classification (runs in background, updates UI when done) ===
-        (async () => {
-          try {
-            let hasUpdates = false;
-            for (const item of tiItems) {
-              if (item.cat === '🏷️ Khác') {
-                const newCat = await classifyByNameDash(item.n);
-                if (newCat !== '🏷️ Khác') {
-                  item.cat = newCat;
-                  hasUpdates = true;
-                }
-              }
-            }
-            
-            if (hasUpdates) {
-              // Rebuild categories and update UI
-              d.cs = buildCsFromTi(tiItems);
-              renderCategories(d.cs, d.ti || []);
-              console.log('[Dashboard] Categories updated after async classification');
-            }
-          } catch (error) {
-            console.error('[Dashboard] Error in async classification:', error);
-          }
-        })();
-
-        document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
-        document.getElementById('data-date').textContent = fmtDate(d.ts);
-        document.getElementById('subtitle-overview').textContent =
-          `${fmtVND(d.t)} tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
-
-        renderKpi(d);
-        renderYearlyChart(d.yd || {}, d);
-        renderPeriod(d.ps || {});
-        renderYearPills(d.yd || {}, yr => {
-          renderMonthly(d.yd, yr, d);
-          // Re-render monthly insight when year changes
-          const monthlyItems = computeMonthlyInsights(d.yd, yr);
-          renderInsightCard('insight-monthly', monthlyItems);
+        function triggerMonthlyAIInsight(d, yr) {
           const yearData = d.yd[yr] || {};
           const avgPerOrder = Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1));
           const monthEntries = Object.entries(yearData.m || {})
@@ -2613,6 +2562,7 @@
           const monthBreakdown = monthEntries.map(([m, v]) => `T${m}:${fmtVND(v)}`).join(', ');
           const activeMonths = monthEntries.length;
           const avgPerMonth = activeMonths > 0 ? Math.round((yearData.t || 0) / activeMonths) : 0;
+          
           // Peak month items from d.mi
           let peakMonthItems = '';
           if (monthEntries.length > 0) {
@@ -2623,54 +2573,64 @@
               peakMonthItems = `Sản phẩm mua trong tháng ${peakEntry[0]}: ${peakItems.slice(0, 5).map(i => `"${i.n}" ${fmtVND(i.s)}`).join(', ')}.`;
             }
           }
-          // Recent period data for trend detection
-          const recent1m = fmtVND(d.ps?.['1m'] || 0);
-          const recent3m = fmtVND(d.ps?.['3m'] || 0);
+
+          // Determine temporal context: is this year current, recent, or historical?
+          const currentYear = new Date().getFullYear();
+          const yearNum = Number(yr);
+          const yearDiff = currentYear - yearNum;
+          const isCurrentYear = yearDiff === 0;
+          const isLastYear = yearDiff === 1;
+          // isPastYear = yearDiff >= 2
+
+          // Last month with data in this year
+          const lastActiveMonth = monthEntries.length > 0
+            ? Number(monthEntries[monthEntries.length - 1][0])
+            : null;
+          const currentMonth = new Date().getMonth() + 1; // 1-indexed
+
+          // Build data context lines
+          const contextLines = [
+            `Năm ${yr}: tổng ${fmtVND(yearData.t || 0)} / ${fmtNum(yearData.o || 0)} đơn / trung bình ${fmtVND(avgPerOrder)}/đơn.`,
+            `Chi theo tháng: ${monthBreakdown || 'không có dữ liệu'}.`,
+            `Trung bình ${fmtVND(avgPerMonth)}/tháng (${activeMonths} tháng có mua sắm).`,
+            peakMonthItems
+          ];
+
+          // Only include recent period data for the current year (it's irrelevant for past years)
+          if (isCurrentYear) {
+            const recent1m = fmtVND(d.ps?.['1m'] || 0);
+            const recent3m = fmtVND(d.ps?.['3m'] || 0);
+            contextLines.push(`Gần đây: 1 tháng qua ${recent1m}, 3 tháng qua ${recent3m}.`);
+            if (lastActiveMonth) {
+              contextLines.push(`Tháng hiện tại: tháng ${currentMonth}/${currentYear}. Tháng gần nhất có dữ liệu: tháng ${lastActiveMonth}.`);
+            }
+          } else {
+            // For past years, note how long ago this data is
+            contextLines.push(`Lưu ý: Đây là dữ liệu của năm ${yr}, cách đây ${yearDiff} năm (năm hiện tại là ${currentYear}).`);
+            if (lastActiveMonth) {
+              contextLines.push(`Tháng cuối cùng có dữ liệu trong năm ${yr}: tháng ${lastActiveMonth}.`);
+            }
+          }
+
+          // Build prompt tailored to temporal context
+          let specificPrompt;
+          if (isCurrentYear) {
+            specificPrompt = `Đây là dữ liệu chi tiêu năm NAY (${yr}). Hãy phân tích biến động chi tiêu theo tháng, chỉ ra tháng nào đang "đốt tiền" nhiều nhất và mua gì. Đánh giá xu hướng 1-3 tháng gần đây đang tăng hay giảm, và đưa ra lời khuyên cụ thể cho các tháng SẮP TỚI (đặt hạn mức, điều chỉnh thói quen...).`;
+          } else if (isLastYear) {
+            specificPrompt = `Đây là dữ liệu chi tiêu năm NGOÁI (${yr}). Hãy nhìn lại và tổng kết: tháng nào chi tiêu vượt kiểm soát nhất, mua gì nhiều nhất? Rút ra bài học gì cho năm nay (${currentYear}) — có thói quen mua sắm theo mùa/dịp nào cần cảnh giác lặp lại không?`;
+          } else {
+            specificPrompt = `Đây là dữ liệu chi tiêu từ ${yearDiff} năm trước (${yr}). Hãy nhìn lại và nhận xét về hành vi chi tiêu theo tháng thời điểm đó: tháng nào chi nhiều nhất, có quy luật mùa vụ gì không? So sánh với thói quen chi tiêu chung và rút ra nhận xét hữu ích mang tính hồi tưởng.`;
+          }
+
           enrichWithAI('insight-monthly',
-            [
-              `Năm ${yr}: tổng ${fmtVND(yearData.t || 0)} / ${fmtNum(yearData.o || 0)} đơn / trung bình ${fmtVND(avgPerOrder)}/đơn.`,
-              `Chi theo tháng: ${monthBreakdown || 'không có dữ liệu'}.`,
-              `Trung bình ${fmtVND(avgPerMonth)}/tháng (${activeMonths} tháng có mua sắm).`,
-              peakMonthItems,
-              `Gần đây: 1 tháng qua ${recent1m}, 3 tháng qua ${recent3m}.`
-            ].filter(Boolean).join(' '),
-            `Tháng nào đang "đốt tiền" nhiều nhất và mua những gì? Điểm tên sản phẩm cụ thể nếu có. Xu hướng gần đây (1-3 tháng) đang tốt hay đáng báo động?`,
+            contextLines.filter(Boolean).join(' '),
+            specificPrompt,
             `insight-monthly-${yr}` // per-year cache key
           );
-        });
-        renderTopItems(d.ti || []);
-        renderCategories(d.cs, d.ti || []);
-
-        // Render insight cards
-        renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
-        renderInsightCard('insight-items', computeItemInsights(d.ti || [], d.t));
-        renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
-
-        // Render monthly insight for default year
-        const defaultYears = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
-        if (defaultYears.length) {
-          renderInsightCard('insight-monthly', computeMonthlyInsights(d.yd, defaultYears[0]));
         }
 
-        // Add listeners for limits
-        document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
-        document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
-
-        setupShareButtons(d);
-
-        // AI category classification — runs lazily with throttling to avoid UI blocking
-        // Use setTimeout with longer delay to ensure UI is fully rendered and responsive
-        // Only run if there are uncategorized items to avoid unnecessary AI calls
-        const uncategorizedCount = (d.ti || []).filter(item => item.cat === '🏷️ Khác').length;
-        if (uncategorizedCount > 0) {
-          console.log(`[Dashboard] Scheduling AI classification for ${uncategorizedCount} items`);
-          setTimeout(() => {
-            classifyKharItems(d.ti || [], d);
-          }, 1500); // Delay increased from immediate to 1.5s for better UX
-        }
-
-        // AI narrative — runs lazily after paint, no-op if Chrome < 148
-        requestAnimationFrame(() => {
+        function runAIInsightsNarrative(d) {
+          console.log('[Dashboard] Starting AI insights narrative...');
           const years = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
           const curYear = years[0];
           const prevYear = years[1];
@@ -2687,29 +2647,18 @@
             yoyLine = `Năm ${curYear} ${pct >= 0 ? 'tăng' : 'giảm'} ${Math.abs(pct)}% so với năm ${prevYear}.`;
           }
 
-          // Top 3 categories formatted
-          const topCats = (d.cs).slice(0, 3).map(c => {
-            const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
-            return `${c.name} ${fmtVND(c.s)} (${pct}%)`;
-          }).join(', ');
-
-          // Top 5 items for yearly context
-          const top5ForYear = (d.ti || []).slice(0, 5);
-          const top5ItemsDesc = top5ForYear.map(i => `"${i.n}": ${fmtVND(i.s)}, mua ${i.c} lần`).join('; ');
-
+          // 1. Yearly Card AI Insight (insight-yearly) - macro/finance overview only (no category names, no product names)
           enrichWithAI('insight-yearly',
             [
               `Tổng chi: ${fmtVND(d.t)} / ${fmtNum(d.o)} đơn / trung bình ${fmtVND(avgOrderValue)}/đơn.`,
               `Phí ship: ${fmtVND(shipFee)} (${shipPct}% tổng, trung bình ${fmtVND(shipPerOrder)}/đơn).`,
               `Tiết kiệm voucher: ${fmtVND(d.s)} (${savingsRate}% giá gốc).`,
-              yoyLine,
-              `Top danh mục: ${topCats}.`,
-              top5ItemsDesc ? `Sản phẩm chi nhiều nhất: ${top5ItemsDesc}.` : ''
+              yoyLine
             ].filter(Boolean).join(' '),
-            `Nhìn vào danh sách sản phẩm cụ thể trên, lỗ hổng tài chính lớn nhất là gì? Sản phẩm nào đang ngốn tiền không tương xứng với giá trị? Đề xuất 1 thay đổi cụ thể có thể tiết kiệm ngay tháng tới.`
+            `Hãy nhận xét thẳng thắn về thói quen chi tiêu tổng thể và hiệu quả tài chính của năm nay (phí vận chuyển, tỷ lệ áp dụng voucher khuyến mãi...). Hãy chỉ ra lỗ hổng tài chính vĩ mô và đề xuất giải pháp tối ưu.`
           );
 
-          // Top 10 items with spend + count + avg price per purchase
+          // 2. Items Card AI Insight (insight-items) - specific products only
           const top10 = (d.ti || []).slice(0, 10);
           const top5sum = top10.slice(0, 5).reduce((s, i) => s + i.s, 0);
           const concentration = Math.round((top5sum / Math.max(d.t || 1, 1)) * 100);
@@ -2717,7 +2666,6 @@
             const avgP = i.c > 0 ? Math.round(i.s / i.c) : i.s;
             return `"${i.n}": tổng ${fmtVND(i.s)}, ${i.c} lần mua (~${fmtVND(avgP)}/lần)`;
           }).join('; ');
-          // Most repeat-bought item
           const mostRepeat = [...top10].sort((a, b) => b.c - a.c)[0];
           const repeatNote = mostRepeat && mostRepeat.c > 2 ? `Mua lặp nhiều nhất: "${mostRepeat.n}" (${mostRepeat.c} lần).` : '';
 
@@ -2727,13 +2675,13 @@
               `Top 5 chiếm ${concentration}% tổng chi.`,
               repeatNote
             ].filter(Boolean).join(' '),
-            `Gọi tên sản phẩm cụ thể: cái nào là lãng phí (mua theo trend rồi bỏ)? Cái nào mua lặp quá nhiều lần có thể mua gộp để rẻ hơn? Đề xuất 1 sản phẩm nên bỏ hoặc thay thế bằng lựa chọn tiết kiệm hơn.`
+            `Hãy gọi tên đích danh sản phẩm cụ thể để phân tích xem cái nào là lãng phí (mua theo trend rồi bỏ), cái nào mua lặp lẻ tẻ quá nhiều lần có thể mua gộp để tiết kiệm. Đề xuất hành động cắt giảm gắn liền với tên sản phẩm.`
           );
 
-          // Category breakdown with sample items per category
-          const catLines = (d.cs).map(c => {
+          // 3. Categories Card AI Insight (insight-categories) - categories only, excluding "Khác"
+          const filteredCs = (d.cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác');
+          const catLines = filteredCs.map(c => {
             const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
-            // Find top 2 items in this category
             const catItems = (d.ti || []).filter(i => i.cat === c.name).slice(0, 2);
             const catItemStr = catItems.length > 0 ? ` (vd: ${catItems.map(i => `"${i.n}"`).join(', ')})` : '';
             return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)${catItemStr}`;
@@ -2741,9 +2689,126 @@
 
           enrichWithAI('insight-categories',
             `Phân bổ chi tiêu theo danh mục: ${catLines}.`,
-            `Danh mục nào và sản phẩm nào cụ thể đang là "bẫy chi tiêu" không cần thiết? Tỷ lệ chi tiêu này có đang lệch quá về nhóm tiêu sản không? Nên cắt hoặc giảm danh mục nào trước?`
+            `Hãy đánh giá cơ cấu phân bổ dòng tiền vào các danh mục sản phẩm (sức khỏe, công nghệ, thời trang...). Chỉ ra danh mục nào là "bẫy chi tiêu" ngốn nhiều tiền nhất (loại bỏ hoàn toàn danh mục "🏷️ Khác" hay "Khác") và đề xuất cách tái phân bổ hợp lý.`
           );
-        });
+
+          // 4. Trigger monthly insight for current active year
+          if (_activeYear) {
+            triggerMonthlyAIInsight(d, _activeYear);
+          }
+        }
+
+        async function initDashboard() {
+          const tiItems = d.ti || [];
+          
+          // 1. Apply cached AI overrides from previous sessions
+          for (const item of tiItems) {
+            if (item.cat) continue;
+            const key = item.n.toLowerCase().substring(0, 120);
+            if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
+          }
+          
+          // 2. Initialize with default category for unclassified items
+          for (const item of tiItems) {
+            if (!item.cat) item.cat = '🏷️ Khác';
+          }
+          
+          // 3. Build initial catStats from classified ti
+          d.cs = buildCsFromTi(tiItems);
+
+          // 4. Render layout synchronously so UI appears instantly
+          document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
+          document.getElementById('data-date').textContent = fmtDate(d.ts);
+          document.getElementById('subtitle-overview').textContent =
+            `${fmtVND(d.t)} tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
+
+          renderKpi(d);
+          renderYearlyChart(d.yd || {}, d);
+          renderPeriod(d.ps || {});
+          
+          renderYearPills(d.yd || {}, yr => {
+            _activeYear = yr;
+            renderMonthly(d.yd, yr, d);
+            const monthlyItems = computeMonthlyInsights(d.yd, yr);
+            renderInsightCard('insight-monthly', monthlyItems);
+            
+            // Only query monthly AI if categorization is complete
+            if (_categorizationFinished) {
+              triggerMonthlyAIInsight(d, yr);
+            }
+          });
+          
+          renderTopItems(tiItems);
+          renderCategories(d.cs, tiItems);
+
+          // Render static insights cards
+          renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
+          renderInsightCard('insight-items', computeItemInsights(tiItems, d.t));
+          renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+
+          // Render monthly insight for default year
+          const defaultYears = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
+          if (defaultYears.length) {
+            renderInsightCard('insight-monthly', computeMonthlyInsights(d.yd, defaultYears[0]));
+          }
+
+          // Add listeners for limits
+          document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
+          document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
+
+          setupShareButtons(d);
+
+          // 5. Run async keyword classification (background)
+          try {
+            let hasUpdates = false;
+            for (const item of tiItems) {
+              if (item.cat === '🏷️ Khác') {
+                const newCat = await classifyByNameDash(item.n);
+                if (newCat !== '🏷️ Khác') {
+                  item.cat = newCat;
+                  hasUpdates = true;
+                }
+              }
+            }
+            
+            if (hasUpdates) {
+              d.cs = buildCsFromTi(tiItems);
+              renderCategories(d.cs, tiItems);
+              renderTopItems(tiItems);
+              console.log('[Dashboard] Categories updated after async keyword classification');
+            }
+          } catch (error) {
+            console.error('[Dashboard] Error in async keyword classification:', error);
+          }
+
+          // 6. Run AI category classification if any remaining '🏷️ Khác' items
+          const uncategorizedCount = tiItems.filter(item => item.cat === '🏷️ Khác').length;
+          if (uncategorizedCount > 0) {
+            console.log(`[Dashboard] Running AI category classification for ${uncategorizedCount} items...`);
+            try {
+              await classifyKharItems(tiItems, d);
+            } catch (e) {
+              console.error('[Dashboard] AI category classification failed:', e);
+            }
+          }
+
+          // 7. Categorization is now 100% finished! Update final state
+          _categorizationFinished = true;
+          d.cs = buildCsFromTi(tiItems);
+          
+          renderTopItems(tiItems);
+          renderCategories(d.cs, tiItems);
+          
+          // Re-render static rule-based cards with the final categorized data
+          renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
+          renderInsightCard('insight-items', computeItemInsights(tiItems, d.t));
+          renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+
+          // 8. Run AI narrative insights using final clean categorization
+          runAIInsightsNarrative(d);
+        }
+
+        initDashboard();
       }
 
     // ═══════════════════════════════════════════════════════════════════════════════════════════════════
