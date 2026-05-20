@@ -1,31 +1,42 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopee Analytics — Dashboard</title>
   <link rel="icon" type="image/png" href="../extension/icons/icon128.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --primary:      #ee4d2d;
-      --primary-dim:  rgba(238,77,45,0.12);
-      --green:        #26aa99;
-      --green-dim:    rgba(38,170,153,0.12);
-      --dark:         #f4f6f8;
-      --surface:      #ffffff;
-      --card:         #ffffff;
-      --border:       rgba(0,0,0,0.08);
-      --text:         #1e293b;
-      --muted:        rgba(30,41,59,0.55);
-      --sidebar-w:    230px;
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body { height: 100%; }
+    :root {
+      --primary: #ee4d2d;
+      --primary-dim: rgba(238, 77, 45, 0.12);
+      --green: #26aa99;
+      --green-dim: rgba(38, 170, 153, 0.12);
+      --dark: #f4f6f8;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #1e293b;
+      --muted: rgba(30, 41, 59, 0.55);
+      --sidebar-w: 230px;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -46,9 +57,11 @@
       flex-direction: column;
       padding: 24px 0;
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       z-index: 10;
     }
+
     .sidebar-logo {
       display: flex;
       align-items: center;
@@ -56,51 +69,98 @@
       padding: 0 20px 24px;
       border-bottom: 1px solid var(--border);
     }
+
     .sidebar-logo .logo-icon {
-      width: 34px; height: 34px;
+      width: 34px;
+      height: 34px;
       background: linear-gradient(135deg, var(--primary), #ff7555);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    .sidebar-logo h2 {
-      font-size: 14px; font-weight: 800;
-      background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .sidebar-logo span {
-      font-size: 10px; font-weight: 600;
-      color: var(--muted); display: block; line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
 
-    .nav-section { padding: 16px 12px 8px; }
-    .nav-label {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--muted); padding: 0 8px; margin-bottom: 6px;
+    .sidebar-logo h2 {
+      font-size: 14px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
+
+    .sidebar-logo span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      display: block;
+      line-height: 1;
+    }
+
+    .nav-section {
+      padding: 16px 12px 8px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+
     .nav-item {
-      display: flex; align-items: center; gap: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       padding: 10px 10px;
       border-radius: 10px;
-      font-size: 13px; font-weight: 600;
+      font-size: 13px;
+      font-weight: 600;
       color: var(--muted);
       cursor: pointer;
-      border: none; background: none; width: 100%;
+      border: none;
+      background: none;
+      width: 100%;
       text-align: left;
       transition: all 0.15s;
     }
-    .nav-item:hover  { background: var(--border); color: var(--text); }
-    .nav-item.active { background: var(--primary-dim); color: var(--primary); }
-    .nav-item .ni    { font-size: 16px; width: 20px; text-align: center; }
+
+    .nav-item:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--primary-dim);
+      color: var(--primary);
+    }
+
+    .nav-item .ni {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
 
     .sidebar-footer {
       margin-top: auto;
       padding: 16px 20px 0;
       border-top: 1px solid var(--border);
     }
-    .sidebar-footer p { font-size: 11px; color: var(--muted); line-height: 1.5; }
-    #data-date { color: rgba(30,41,59,0.6); font-weight: 600; }
+
+    .sidebar-footer p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    #data-date {
+      color: rgba(30, 41, 59, 0.6);
+      font-weight: 600;
+    }
 
     /* ── Main ─────────────────────────────────────── */
     .main {
@@ -111,15 +171,31 @@
     }
 
     .page-header {
-      display: flex; align-items: flex-end; justify-content: space-between;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
       margin-bottom: 28px;
     }
-    .page-title { font-size: 24px; font-weight: 800; }
-    .page-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
 
     /* ── Views ───────────────────────────────────── */
-    .view { display: none; }
-    .view.active { display: block; }
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
 
     /* ── KPI row ─────────────────────────────────── */
     .kpi-row {
@@ -128,25 +204,58 @@
       gap: 14px;
       margin-bottom: 24px;
     }
+
     .kpi {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 18px 20px;
-      opacity: 0; transform: translateY(10px);
-      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16, 1, .3, 1);
     }
-    .kpi.in { opacity: 1; transform: translateY(0); }
-    .kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
-    .kpi-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .kpi-value.green  { color: #5fe8cc; }
-    .kpi-value.orange { color: var(--primary); }
-    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .kpi.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-value.green {
+      color: #5fe8cc;
+    }
+
+    .kpi-value.orange {
+      color: var(--primary);
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
 
     /* ── Section title ───────────────────────────── */
     .section-heading {
-      font-size: 14px; font-weight: 700;
-      color: var(--muted); text-transform: uppercase; letter-spacing: .8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
       margin-bottom: 14px;
     }
 
@@ -157,26 +266,44 @@
       border-radius: 16px;
       padding: 22px 24px;
       margin-bottom: 20px;
-      opacity: 0; transform: translateY(10px);
-      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16, 1, .3, 1);
     }
-    .card.in { opacity: 1; transform: translateY(0); }
+
+    .card.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .card-title {
-      font-size: 15px; font-weight: 700; margin-bottom: 20px;
-      display: flex; align-items: center; gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* ── Grid 2 columns ──────────────────────────── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
 
     /* ── Chart containers ────────────────────────── */
-    .chart-wrap { 
-      position: relative; 
-      height: 260px; 
+    .chart-wrap {
+      position: relative;
+      height: 260px;
       width: 100%;
       overflow: hidden;
     }
-    .chart-wrap.tall { height: 320px; }
+
+    .chart-wrap.tall {
+      height: 320px;
+    }
+
     .chart-wrap canvas {
       max-width: 100%;
       max-height: 100%;
@@ -184,16 +311,35 @@
     }
 
     /* ── Period pills ────────────────────────────── */
-    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-    .pill {
-      padding: 6px 16px; border-radius: 20px;
-      font-size: 12px; font-weight: 600;
-      border: 1.5px solid var(--border);
-      background: transparent; color: var(--muted);
-      cursor: pointer; transition: all .2s;
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
     }
-    .pill:hover { border-color: var(--primary); color: var(--primary); }
-    .pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .pill {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
 
     /* ── Share Button ───────────────────────────── */
     .btn-share {
@@ -214,127 +360,383 @@
       min-width: 130px;
       justify-content: center;
     }
+
     .btn-share:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(238, 77, 45, 0.35);
     }
 
     /* ── Table ───────────────────────────────────── */
-    .table { width: 100%; border-collapse: collapse; text-align: left; }
-    .table th { padding: 12px 0; font-size: 12px; font-weight: 700; color: var(--muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
-    .table td { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-    .table tr:last-child td { border-bottom: none; }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .table th {
+      padding: 12px 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+    }
+
+    .table td {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
 
     /* ── Top items list ──────────────────────────── */
-    .top-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .top-row {
-      display: flex; align-items: center; gap: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       padding: 10px 0;
       border-bottom: 1px solid var(--border);
-      opacity: 0; transform: translateX(-8px);
-      transition: opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity .35s ease, transform .35s cubic-bezier(.16, 1, .3, 1);
     }
-    .top-row:last-child { border-bottom: none; }
-    .top-row.in { opacity: 1; transform: translateX(0); }
-    .top-num { font-size: 13px; font-weight: 800; color: var(--muted); width: 22px; flex-shrink: 0; }
-    .top-name-wrap { flex: 1; min-width: 0; }
-    .top-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .top-bar-wrap { width: 120px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
-    .top-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), #ff8a5a); width: 0%; transition: width 0.8s cubic-bezier(.16,1,.3,1); }
-    .top-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .top-val { font-size: 14px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+    .top-row:last-child {
+      border-bottom: none;
+    }
+
+    .top-row.in {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .top-num {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      width: 22px;
+      flex-shrink: 0;
+    }
+
+    .top-name-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .top-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-bar-wrap {
+      width: 120px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .top-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), #ff8a5a);
+      width: 0%;
+      transition: width 0.8s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .top-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .top-val {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
     /* ── Category bars ───────────────────────────── */
     .limit-select {
-      padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-      background: var(--surface); color: var(--text);
-      font-size: 12px; font-weight: 600; font-family: inherit;
-      cursor: pointer; outline: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
     }
-    .limit-select:hover { border-color: var(--primary); }
 
-    .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 6px 8px; border-radius: 8px; transition: background .15s; }
-    .cat-row:hover { background: rgba(238,77,45,.07); }
-    .cat-row-active { background: rgba(238,77,45,.12) !important; }
-    .cat-row-active .cat-label { color: var(--primary); }
-    .cat-label { font-size: 13px; font-weight: 600; width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cat-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-    .cat-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--green), #5fe8cc); width: 0%; transition: width 0.9s cubic-bezier(.16,1,.3,1); }
-    .cat-val { font-size: 12px; font-weight: 700; color: var(--muted); min-width: 80px; text-align: right; white-space: nowrap; }
+    .limit-select:hover {
+      border-color: var(--primary);
+    }
+
+    .cat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: background .15s;
+    }
+
+    .cat-row:hover {
+      background: rgba(238, 77, 45, .07);
+    }
+
+    .cat-row-active {
+      background: rgba(238, 77, 45, .12) !important;
+    }
+
+    .cat-row-active .cat-label {
+      color: var(--primary);
+    }
+
+    .cat-label {
+      font-size: 13px;
+      font-weight: 600;
+      width: 200px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--green), #5fe8cc);
+      width: 0%;
+      transition: width 0.9s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    .cat-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      min-width: 80px;
+      text-align: right;
+      white-space: nowrap;
+    }
 
     /* ── Period stats grid ───────────────────────── */
-    .period-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+
     .period-box {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px 16px; text-align: center;
+      padding: 14px 16px;
+      text-align: center;
     }
-    .period-box-val { font-size: 18px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
-    .period-box-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+    .period-box-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .period-box-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
 
     /* ── No data ─────────────────────────────────── */
-    .no-data { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-    .no-data a { color: var(--primary); text-decoration: none; font-weight: 600; }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .no-data a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
 
     /* ── Responsive ──────────────────────────────── */
     /* ── Modal ───────────────────────────────────── */
     .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6); z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .modal-content {
-      background: var(--surface); border-radius: 20px;
-      width: 90%; max-width: 750px; max-height: 90vh;
-      display: flex; flex-direction: column; overflow: hidden;
-      transform: translateY(20px); transition: transform 0.3s;
+      background: var(--surface);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 750px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform 0.3s;
     }
-    .modal-overlay.active .modal-content { transform: translateY(0); }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
     .modal-header {
-      padding: 20px 24px; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .modal-header h2 { font-size: 18px; font-weight: 800; margin: 0; }
+
+    .modal-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+    }
+
     .btn-close {
-      background: none; border: none; font-size: 28px; line-height: 1;
-      color: var(--muted); cursor: pointer; padding: 0;
+      background: none;
+      border: none;
+      font-size: 28px;
+      line-height: 1;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
     }
+
     .modal-body {
-      display: flex; padding: 24px; gap: 24px; overflow-y: auto;
+      display: flex;
+      padding: 24px;
+      gap: 24px;
+      overflow-y: auto;
     }
+
     .modal-preview {
-      flex: 1; background: var(--dark); border-radius: 12px;
-      padding: 16px; display: flex; align-items: center; justify-content: center;
+      flex: 1;
+      background: var(--dark);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
     .modal-preview img {
-      max-width: 100%; max-height: 55vh; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      max-width: 100%;
+      max-height: 55vh;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       transition: opacity 0.2s;
     }
-    .modal-controls { width: 280px; display: flex; flex-direction: column; gap: 20px; }
-    .control-group { display: flex; flex-direction: column; gap: 10px; }
-    .control-group label { font-size: 13px; font-weight: 700; color: var(--muted); }
-    .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 600 !important; cursor: pointer; color: var(--text) !important; font-size: 14px; }
-    .checkbox-label input { width: 16px; height: 16px; accent-color: var(--primary); }
-    .control-actions { display: flex; gap: 10px; margin-top: auto; }
-    
+
+    .modal-controls {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-group label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600 !important;
+      cursor: pointer;
+      color: var(--text) !important;
+      font-size: 14px;
+    }
+
+    .checkbox-label input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+    }
+
+    .control-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
     /* ── Small laptop/tablet landscape responsive ─── */
     @media (max-width: 1350px) and (max-height: 900px) {
-      .grid-2 { 
-        grid-template-columns: 1fr; 
-        gap: 16px; 
+      .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
-      .chart-wrap { 
-        height: 240px; 
+
+      .chart-wrap {
+        height: 240px;
       }
-      .chart-wrap.tall { 
-        height: 280px; 
+
+      .chart-wrap.tall {
+        height: 280px;
       }
+
       .main {
         padding: 16px;
       }
+
       .card {
         padding: 16px 18px;
         margin-bottom: 14px;
@@ -346,24 +748,30 @@
       .sidebar {
         width: 200px;
       }
+
       .main {
         margin-left: 200px;
         padding: 14px;
       }
-      .grid-2 { 
-        grid-template-columns: 1fr; 
-        gap: 12px; 
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
       }
-      .chart-wrap { 
-        height: 220px; 
+
+      .chart-wrap {
+        height: 220px;
       }
-      .chart-wrap.tall { 
-        height: 260px; 
+
+      .chart-wrap.tall {
+        height: 260px;
       }
+
       .card {
         padding: 14px 16px;
         margin-bottom: 12px;
       }
+
       .card-title {
         font-size: 14px;
         margin-bottom: 16px;
@@ -372,19 +780,23 @@
 
     /* ── Tablet portrait responsive ────────────────── */
     @media (max-width: 1024px) {
-      .grid-2 { 
-        grid-template-columns: 1fr; 
-        gap: 15px; 
+      .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 15px;
       }
-      .chart-wrap { 
-        height: 230px; 
+
+      .chart-wrap {
+        height: 230px;
       }
-      .chart-wrap.tall { 
-        height: 270px; 
+
+      .chart-wrap.tall {
+        height: 270px;
       }
-      .main { 
-        padding: 20px; 
+
+      .main {
+        padding: 20px;
       }
+
       .card {
         padding: 18px 20px;
         margin-bottom: 16px;
@@ -393,51 +805,140 @@
 
     /* ── Mobile responsive ────────────────────────── */
     @media (max-width: 768px) {
-      .modal-body { flex-direction: column; }
-      .modal-controls { width: 100%; }
+      .modal-body {
+        flex-direction: column;
+      }
+
+      .modal-controls {
+        width: 100%;
+      }
+
       .sidebar {
-        width: 100%; height: 65px; min-height: auto;
-        flex-direction: row; top: auto; bottom: 0;
-        border-right: none; border-top: 1px solid var(--border);
-        padding: 0; z-index: 100;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.03);
+        width: 100%;
+        height: 65px;
+        min-height: auto;
+        flex-direction: row;
+        top: auto;
+        bottom: 0;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        padding: 0;
+        z-index: 100;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
       }
-      .sidebar-logo, .sidebar-footer, .nav-label { display: none !important; }
+
+      .sidebar-logo,
+      .sidebar-footer,
+      .nav-label {
+        display: none !important;
+      }
+
       .nav-section {
-        padding: 0 8px; display: flex; flex-direction: row;
-        width: 100%; justify-content: space-around; align-items: center; height: 100%;
+        padding: 0 8px;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        align-items: center;
+        height: 100%;
       }
+
       .nav-item {
-        flex-direction: column; gap: 4px; padding: 6px 4px;
-        border-radius: 8px; text-align: center; font-size: 11px;
-        justify-content: center; width: auto; flex: 1;
-        margin: 0 2px; background: transparent; height: 100%;
+        flex-direction: column;
+        gap: 4px;
+        padding: 6px 4px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 11px;
+        justify-content: center;
+        width: auto;
+        flex: 1;
+        margin: 0 2px;
+        background: transparent;
+        height: 100%;
       }
-      .nav-item:hover { background: transparent; }
-      .nav-item.active { background: transparent; color: var(--primary); font-weight: 700; }
-      .nav-item .ni { font-size: 22px; width: auto; margin-bottom: 0; }
-      .main { margin-left: 0; padding: 16px 16px 85px 16px; max-width: 100vw; }
-      .grid-2 { grid-template-columns: 1fr !important; }
-      .chart-wrap { height: 220px !important; }
-      .chart-wrap.tall { height: 260px !important; }
-      .cat-label { width: 120px; }
-      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
-      .page-header > div:last-child { width: 100%; justify-content: flex-start !important; }
-      .btn-share-trigger { width: 100%; justify-content: center; }
-      .pill-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
-      .pill-row::-webkit-scrollbar { display: none; }
-      .pill { white-space: nowrap; }
+
+      .nav-item:hover {
+        background: transparent;
+      }
+
+      .nav-item.active {
+        background: transparent;
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .nav-item .ni {
+        font-size: 22px;
+        width: auto;
+        margin-bottom: 0;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 16px 16px 85px 16px;
+        max-width: 100vw;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      .chart-wrap {
+        height: 220px !important;
+      }
+
+      .chart-wrap.tall {
+        height: 260px !important;
+      }
+
+      .cat-label {
+        width: 120px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .page-header>div:last-child {
+        width: 100%;
+        justify-content: flex-start !important;
+      }
+
+      .btn-share-trigger {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .pill-row {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .pill-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .pill {
+        white-space: nowrap;
+      }
     }
 
     /* ── Insight Cards ───────────────────────────── */
     .insight-card {
       background: var(--green-dim);
-      border: 1px solid rgba(38,170,153,0.2);
+      border: 1px solid rgba(38, 170, 153, 0.2);
       border-radius: 12px;
       padding: 14px 16px;
       margin-top: 16px;
       font-size: 13px;
     }
+
     .insight-title {
       font-weight: 700;
       color: var(--green);
@@ -446,6 +947,7 @@
       align-items: center;
       gap: 6px;
     }
+
     .insight-list {
       padding-left: 0;
       list-style: none;
@@ -453,6 +955,7 @@
       flex-direction: column;
       gap: 5px;
     }
+
     .insight-list li {
       color: var(--text);
       line-height: 1.55;
@@ -460,626 +963,909 @@
       gap: 6px;
       align-items: baseline;
     }
+
     .insight-list li .ins-icon {
       flex-shrink: 0;
       font-size: 12px;
       width: 14px;
       text-align: center;
     }
+
     .insight-ai {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(38,170,153,0.18);
-      color: var(--muted);
-      font-style: italic;
-      font-size: 12.5px;
-      line-height: 1.6;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(38, 170, 153, 0.08) 0%, rgba(74, 144, 217, 0.06) 100%);
+      border: 1px solid rgba(38, 170, 153, 0.2);
+      color: var(--text);
+      font-style: normal;
+      font-size: 13px;
+      line-height: 1.7;
       min-height: 0;
       transition: opacity 0.3s;
+      position: relative;
     }
+
     .insight-ai.loading {
       opacity: 0.4;
     }
+
     .insight-ai.loading::after {
-      content: ' Đang phân tích...';
+      content: ' ✨ Đang phân tích...';
+      color: var(--muted);
+      font-style: italic;
     }
+
+    .insight-ai-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
     .insight-ai-badge {
-      display: inline-block;
-      background: var(--green);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--green), #4a90d9);
       color: #fff;
       font-size: 10px;
       font-weight: 700;
-      border-radius: 4px;
-      padding: 1px 5px;
-      margin-right: 5px;
+      border-radius: 20px;
+      padding: 3px 10px;
       font-style: normal;
-      vertical-align: middle;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .insight-ai-title {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .insight-ai-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .insight-ai-sentence {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .insight-ai-sentence .ai-bullet {
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-size: 12px;
     }
   </style>
 </head>
+
 <body>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <img src="../extension/icons/icon128.png" style="width: 32px; height: 32px; border-radius: 8px;" alt="Logo" />
-    <div>
-      <h2>Analytics Pro</h2>
-      <span>Shopee Statistics</span>
-    </div>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Báo cáo</div>
-    <button class="nav-item active" data-view="overview">
-      <span class="ni">📊</span> Tổng quan
-    </button>
-    <button class="nav-item" data-view="monthly">
-      <span class="ni">📅</span> Theo tháng
-    </button>
-    <button class="nav-item" data-view="items">
-      <span class="ni">🛒</span> Top Sản phẩm
-    </button>
-    <button class="nav-item" data-view="categories">
-      <span class="ni">🏷️</span> Danh mục
-    </button>
-  </div>
-
-  <div class="sidebar-footer">
-    <p>Dữ liệu tại:<br><span id="data-date">—</span></p>
-    <p style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;" id="dashboard-author-info"></p>
-  </div>
-</aside>
-
-<!-- Main content -->
-<main class="main">
-
-  <!-- Overview -->
-  <div id="view-overview" class="view active">
-    <div class="page-header">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="../extension/icons/icon128.png" style="width: 32px; height: 32px; border-radius: 8px;" alt="Logo" />
       <div>
-        <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
-        <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
-      </div>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="btn-share btn-share-trigger" data-type="overview">✨ Chia sẻ</button>
+        <h2>Analytics Pro</h2>
+        <span>Shopee Statistics</span>
       </div>
     </div>
 
-    <div class="kpi-row" id="kpi-row"></div>
-
-    <div class="grid-2">
-      <div class="card" id="card-yearly">
-        <div class="card-title">📈 Chi Tiêu Theo Năm <span style="font-size: 13px; font-weight: normal; color: var(--muted); float: right;">(Click vào cột)</span></div>
-        <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
-      </div>
-      <div class="card" id="card-period">
-        <div class="card-title">⏱ Thống Kê Gần Đây</div>
-        <div class="period-grid" id="period-grid"></div>
-      </div>
+    <div class="nav-section">
+      <div class="nav-label">Báo cáo</div>
+      <button class="nav-item active" data-view="overview">
+        <span class="ni">📊</span> Tổng quan
+      </button>
+      <button class="nav-item" data-view="monthly">
+        <span class="ni">📅</span> Theo tháng
+      </button>
+      <button class="nav-item" data-view="items">
+        <span class="ni">🛒</span> Top Sản phẩm
+      </button>
+      <button class="nav-item" data-view="categories">
+        <span class="ni">🏷️</span> Danh mục
+      </button>
     </div>
 
-    <div class="insight-card" id="insight-yearly" style="display:none">
-      <div class="insight-title">💡 Nhận xét</div>
-      <ul class="insight-list" id="insight-yearly-list"></ul>
-      <p class="insight-ai" id="insight-yearly-ai"></p>
+    <div class="sidebar-footer">
+      <p>Dữ liệu tại:<br><span id="data-date">—</span></p>
+      <p style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;" id="dashboard-author-info">
+      </p>
     </div>
+  </aside>
 
-    <div class="card" id="card-yearly-items" style="display: none; margin-top: 24px;">
-      <div class="card-title" id="yearly-items-title">🛒 Top Sản Phẩm Năm</div>
-      <div class="table-wrap">
-        <table class="table" id="yearly-items-table">
-          <thead><tr><th>Sản Phẩm</th><th style="text-align: right;">Số Tiền</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  <!-- Main content -->
+  <main class="main">
 
-  <!-- Monthly -->
-  <div id="view-monthly" class="view">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
-        <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
-      </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button class="btn-share btn-share-trigger" data-type="monthly">✨ Chia Sẻ Tháng</button>
-      </div>
-    </div>
-    <div class="pill-row" id="year-pills"></div>
-    <div class="card" id="card-monthly">
-      <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
-      <div class="chart-wrap tall"><canvas id="chart-monthly"></canvas></div>
-    </div>
-    <div class="insight-card" id="insight-monthly" style="display:none">
-      <div class="insight-title">💡 Nhận xét</div>
-      <ul class="insight-list" id="insight-monthly-list"></ul>
-      <p class="insight-ai" id="insight-monthly-ai"></p>
-    </div>
-
-    <div class="card" id="card-monthly-items" style="display: none; margin-top: 20px;">
-      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-        <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
-        <select id="monthly-limit-select" class="limit-select">
-          <option value="10">Top 10</option>
-          <option value="20" selected>Top 20</option>
-          <option value="50">Top 50</option>
-        </select>
-      </div>
-      <div class="top-list" id="monthly-items-list"></div>
-    </div>
-  </div>
-
-  <!-- Top Items -->
-  <div id="view-items" class="view">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
-        <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
-      </div>
-      <div style="display: flex; justify-content: flex-end;">
-        <button class="btn-share btn-share-trigger" data-type="items">✨ Chia Sẻ Top SP</button>
-      </div>
-    </div>
-    <div class="insight-card" id="insight-items" style="display:none">
-      <div class="insight-title">💡 Nhận xét</div>
-      <ul class="insight-list" id="insight-items-list"></ul>
-      <p class="insight-ai" id="insight-items-ai"></p>
-    </div>
-
-    <div class="card" id="card-items">
-      <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-        <span>🏆 Bảng Xếp Hạng</span>
-        <select id="items-limit-select" class="limit-select">
-          <option value="10">Top 10</option>
-          <option value="20" selected>Top 20</option>
-          <option value="50">Top 50</option>
-        </select>
-      </div>
-      <div class="top-list" id="items-list"></div>
-    </div>
-  </div>
-
-  <!-- Categories -->
-  <div id="view-categories" class="view">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
-        <p class="page-subtitle">Phân bổ chi tiêu theo từng danh mục Shopee</p>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card" id="card-cat-pie">
-        <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
-        <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
-      </div>
-      <div class="card" id="card-cat-bars">
-        <div class="card-title">📊 So Sánh Danh Mục <small style="font-weight:400;font-size:12px;opacity:.6">— Click để xem sản phẩm</small></div>
-        <div id="cat-bars"></div>
-      </div>
-    </div>
-
-    <div class="insight-card" id="insight-categories" style="display:none">
-      <div class="insight-title">💡 Nhận xét</div>
-      <ul class="insight-list" id="insight-categories-list"></ul>
-      <p class="insight-ai" id="insight-categories-ai"></p>
-    </div>
-    <div class="card" id="card-cat-items" style="display:none">
-      <div class="card-title" id="cat-items-title">🏷️ Sản Phẩm Danh Mục</div>
-      <div id="cat-items-list"></div>
-    </div>
-  </div>
-
-  <!-- Share Modal -->
-  <div id="share-modal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>✨ Chia sẻ</h2>
-        <button id="btn-close-modal" class="btn-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-preview">
-          <img id="share-preview-img" src="" alt="Đang tạo ảnh..." />
+    <!-- Overview -->
+    <div id="view-overview" class="view active">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
+          <p class="page-subtitle" id="subtitle-overview">Shopee Analytics Pro</p>
         </div>
-        <div class="modal-controls">
-          <div class="control-group">
-            <label>Giao diện (Theme)</label>
-            <select id="share-theme-select" class="limit-select" style="padding: 8px; font-size: 14px;">
-              <option value="light">Trắng Sáng (Nổi Bật)</option>
-              <option value="minimal">Tối Giản</option>
-              <option value="orange">Shopee Cam</option>
-              <option value="dark">Đêm Huyền Bí</option>
-            </select>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+          <button class="btn-share btn-share-trigger" data-type="overview">✨ Chia sẻ</button>
+        </div>
+      </div>
+
+      <div class="kpi-row" id="kpi-row"></div>
+
+      <div class="grid-2">
+        <div class="card" id="card-yearly">
+          <div class="card-title">📈 Chi Tiêu Theo Năm <span
+              style="font-size: 13px; font-weight: normal; color: var(--muted); float: right;">(Click vào cột)</span>
           </div>
-          <div class="control-group" style="margin-top: 10px;">
-            <label class="checkbox-label">
-              <input type="checkbox" id="share-hide-amount" />
-              Ẩn số tiền chi tiết
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="share-hide-names" />
-              Ẩn tên sản phẩm
-            </label>
-          </div>
-          <div class="control-actions">
-            <button id="btn-modal-copy" class="pill" style="border-color: var(--primary); color: var(--primary); flex: 1; margin: 0; padding: 10px;">📋 Copy</button>
-            <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px;">📸 Tải Về</button>
-          </div>
+          <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
+        </div>
+        <div class="card" id="card-period">
+          <div class="card-title">⏱ Thống Kê Gần Đây</div>
+          <div class="period-grid" id="period-grid"></div>
+        </div>
+      </div>
+
+      <div class="insight-card" id="insight-yearly" style="display:none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-yearly-list"></ul>
+        <p class="insight-ai" id="insight-yearly-ai"></p>
+      </div>
+
+      <div class="card" id="card-yearly-items" style="display: none; margin-top: 24px;">
+        <div class="card-title" id="yearly-items-title">🛒 Top Sản Phẩm Năm</div>
+        <div class="table-wrap">
+          <table class="table" id="yearly-items-table">
+            <thead>
+              <tr>
+                <th>Sản Phẩm</th>
+                <th style="text-align: right;">Số Tiền</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </div>
-  </div>
 
-</main>
+    <!-- Monthly -->
+    <div id="view-monthly" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
+          <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="btn-share btn-share-trigger" data-type="monthly">✨ Chia Sẻ Tháng</button>
+        </div>
+      </div>
+      <div class="pill-row" id="year-pills"></div>
+      <div class="card" id="card-monthly">
+        <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
+        <div class="chart-wrap tall"><canvas id="chart-monthly"></canvas></div>
+      </div>
+      <div class="insight-card" id="insight-monthly" style="display:none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-monthly-list"></ul>
+        <p class="insight-ai" id="insight-monthly-ai"></p>
+      </div>
 
-<script src="../extension/config.js"></script>
-<script src="share-card.js"></script>
-<script>
-(function () {
-  const authorInfoEl = document.getElementById('dashboard-author-info');
-  if (authorInfoEl && window.APP_CONFIG) {
-    authorInfoEl.innerHTML = `${window.APP_CONFIG.authorIcon} <a href="${window.APP_CONFIG.authorLink}" target="_blank" style="color: var(--primary); text-decoration: none;">${window.APP_CONFIG.authorText}</a>`;
-  }
+      <div class="card" id="card-monthly-items" style="display: none; margin-top: 20px;">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
+          <select id="monthly-limit-select" class="limit-select">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="top-list" id="monthly-items-list"></div>
+      </div>
+    </div>
 
-  /* ─────────────────────────────────────────────────
-     Helpers
-  ───────────────────────────────────────────────── */
-  function fmtVND(n) {
-    n = Math.round(n || 0);
-    if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';
-    if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0', '') + 'k';
-    return n.toLocaleString('vi-VN');
-  }
-  function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
-  function fmtDate(ts) {
-    const d = new Date((ts || Date.now() / 1000) * 1000);
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  }
-  function escHtml(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+    <!-- Top Items -->
+    <div id="view-items" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
+          <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="btn-share btn-share-trigger" data-type="items">✨ Chia Sẻ Top SP</button>
+        </div>
+      </div>
+      <div class="insight-card" id="insight-items" style="display:none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-items-list"></ul>
+        <p class="insight-ai" id="insight-items-ai"></p>
+      </div>
 
-  // Legacy map for backward compatibility with old dashboard URLs (format: { id, s, c })
-  const LEGACY_CAT_NAMES = {
-    '11000001': '📱 Điện Thoại & Phụ Kiện',
-    '11000027': '💻 Máy Tính & Laptop',
-    '11000003': '🔌 Thiết Bị Điện Tử',
-    '11000028': '👔 Thời Trang Nam',
-    '11000004': '👗 Thời Trang Nữ',
-    '11000006': '🏠 Nhà Cửa & Đời Sống',
-    '11000007': '💊 Sức Khỏe & Làm Đẹp',
-    '11000010': '🍜 Thực Phẩm & Đồ Uống',
-    '11000011': '📚 Sách & Văn Phòng',
-    '11000008': '⚽ Thể Thao & Du Lịch',
-    '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
-    '11000009': '🚗 Ô Tô & Xe Máy',
-    '11000013': '⌚ Đồng Hồ',
-    '11000012': '📷 Máy Ảnh'
-  };
-  function resolveCatLabel(c) {
-    // New format: c.name is a resolved category name string
-    if (c.name) return c.name;
-    // Legacy format: c.id is a numeric Shopee category ID
-    if (c.id) return LEGACY_CAT_NAMES[c.id] || 'Danh mục #' + c.id;
-    return 'Khác';
-  }
+      <div class="card" id="card-items">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>🏆 Bảng Xếp Hạng</span>
+          <select id="items-limit-select" class="limit-select">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="top-list" id="items-list"></div>
+      </div>
+    </div>
 
-  const CHART_CFG = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: {
-      backgroundColor: '#ffffff',
-      borderColor: 'rgba(0,0,0,0.1)',
-      borderWidth: 1,
-      titleColor: '#1e293b',
-      bodyColor: 'rgba(30,41,59,0.8)',
-      padding: 12,
-      callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) }
-    }},
-    scales: {
-      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 12 } } },
-      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 11 }, callback: v => fmtVND(v) } }
-    }
-  };
+    <!-- Categories -->
+    <div id="view-categories" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
+          <p class="page-subtitle">Phân bổ chi tiêu theo từng danh mục Shopee</p>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card" id="card-cat-pie">
+          <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
+          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+        </div>
+        <div class="card" id="card-cat-bars">
+          <div class="card-title">📊 So Sánh Danh Mục <small style="font-weight:400;font-size:12px;opacity:.6">— Click
+              để xem sản phẩm</small></div>
+          <div id="cat-bars"></div>
+        </div>
+      </div>
 
-  /* ─────────────────────────────────────────────────
-     Insight Engine — Rule-based analysis
-  ───────────────────────────────────────────────── */
-  function computeYearlyInsights(yd, d) {
-    const items = [];
-    const years = Object.keys(yd || {}).map(Number).sort((a, b) => a - b);
-    if (!years.length) return items;
+      <div class="insight-card" id="insight-categories" style="display:none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-categories-list"></ul>
+        <p class="insight-ai" id="insight-categories-ai"></p>
+      </div>
+      <div class="card" id="card-cat-items" style="display:none">
+        <div class="card-title" id="cat-items-title">🏷️ Sản Phẩm Danh Mục</div>
+        <div id="cat-items-list"></div>
+      </div>
+    </div>
 
-    // Year with highest spend
-    let maxYear = years[0], maxVal = 0;
-    for (const y of years) {
-      if ((yd[y].t || 0) > maxVal) { maxVal = yd[y].t; maxYear = y; }
-    }
-    items.push({ icon: '★', text: `Năm ${maxYear} là năm chi tiêu nhiều nhất — ${fmtVND(maxVal)}` });
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>✨ Chia sẻ</h2>
+          <button id="btn-close-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-preview">
+            <img id="share-preview-img" src="" alt="Đang tạo ảnh..." />
+          </div>
+          <div class="modal-controls">
+            <div class="control-group">
+              <label>Giao diện (Theme)</label>
+              <select id="share-theme-select" class="limit-select" style="padding: 8px; font-size: 14px;">
+                <option value="light">Trắng Sáng (Nổi Bật)</option>
+                <option value="minimal">Tối Giản</option>
+                <option value="orange">Shopee Cam</option>
+                <option value="dark">Đêm Huyền Bí</option>
+              </select>
+            </div>
+            <div class="control-group" style="margin-top: 10px;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="share-hide-amount" />
+                Ẩn số tiền chi tiết
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="share-hide-names" />
+                Ẩn tên sản phẩm
+              </label>
+            </div>
+            <div class="control-actions">
+              <button id="btn-modal-copy" class="pill"
+                style="border-color: var(--primary); color: var(--primary); flex: 1; margin: 0; padding: 10px;">📋
+                Copy</button>
+              <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px;">📸 Tải
+                Về</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    // YoY change for latest 2 years
-    if (years.length >= 2) {
-      const lastY = years[years.length - 1];
-      const prevY = years[years.length - 2];
-      const last = yd[lastY].t || 0;
-      const prev = yd[prevY].t || 0;
-      if (prev > 0) {
-        const pct = Math.round(((last - prev) / prev) * 100);
-        const icon = pct >= 0 ? '↑' : '↓';
-        const label = pct >= 0 ? 'tăng' : 'giảm';
-        items.push({ icon, text: `Năm ${lastY} ${label} ${Math.abs(pct)}% so với năm ${prevY} (${fmtVND(prev)} → ${fmtVND(last)})` });
+  </main>
+
+  <script src="../extension/config.js"></script>
+  <script src="share-card.js"></script>
+  <script>
+    (function () {
+      const authorInfoEl = document.getElementById('dashboard-author-info');
+      if (authorInfoEl && window.APP_CONFIG) {
+        authorInfoEl.innerHTML = `${window.APP_CONFIG.authorIcon} <a href="${window.APP_CONFIG.authorLink}" target="_blank" style="color: var(--primary); text-decoration: none;">${window.APP_CONFIG.authorText}</a>`;
       }
-    }
 
-    // Savings rate
-    const totalSpend = d.t || 0;
-    const totalSaved = d.s || 0;
-    if (totalSpend > 0 && totalSaved > 0) {
-      const savePct = Math.round((totalSaved / (totalSpend + totalSaved)) * 100);
-      items.push({ icon: '→', text: `Tiết kiệm được ${fmtVND(totalSaved)} từ khuyến mãi (${savePct}% giá gốc)` });
-    }
-
-    // Average spend per order
-    if (d.o > 0) {
-      items.push({ icon: '→', text: `Trung bình mỗi đơn hàng: ${fmtVND(Math.round(totalSpend / d.o))}` });
-    }
-
-    return items;
-  }
-
-  function computeMonthlyInsights(yd, year) {
-    const items = [];
-    const monthData = (yd || {})[year]?.m || {};
-    const months = Object.entries(monthData)
-      .map(([m, v]) => ({ m: parseInt(m, 10), v }))
-      .filter(x => x.v > 0)
-      .sort((a, b) => a.m - b.m);
-    if (!months.length) return items;
-
-    const total = months.reduce((s, x) => s + x.v, 0);
-    const peak = months.reduce((a, b) => a.v >= b.v ? a : b);
-    const low = months.reduce((a, b) => a.v <= b.v ? a : b);
-
-    const MONTH_NAMES = ['', 'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-      'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-
-    const peakPct = Math.round((peak.v / total) * 100);
-    items.push({ icon: '★', text: `${MONTH_NAMES[peak.m]} là tháng chi tiêu cao nhất — ${fmtVND(peak.v)} (${peakPct}% cả năm)` });
-
-    if (low.m !== peak.m) {
-      items.push({ icon: '↓', text: `${MONTH_NAMES[low.m]} chi tiêu thấp nhất — ${fmtVND(low.v)}` });
-    }
-
-    // Q4 detection (Oct-Nov-Dec)
-    const q4Total = [10, 11, 12].reduce((s, m) => s + (monthData[m] || 0), 0);
-    if (q4Total > 0 && total > 0) {
-      const q4Pct = Math.round((q4Total / total) * 100);
-      if (q4Pct >= 30) {
-        items.push({ icon: '↑', text: `Quý 4 (Tháng 10–12) chiếm ${q4Pct}% chi tiêu cả năm — mùa mua sắm cuối năm` });
+      /* ─────────────────────────────────────────────────
+         Helpers
+      ───────────────────────────────────────────────── */
+      function fmtVND(n) {
+        n = Math.round(n || 0);
+        if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
+        if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';
+        if (n >= 1e3) return (n / 1e3).toFixed(1).replace('.0', '') + 'k';
+        return n.toLocaleString('vi-VN');
       }
-    }
-
-    // Average per active month
-    if (months.length > 1) {
-      items.push({ icon: '→', text: `Trung bình ${fmtVND(Math.round(total / months.length))} / tháng có mua sắm (${months.length} tháng)` });
-    }
-
-    return items;
-  }
-
-  function computeCategoryInsights(cs, totalSpend) {
-    const items = [];
-    if (!cs || !cs.length) return items;
-
-    const sorted = [...cs].sort((a, b) => b.s - a.s);
-    const total = sorted.reduce((s, c) => s + c.s, 0) || totalSpend || 1;
-
-    const top1 = sorted[0];
-    const top1Pct = Math.round((top1.s / total) * 100);
-    const top1Name = top1.name || resolveCatLabel(top1);
-    items.push({ icon: '★', text: `${top1Name} dẫn đầu với ${fmtVND(top1.s)} (${top1Pct}% tổng chi tiêu)` });
-
-    if (sorted.length >= 2) {
-      const top2 = sorted[1];
-      const top2Pct = Math.round((top2.s / total) * 100);
-      const top2Name = top2.name || resolveCatLabel(top2);
-      const combined = top1Pct + top2Pct;
-      items.push({ icon: '→', text: `${top1Name} + ${top2Name} chiếm ${combined}% tổng chi tiêu` });
-    }
-
-    // Smallest category
-    const last = sorted[sorted.length - 1];
-    if (last !== top1 && last.s > 0) {
-      const lastName = last.name || resolveCatLabel(last);
-      const lastPct = Math.round((last.s / total) * 100);
-      items.push({ icon: '↓', text: `Danh mục ít nhất: ${lastName} — ${fmtVND(last.s)} (${lastPct}%)` });
-    }
-
-    // Count of items per category
-    const topByCount = [...cs].sort((a, b) => b.c - a.c)[0];
-    if (topByCount && topByCount.c > 0) {
-      const topCountName = topByCount.name || resolveCatLabel(topByCount);
-      items.push({ icon: '→', text: `Mua nhiều lượt nhất: ${topCountName} — ${fmtNum(topByCount.c)} lượt` });
-    }
-
-    return items;
-  }
-
-  function computeItemInsights(ti, totalSpend) {
-    const items = [];
-    if (!ti || !ti.length) return items;
-
-    const total = totalSpend || ti.reduce((s, i) => s + i.s, 0) || 1;
-
-    // Top by spend
-    const topSpend = [...ti].sort((a, b) => b.s - a.s)[0];
-    if (topSpend) {
-      const pct = Math.round((topSpend.s / total) * 100);
-      items.push({ icon: '★', text: `Chi nhiều nhất: "${topSpend.n}" — ${fmtVND(topSpend.s)} (${pct}% tổng)` });
-    }
-
-    // Top by count
-    const topCount = [...ti].sort((a, b) => b.c - a.c)[0];
-    if (topCount && topCount.c > 1) {
-      items.push({ icon: '→', text: `Mua nhiều lần nhất: "${topCount.n}" — ${fmtNum(topCount.c)} lần` });
-    }
-
-    // Top 5 concentration
-    const top5 = [...ti].sort((a, b) => b.s - a.s).slice(0, 5);
-    const top5Sum = top5.reduce((s, i) => s + i.s, 0);
-    if (top5Sum > 0 && top5.length === 5) {
-      const pct = Math.round((top5Sum / total) * 100);
-      items.push({ icon: '↑', text: `Top 5 sản phẩm chiếm ${pct}% tổng chi tiêu` });
-    }
-
-    // Unique products count
-    items.push({ icon: '→', text: `${fmtNum(ti.length)} sản phẩm khác nhau đã mua` });
-
-    return items;
-  }
-
-  /* ─────────────────────────────────────────────────
-     Render insight card
-  ───────────────────────────────────────────────── */
-  function renderInsightCard(id, insightItems) {
-    const card = document.getElementById(id);
-    const list = document.getElementById(id + '-list');
-    
-    console.log(`[Dashboard] renderInsightCard('${id}')`, {
-      card: !!card,
-      list: !!list, 
-      itemCount: insightItems?.length || 0,
-      items: insightItems?.slice(0, 2) || []
-    });
-    
-    if (!card || !list || !insightItems || !insightItems.length) return;
-
-    list.innerHTML = insightItems.map(item =>
-      `<li><span class="ins-icon">${item.icon}</span><span>${escHtml(item.text)}</span></li>`
-    ).join('');
-    card.style.display = '';
-    reveal(card);
-    
-    console.log(`[Dashboard] ✅ Insight card '${id}' rendered with ${insightItems.length} items`);
-  }
-
-  /* ─────────────────────────────────────────────────
-     AI narrative — Chrome 148+ web LanguageModel
-  ───────────────────────────────────────────────── */
-  const AI_INSIGHT_SYSTEM = [
-    'You are a friendly Vietnamese spending analyst.',
-    'Given a user\'s shopping statistics, write ONE short, natural-sounding Vietnamese sentence',
-    '(max 100 words) that gives a helpful observation or encouragement about their spending habit.',
-    'Be specific with numbers. No markdown, no lists, plain text only.'
-  ].join(' ');
-
-  let _aiInsightSession = null;
-  let _aiInsightDisabled = false;
-
-  function isAIFatalError(error) {
-    const msg = String(error?.message || error || '').toLowerCase();
-    return msg.includes('crashed too many times') ||
-           msg.includes('unable to create a session') ||
-           msg.includes('model not available');
-  }
-
-  async function getAIInsightSession() {
-    if (_aiInsightDisabled) return null;
-    if (_aiInsightSession) return _aiInsightSession;
-    if (typeof LanguageModel === 'undefined') return null;
-    try {
-      const status = await LanguageModel.availability();
-      if (status === 'unavailable') return null;
-      _aiInsightSession = await LanguageModel.create({
-        initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }]
-      });
-      return _aiInsightSession;
-    } catch (e) {
-      if (isAIFatalError(e)) {
-        console.warn('[Dashboard] AI model fatally broken, disabling AI insights:', e.message);
-        _aiInsightDisabled = true;
+      function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
+      function fmtDate(ts) {
+        const d = new Date((ts || Date.now() / 1000) * 1000);
+        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
       }
-      return null;
-    }
-  }
-
-  async function enrichWithAI(cardId, context, specificPrompt) {
-    if (_aiInsightDisabled) return;
-    const aiEl = document.getElementById(cardId + '-ai');
-    if (!aiEl) return;
-    aiEl.classList.add('loading');
-
-    const session = await getAIInsightSession();
-    if (!session) { aiEl.remove(); return; }
-
-    try {
-      // Enhanced prompt with context and specific analysis request
-      const fullPrompt = [
-        `Bối cảnh: ${context}`,
-        `Yêu cầu phân tích: ${specificPrompt}`,
-        'Hãy đưa ra nhận xét chuyên gia về xu hướng chi tiêu, so sánh với thói quen tiêu dùng phổ biến, và đề xuất cải thiện cụ thể.'
-      ].join('\n\n');
-      
-      const result = await session.prompt(fullPrompt);
-      if (result && result.trim()) {
-        aiEl.innerHTML = `<span class="insight-ai-badge">🤖 AI</span>${escHtml(result.trim())}`;
-      } else {
-        aiEl.remove();
+      function escHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
-    } catch (e) {
-      console.warn('[Dashboard] AI insight failed:', e);
-      if (isAIFatalError(e)) {
-        _aiInsightDisabled = true;
-        _aiInsightSession = null;
+      function capFirst(s) {
+        if (!s) return s;
+        return String(s).charAt(0).toUpperCase() + String(s).slice(1);
       }
-      aiEl.remove();
-    } finally {
-      aiEl.classList.remove('loading');
-    }
-  }
+      function renderAIInsight(text) {
+        // Split text into sentences for prettier display
+        const bullets = ['💡', '📌', '⚡', '🎯', '💰'];
+        const sentences = text
+          .split(/(?<=[.!?])\s+/)
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+        const items = sentences.map((s, i) =>
+          `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${escHtml(s)}</span></div>`
+        ).join('');
+        return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span></div><div class="insight-ai-body">${items}</div>`;
+      }
 
-  /* ─────────────────────────────────────────────────
-     Parse data from URL hash
-  ───────────────────────────────────────────────── */
-  function parseData() {
-    try {
-      const match = location.hash.match(/[#&]d=([^&]+)/);
-      if (!match) return null;
-      return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
-    } catch { return null; }
-  }
+      // Legacy map for backward compatibility with old dashboard URLs (format: { id, s, c })
+      const LEGACY_CAT_NAMES = {
+        '11000001': '📱 Điện Thoại & Phụ Kiện',
+        '11000027': '💻 Máy Tính & Laptop',
+        '11000003': '🔌 Thiết Bị Điện Tử',
+        '11000028': '👔 Thời Trang Nam',
+        '11000004': '👗 Thời Trang Nữ',
+        '11000006': '🏠 Nhà Cửa & Đời Sống',
+        '11000007': '💊 Sức Khỏe & Làm Đẹp',
+        '11000010': '🍜 Thực Phẩm & Đồ Uống',
+        '11000011': '📚 Sách & Văn Phòng',
+        '11000008': '⚽ Thể Thao & Du Lịch',
+        '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
+        '11000009': '🚗 Ô Tô & Xe Máy',
+        '11000013': '⌚ Đồng Hồ',
+        '11000012': '📷 Máy Ảnh'
+      };
+      function resolveCatLabel(c) {
+        // New format: c.name is a resolved category name string
+        if (c.name) return c.name;
+        // Legacy format: c.id is a numeric Shopee category ID
+        if (c.id) return LEGACY_CAT_NAMES[c.id] || 'Danh mục #' + c.id;
+        return 'Khác';
+      }
 
-  /* ─────────────────────────────────────────────────
-     Animate helpers
-  ───────────────────────────────────────────────── */
-  function animateCounter(el, target, duration) {
-    const match = String(target).match(/^([\d,\.]+)(.*)$/);
-    if (!match) { el.textContent = target; return; }
-    const num = parseFloat(match[1].replace(/,/g, ''));
-    const suffix = match[2];
-    const start = performance.now();
-    const step = now => {
-      const p = Math.min((now - start) / duration, 1);
-      const v = num * (1 - Math.pow(1 - p, 3));
-      el.textContent = Math.round(v).toLocaleString('vi-VN') + suffix;
-      if (p < 1) requestAnimationFrame(step);
-      else el.textContent = target;
-    };
-    requestAnimationFrame(step);
-  }
+      const CHART_CFG = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }, tooltip: {
+            backgroundColor: '#ffffff',
+            borderColor: 'rgba(0,0,0,0.1)',
+            borderWidth: 1,
+            titleColor: '#1e293b',
+            bodyColor: 'rgba(30,41,59,0.8)',
+            padding: 12,
+            callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed.y || ctx.parsed) }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 12 } } },
+          y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: 'rgba(30,41,59,0.5)', font: { size: 11 }, callback: v => fmtVND(v) } }
+        }
+      };
 
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold: 0.1 });
-  function reveal(el) { if (el) io.observe(el); }
+      /* ─────────────────────────────────────────────────
+         Insight Engine — Rule-based analysis
+      ───────────────────────────────────────────────── */
+      function computeYearlyInsights(yd, d) {
+        const items = [];
+        const years = Object.keys(yd || {}).map(Number).sort((a, b) => a - b);
+        if (!years.length) return items;
 
-  /* ─────────────────────────────────────────────────
-     Render: No data
-  ───────────────────────────────────────────────── */
-  function renderNoData() {
-    document.querySelector('.main').innerHTML = `
+        // Year with highest spend
+        let maxYear = years[0], maxVal = 0;
+        for (const y of years) {
+          if ((yd[y].t || 0) > maxVal) { maxVal = yd[y].t; maxYear = y; }
+        }
+        items.push({ icon: '★', text: `Năm ${maxYear} là năm chi tiêu nhiều nhất — ${fmtVND(maxVal)}` });
+
+        // YoY change for latest 2 years
+        if (years.length >= 2) {
+          const lastY = years[years.length - 1];
+          const prevY = years[years.length - 2];
+          const last = yd[lastY].t || 0;
+          const prev = yd[prevY].t || 0;
+          if (prev > 0) {
+            const pct = Math.round(((last - prev) / prev) * 100);
+            const icon = pct >= 0 ? '↑' : '↓';
+            const label = pct >= 0 ? 'tăng' : 'giảm';
+            items.push({ icon, text: `Năm ${lastY} ${label} ${Math.abs(pct)}% so với năm ${prevY} (${fmtVND(prev)} → ${fmtVND(last)})` });
+          }
+        }
+
+        // Savings rate
+        const totalSpend = d.t || 0;
+        const totalSaved = d.s || 0;
+        if (totalSpend > 0 && totalSaved > 0) {
+          const savePct = Math.round((totalSaved / (totalSpend + totalSaved)) * 100);
+          items.push({ icon: '→', text: `Tiết kiệm được ${fmtVND(totalSaved)} từ khuyến mãi (${savePct}% giá gốc)` });
+        }
+
+        // Average spend per order
+        if (d.o > 0) {
+          items.push({ icon: '→', text: `Trung bình mỗi đơn hàng: ${fmtVND(Math.round(totalSpend / d.o))}` });
+        }
+
+        return items;
+      }
+
+      function computeMonthlyInsights(yd, year) {
+        const items = [];
+        const monthData = (yd || {})[year]?.m || {};
+        const months = Object.entries(monthData)
+          .map(([m, v]) => ({ m: parseInt(m, 10), v }))
+          .filter(x => x.v > 0)
+          .sort((a, b) => a.m - b.m);
+        if (!months.length) return items;
+
+        const total = months.reduce((s, x) => s + x.v, 0);
+        const peak = months.reduce((a, b) => a.v >= b.v ? a : b);
+        const low = months.reduce((a, b) => a.v <= b.v ? a : b);
+
+        const MONTH_NAMES = ['', 'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+          'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+
+        const peakPct = Math.round((peak.v / total) * 100);
+        items.push({ icon: '★', text: `${MONTH_NAMES[peak.m]} là tháng chi tiêu cao nhất — ${fmtVND(peak.v)} (${peakPct}% cả năm)` });
+
+        if (low.m !== peak.m) {
+          items.push({ icon: '↓', text: `${MONTH_NAMES[low.m]} chi tiêu thấp nhất — ${fmtVND(low.v)}` });
+        }
+
+        // Q4 detection (Oct-Nov-Dec)
+        const q4Total = [10, 11, 12].reduce((s, m) => s + (monthData[m] || 0), 0);
+        if (q4Total > 0 && total > 0) {
+          const q4Pct = Math.round((q4Total / total) * 100);
+          if (q4Pct >= 30) {
+            items.push({ icon: '↑', text: `Quý 4 (Tháng 10–12) chiếm ${q4Pct}% chi tiêu cả năm — mùa mua sắm cuối năm` });
+          }
+        }
+
+        // Average per active month
+        if (months.length > 1) {
+          items.push({ icon: '→', text: `Trung bình ${fmtVND(Math.round(total / months.length))} / tháng có mua sắm (${months.length} tháng)` });
+        }
+
+        return items;
+      }
+
+      function computeCategoryInsights(cs, totalSpend) {
+        const items = [];
+        if (!cs || !cs.length) return items;
+
+        const sorted = [...cs].sort((a, b) => b.s - a.s);
+        const total = sorted.reduce((s, c) => s + c.s, 0) || totalSpend || 1;
+
+        const top1 = sorted[0];
+        const top1Pct = Math.round((top1.s / total) * 100);
+        const top1Name = top1.name || resolveCatLabel(top1);
+        items.push({ icon: '★', text: `${top1Name} dẫn đầu với ${fmtVND(top1.s)} (${top1Pct}% tổng chi tiêu)` });
+
+        if (sorted.length >= 2) {
+          const top2 = sorted[1];
+          const top2Pct = Math.round((top2.s / total) * 100);
+          const top2Name = top2.name || resolveCatLabel(top2);
+          const combined = top1Pct + top2Pct;
+          items.push({ icon: '→', text: `${top1Name} + ${top2Name} chiếm ${combined}% tổng chi tiêu` });
+        }
+
+        // Smallest category
+        const last = sorted[sorted.length - 1];
+        if (last !== top1 && last.s > 0) {
+          const lastName = last.name || resolveCatLabel(last);
+          const lastPct = Math.round((last.s / total) * 100);
+          items.push({ icon: '↓', text: `Danh mục ít nhất: ${lastName} — ${fmtVND(last.s)} (${lastPct}%)` });
+        }
+
+        // Count of items per category
+        const topByCount = [...cs].sort((a, b) => b.c - a.c)[0];
+        if (topByCount && topByCount.c > 0) {
+          const topCountName = topByCount.name || resolveCatLabel(topByCount);
+          items.push({ icon: '→', text: `Mua nhiều lượt nhất: ${topCountName} — ${fmtNum(topByCount.c)} lượt` });
+        }
+
+        return items;
+      }
+
+      function computeItemInsights(ti, totalSpend) {
+        const items = [];
+        if (!ti || !ti.length) return items;
+
+        const total = totalSpend || ti.reduce((s, i) => s + i.s, 0) || 1;
+
+        // Top by spend
+        const topSpend = [...ti].sort((a, b) => b.s - a.s)[0];
+        if (topSpend) {
+          const pct = Math.round((topSpend.s / total) * 100);
+          items.push({ icon: '★', text: `Chi nhiều nhất: "${topSpend.n}" — ${fmtVND(topSpend.s)} (${pct}% tổng)` });
+        }
+
+        // Top by count
+        const topCount = [...ti].sort((a, b) => b.c - a.c)[0];
+        if (topCount && topCount.c > 1) {
+          items.push({ icon: '→', text: `Mua nhiều lần nhất: "${topCount.n}" — ${fmtNum(topCount.c)} lần` });
+        }
+
+        // Top 5 concentration
+        const top5 = [...ti].sort((a, b) => b.s - a.s).slice(0, 5);
+        const top5Sum = top5.reduce((s, i) => s + i.s, 0);
+        if (top5Sum > 0 && top5.length === 5) {
+          const pct = Math.round((top5Sum / total) * 100);
+          items.push({ icon: '↑', text: `Top 5 sản phẩm chiếm ${pct}% tổng chi tiêu` });
+        }
+
+        // Unique products count
+        items.push({ icon: '→', text: `${fmtNum(ti.length)} sản phẩm khác nhau đã mua` });
+
+        return items;
+      }
+
+      /* ─────────────────────────────────────────────────
+         Render insight card
+      ───────────────────────────────────────────────── */
+      function renderInsightCard(id, insightItems) {
+        const card = document.getElementById(id);
+        const list = document.getElementById(id + '-list');
+
+        console.log(`[Dashboard] renderInsightCard('${id}')`, {
+          card: !!card,
+          list: !!list,
+          itemCount: insightItems?.length || 0,
+          items: insightItems?.slice(0, 2) || []
+        });
+
+        if (!card || !list || !insightItems || !insightItems.length) return;
+
+        list.innerHTML = insightItems.map(item =>
+          `<li><span class="ins-icon">${item.icon}</span><span>${escHtml(item.text)}</span></li>`
+        ).join('');
+        card.style.display = '';
+        reveal(card);
+
+        console.log(`[Dashboard] ✅ Insight card '${id}' rendered with ${insightItems.length} items`);
+      }
+
+      /* ─────────────────────────────────────────────────
+         Dashboard cache (localStorage)
+         Key = d.ts — auto-invalidated when new scan arrives.
+         Structure: { v, ts, cats: { nameKey → category }, insights: { cardId → text } }
+      ───────────────────────────────────────────────── */
+      const DASH_CACHE_KEY = 'shopee_insight_cache';
+      let _dashCache = null;
+
+      function loadDashCache(ts) {
+        try {
+          const raw = localStorage.getItem(DASH_CACHE_KEY);
+          if (raw) {
+            const c = JSON.parse(raw);
+            if (c.ts === ts) return c; // Cache hit — same scan
+          }
+        } catch { /* corrupted, ignore */ }
+        return { v: 1, ts, cats: {}, insights: {} }; // Cache miss — fresh
+      }
+
+      function saveDashCache() {
+        if (!_dashCache) return;
+        try {
+          localStorage.setItem(DASH_CACHE_KEY, JSON.stringify(_dashCache));
+        } catch (e) {
+          console.warn('[Dashboard] Cache save failed (quota?):', e.message);
+        }
+      }
+
+      /* ─────────────────────────────────────────────────
+         Dashboard-side classification (rule-based + AI)
+         Popup only collects raw data; all categorization
+         happens here — keyword first, then AI fallback.
+      ───────────────────────────────────────────────── */
+
+      // Keyword lists mirror content.js keyword definitions (source of truth moved here)
+      const _DASH_KW = {
+        beauty: "son|son môi|son dưỡng|son kem|son lì|son bóng|tint|phấn nền|phấn phủ|phấn nước|cushion|kem nền|foundation|bb cream|cc cream|che khuyết điểm|concealer|mascara|eyeliner|kẻ mắt|kẻ mày|chì kẻ mày|phấn mắt|phấn má|tạo khối|highlight|tẩy trang|nước hoa hồng|toner|serum|tinh chất|kem dưỡng|lotion|xịt khoáng|mặt nạ|mask|kem chống nắng|kcn|sữa rửa mặt|srm|tẩy da chết|tẩy tế bào chết|peeling|retinol|bha|aha|niacinamide|vitamin c|trị mụn|thâm nám|sữa tắm|dầu gội|dầu xả|kem ủ tóc|dưỡng tóc|xịt bưởi|mọc tóc|lăn nách|lăn khử mùi|xịt khử mùi|dung dịch vệ sinh|ddvs|băng vệ sinh|bvs|cốc nguyệt san|kem tẩy lông|wax lông|sữa dưỡng thể|body lotion|nước hoa|bodymist|cọ trang điểm|mút trang điểm|kẹp mi|máy rửa mặt|máy đẩy tinh chất|nhíp|dao cạo|bông tẩy trang|thực phẩm chức năng|tpcn|collagen|vitamin|omega 3|canxi|kẽm|sắt|biotin|giảm cân|tăng cân|đốt mỡ|yến sào|đông trùng hạ thảo|bao cao su|bcs|que thử thai|mac|3ce|romand|black rouge|merzy|innisfree|laneige|la roche posay|vichy|cerave|cetaphil|cocoon|the ordinary|obagi|paula's choice",
+        fashion: "áo|áo thun|áo phông|áo sơ mi|áo polo|áo khoác|áo gió|áo dạ|áo len|áo nỉ|áo hoodie|áo vest|blazer|trench coat|áo tweed|áo kiểu|áo trễ vai|áo hai dây|áo ống|áo croptop|bra|bralette|quần|quần tây|quần âu|quần kaki|quần jeans|quần bò|quần short|quần đùi|quần jogger|quần ống rộng|quần culottes|quần ống loe|quần legging|quần lót|lọt khe|đồ lót|sịp|boxer|đồ bộ|đồ mặc nhà|váy ngủ|pijama|chân váy|váy|váy xòe|váy xếp ly|váy chữ a|váy maxi|đầm|đầm xòe|đầm suông|đầm body|đầm dạ hội|váy cưới|bikini|đồ bơi|giày|giày thể thao|sneaker|giày tây|giày lười|giày slip on|giày boot|bốt|dép|sandal|giày cao gót|giày búp bê|mary jane|giày bệt|guốc|dép sục|dép xỏ ngón|tất|vớ|quần tất|balo|ba lô|túi|túi xách|túi đeo chéo|túi tote|túi kẹp nách|cặp xách|vali|ví|ví da|bóp|clutch|mũ|nón|mũ lưỡi trai|mũ nồi|beret|bucket|kính râm|kính mát|gọng kính|thắt lưng|dây nịt|cà vạt|khăn|găng tay|nhẫn|dây chuyền|bông tai|khuyên tai|vòng tay|lắc tay|lắc chân|choker|băng đô|cột tóc|kẹp tóc|kẹp càng cua|chun buộc tóc|scrunchies|đồng hồ|vàng|bạc|trang sức|jewelry",
+        tech: "điện thoại|samsung|apple|iphone|ipad|macbook|lg|sony|xiaomi|oppo|vivo|laptop|máy tính bảng|màn hình|pc|mainboard|cpu|vga|card màn hình|ram|ssd|hdd|vỏ case|nguồn|tản nhiệt|chuột|chuột không dây|chuột gaming|lót chuột|bàn phím|bàn phím cơ|keycap|switch|tai nghe|tai nghe bluetooth|tai nghe true wireless|loa bluetooth|loa|router wifi|modem|cáp mạng|usb|cáp sạc|cáp type c|cáp lightning|củ sạc|sạc nhanh|sạc dự phòng|ốp lưng|cường lực|giá đỡ điện thoại|gậy selfie|tripod|tay cầm chơi game|máy ảnh|ống kính|lens|thẻ nhớ|tivi|máy chiếu|máy in|camera quan sát|camera hành trình|nhà thông minh|smart home|apple watch|kindle|airtag|quạt tản nhiệt điện thoại|gimbal|đèn livestream|logitech|razer|corsair|anker|baseus|ugreen",
+        home: "chăn|mền|ga trải giường|drap|gối|đệm|nệm|chiếu|màn|rèm|tủ|kệ|bàn|ghế|sofa|tranh|gương|lọ hoa|nến thơm|tinh dầu|thảm|nồi|chảo|bát|chén|đĩa|đũa|thìa|ly|cốc|dao|kéo|thớt|rổ|bình giữ nhiệt|hộp đựng|màng bọc|máy giặt|máy sấy|bàn ủi|bàn là|móc treo|chổi|cây lau nhà|máy hút bụi|robot hút bụi|nước lau sàn|bột giặt|nước giặt|nước xả|giấy vệ sinh|khăn giấy|túi rác|kìm|búa|cờ lê|tuốc nơ vít|khoan|ốc vít|băng keo|thang|chậu cây|phân bón|hạt giống|vòi tưới|ổ cắm|bóng đèn|máy lọc nước|máy lọc không khí|bình nóng lạnh|tủ lạnh|máy lạnh|điều hòa|quạt|khăn tắm|phụ kiện ô tô|phụ kiện xe máy|nhớt xe|mũ bảo hiểm|bạt phủ xe|nước mắm|dầu ăn|gia vị|mì gói|gạo|đồ ăn vặt|bánh|kẹo|sô cô la|bia|rượu|nước ngọt|trà|cafe|sữa|bỉm|tã|đồ sơ sinh|bình sữa|xe đẩy em bé|thức ăn chó mèo|cát vệ sinh|locknlock|sunhouse|kangaroo|philips",
+        sport: "bóng đá|bóng rổ|bóng chuyền|cầu lông|quần vợt|tennis|bóng bàn|golf|bơi lội|chạy bộ|đạp xe|võ thuật|boxing|mma|muay thái|yoga|gym|thể hình|vợt|quả cầu lông|bóng|găng tay thủ môn|giày đá bóng|giày đinh|giày training|đồ bơi|kính bơi|mũ bơi|phao bơi|gậy golf|túi golf|xe đạp thể thao|đồng hồ thể thao|garmin|coros|tạ tay|tạ đòn|ghế tập tạ|xà đơn|máy chạy bộ|xe đạp tập|thảm yoga|bóng yoga|con lăn tập bụng|dây nhảy|dây kháng lực|quấn cổ tay|băng bảo vệ|đai nịt bụng|áo tập|quần tập|bra thể thao|bình lắc|whey|mass gainer|bcaa|eaa|creatine|pre-workout|patin|leo núi|cắm trại|camping|lều|câu cá|cần câu|mồi câu|túi ngủ|yonex|victor|lining|decathlon|asics|mizuno",
+        edu: "sách|truyện|manga|comic|tiểu thuyết|từ điển|giáo trình|vở|sổ|giấy|bút|thước|tẩy|gôm|kẹp|đồ chơi|lego|rubik|yoyo|búp bê|mô hình|figure|gundam|board game|cờ|đất nặn|màu nước|toan vẽ|len|kim móc|nhạc cụ|đàn|guitar|piano|ukulele|sáo|trống|đĩa cd|đĩa game|ps5|nintendo|khóa học|tài khoản|netflix|spotify|balo học sinh|flashcard"
+      };
+
+      // Pre-process keyword lists into sorted word arrays (longest first to avoid partial overlap)
+      const DASH_SCORING_CATS = [
+        { name: '💄 Sức khỏe & Làm đẹp', words: _DASH_KW.beauty.split('|').sort((a, b) => b.length - a.length) },
+        { name: '👗 Thời trang & Phụ kiện', words: _DASH_KW.fashion.split('|').sort((a, b) => b.length - a.length) },
+        { name: '💻 Điện tử & Công nghệ', words: _DASH_KW.tech.split('|').sort((a, b) => b.length - a.length) },
+        { name: '🏠 Nhà cửa & Đời sống', words: _DASH_KW.home.split('|').sort((a, b) => b.length - a.length) },
+        { name: '💪 Thể thao & Dã ngoại', words: _DASH_KW.sport.split('|').sort((a, b) => b.length - a.length) },
+        { name: '📚 Giải trí & Giáo dục', words: _DASH_KW.edu.split('|').sort((a, b) => b.length - a.length) }
+      ];
+
+      // Synchronous keyword classifier — same scoring logic as the former content.js version
+      const MIN_DASH_SCORE = 5;
+      function classifyByNameDash(name) {
+        const n = String(name || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
+        const paddedN = ' ' + n + ' ';
+        let bestCat = '🏷️ Khác';
+        let maxScore = 0;
+        for (const cat of DASH_SCORING_CATS) {
+          let score = 0;
+          let temp = paddedN;
+          for (const w of cat.words) {
+            const target = ' ' + w + ' ';
+            let idx = temp.indexOf(target);
+            while (idx !== -1) {
+              score += w.length;
+              temp = temp.substring(0, idx) + ' ' + temp.substring(idx + target.length - 1);
+              idx = temp.indexOf(target);
+            }
+          }
+          if (score > maxScore) { maxScore = score; bestCat = cat.name; }
+        }
+        return maxScore >= MIN_DASH_SCORE ? bestCat : '🏷️ Khác';
+      }
+
+      // Build category spending summary from a classified ti array (replaces cs from URL)
+      function buildCsFromTi(ti) {
+        const map = {};
+        for (const item of (ti || [])) {
+          const cat = item.cat || '🏷️ Khác';
+          if (!map[cat]) map[cat] = { name: cat, s: 0, c: 0 };
+          map[cat].s += item.s || 0;
+          map[cat].c += item.c || 0;
+        }
+        return Object.values(map).sort((a, b) => b.s - a.s);
+      }
+
+      const DASH_CAT_CODES = {
+        tech: '💻 Điện tử & Công nghệ',
+        beauty: '💄 Sức khỏe & Làm đẹp',
+        fashion: '👗 Thời trang & Phụ kiện',
+        sport: '💪 Thể thao & Dã ngoại',
+        home: '🏠 Nhà cửa & Đời sống',
+        edu: '📚 Giải trí & Giáo dục'
+      };
+
+      let _dashCatSession = null;
+      let _dashCatDisabled = false;
+
+      async function getDashCatSession() {
+        if (_dashCatDisabled) return null;
+        if (_dashCatSession) return _dashCatSession;
+        if (typeof LanguageModel === 'undefined') return null;
+        try {
+          const status = await LanguageModel.availability();
+          if (status === 'unavailable') return null;
+          _dashCatSession = await LanguageModel.create({
+            initialPrompts: [{
+              role: 'system', content:
+                'You classify Vietnamese e-commerce product names. ' +
+                'Categories: tech=electronics/devices, beauty=cosmetics/skincare/health, ' +
+                'fashion=clothing/shoes/bags/accessories, sport=sports/outdoors, ' +
+                'home=home/kitchen/groceries, edu=books/toys/hobbies. ' +
+                'Reply with exactly one code per line in the same order as input. No other text.'
+            }],
+            temperature: 0.1
+          });
+          return _dashCatSession;
+        } catch (e) {
+          if (isAIFatalError(e)) _dashCatDisabled = true;
+          return null;
+        }
+      }
+
+      // Classifies top-item entries still at '🏷️ Khác' via AI (keyword pre-pass already ran).
+      // Mutates ti in-place; re-renders top items and categories after completion.
+      async function classifyKharItems(ti, d) {
+        if (!ti || !ti.length || !_dashCache) return;
+
+        // Apply any cached overrides that may have been missed (safety net)
+        for (const item of ti) {
+          if (item.cat && item.cat !== '🏷️ Khác') continue;
+          const key = item.n.toLowerCase().substring(0, 120);
+          if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
+        }
+
+        // Collect still-uncategorized unique items (max 20 — same guard as extension)
+        const toClassify = [];
+        const seen = new Set();
+        for (const item of ti) {
+          if (item.cat !== '🏷️ Khác') continue;
+          const key = item.n.toLowerCase().substring(0, 120);
+          if (!seen.has(key)) { seen.add(key); toClassify.push({ item, key }); }
+        }
+        if (!toClassify.length) return;
+        if (toClassify.length > 20) return;
+
+        const session = await getDashCatSession();
+        if (!session) return;
+
+        try {
+          const names = toClassify.map(x => x.item.n).join('\n');
+          const raw = await session.prompt(`Classify these products (one code per line):\n${names}`);
+          const lines = String(raw).split('\n')
+            .map(l => l.trim().toLowerCase().replace(/[^a-z]/g, ''))
+            .filter(Boolean);
+
+          let patched = 0;
+          for (let i = 0; i < toClassify.length; i++) {
+            const resolved = DASH_CAT_CODES[lines[i]];
+            if (!resolved) continue;
+            const { key } = toClassify[i];
+            // Apply to all ti items sharing this name key
+            for (const item of ti) {
+              if (item.cat === '🏷️ Khác' && item.n.toLowerCase().substring(0, 120) === key) {
+                item.cat = resolved;
+                patched++;
+              }
+            }
+            _dashCache.cats[key] = resolved;
+          }
+
+          if (patched > 0) {
+            saveDashCache();
+            d.cs = buildCsFromTi(ti);
+            // Re-render components that display item categories
+            renderTopItems(ti);
+            renderCategories(d.cs, ti);
+            console.log(`[Dashboard] AI classified ${patched} items → cache saved`);
+          }
+        } catch (e) {
+          console.warn('[Dashboard] Category classification failed:', e);
+          if (isAIFatalError(e)) { _dashCatDisabled = true; _dashCatSession = null; }
+        }
+      }
+
+      /* ─────────────────────────────────────────────────
+         AI narrative — Chrome 148+ web LanguageModel
+      ───────────────────────────────────────────────── */
+      const AI_INSIGHT_SYSTEM = [
+        'Bạn là Chuyên gia Kế hoạch Tài chính Cá nhân người Việt.',
+        'Nhiệm vụ: phân tích dữ liệu chi tiêu thực tế trên Shopee và đưa ra nhận xét THẲNG THẮN, CÁ NHÂN HÓA.',
+        'Quy tắc bắt buộc:',
+        '(1) Luôn dùng đúng số liệu từ dữ liệu được cung cấp.',
+        '(2) Chỉ đích danh sản phẩm hoặc danh mục cụ thể — không nói chung chung.',
+        '(3) Đề xuất ít nhất 1 hành động cắt giảm hoặc tiết kiệm thực tế có thể làm ngay.',
+        '(4) Tối đa 3 câu ngắn gọn, súc tích. Không dùng markdown, không dùng danh sách.',
+        '(5) Giọng điệu: thẳng thắn nhưng thân thiện, như người bạn tư vấn tài chính thực sự.'
+      ].join(' ');
+
+      let _aiInsightSession = null;
+      let _aiInsightDisabled = false;
+
+      function isAIFatalError(error) {
+        const msg = String(error?.message || error || '').toLowerCase();
+        return msg.includes('crashed too many times') ||
+          msg.includes('unable to create a session') ||
+          msg.includes('model not available');
+      }
+
+      async function getAIInsightSession() {
+        if (_aiInsightDisabled) return null;
+        if (_aiInsightSession) return _aiInsightSession;
+        if (typeof LanguageModel === 'undefined') return null;
+        try {
+          const status = await LanguageModel.availability();
+          if (status === 'unavailable') return null;
+          _aiInsightSession = await LanguageModel.create({
+            initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }]
+          });
+          return _aiInsightSession;
+        } catch (e) {
+          if (isAIFatalError(e)) {
+            console.warn('[Dashboard] AI model fatally broken, disabling AI insights:', e.message);
+            _aiInsightDisabled = true;
+          }
+          return null;
+        }
+      }
+
+      // cacheKey: optional override for cache lookup (used for per-year monthly insights)
+      async function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
+        if (_aiInsightDisabled) return;
+        const aiEl = document.getElementById(cardId + '-ai');
+        if (!aiEl) return;
+
+        const ck = cacheKey || cardId;
+
+        // Serve from cache if available — no AI call needed
+        if (_dashCache?.insights[ck]) {
+          aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck]);
+          return;
+        }
+
+        aiEl.classList.add('loading');
+
+        const session = await getAIInsightSession();
+        if (!session) { aiEl.remove(); return; }
+
+        try {
+          const fullPrompt = `DỮ LIỆU CHI TIÊU:\n${context}\n\nYÊU CẦU: ${specificPrompt}`;
+          const result = await session.prompt(fullPrompt);
+          if (result && result.trim()) {
+            const text = result.trim();
+            aiEl.innerHTML = renderAIInsight(text);
+            // Save to cache
+            if (_dashCache) {
+              _dashCache.insights[ck] = text;
+              saveDashCache();
+            }
+          } else {
+            aiEl.remove();
+          }
+        } catch (e) {
+          console.warn('[Dashboard] AI insight failed:', e);
+          if (isAIFatalError(e)) {
+            _aiInsightDisabled = true;
+            _aiInsightSession = null;
+          }
+          aiEl.remove();
+        } finally {
+          aiEl.classList.remove('loading');
+        }
+      }
+
+      /* ─────────────────────────────────────────────────
+         Parse data from URL hash
+      ───────────────────────────────────────────────── */
+      function parseData() {
+        try {
+          const match = location.hash.match(/[#&]d=([^&]+)/);
+          if (!match) return null;
+          return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+        } catch { return null; }
+      }
+
+      /* ─────────────────────────────────────────────────
+         Animate helpers
+      ───────────────────────────────────────────────── */
+      function animateCounter(el, target, duration) {
+        const match = String(target).match(/^([\d,\.]+)(.*)$/);
+        if (!match) { el.textContent = target; return; }
+        const num = parseFloat(match[1].replace(/,/g, ''));
+        const suffix = match[2];
+        const start = performance.now();
+        const step = now => {
+          const p = Math.min((now - start) / duration, 1);
+          const v = num * (1 - Math.pow(1 - p, 3));
+          el.textContent = Math.round(v).toLocaleString('vi-VN') + suffix;
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = target;
+        };
+        requestAnimationFrame(step);
+      }
+
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+      }, { threshold: 0.1 });
+      function reveal(el) { if (el) io.observe(el); }
+
+      /* ─────────────────────────────────────────────────
+         Render: No data
+      ───────────────────────────────────────────────── */
+      function renderNoData() {
+        document.querySelector('.main').innerHTML = `
       <div class="no-data" style="margin-top:10vh; max-width: 600px; margin-left: auto; margin-right: auto; padding: 40px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center;">
         <div style="font-size:64px;margin-bottom:16px; animation: float 3s ease-in-out infinite;">🛒</div>
         <h2 style="font-size:28px;font-weight:800;color:var(--text);margin-bottom:12px">Bắt đầu thống kê chi tiêu!</h2>
@@ -1121,124 +1907,124 @@
         }
       </style>
     `;
-    
-    // Hide sidebar on no data screen for better focus
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.style.display = 'none';
-    document.querySelector('.main').style.marginLeft = '0';
-  }
 
-  /* ─────────────────────────────────────────────────
-     Render: KPI row
-  ───────────────────────────────────────────────── */
-  function renderKpi(d) {
-    const kpis = [
-      { label: 'Tổng Chi Tiêu',    val: fmtVND(d.t),    cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
-      { label: 'Sản Phẩm Đã Mua',  val: fmtNum(d.ip),          cls: '',       sub: 'sản phẩm' },
-      { label: 'Tiết Kiệm Được',   val: fmtVND(d.s),    cls: 'green',  sub: 'từ khuyến mãi' }
-    ];
-    if (d.ship && d.ship > 0) {
-      kpis.push({ label: 'Phí Vận Chuyển',   val: fmtVND(d.ship), cls: '',       sub: 'tổng phí ship' });
-    }
-    const row = document.getElementById('kpi-row');
-    row.innerHTML = kpis.map((k, i) => `
+        // Hide sidebar on no data screen for better focus
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+        document.querySelector('.main').style.marginLeft = '0';
+      }
+
+      /* ─────────────────────────────────────────────────
+         Render: KPI row
+      ───────────────────────────────────────────────── */
+      function renderKpi(d) {
+        const kpis = [
+          { label: 'Tổng Chi Tiêu', val: fmtVND(d.t), cls: 'orange', sub: `${fmtNum(d.o)} đơn hàng` },
+          { label: 'Sản Phẩm Đã Mua', val: fmtNum(d.ip), cls: '', sub: 'sản phẩm' },
+          { label: 'Tiết Kiệm Được', val: fmtVND(d.s), cls: 'green', sub: 'từ khuyến mãi' }
+        ];
+        if (d.ship && d.ship > 0) {
+          kpis.push({ label: 'Phí Vận Chuyển', val: fmtVND(d.ship), cls: '', sub: 'tổng phí ship' });
+        }
+        const row = document.getElementById('kpi-row');
+        row.innerHTML = kpis.map((k, i) => `
       <div class="kpi" style="transition-delay:${i * 0.08}s">
         <div class="kpi-label">${k.label}</div>
         <div class="kpi-value ${k.cls}" data-target="${k.val}">${k.val}</div>
         <div class="kpi-sub">${k.sub}</div>
       </div>`).join('');
-    row.querySelectorAll('.kpi').forEach(el => {
-      reveal(el);
-      const vEl = el.querySelector('.kpi-value');
-      io.observe(el);
-      // Counter once visible
-      const obs = new IntersectionObserver(([e]) => {
-        if (!e.isIntersecting) return;
-        obs.disconnect();
-        animateCounter(vEl, vEl.getAttribute('data-target'), 900);
-      });
-      obs.observe(el);
-    });
-  }
+        row.querySelectorAll('.kpi').forEach(el => {
+          reveal(el);
+          const vEl = el.querySelector('.kpi-value');
+          io.observe(el);
+          // Counter once visible
+          const obs = new IntersectionObserver(([e]) => {
+            if (!e.isIntersecting) return;
+            obs.disconnect();
+            animateCounter(vEl, vEl.getAttribute('data-target'), 900);
+          });
+          obs.observe(el);
+        });
+      }
 
-  /* ─────────────────────────────────────────────────
-     Render: Yearly chart
-  ───────────────────────────────────────────────── */
-  let yearlyChart = null;
-  function renderYearlyChart(yd, d) {
-    const years = Object.keys(yd).sort();
-    const vals  = years.map(y => yd[y].t);
-    const maxV  = Math.max(...vals);
-    const colors = years.map(y =>
-      y === String(new Date().getFullYear()) ? '#ee4d2d' : 'rgba(238,77,45,0.4)'
-    );
+      /* ─────────────────────────────────────────────────
+         Render: Yearly chart
+      ───────────────────────────────────────────────── */
+      let yearlyChart = null;
+      function renderYearlyChart(yd, d) {
+        const years = Object.keys(yd).sort();
+        const vals = years.map(y => yd[y].t);
+        const maxV = Math.max(...vals);
+        const colors = years.map(y =>
+          y === String(new Date().getFullYear()) ? '#ee4d2d' : 'rgba(238,77,45,0.4)'
+        );
 
-    const ctx = document.getElementById('chart-yearly').getContext('2d');
-    if (yearlyChart) yearlyChart.destroy();
-    yearlyChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: years,
-        datasets: [{
-          data: vals,
-          backgroundColor: colors,
-          borderRadius: 8,
-          borderSkipped: false
-        }]
-      },
-      options: {
-        ...CHART_CFG,
-        onClick: (e, elements) => {
-          if (elements && elements.length > 0) {
-            const index = elements[0].index;
-            const year = years[index];
-            showYearlyTopItems(year, d);
-            
-            const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
-            yearlyChart.data.datasets[0].backgroundColor = newColors;
-            yearlyChart.update();
+        const ctx = document.getElementById('chart-yearly').getContext('2d');
+        if (yearlyChart) yearlyChart.destroy();
+        yearlyChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: years,
+            datasets: [{
+              data: vals,
+              backgroundColor: colors,
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            ...CHART_CFG,
+            onClick: (e, elements) => {
+              if (elements && elements.length > 0) {
+                const index = elements[0].index;
+                const year = years[index];
+                showYearlyTopItems(year, d);
+
+                const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
+                yearlyChart.data.datasets[0].backgroundColor = newColors;
+                yearlyChart.update();
+              }
+            },
+            plugins: {
+              ...CHART_CFG.plugins,
+              tooltip: {
+                ...CHART_CFG.plugins.tooltip,
+                callbacks: {
+                  title: ctx => 'Năm ' + ctx[0].label,
+                  label: ctx => '  ' + fmtVND(ctx.parsed.y) + 'đ  (' + fmtNum(yd[ctx.label].o) + ' đơn)'
+                }
+              }
+            }
           }
-        },
-        plugins: {
-          ...CHART_CFG.plugins,
-          tooltip: {
-            ...CHART_CFG.plugins.tooltip,
-            callbacks: {
-              title: ctx => 'Năm ' + ctx[0].label,
-              label: ctx => '  ' + fmtVND(ctx.parsed.y) + 'đ  (' + fmtNum(yd[ctx.label].o) + ' đơn)'
+        });
+        reveal(document.getElementById('card-yearly'));
+      }
+
+      function showYearlyTopItems(year, d) {
+        const card = document.getElementById('card-yearly-items');
+        const tbody = document.querySelector('#yearly-items-table tbody');
+        document.getElementById('yearly-items-title').textContent = `🛒 Top Sản Phẩm Năm ${year}`;
+
+        if (!d || !d.mi) return;
+
+        const itemMap = {};
+        for (const ym in d.mi) {
+          if (ym.startsWith(year + '-')) {
+            const items = d.mi[ym];
+            for (const item of items) {
+              if (!itemMap[item.n]) itemMap[item.n] = { n: item.n, s: 0, c: 0 };
+              itemMap[item.n].s += item.s;
+              itemMap[item.n].c += (item.c || 1);
             }
           }
         }
-      }
-    });
-    reveal(document.getElementById('card-yearly'));
-  }
 
-  function showYearlyTopItems(year, d) {
-    const card = document.getElementById('card-yearly-items');
-    const tbody = document.querySelector('#yearly-items-table tbody');
-    document.getElementById('yearly-items-title').textContent = `🛒 Top Sản Phẩm Năm ${year}`;
-    
-    if (!d || !d.mi) return;
-    
-    const itemMap = {};
-    for (const ym in d.mi) {
-      if (ym.startsWith(year + '-')) {
-        const items = d.mi[ym];
-        for (const item of items) {
-          if (!itemMap[item.n]) itemMap[item.n] = { n: item.n, s: 0, c: 0 };
-          itemMap[item.n].s += item.s;
-          itemMap[item.n].c += (item.c || 1);
-        }
-      }
-    }
-    
-    const aggregatedItems = Object.values(itemMap).sort((a,b) => b.s - a.s).slice(0, 20); // Top 20
-    
-    if (aggregatedItems.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">Không có dữ liệu mua sắm cho năm ${year}.</td></tr>`;
-    } else {
-      tbody.innerHTML = aggregatedItems.map(item => `
+        const aggregatedItems = Object.values(itemMap).sort((a, b) => b.s - a.s).slice(0, 20); // Top 20
+
+        if (aggregatedItems.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">Không có dữ liệu mua sắm cho năm ${year}.</td></tr>`;
+        } else {
+          tbody.innerHTML = aggregatedItems.map(item => `
         <tr>
           <td>
             <div style="font-weight: 500; margin-bottom: 4px;">${item.n}</div>
@@ -1247,522 +2033,1017 @@
           <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}</td>
         </tr>
       `).join('');
-    }
-    
-    card.style.display = 'block';
-    reveal(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
+        }
 
-  /* ─────────────────────────────────────────────────
-     Render: Period stats
-  ───────────────────────────────────────────────── */
-  function renderPeriod(ps) {
-    const items = [
-      { label: '1 Tháng',  val: ps['1m'] },
-      { label: '3 Tháng',  val: ps['3m'] },
-      { label: '6 Tháng',  val: ps['6m'] },
-      { label: '1 Năm',    val: ps['1y'] }
-    ];
-    document.getElementById('period-grid').innerHTML = items.map(item => `
+        card.style.display = 'block';
+        reveal(card);
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      /* ─────────────────────────────────────────────────
+         Render: Period stats
+      ───────────────────────────────────────────────── */
+      function renderPeriod(ps) {
+        const items = [
+          { label: '1 Tháng', val: ps['1m'] },
+          { label: '3 Tháng', val: ps['3m'] },
+          { label: '6 Tháng', val: ps['6m'] },
+          { label: '1 Năm', val: ps['1y'] }
+        ];
+        document.getElementById('period-grid').innerHTML = items.map(item => `
       <div class="period-box">
         <div class="period-box-val">${fmtVND(item.val)}</div>
         <div class="period-box-label">${item.label} gần nhất</div>
       </div>`).join('');
-    reveal(document.getElementById('card-period'));
-  }
-
-  /* ─────────────────────────────────────────────────
-     Render: Monthly chart
-  ───────────────────────────────────────────────── */
-  let monthlyChart = null;
-  function renderMonthly(yd, year, d) {
-    currentMonthlySelection.year = String(year);
-    currentMonthlySelection.month = null;
-    const ydata = yd[year];
-    if (!ydata) return;
-    const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
-    const vals   = months.map(m => ydata.m[m] || 0);
-
-    document.getElementById('monthly-chart-title').textContent = `📅 Chi Tiêu Tháng — Năm ${year} (Click vào cột để xem sản phẩm)`;
-    
-    const miCard = document.getElementById('card-monthly-items');
-    if (miCard) miCard.style.display = 'none';
-
-    const ctx = document.getElementById('chart-monthly').getContext('2d');
-    if (monthlyChart) monthlyChart.destroy();
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-    gradient.addColorStop(0,   'rgba(238,77,45,0.4)');
-    gradient.addColorStop(1,   'rgba(238,77,45,0.02)');
-
-    monthlyChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: months.map(m => 'T' + m),
-        datasets: [{
-          data: vals,
-          backgroundColor: gradient,
-          borderColor: '#ee4d2d',
-          borderWidth: 1.5,
-          borderRadius: 6,
-          borderSkipped: false
-        }]
-      },
-      options: {
-        ...CHART_CFG,
-        onClick: (event, elements) => {
-          if (elements.length > 0) {
-            const index = elements[0].index;
-            const monthStr = months[index];
-            showMonthlyItems(d, year, monthStr);
-          }
-        }
+        reveal(document.getElementById('card-period'));
       }
-    });
-    reveal(document.getElementById('card-monthly'));
-  }
 
-  let currentMonthlyItems = [];
-  let currentMonthlySelection = { year: String(new Date().getFullYear()), month: null };
+      /* ─────────────────────────────────────────────────
+         Render: Monthly chart
+      ───────────────────────────────────────────────── */
+      let monthlyChart = null;
+      function renderMonthly(yd, year, d) {
+        currentMonthlySelection.year = String(year);
+        currentMonthlySelection.month = null;
+        const ydata = yd[year];
+        if (!ydata) return;
+        const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
+        const vals = months.map(m => ydata.m[m] || 0);
 
-  function showMonthlyItems(d, year, monthStr) {
-    currentMonthlySelection = { year: String(year), month: monthStr };
-    const ym = year + '-' + monthStr;
-    currentMonthlyItems = (d.mi && d.mi[ym]) || [];
-    
-    document.getElementById('monthly-items-title').textContent = `🏆 Top Sản Phẩm Tháng ${monthStr}/${year}`;
-    
-    const container = document.getElementById('card-monthly-items');
-    container.style.display = 'block';
-    reveal(container);
-    
-    renderMonthlyItemsList();
-  }
+        document.getElementById('monthly-chart-title').textContent = `📅 Chi Tiêu Tháng — Năm ${year} (Click vào cột để xem sản phẩm)`;
 
-  function renderMonthlyItemsList() {
-    const list = document.getElementById('monthly-items-list');
-    const limit = parseInt(document.getElementById('monthly-limit-select').value, 10) || 20;
-    const items = currentMonthlyItems.slice(0, limit);
+        const miCard = document.getElementById('card-monthly-items');
+        if (miCard) miCard.style.display = 'none';
 
-    if (items.length === 0) {
-      list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
-      return;
-    }
-    
-    const maxS = Math.max(...items.map(i => i.s), 1);
-    list.innerHTML = items.map((item, idx) => {
-      const pct = Math.round((item.s / maxS) * 100);
-      return `
+        const ctx = document.getElementById('chart-monthly').getContext('2d');
+        if (monthlyChart) monthlyChart.destroy();
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, 'rgba(238,77,45,0.4)');
+        gradient.addColorStop(1, 'rgba(238,77,45,0.02)');
+
+        monthlyChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: months.map(m => 'T' + m),
+            datasets: [{
+              data: vals,
+              backgroundColor: gradient,
+              borderColor: '#ee4d2d',
+              borderWidth: 1.5,
+              borderRadius: 6,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            ...CHART_CFG,
+            onClick: (event, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const monthStr = months[index];
+                showMonthlyItems(d, year, monthStr);
+              }
+            }
+          }
+        });
+        reveal(document.getElementById('card-monthly'));
+      }
+
+      let currentMonthlyItems = [];
+      let currentMonthlySelection = { year: String(new Date().getFullYear()), month: null };
+
+      function showMonthlyItems(d, year, monthStr) {
+        currentMonthlySelection = { year: String(year), month: monthStr };
+        const ym = year + '-' + monthStr;
+        currentMonthlyItems = (d.mi && d.mi[ym]) || [];
+
+        document.getElementById('monthly-items-title').textContent = `🏆 Top Sản Phẩm Tháng ${monthStr}/${year}`;
+
+        const container = document.getElementById('card-monthly-items');
+        container.style.display = 'block';
+        reveal(container);
+
+        renderMonthlyItemsList();
+      }
+
+      function renderMonthlyItemsList() {
+        const list = document.getElementById('monthly-items-list');
+        const limit = parseInt(document.getElementById('monthly-limit-select').value, 10) || 20;
+        const items = currentMonthlyItems.slice(0, limit);
+
+        if (items.length === 0) {
+          list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
+          return;
+        }
+
+        const maxS = Math.max(...items.map(i => i.s), 1);
+        list.innerHTML = items.map((item, idx) => {
+          const pct = Math.round((item.s / maxS) * 100);
+          return `
         <div class="top-row in">
           <div class="top-num">${idx + 1}</div>
           <div class="top-name-wrap">
-            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-name">${escHtml(capFirst(item.n))}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
             <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
           <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
-    }).join('');
-  }
+        }).join('');
+      }
 
-  /* ─────────────────────────────────────────────────
-     Render: Top Items
-  ───────────────────────────────────────────────── */
-  let currentTopItems = [];
-  function renderTopItems(ti) {
-    console.log('[Dashboard] renderTopItems', { itemCount: (ti || []).length, sampleItems: (ti || []).slice(0, 2) });
-    currentTopItems = ti || [];
-    renderTopItemsList();
-    reveal(document.getElementById('card-items'));
-  }
+      /* ─────────────────────────────────────────────────
+         Render: Top Items
+      ───────────────────────────────────────────────── */
+      let currentTopItems = [];
+      function renderTopItems(ti) {
+        console.log('[Dashboard] renderTopItems', { itemCount: (ti || []).length, sampleItems: (ti || []).slice(0, 2) });
+        currentTopItems = ti || [];
+        renderTopItemsList();
+        reveal(document.getElementById('card-items'));
+      }
 
-  function renderTopItemsList() {
-    const list = document.getElementById('items-list');
-    const limit = parseInt(document.getElementById('items-limit-select').value, 10) || 20;
-    const items = currentTopItems.slice(0, limit);
+      function renderTopItemsList() {
+        const list = document.getElementById('items-list');
+        const limit = parseInt(document.getElementById('items-limit-select').value, 10) || 20;
+        const items = currentTopItems.slice(0, limit);
 
-    if (items.length === 0) {
-      list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
-      return;
-    }
-    const maxS = Math.max(...items.map(i => i.s), 1);
-    list.innerHTML = items.map((item, idx) => {
-      const pct = Math.round((item.s / maxS) * 100);
-      return `
+        if (items.length === 0) {
+          list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm</div>';
+          return;
+        }
+        const maxS = Math.max(...items.map(i => i.s), 1);
+        list.innerHTML = items.map((item, idx) => {
+          const pct = Math.round((item.s / maxS) * 100);
+          return `
         <div class="top-row" style="transition-delay:${idx * 0.06}s">
           <div class="top-num">${idx + 1}</div>
           <div class="top-name-wrap">
-            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-name">${escHtml(capFirst(item.n))}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" data-pct="${pct}"></div></div>
             <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
           <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
-    }).join('');
-    list.querySelectorAll('.top-row').forEach(row => reveal(row));
+        }).join('');
+        list.querySelectorAll('.top-row').forEach(row => reveal(row));
 
-    // Animate bars
-    const barObs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (!e.isIntersecting) return;
-        e.target.querySelectorAll('.top-bar-fill').forEach((bar, i) => {
-          setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 30);
-        });
-      });
-    }, { threshold: 0.2 });
-    barObs.observe(list);
-  }
-
-  function renderYearPills(yd, onSelect) {
-    const years = Object.keys(yd).sort((a, b) => b - a);
-    const container = document.getElementById('year-pills');
-    container.innerHTML = years.map((y, i) => `
-      <button class="pill${i === 0 ? ' active' : ''}" data-year="${y}">Năm ${y}</button>`
-    ).join('');
-    container.querySelectorAll('.pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        onSelect(btn.getAttribute('data-year'));
-      });
-    });
-    if (years.length) onSelect(years[0]);
-  }
-
-  /* ─────────────────────────────────────────────────
-     Render: Categories
-  ───────────────────────────────────────────────── */
-  let catChart = null;
-  let currentCatData = null;
-
-  function showCatItems(catName, ti) {
-    const card = document.getElementById('card-cat-items');
-    const title = document.getElementById('cat-items-title');
-    const list  = document.getElementById('cat-items-list');
-
-    const items = (ti || []).filter(i => {
-      if (i.cat === catName) return true;
-      if (resolveCatLabel({ id: i.cat }) === catName) return true;
-      if (resolveCatLabel({ name: i.cat }) === catName) return true;
-      if (catName === 'Khác' || catName === '🏷️ Khác') {
-        if (!i.cat || i.cat === 'Khác' || i.cat === '🏷️ Khác') return true;
+        // Animate bars
+        const barObs = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            e.target.querySelectorAll('.top-bar-fill').forEach((bar, i) => {
+              setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 30);
+            });
+          });
+        }, { threshold: 0.2 });
+        barObs.observe(list);
       }
-      return false;
-    }).slice(0, 100);
 
-    // Highlight selected bar
-    document.querySelectorAll('.cat-row').forEach(r => {
-      r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
-    });
+      function renderYearPills(yd, onSelect) {
+        const years = Object.keys(yd).sort((a, b) => b - a);
+        const container = document.getElementById('year-pills');
+        container.innerHTML = years.map((y, i) => `
+      <button class="pill${i === 0 ? ' active' : ''}" data-year="${y}">Năm ${y}</button>`
+        ).join('');
+        container.querySelectorAll('.pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            container.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            onSelect(btn.getAttribute('data-year'));
+          });
+        });
+        if (years.length) onSelect(years[0]);
+      }
 
-    title.textContent = catName + ' — Top Sản Phẩm';
-    card.style.display = 'block';
+      /* ─────────────────────────────────────────────────
+         Render: Categories
+      ───────────────────────────────────────────────── */
+      let catChart = null;
+      let currentCatData = null;
 
-    if (items.length === 0) {
-      list.innerHTML = '<div class="no-data">Không có sản phẩm nào trong danh mục này (thử chạy lại để cập nhật dữ liệu)</div>';
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      return;
-    }
+      function showCatItems(catName, ti) {
+        const card = document.getElementById('card-cat-items');
+        const title = document.getElementById('cat-items-title');
+        const list = document.getElementById('cat-items-list');
 
-    const maxS = Math.max(...items.map(i => i.s), 1);
-    list.innerHTML = items.map((item, idx) => {
-      const pct = Math.round((item.s / maxS) * 100);
-      return `
+        const items = (ti || []).filter(i => {
+          if (i.cat === catName) return true;
+          if (resolveCatLabel({ id: i.cat }) === catName) return true;
+          if (resolveCatLabel({ name: i.cat }) === catName) return true;
+          if (catName === 'Khác' || catName === '🏷️ Khác') {
+            if (!i.cat || i.cat === 'Khác' || i.cat === '🏷️ Khác') return true;
+          }
+          return false;
+        }).slice(0, 100);
+
+        // Highlight selected bar
+        document.querySelectorAll('.cat-row').forEach(r => {
+          r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
+        });
+
+        title.textContent = catName + ' — Top Sản Phẩm';
+        card.style.display = 'block';
+
+        if (items.length === 0) {
+          list.innerHTML = '<div class="no-data">Không có sản phẩm nào trong danh mục này (thử chạy lại để cập nhật dữ liệu)</div>';
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+
+        const maxS = Math.max(...items.map(i => i.s), 1);
+        list.innerHTML = items.map((item, idx) => {
+          const pct = Math.round((item.s / maxS) * 100);
+          return `
         <div class="top-row in">
           <div class="top-num">${idx + 1}</div>
           <div class="top-name-wrap">
-            <div class="top-name">${escHtml(item.n)}</div>
+            <div class="top-name">${escHtml(capFirst(item.n))}</div>
             <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
             <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
           </div>
           <div class="top-val">${fmtVND(item.s)}</div>
         </div>`;
-    }).join('');
-    reveal(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
+        }).join('');
+        reveal(card);
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
-  function renderCategories(cs, ti) {
-    currentCatData = { cs, ti };
-    if (!cs || cs.length === 0) {
-      document.getElementById('cat-bars').innerHTML = '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
-      return;
-    }
-    const maxS = Math.max(...cs.map(c => c.s), 1);
-    const bars = document.getElementById('cat-bars');
-    bars.innerHTML = cs.map(c => {
-      const name = resolveCatLabel(c);
-      const pct  = Math.round((c.s / maxS) * 100);
-      return `
+      function renderCategories(cs, ti) {
+        currentCatData = { cs, ti };
+        if (!cs || cs.length === 0) {
+          document.getElementById('cat-bars').innerHTML = '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
+          return;
+        }
+        const maxS = Math.max(...cs.map(c => c.s), 1);
+        const bars = document.getElementById('cat-bars');
+        bars.innerHTML = cs.map(c => {
+          const name = resolveCatLabel(c);
+          const pct = Math.round((c.s / maxS) * 100);
+          return `
         <div class="cat-row" data-cat="${escHtml(name)}" style="cursor:pointer" title="Click để xem sản phẩm">
           <div class="cat-label">${escHtml(name)}</div>
           <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
           <div class="cat-val">${fmtVND(c.s)}</div>
         </div>`;
-    }).join('');
+        }).join('');
 
-    // Click handler
-    bars.querySelectorAll('.cat-row').forEach(row => {
-      row.addEventListener('click', () => showCatItems(row.getAttribute('data-cat'), ti));
-    });
+        // Click handler
+        bars.querySelectorAll('.cat-row').forEach(row => {
+          row.addEventListener('click', () => showCatItems(row.getAttribute('data-cat'), ti));
+        });
 
-    // Animate bars
-    const bObs = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      bObs.disconnect();
-      bars.querySelectorAll('.cat-bar-fill').forEach((bar, i) => {
-        setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 70);
-      });
-    }, { threshold: 0.2 });
-    bObs.observe(bars);
-    reveal(document.getElementById('card-cat-bars'));
+        // Animate bars
+        const bObs = new IntersectionObserver(([e]) => {
+          if (!e.isIntersecting) return;
+          bObs.disconnect();
+          bars.querySelectorAll('.cat-bar-fill').forEach((bar, i) => {
+            setTimeout(() => { bar.style.width = bar.getAttribute('data-pct') + '%'; }, i * 70);
+          });
+        }, { threshold: 0.2 });
+        bObs.observe(bars);
+        reveal(document.getElementById('card-cat-bars'));
 
-    // Donut chart
-    const PALETTE = [
-      '#ee4d2d','#ff7555','#ffa07a','#26aa99','#5fe8cc',
-      '#4a90d9','#a855f7','#f59e0b','#10b981','#ef4444',
-      '#8b5cf6','#06b6d4'
-    ];
-    const ctx = document.getElementById('chart-cat').getContext('2d');
-    if (catChart) catChart.destroy();
-    catChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: cs.map(c => resolveCatLabel(c)),
-        datasets: [{
-          data: cs.map(c => c.s),
-          backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
-          borderWidth: 2,
-          borderColor: '#ffffff',
-          hoverOffset: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '62%',
-        plugins: {
-          legend: {
-            display: true, position: 'right',
-            labels: { color: 'rgba(30,41,59,0.7)', font: { size: 11 }, boxWidth: 12, padding: 10 }
+        // Donut chart
+        const PALETTE = [
+          '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
+          '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
+          '#8b5cf6', '#06b6d4'
+        ];
+        const ctx = document.getElementById('chart-cat').getContext('2d');
+        if (catChart) catChart.destroy();
+        catChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: cs.map(c => resolveCatLabel(c)),
+            datasets: [{
+              data: cs.map(c => c.s),
+              backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 8
+            }]
           },
-          tooltip: {
-            backgroundColor: '#ffffff',
-            borderColor: 'rgba(0,0,0,0.1)',
-            borderWidth: 1,
-            titleColor: '#1e293b',
-            bodyColor: 'rgba(30,41,59,0.8)',
-            callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: {
+                display: true, position: 'right',
+                labels: { color: 'rgba(30,41,59,0.7)', font: { size: 11 }, boxWidth: 12, padding: 10 }
+              },
+              tooltip: {
+                backgroundColor: '#ffffff',
+                borderColor: 'rgba(0,0,0,0.1)',
+                borderWidth: 1,
+                titleColor: '#1e293b',
+                bodyColor: 'rgba(30,41,59,0.8)',
+                callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) }
+              }
+            }
           }
-        }
+        });
+        reveal(document.getElementById('card-cat-pie'));
       }
-    });
-    reveal(document.getElementById('card-cat-pie'));
-  }
 
-  /* ─────────────────────────────────────────────────
-     Navigation
-  ───────────────────────────────────────────────── */
-  const views   = document.querySelectorAll('.view');
-  const navBtns = document.querySelectorAll('.nav-item');
-  function switchView(name) {
-    views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
-    navBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-view') === name));
-  }
-  navBtns.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-view'))));
+      /* ─────────────────────────────────────────────────
+         Navigation
+      ───────────────────────────────────────────────── */
+      const views = document.querySelectorAll('.view');
+      const navBtns = document.querySelectorAll('.nav-item');
+      function switchView(name) {
+        views.forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+        navBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-view') === name));
+      }
+      navBtns.forEach(btn => btn.addEventListener('click', () => switchView(btn.getAttribute('data-view'))));
 
-  /* ─────────────────────────────────────────────────
-     Share Modal Logic
-  ───────────────────────────────────────────────── */
-  function setupShareButtons(d) {
-    const modal = document.getElementById('share-modal');
-    const previewImg = document.getElementById('share-preview-img');
-    const themeSelect = document.getElementById('share-theme-select');
-    const hideAmountCb = document.getElementById('share-hide-amount');
-    const hideNamesCb = document.getElementById('share-hide-names');
-    
-    const btnCopy = document.getElementById('btn-modal-copy');
-    const btnDownload = document.getElementById('btn-modal-download');
-    
-    let currentOptions = { cardType: 'overview' };
-    let currentDataUrl = '';
-    
-    const getBeat = (t) => {
-       if (t <= 1000000) return 10;
-       if (t <= 3000000) return 25;
-       if (t <= 8000000) return 45;
-       if (t <= 20000000) return 65;
-       if (t <= 50000000) return 82;
-       if (t <= 100000000) return 93;
-       return 99;
-    };
-    
-    async function updatePreview() {
-      if (!window.generateDashboardShareCard) return;
-      const curYear = new Date().getFullYear();
-      const yearlySpend = (d.yd && d.yd[curYear]) ? d.yd[curYear].t : d.t;
-      const opts = {
-        ...currentOptions,
-        theme: themeSelect.value,
-        hideAmount: hideAmountCb.checked,
-        hideNames: hideNamesCb.checked,
-        beat: getBeat(yearlySpend),
-        year: currentOptions.year || curYear
-      };
-      
-      previewImg.style.opacity = '0.5';
-      try {
-        currentDataUrl = await window.generateDashboardShareCard(d, opts);
-        previewImg.src = currentDataUrl;
-      } catch(e) { console.error(e); }
-      previewImg.style.opacity = '1';
-    }
-    
-    function openModal(cardType, extraOpts = {}) {
-      currentOptions = { cardType, ...extraOpts };
-      modal.classList.add('active');
-      updatePreview();
-    }
-    
-    document.getElementById('btn-close-modal').addEventListener('click', () => {
-      modal.classList.remove('active');
-    });
-    
-    themeSelect.addEventListener('change', updatePreview);
-    hideAmountCb.addEventListener('change', updatePreview);
-    hideNamesCb.addEventListener('change', updatePreview);
-    
-    document.querySelectorAll('.btn-share-trigger').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const type = btn.getAttribute('data-type');
-        if (type === 'monthly') {
-          const selYear = currentMonthlySelection.year;
-          let selMonth = currentMonthlySelection.month;
-          if (!selMonth && d.yd && d.yd[selYear] && d.yd[selYear].m) {
-            const topMonth = Object.entries(d.yd[selYear].m).sort((a, b) => b[1] - a[1])[0];
-            selMonth = topMonth ? topMonth[0] : null;
-          }
-          openModal(type, { month: selMonth, year: selYear });
-        } else {
-          openModal(type);
+      /* ─────────────────────────────────────────────────
+         Share Modal Logic
+      ───────────────────────────────────────────────── */
+      function setupShareButtons(d) {
+        const modal = document.getElementById('share-modal');
+        const previewImg = document.getElementById('share-preview-img');
+        const themeSelect = document.getElementById('share-theme-select');
+        const hideAmountCb = document.getElementById('share-hide-amount');
+        const hideNamesCb = document.getElementById('share-hide-names');
+
+        const btnCopy = document.getElementById('btn-modal-copy');
+        const btnDownload = document.getElementById('btn-modal-download');
+
+        let currentOptions = { cardType: 'overview' };
+        let currentDataUrl = '';
+
+        const getBeat = (t) => {
+          if (t <= 1000000) return 10;
+          if (t <= 3000000) return 25;
+          if (t <= 8000000) return 45;
+          if (t <= 20000000) return 65;
+          if (t <= 50000000) return 82;
+          if (t <= 100000000) return 93;
+          return 99;
+        };
+
+        async function updatePreview() {
+          if (!window.generateDashboardShareCard) return;
+          const curYear = new Date().getFullYear();
+          const yearlySpend = (d.yd && d.yd[curYear]) ? d.yd[curYear].t : d.t;
+          const opts = {
+            ...currentOptions,
+            theme: themeSelect.value,
+            hideAmount: hideAmountCb.checked,
+            hideNames: hideNamesCb.checked,
+            beat: getBeat(yearlySpend),
+            year: currentOptions.year || curYear
+          };
+
+          previewImg.style.opacity = '0.5';
+          try {
+            currentDataUrl = await window.generateDashboardShareCard(d, opts);
+            previewImg.src = currentDataUrl;
+          } catch (e) { console.error(e); }
+          previewImg.style.opacity = '1';
         }
+
+        function openModal(cardType, extraOpts = {}) {
+          currentOptions = { cardType, ...extraOpts };
+          modal.classList.add('active');
+          updatePreview();
+        }
+
+        document.getElementById('btn-close-modal').addEventListener('click', () => {
+          modal.classList.remove('active');
+        });
+
+        themeSelect.addEventListener('change', updatePreview);
+        hideAmountCb.addEventListener('change', updatePreview);
+        hideNamesCb.addEventListener('change', updatePreview);
+
+        document.querySelectorAll('.btn-share-trigger').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const type = btn.getAttribute('data-type');
+            if (type === 'monthly') {
+              const selYear = currentMonthlySelection.year;
+              let selMonth = currentMonthlySelection.month;
+              if (!selMonth && d.yd && d.yd[selYear] && d.yd[selYear].m) {
+                const topMonth = Object.entries(d.yd[selYear].m).sort((a, b) => b[1] - a[1])[0];
+                selMonth = topMonth ? topMonth[0] : null;
+              }
+              openModal(type, { month: selMonth, year: selYear });
+            } else {
+              openModal(type);
+            }
+          });
+        });
+
+        btnDownload.addEventListener('click', () => {
+          if (!currentDataUrl) return;
+          const link = document.createElement('a');
+          link.href = currentDataUrl;
+          link.download = `shopee-analytics-${currentOptions.cardType}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+
+        btnCopy.addEventListener('click', async () => {
+          if (!currentDataUrl) return;
+          const orig = btnCopy.innerHTML;
+          btnCopy.innerHTML = 'Đang copy...';
+          try {
+            const res = await fetch(currentDataUrl);
+            const blob = await res.blob();
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            btnCopy.innerHTML = '✓ Đã copy!';
+          } catch (err) {
+            console.error(err);
+            btnCopy.innerHTML = '❌ Lỗi';
+          } finally {
+            setTimeout(() => { btnCopy.innerHTML = orig; }, 2000);
+          }
+        });
+      }
+
+      /* ─────────────────────────────────────────────────
+         Boot - Handle extension data or URL hash
+      ───────────────────────────────────────────────── */
+      
+      // Check if opened from extension with raw data
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('source') === 'extension') {
+        console.log('[Dashboard] Opened from extension, checking for raw data...');
+        
+        // Try to get raw data from chrome.storage.local (if available)
+        if (typeof chrome !== 'undefined' && chrome.storage) {
+          chrome.storage.local.get(['shopee_dashboard_data'], (result) => {
+            if (result.shopee_dashboard_data) {
+              console.log('[Dashboard] Found extension data, building URL...');
+              const url = buildDashboardUrlFromExtension(result.shopee_dashboard_data);
+              // Clean up storage
+              chrome.storage.local.remove(['shopee_dashboard_data']);
+              // Redirect to proper dashboard URL
+              window.location.href = url;
+              return;
+            }
+            // No data found, show no-data view
+            renderNoData();
+          });
+          return;
+        }
+        
+        // No chrome.storage available, show no-data
+        renderNoData();
+        return;
+      }
+      
+      const d = parseData();
+      console.log('[Dashboard] Parsed data:', {
+        hasData: !!d,
+        totalSpend: d?.t,
+        topItemsCount: (d?.ti || []).length,
+        categoriesCount: (d?.cs || []).length
       });
-    });
-    
-    btnDownload.addEventListener('click', () => {
-      if (!currentDataUrl) return;
-      const link = document.createElement('a');
-      link.href = currentDataUrl;
-      link.download = `shopee-analytics-${currentOptions.cardType}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-    
-    btnCopy.addEventListener('click', async () => {
-      if (!currentDataUrl) return;
-      const orig = btnCopy.innerHTML;
-      btnCopy.innerHTML = 'Đang copy...';
-      try {
-        const res = await fetch(currentDataUrl);
-        const blob = await res.blob();
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        btnCopy.innerHTML = '✓ Đã copy!';
-      } catch (err) {
-        console.error(err);
-        btnCopy.innerHTML = '❌ Lỗi';
-      } finally {
-        setTimeout(() => { btnCopy.innerHTML = orig; }, 2000);
+
+      if (!d || !d.t) {
+        console.warn('[Dashboard] No data or invalid data, showing no-data view');
+        renderNoData();
+      } else {
+        // Load cache keyed by scan timestamp — auto-invalidated when user re-scans
+        _dashCache = loadDashCache(d.ts);
+        console.log(`[Dashboard] Cache ${Object.keys(_dashCache.cats).length} categories, ${Object.keys(_dashCache.insights).length} insights`);
+
+        // === Synchronous pre-classification (runs before first paint) ===
+        // 1. Apply cached AI overrides from previous sessions
+        const tiItems = d.ti || [];
+        for (const item of tiItems) {
+          if (item.cat) continue;
+          const key = item.n.toLowerCase().substring(0, 120);
+          if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
+        }
+        // 2. Keyword-classify remaining unclassified items (synchronous, O(n*keywords))
+        for (const item of tiItems) {
+          if (!item.cat) item.cat = classifyByNameDash(item.n);
+        }
+        // 3. Build catStats from classified ti (replaces the old cs from URL)
+        d.cs = buildCsFromTi(tiItems);
+
+        document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
+        document.getElementById('data-date').textContent = fmtDate(d.ts);
+        document.getElementById('subtitle-overview').textContent =
+          `${fmtVND(d.t)} tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
+
+        renderKpi(d);
+        renderYearlyChart(d.yd || {}, d);
+        renderPeriod(d.ps || {});
+        renderYearPills(d.yd || {}, yr => {
+          renderMonthly(d.yd, yr, d);
+          // Re-render monthly insight when year changes
+          const monthlyItems = computeMonthlyInsights(d.yd, yr);
+          renderInsightCard('insight-monthly', monthlyItems);
+          const yearData = d.yd[yr] || {};
+          const avgPerOrder = Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1));
+          const monthBreakdown = Object.entries(yearData.m || {})
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .map(([m, v]) => `T${m}:${fmtVND(v)}`).join(', ');
+          const activeMonths = Object.values(yearData.m || {}).filter(v => v > 0).length;
+          const avgPerMonth = activeMonths > 0 ? Math.round((yearData.t || 0) / activeMonths) : 0;
+          // Recent period data for trend detection
+          const recent1m = fmtVND(d.ps?.['1m'] || 0);
+          const recent3m = fmtVND(d.ps?.['3m'] || 0);
+          enrichWithAI('insight-monthly',
+            [
+              `Năm ${yr}: tổng ${fmtVND(yearData.t || 0)} / ${fmtNum(yearData.o || 0)} đơn / trung bình ${fmtVND(avgPerOrder)}/đơn.`,
+              `Chi theo tháng: ${monthBreakdown || 'không có dữ liệu'}.`,
+              `Trung bình ${fmtVND(avgPerMonth)}/tháng (${activeMonths} tháng có mua sắm).`,
+              `Gần đây: 1 tháng qua ${recent1m}, 3 tháng qua ${recent3m}.`
+            ].join(' '),
+            `Tháng nào bị "nghiện" mua sắm nhất? Tần suất ${fmtNum(yearData.o || 0)} đơn/${activeMonths} tháng có đáng lo không? Xu hướng chi tiêu gần đây đang tăng hay giảm và cần điều chỉnh gì?`,
+            `insight-monthly-${yr}` // per-year cache key
+          );
+        });
+        renderTopItems(d.ti || []);
+        renderCategories(d.cs, d.ti || []);
+
+        // Render insight cards
+        renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
+        renderInsightCard('insight-items', computeItemInsights(d.ti || [], d.t));
+        renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+
+        // Render monthly insight for default year
+        const defaultYears = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
+        if (defaultYears.length) {
+          renderInsightCard('insight-monthly', computeMonthlyInsights(d.yd, defaultYears[0]));
+        }
+
+        // Add listeners for limits
+        document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
+        document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
+
+        setupShareButtons(d);
+
+        // AI category classification — runs lazily after paint.
+        // Applies cached overrides immediately, then calls Chrome AI for remaining '🏷️ Khác' items.
+        // Results are persisted to localStorage so subsequent reloads use cache (no AI call).
+        requestAnimationFrame(() => {
+          classifyKharItems(d.ti || [], d);
+        });
+
+        // AI narrative — runs lazily after paint, no-op if Chrome < 148
+        requestAnimationFrame(() => {
+          const years = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
+          const curYear = years[0];
+          const prevYear = years[1];
+          const avgOrderValue = Math.round((d.t || 0) / Math.max(d.o || 1, 1));
+          const savingsRate = Math.round(((d.s || 0) / Math.max((d.t || 0) + (d.s || 0), 1)) * 100);
+          const shipFee = d.ship || 0;
+          const shipPct = Math.round((shipFee / Math.max(d.t || 1, 1)) * 100);
+          const shipPerOrder = Math.round(shipFee / Math.max(d.o || 1, 1));
+
+          // YoY trend text
+          let yoyLine = '';
+          if (curYear && prevYear && d.yd[prevYear]?.t > 0) {
+            const pct = Math.round(((d.yd[curYear].t - d.yd[prevYear].t) / d.yd[prevYear].t) * 100);
+            yoyLine = `Năm ${curYear} ${pct >= 0 ? 'tăng' : 'giảm'} ${Math.abs(pct)}% so với năm ${prevYear}.`;
+          }
+
+          // Top 3 categories formatted
+          const topCats = (d.cs).slice(0, 3).map(c => {
+            const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
+            return `${c.name} ${fmtVND(c.s)} (${pct}%)`;
+          }).join(', ');
+
+          enrichWithAI('insight-yearly',
+            [
+              `Tổng chi: ${fmtVND(d.t)} / ${fmtNum(d.o)} đơn / trung bình ${fmtVND(avgOrderValue)}/đơn.`,
+              `Phí ship: ${fmtVND(shipFee)} (${shipPct}% tổng, trung bình ${fmtVND(shipPerOrder)}/đơn).`,
+              `Tiết kiệm voucher: ${fmtVND(d.s)} (${savingsRate}% giá gốc).`,
+              yoyLine,
+              `Top danh mục: ${topCats}.`
+            ].filter(Boolean).join(' '),
+            `Chẩn đoán: lỗ hổng tài chính lớn nhất là gì (tiền ship, mua lẻ, hay chi tiêu 1 danh mục quá nhiều)? Đề xuất 1 hành động cắt giảm ngay trong tháng tới.`
+          );
+
+          // Top 8 items with spend + count
+          const top8 = (d.ti || []).slice(0, 8);
+          const top5sum = top8.slice(0, 5).reduce((s, i) => s + i.s, 0);
+          const concentration = Math.round((top5sum / Math.max(d.t || 1, 1)) * 100);
+          const itemLines = top8.map(i => `"${i.n}": ${fmtVND(i.s)}, ${i.c} lần mua`).join('; ');
+
+          enrichWithAI('insight-items',
+            `Top sản phẩm: ${itemLines}. Top 5 chiếm ${concentration}% tổng chi.`,
+            `Sản phẩm nào là lãng phí/tiêu sản (mua theo trend, ít dùng)? Sản phẩm nào đang bị mua lặp quá nhiều? Gợi ý cắt giảm hoặc thay thế thông minh hơn.`
+          );
+
+          // Category breakdown with percentages
+          const catLines = (d.cs).map(c => {
+            const pct = Math.round((c.s / Math.max(d.t || 1, 1)) * 100);
+            return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lượt)`;
+          }).join('; ');
+
+          enrichWithAI('insight-categories',
+            `Phân bổ chi tiêu: ${catLines}.`,
+            `Danh mục nào là "bẫy chi tiêu" không cần thiết? Tỷ lệ này cân bằng hay đang lệch về nhóm tiêu sản (làm đẹp, thời trang trend)? Nên điều chỉnh phân bổ thế nào?`
+          );
+        });
       }
-    });
-  }
+    })();
 
-  /* ─────────────────────────────────────────────────
-     Boot
-  ───────────────────────────────────────────────── */
-  const d = parseData();
-  console.log('[Dashboard] Parsed data:', { 
-    hasData: !!d, 
-    totalSpend: d?.t, 
-    topItemsCount: (d?.ti || []).length,
-    categoriesCount: (d?.cs || []).length
-  });
-  
-  if (!d || !d.t) {
-    console.warn('[Dashboard] No data or invalid data, showing no-data view');
-    renderNoData();
-  } else {
-    document.title = `Dashboard — ${fmtVND(d.t)} · Shopee Analytics`;
-    document.getElementById('data-date').textContent = fmtDate(d.ts);
-    document.getElementById('subtitle-overview').textContent =
-      `${fmtVND(d.t)} tổng chi tiêu · ${fmtNum(d.o)} đơn hàng`;
+    // ═══════════════════════════════════════════════════════════════════════════════════════════════════
+    // EXTENSION HELPERS - URL building and share card generation moved from extension to reduce size
+    // ═══════════════════════════════════════════════════════════════════════════════════════════════════
 
-    renderKpi(d);
-    renderYearlyChart(d.yd || {}, d);
-    renderPeriod(d.ps || {});
-    renderYearPills(d.yd || {}, yr => {
-      renderMonthly(d.yd, yr, d);
-      // Re-render monthly insight when year changes
-      const monthlyItems = computeMonthlyInsights(d.yd, yr);
-      renderInsightCard('insight-monthly', monthlyItems);
-      const yearData = d.yd[yr] || {};
-      enrichWithAI('insight-monthly',
-        `Người dùng chi tiêu ${fmtVND(yearData.t || 0)} trong năm ${yr} qua ${fmtNum(yearData.o || 0)} đơn hàng. Trung bình ${fmtVND(Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1)))} mỗi đơn. ${monthlyItems.slice(0, 2).map(i => i.text).join('. ')}`,
-        'Phân tích xu hướng chi tiêu theo tháng và đánh giá hiệu quả quản lý ngân sách cá nhân'
-      );
-    });
-    renderTopItems(d.ti || []);
-    renderCategories(d.cs || [], d.ti || []);
+    // SHARE CARD GENERATION (moved from extension/popup/share-card.js)
+    (function () {
+      'use strict';
 
-    // Render insight cards
-    renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
-    renderInsightCard('insight-items', computeItemInsights(d.ti || [], d.t));
-    renderInsightCard('insight-categories', computeCategoryInsights(d.cs || [], d.t));
+      function roundedRect(ctx, x, y, w, h, r, fillColor) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+      }
 
-    // Render monthly insight for default year
-    const defaultYears = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
-    if (defaultYears.length) {
-      renderInsightCard('insight-monthly', computeMonthlyInsights(d.yd, defaultYears[0]));
+      function truncate(str, maxLen) {
+        if (!str) return '';
+        const s = String(str);
+        return s.length > maxLen ? s.substring(0, maxLen - 1) + '…' : s;
+      }
+
+      function fmtVND(n) {
+        n = Math.round(n || 0);
+        if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
+        if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+        return n.toLocaleString('vi-VN');
+      }
+
+      function fmtNum(n) {
+        return Math.round(n || 0).toLocaleString('vi-VN');
+      }
+
+      function getRankStr(total) {
+        if (total <= 10000000) return 'Khách Tập Sự 👶';
+        if (total <= 50000000) return 'Khách Quen 🤝';
+        if (total < 80000000) return 'Tín Đồ Cuồng Nhiệt 👑';
+        return 'Cổ Đông Chiến Lược 💎';
+      }
+
+      async function generateShareCard(data, getSpendingPercentile) {
+        // Wait for fonts to be ready so Canvas can use Inter
+        try { await document.fonts.ready; } catch (e) {}
+
+        const W = 1080, H = 1350;
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        const FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        const PAD = 60;
+
+        // Modern gradient background
+        const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+        bgGrad.addColorStop(0, '#ff6b35');
+        bgGrad.addColorStop(0.35, '#f7931e');
+        bgGrad.addColorStop(1, '#ee4d2d');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Add subtle mesh gradient overlay
+        const meshGrad = ctx.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, W * 0.8);
+        meshGrad.addColorStop(0, 'rgba(255,255,255,0.08)');
+        meshGrad.addColorStop(1, 'rgba(0,0,0,0.05)');
+        ctx.fillStyle = meshGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Modern geometric decorative elements
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = '#ffffff';
+        // Large circles
+        ctx.beginPath(); ctx.arc(W * 0.85, H * 0.12, 280, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(W * 0.15, H * 0.85, 200, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(W * 0.65, H * 0.6, 350, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Subtle grid pattern instead of dots
+        ctx.globalAlpha = 0.03;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < W; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, H);
+          ctx.stroke();
+        }
+        for (let y = 0; y < H; y += 60) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(W, y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        // Helper: draw text
+        function txt(t, x, y, size, weight, color, align) {
+          ctx.font = `${weight} ${size}px ${FONT}`;
+          ctx.fillStyle = color || '#ffffff';
+          ctx.textAlign = align || 'left';
+          ctx.fillText(t, x, y);
+        }
+
+        const curYear = new Date().getFullYear();
+
+        // Modern header with better spacing
+        txt('SHOPEE ANALYTICS', PAD, 100, 22, '700', 'rgba(255,255,255,0.8)');
+        txt(`Tổng Kết ${curYear}`, PAD, 150, 48, '900', '#ffffff');
+
+        // Modern accent line with gradient
+        const lineGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+        lineGrad.addColorStop(0, '#00d9ff');
+        lineGrad.addColorStop(0.7, 'rgba(255,255,255,0.4)');
+        lineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = lineGrad;
+        ctx.fillRect(PAD, 165, W - PAD * 2, 3);
+        
+        // Add subtle shadow line
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(PAD, 168, W - PAD * 2, 1);
+
+        // === Main amount ===
+        const amtStr = fmtVND(data.tongtienhang || data.t);
+        const amtSize = amtStr.length > 14 ? 68 : amtStr.length > 10 ? 82 : 96;
+        txt(amtStr, PAD, 280, amtSize, '900', '#ffffff');
+
+        // Modern rank pill
+        const rankStr = getRankStr(data.tongtienhang || data.t);
+        ctx.font = `800 26px ${FONT}`;
+        const rankW = Math.min(ctx.measureText(rankStr).width + 56, W - PAD * 2);
+        
+        // Modern pill with glass effect
+        const pillGrad = ctx.createLinearGradient(PAD, 310, PAD + rankW, 310);
+        pillGrad.addColorStop(0, 'rgba(255,255,255,0.1)');
+        pillGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+        roundedRect(ctx, PAD, 310, rankW, 48, 24, pillGrad);
+        
+        // Add border highlight
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(PAD, 310, rankW, 48, 24);
+        ctx.stroke();
+        
+        txt(rankStr, PAD + 28, 342, 24, '800', '#ffffff');
+
+        // Modern glass card with better styling
+        const cardGrad = ctx.createLinearGradient(PAD, 390, PAD, 580);
+        cardGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
+        cardGrad.addColorStop(1, 'rgba(255,255,255,0.08)');
+        roundedRect(ctx, PAD, 390, W - PAD * 2, 190, 24, cardGrad);
+        
+        // Card border
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(PAD, 390, W - PAD * 2, 190, 24);
+        ctx.stroke();
+
+        const statColL = PAD + 40, statColR = W / 2 + 20;
+        const statY1 = 450, statY2 = 530;
+
+        // Main stats with better typography (adapt field names)
+        txt(fmtNum(data.tongDonHang || data.o), statColL, statY1, 44, '900', '#ffffff');
+        txt('ĐƠN HÀNG', statColL, statY1 + 28, 18, '700', 'rgba(255,255,255,0.7)');
+
+        txt(fmtNum(data.tongSanPhamDaMua || data.ip), statColR, statY1, 44, '900', '#ffffff');
+        txt('SẢN PHẨM', statColR, statY1 + 28, 18, '700', 'rgba(255,255,255,0.7)');
+
+        // Secondary stats with accent colors
+        txt(fmtVND(Math.max(0, data.tongTienTietKiem || data.s)) + 'đ', statColL, statY2, 38, '800', '#00d9ff');
+        txt('TIẾT KIỆM', statColL, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
+
+        txt(fmtVND(data.tongPhiShip || data.ship || 0), statColR, statY2, 38, '800', '#ffd23f');
+        txt('PHÍ SHIP', statColR, statY2 + 24, 16, '600', 'rgba(255,255,255,0.6)');
+
+        // Modern divider
+        const dividerGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+        dividerGrad.addColorStop(0, 'rgba(255,255,255,0)');
+        dividerGrad.addColorStop(0.5, 'rgba(255,255,255,0.3)');
+        dividerGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = dividerGrad;
+        ctx.fillRect(PAD, 620, W - PAD * 2, 2);
+
+        // === Top Item Section ===
+        let topY = 640;
+        const topItems = data.topItems || data.ti || [];
+        const hasTopItem = topItems && topItems.length > 0;
+
+        if (hasTopItem) {
+          // Icon with background circle
+          ctx.fillStyle = 'rgba(255,255,255,0.1)';
+          ctx.beginPath(); 
+          ctx.arc(PAD + 20, topY + 50, 20, 0, Math.PI * 2); 
+          ctx.fill();
+          txt('🛒', PAD + 15, topY + 57, 20, '400', '#ffffff');
+          
+          txt('SẢN PHẨM YÊU THÍCH', PAD + 50, topY + 36, 22, '700', 'rgba(255,255,255,0.8)');
+          txt(truncate(topItems[0].name || topItems[0].n, 32), PAD, topY + 80, 32, '800', '#ffffff');
+          const spent = topItems[0].spent || topItems[0].s || 0;
+          const count = topItems[0].count || topItems[0].c || 0;
+          txt(fmtVND(spent) + 'đ • ' + fmtNum(count) + ' lần mua', PAD, topY + 110, 20, '500', 'rgba(255,255,255,0.65)');
+        }
+
+        // === Percentile bar ===
+        const pctY = 780;
+        const curYear = new Date().getFullYear();
+        const yearlyData = data.thongKeTheoNam || data.yd || {};
+        const annualSpent = yearlyData[curYear] ? yearlyData[curYear].total?.tongTien || yearlyData[curYear].t || 0 : 0;
+        const beat = typeof getSpendingPercentile === 'function' ? getSpendingPercentile(annualSpent) : 50;
+
+        // Modern percentile card
+        const pctGrad = ctx.createLinearGradient(PAD, pctY, PAD, pctY + 140);
+        pctGrad.addColorStop(0, 'rgba(255,255,255,0.12)');
+        pctGrad.addColorStop(1, 'rgba(0,0,0,0.15)');
+        roundedRect(ctx, PAD, pctY, W - PAD * 2, 140, 20, pctGrad);
+        
+        // Border
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(PAD, pctY, W - PAD * 2, 140, 20);
+        ctx.stroke();
+
+        txt(`Chi tiêu nhiều hơn ${beat}% người dùng`, PAD + 30, pctY + 42, 24, '700', 'rgba(255,255,255,0.9)');
+        txt(`Năm ${curYear}`, PAD + 30, pctY + 70, 18, '500', 'rgba(255,255,255,0.6)');
+
+        // Modern progress bar with gradient
+        const barX = PAD + 30, barY2 = pctY + 95, barW = W - PAD * 2 - 60, barH = 8;
+        roundedRect(ctx, barX, barY2, barW, barH, 4, 'rgba(255,255,255,0.15)');
+        
+        if (beat > 0) {
+          const progGrad = ctx.createLinearGradient(barX, 0, barX + barW * (beat / 100), 0);
+          progGrad.addColorStop(0, '#00d9ff');
+          progGrad.addColorStop(1, '#ffd23f');
+          roundedRect(ctx, barX, barY2, barW * (beat / 100), barH, 4, progGrad);
+        }
+
+        // Clean minimal footer - removed URLs and excess info
+        const footerY = 1000;
+        
+        // Subtle divider
+        const footerDivGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+        footerDivGrad.addColorStop(0, 'rgba(255,255,255,0)');
+        footerDivGrad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+        footerDivGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = footerDivGrad;
+        ctx.fillRect(PAD, footerY, W - PAD * 2, 1);
+
+        // Simple branding
+        txt('SHOPEE ANALYTICS', W / 2, footerY + 80, 20, '600', 'rgba(255,255,255,0.4)', 'center');
+        
+        // Clean summary without URLs
+        const orders = data.tongDonHang || data.o || 0;
+        const items = data.tongSanPhamDaMua || data.ip || 0;
+        const summary = `${fmtNum(orders)} đơn hàng • ${fmtNum(items)} sản phẩm`;
+        txt(summary, W / 2, footerY + 110, 22, '500', 'rgba(255,255,255,0.3)', 'center');
+
+        return canvas.toDataURL('image/png');
+      }
+
+      window.generateShareCard = generateShareCard;
+    })();
+
+    // Compact item names for URL encoding (moved from popup/script.js)
+    function compactItemNameForUrl(name) {
+      let s = String(name || '');
+      
+      // Remove promotional tags and brackets
+      s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
+      
+      // Comprehensive Shopee noise words based on real-world patterns, sorted by length DESC
+      const shopeeNoiseWords = [
+        // Promo & Price (long phrases first)
+        'freeship extra plus', 'miễn phí vận chuyển', 'giao hỏa tốc 2h', 'hoàn xu extra', 
+        'cam kết chính hãng', 'bảo hành trọn đời', 'ship hỏa tốc', 'hỏa tốc 2h', 
+        'freeship extra', 'rẻ vô địch', 'giá hủy diệt', 'mua 1 tặng 1', 'flash sale',
+        'date mới nhất', 'hàng nội địa', 'nguyên seal', 'chính ngạch', 'tận xưởng',
+        'hot trend', 'siêu hot', 'mẫu mới', 'xịn xò', 'cực xinh',
+        
+        // Medium phrases
+        'khuyến mãi', 'giảm giá', 'flashsale', 'siêu sale', 'deal sốc', 
+        'hoàn xu', 'quà tặng', 'tặng kèm', 'kèm quà', 'thanh lý', 
+        'xả hàng', 'xả kho', 'giá sỉ', 'sỉ lẻ', 'chuẩn auth',
+        'hàng chuẩn', 'bảo hành', 'cam kết', 'tem phụ', 'loại 1',
+        'giao ngay', 'siêu tốc', 'hỏa tốc', 'nowship', 'xách tay',
+        'date mới', 'fullbox', 'cao cấp', 'chính hãng', 'nhập khẩu',
+        
+        // Short terms
+        'freeship', 'deal', 'sale', 'authentic', 'hoàn tiền', 'uy tín', 
+        'auth', 'real', 'fake', 'grab', 'ship', 'mới nhất', 'new', 'cũ',
+        'trend', 'hot', 'mới'
+      ].sort((a, b) => b.length - a.length); // Sort by length DESC - critical for proper matching
+      
+      // Convert to lowercase for noise removal
+      let lower = s.toLowerCase();
+      
+      // Remove noise words (already sorted by length DESC to avoid partial matching issues)
+      for (const noise of shopeeNoiseWords) {
+        // Escape special regex chars and use word boundaries for precise matching
+        const escaped = noise.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp('\\b' + escaped + '\\b', 'gi');
+        lower = lower.replace(regex, ' ');
+      }
+      
+      // Remove excessive punctuation and normalize spaces
+      lower = lower.replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+      
+      // Filter out single characters and very short words, but keep full descriptive name
+      const words = lower.split(' ').filter(w => w.length > 1);
+      return words.join(' '); // Keep all meaningful words after noise removal
     }
 
-    // Add listeners for limits
-    document.getElementById('items-limit-select')?.addEventListener('change', renderTopItemsList);
-    document.getElementById('monthly-limit-select')?.addEventListener('change', renderMonthlyItemsList);
+    // Build dashboard URL from raw extension data (moved from popup/script.js)
+    function buildDashboardUrlFromExtension(data) {
+      const monthlyItems = {};
+      if (data.cachePayload && data.cachePayload.miniOrders) {
+        for (const order of data.cachePayload.miniOrders) {
+          if (!order.ts) continue;
+          const d_obj = new Date(order.ts * 1000);
+          const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
+          if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
+          for (const item of (order.il || [])) {
+             if (!item.i) continue;
+             if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
+             monthlyItems[y_m][item.i].s += item.s;
+             monthlyItems[y_m][item.i].c += item.c;
+          }
+        }
+      }
+      const mi = {};
+      for (const [ym, map] of Object.entries(monthlyItems)) {
+        // Keep top 20 per month (dashboard renders at most 20); compact names to reduce base64 size
+        mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 20).map(x => ({
+           n: compactItemNameForUrl(x.n).substring(0, 45), // Longer after aggressive noise removal
+           s: Math.round(x.s),
+           c: x.c
+        }));
+      }
 
-    setupShareButtons(d);
+      const yd = {};
+      for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
+        yd[yr] = {
+          t:  Math.round(ydata.total.tongTien),
+          o:  ydata.total.donHang,
+          ip: ydata.total.sanPham,
+          s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+          m:  Object.fromEntries(
+            Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
+          )
+        };
+      }
+      const ps = data.thongKeTheoThang || {};
+      const dashData = {
+        v:    1,
+        t:    Math.round(data.tongtienhang),
+        o:    data.tongDonHang,
+        s:    Math.round(Math.max(0, data.tongTienTietKiem)),
+        ip:   data.tongSanPhamDaMua,
+        ship: Math.round(data.tongPhiShip || 0),
+        ts:   Math.floor(Date.now() / 1000),
+        yd,
+        mi,
+        ps: {
+          '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
+          '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
+          '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
+          '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
+        },
+        ti: (() => {
+          // Send top 150 items (no cat — dashboard classifies itself)
+          return (data.topItems || []).slice(0, 150).map(i => ({
+            n: compactItemNameForUrl(i.name).substring(0, 50),
+            s: Math.round(i.spent),
+            c: i.count
+          }));
+        })()
+      };
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
+      return `${window.location.origin}${window.location.pathname}#d=${encoded}`;
+    }
 
-    // AI narrative — runs lazily after paint, no-op if Chrome < 148
-    requestAnimationFrame(() => {
-      const yearlyItems = computeYearlyInsights(d.yd || {}, d);
-      const avgOrderValue = Math.round((d.t || 0) / Math.max(d.o || 1, 1));
-      const savingsRate = Math.round(((d.s || 0) / Math.max((d.t || 0) + (d.s || 0), 1)) * 100);
-      
-      enrichWithAI('insight-yearly',
-        `Tổng chi tiêu ${fmtVND(d.t)} qua ${fmtNum(d.o)} đơn hàng, trung bình ${fmtVND(avgOrderValue)}/đơn. Tiết kiệm ${fmtVND(d.s)} (${savingsRate}% từ khuyến mãi). ${yearlyItems.slice(0, 2).map(i => i.text).join('. ')}`,
-        'Đánh giá tổng quan hiệu quả chi tiêu và khả năng tiết kiệm so với chuẩn mực người tiêu dùng Việt Nam'
-      );
-      
-      const topItems = (d.ti || []).slice(0, 5);
-      const topSpend = topItems.reduce((s, i) => s + i.s, 0);
-      const concentration = Math.round((topSpend / Math.max(d.t || 1, 1)) * 100);
-      
-      enrichWithAI('insight-items',
-        `Tổng ${fmtNum((d.ti || []).length)} sản phẩm khác nhau. Top 5 sản phẩm chiếm ${concentration}% tổng chi tiêu. ${computeItemInsights(d.ti || [], d.t).slice(0, 2).map(i => i.text).join('. ')}`,
-        'Phân tích mức độ tập trung chi tiêu và đưa ra gợi ý đa dạng hóa danh mục mua sắm'
-      );
-      
-      const topCategories = (d.cs || []).slice(0, 3);
-      const catSpend = topCategories.reduce((s, c) => s + c.s, 0);
-      const catShare = Math.round((catSpend / Math.max(d.t || 1, 1)) * 100);
-      
-      enrichWithAI('insight-categories',
-        `Chi tiêu trải đều ${(d.cs || []).length} danh mục. Top 3 danh mục (${topCategories.map(c => c.name).join(', ')}) chiếm ${catShare}% tổng. ${computeCategoryInsights(d.cs || [], d.t).slice(0, 2).map(i => i.text).join('. ')}`,
-        'Phân tích cân bằng danh mục chi tiêu và đề xuất tối ưu phân bổ ngân sách theo nhu cầu thiết yếu'
-      );
-    });
-  }
-})();
-</script>
+    // Expose globally for extension message passing
+    window.buildDashboardUrlFromExtension = buildDashboardUrlFromExtension;
+
+    })();
+  </script>
 </body>
+
 </html>

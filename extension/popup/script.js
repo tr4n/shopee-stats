@@ -160,13 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkCacheInfo(3);
   btnClearCache.addEventListener('click', () => {
-    chrome.storage.local.remove(['shopee_cache', 'aiClassificationCache'], () => {
+    chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
       cacheInfo.classList.add('hidden');
     });
-    // Reset persistent AI session so it will be recreated on next run
-    chrome.runtime.sendMessage({ type: 'AI_RESET_SESSION' }).catch(() => {});
-    if (window.ShopeeAIService?.destroySession) ShopeeAIService.destroySession();
   });
 
 
@@ -261,94 +258,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Dashboard URL ===
   const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
 
-  function buildDashboardUrl(data) {
-    const monthlyItems = {};
-    if (data.cachePayload && data.cachePayload.miniOrders) {
-      for (const order of data.cachePayload.miniOrders) {
-        if (!order.ts) continue;
-        const d_obj = new Date(order.ts * 1000);
-        const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
-        if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
-        for (const item of (order.il || [])) {
-           if (!item.i) continue;
-           if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
-           monthlyItems[y_m][item.i].s += item.s;
-           monthlyItems[y_m][item.i].c += item.c;
-        }
-      }
-    }
-    const mi = {};
-    for (const [ym, map] of Object.entries(monthlyItems)) {
-      mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 50).map(x => ({
-         n: x.n.substring(0, 50),
-         s: Math.round(x.s),
-         c: x.c
-      }));
-    }
-
-    const yd = {};
-    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
-      yd[yr] = {
-        t:  Math.round(ydata.total.tongTien),
-        o:  ydata.total.donHang,
-        ip: ydata.total.sanPham,
-        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
-        m:  Object.fromEntries(
-          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
-        )
-      };
-    }
-    const ps = data.thongKeTheoThang || {};
-    const dashData = {
-      v:    1,
-      t:    Math.round(data.tongtienhang),
-      o:    data.tongDonHang,
-      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
-      ip:   data.tongSanPhamDaMua,
-      ship: Math.round(data.tongPhiShip || 0),
-      ts:   Math.floor(Date.now() / 1000),
-      yd,
-      mi,
-      ps: {
-        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
-        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
-        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
-        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
-      },
-      ti: (() => {
-        const allItems = data.topItems || [];
-        const top100 = allItems.slice(0, 100);
-        const catMap = {};
-        allItems.forEach(i => {
-          const cat = i.cat || 'Khác';
-          if (!catMap[cat]) catMap[cat] = [];
-          if (catMap[cat].length < 30) catMap[cat].push(i);
-        });
-        const combined = new Set([...top100]);
-        Object.values(catMap).forEach(arr => arr.forEach(i => combined.add(i)));
-        return Array.from(combined).map(i => ({
-          n: i.name.substring(0, 50),
-          s: Math.round(i.spent),
-          c: i.count,
-          cat: i.cat || ''
-        }));
-      })(),
-      cs: Object.entries(data.catStats || {})
-        .sort((a, b) => b[1].spent - a[1].spent)
-        .slice(0, 12)
-        .map(([name, v]) => ({ name, s: Math.round(v.spent), c: v.count }))
-    };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
-    return `${DASHBOARD_BASE}/#d=${encoded}`;
+  // Store data and open dashboard - dashboard will read from storage and build its own URL
+  function openDashboardWithData(data) {
+    // Store raw extension data for dashboard to process
+    chrome.storage.local.set({ 'shopee_dashboard_data': data }, () => {
+      // Open dashboard with extension flag - dashboard will read storage and redirect with proper URL
+      chrome.tabs.create({ url: `${DASHBOARD_BASE}?source=extension&ts=${Date.now()}` });
+    });
   }
 
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
-      const url = lastCompleteData
-        ? buildDashboardUrl(lastCompleteData)
-        : DASHBOARD_BASE + '/';
-      chrome.tabs.create({ url });
+      if (lastCompleteData) {
+        openDashboardWithData(lastCompleteData);
+      } else {
+        chrome.tabs.create({ url: DASHBOARD_BASE + '/' });
+      }
     });
   }
 
@@ -401,8 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
         listType,
         lastUpdated: useCache ? (cacheData.lastUpdated || 0) : 0,
         miniOrders: useCache ? cacheData.miniOrders : [],
-        itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {},
-        catTree: useCache && cacheData.catTree ? cacheData.catTree : {}
+        itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
       };
 
       if (debugStatus) debugStatus.textContent = 'Đang lưu cấu hình...';
@@ -572,125 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);
         });
       }
-      enhanceWithAI(message.data)
-        .then(renderResults)
-        .catch(() => renderResults(message.data));
+      renderResults(message.data);
     }
   });
 
 
-
-  // === AI Enhancement ===
-  function logAIDiagnostics(diag) {
-    console.warn('[ShopeeAI] ❌ Prompt API không khả dụng trong extension.');
-    console.warn('[ShopeeAI] Diagnostics:', diag);
-    console.warn(
-      '[ShopeeAI] Cần: Chrome 138+ (chrome://version), bật flags:\n' +
-      '  • chrome://flags/#optimization-guide-on-device-model → Enabled\n' +
-      '  • chrome://flags/#prompt-api-for-gemini-nano → Enabled\n' +
-      '  Hoặc đăng ký Origin Trial cho extension: https://developer.chrome.com/origintrials\n' +
-      '  Kiểm tra model: chrome://on-device-internals'
-    );
-  }
-
-  async function getAIDiagnostics() {
-    if (window.ShopeeAIService) return ShopeeAIService.getDiagnostics();
-    try {
-      const resp = await chrome.runtime.sendMessage({ type: 'AI_DIAG' });
-      return resp?.diag || null;
-    } catch {
-      return null;
-    }
-  }
-
-  async function isAIAvailable() {
-    if (window.ShopeeAIService?.isSupported()) {
-      return ShopeeAIService.checkAIAvailability();
-    }
-    try {
-      const resp = await chrome.runtime.sendMessage({ type: 'AI_CHECK' });
-      return !!resp?.available;
-    } catch {
-      return false;
-    }
-  }
-
-  async function classifyViaExtension(items, onProgress) {
-    if (window.ShopeeAIService?.isSupported()) {
-      return ShopeeAIService.classifyItemsBatch(items, onProgress);
-    }
-    const resp = await chrome.runtime.sendMessage({ type: 'AI_CLASSIFY', items });
-    if (resp?.ok) return resp.results;
-    if (resp?.error) console.error('[ShopeeAI] background classify error:', resp.error);
-    return null;
-  }
-
-  // Runs after rule-based pipeline; only classifies items still at 🏷️ Khác.
-  async function enhanceWithAI(data) {
-    const diag = await getAIDiagnostics();
-    console.log('[ShopeeAI] diagnostics:', diag);
-
-    if (!diag?.supported) {
-      logAIDiagnostics(diag);
-      return data;
-    }
-
-    const kharItems = (data.topItems || []).filter(item => item.cat === '🏷️ Khác');
-    if (!kharItems.length) return data;
-
-    const available = await isAIAvailable();
-    if (!available) {
-      console.warn('[ShopeeAI] ❌ Model chưa sẵn sàng (availability/capabilities). Xem chrome://on-device-internals');
-      return data;
-    }
-
-    // Deduplicate by name before sending to AI
-    const seen = new Set();
-    const uniqueItems = [];
-    for (const item of kharItems) {
-      if (!seen.has(item.name)) {
-        seen.add(item.name);
-        uniqueItems.push({ id: item.name, name: item.name });
-      }
-    }
-    console.log('[ShopeeAI] Unique items sẽ gửi AI:', uniqueItems.length);
-
-    let aiMap = {};
-    try {
-      const batchResult = await classifyViaExtension(uniqueItems, null);
-      if (!batchResult) return data;
-      aiMap = batchResult;
-      console.log('[ShopeeAI] classify hoàn tất. Sample:', Object.entries(aiMap).slice(0, 5));
-    } catch (e) {
-      console.error('[ShopeeAI] ❌ classify bị lỗi:', e);
-      return data;
-    }
-
-    // Patch topItems with AI-resolved categories
-    let patched = 0;
-    for (const item of data.topItems) {
-      if (item.cat === '🏷️ Khác') {
-        const aiCat = aiMap[item.name];
-        if (aiCat && aiCat !== '🏷️ Khác') {
-          item.cat = aiCat;
-          patched++;
-        }
-      }
-    }
-    console.log(`[ShopeeAI] ✅ Đã patch ${patched} items từ Khác sang category AI.`);
-
-    // Rebuild catStats from updated topItems (topItems is the full aggregation)
-    const catStats = {};
-    for (const item of data.topItems) {
-      if (!catStats[item.cat]) catStats[item.cat] = { spent: 0, count: 0 };
-      catStats[item.cat].spent += item.spent;
-      catStats[item.cat].count += item.count;
-    }
-    data.catStats = catStats;
-    console.log('[ShopeeAI] catStats cuối:', catStats);
-
-    return data;
-  }
 
   // === Render Results ===
   function renderResults(data) {
