@@ -1831,25 +1831,10 @@
       ───────────────────────────────────────────────── */
       function parseData() {
         try {
-          console.log('[Dashboard] Parsing URL hash:', location.hash.substring(0, 100) + '...');
           const match = location.hash.match(/[#&]d=([^&]+)/);
-          if (!match) {
-            console.log('[Dashboard] No data hash found in URL');
-            return null;
-          }
-          console.log('[Dashboard] Found data hash, length:', match[1].length);
-          const decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))));
-          console.log('[Dashboard] Successfully parsed data:', {
-            version: decoded.v,
-            totalSpend: decoded.t,
-            orders: decoded.o,
-            topItemsCount: (decoded.ti || []).length
-          });
-          return decoded;
-        } catch (e) { 
-          console.error('[Dashboard] Parse error:', e);
-          return null; 
-        }
+          if (!match) return null;
+          return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+        } catch { return null; }
       }
 
       /* ─────────────────────────────────────────────────
@@ -2633,13 +2618,10 @@
           );
         });
       }
-    })();
 
     // ═══════════════════════════════════════════════════════════════════════════════════════════════════
-    // EXTENSION HELPERS - URL building and share card generation moved from extension to reduce size
+    // SHARE CARD GENERATION (moved from extension/popup/share-card.js to keep extension minimal)
     // ═══════════════════════════════════════════════════════════════════════════════════════════════════
-
-    // SHARE CARD GENERATION (moved from extension/popup/share-card.js)
     (function () {
       'use strict';
 
@@ -2850,7 +2832,6 @@
 
         // === Percentile bar ===
         const pctY = 780;
-        const curYear = new Date().getFullYear();
         const yearlyData = data.thongKeTheoNam || data.yd || {};
         const annualSpent = yearlyData[curYear] ? yearlyData[curYear].total?.tongTien || yearlyData[curYear].t || 0 : 0;
         const beat = typeof getSpendingPercentile === 'function' ? getSpendingPercentile(annualSpent) : 50;
@@ -2907,8 +2888,6 @@
 
       window.generateShareCard = generateShareCard;
     })();
-
-    // Extension helpers - functions moved to extension for direct use
 
     })();
   </script>

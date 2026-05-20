@@ -258,68 +258,82 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Dashboard URL ===
   const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
 
-  // Build URL locally and pass to dashboard - simpler approach  
-  function openDashboardWithData(data) {
-    try {
-      // Build the URL directly in popup (keep the logic here for now)
-      const url = buildDashboardUrlLocal(data);
-      console.log('[Popup] Built dashboard URL, length:', url.length);
-      console.log('[Popup] URL preview:', url.substring(0, 200) + '...');
-      chrome.tabs.create({ url });
-    } catch (e) {
-      console.error('[Popup] Failed to build dashboard URL:', e);
-      // Fallback: open dashboard without data
-      chrome.tabs.create({ url: DASHBOARD_BASE });
+  // === Item name cleaning — done here so dashboard receives minimal, display-ready data ===
+
+  // Noise words sorted by length DESC (longer phrases must match before their substrings)
+  const NOISE_WORDS = [
+    'freeship extra plus','miễn phí vận chuyển','giao hỏa tốc 2h','cam kết chính hãng',
+    'bảo hành trọn đời','hoàn xu extra','ship hỏa tốc','hỏa tốc 2h','freeship extra',
+    'rẻ vô địch','giá hủy diệt','mua 1 tặng 1','flash sale','date mới nhất',
+    'hàng nội địa','nguyên seal','chính ngạch','tận xưởng','hot trend','siêu hot',
+    'mẫu mới','xịn xò','cực xinh',
+    'khuyến mãi','giảm giá','flashsale','siêu sale','deal sốc','hoàn xu',
+    'quà tặng','tặng kèm','kèm quà','thanh lý','xả hàng','xả kho',
+    'giá sỉ','sỉ lẻ','chuẩn auth','hàng chuẩn','bảo hành','cam kết',
+    'tem phụ','loại 1','giao ngay','siêu tốc','hỏa tốc','nowship','xách tay',
+    'date mới','fullbox','cao cấp','chính hãng','nhập khẩu',
+    'freeship','authentic','hoàn tiền','uy tín',
+    'auth','real','fake','grab','ship','mới nhất','new','cũ','trend','hot','deal','sale','mới'
+  ].sort((a, b) => b.length - a.length);
+
+  function compactItemName(name) {
+    let s = String(name || '');
+    // Strip bracket content (promotional tags)
+    s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
+    // Strip special chars / emoji, keep letters + numbers
+    s = s.replace(/[^\p{L}\p{N}\s]/gu, ' ').toLowerCase();
+    // Remove noise words (longest first to avoid partial clashes)
+    for (const w of NOISE_WORDS) {
+      const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      s = s.replace(new RegExp('\\b' + esc + '\\b', 'g'), ' ');
     }
+    s = s.replace(/\s+/g, ' ').trim();
+    // Drop single-char tokens
+    const words = s.split(' ').filter(w => w.length > 1);
+    const result = words.join(' ');
+    // Capitalize first character for display
+    return result ? result[0].toUpperCase() + result.slice(1) : '';
   }
 
-  // Rebuild the URL building logic locally (simplified from what was moved to dashboard)
-  function buildDashboardUrlLocal(data) {
-    const monthlyItems = {};
-    if (data.cachePayload && data.cachePayload.miniOrders) {
-      for (const order of data.cachePayload.miniOrders) {
-        if (!order.ts) continue;
-        const d_obj = new Date(order.ts * 1000);
-        const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
-        if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
-        for (const item of (order.il || [])) {
-           if (!item.i) continue;
-           if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
-           monthlyItems[y_m][item.i].s += item.s;
-           monthlyItems[y_m][item.i].c += item.c;
-        }
+  function buildDashboardUrl(data) {
+    // Build monthly items aggregation
+    const monthMap = {};
+    for (const order of (data.cachePayload?.miniOrders || [])) {
+      if (!order.ts) continue;
+      const d = new Date(order.ts * 1000);
+      const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
+      if (!monthMap[ym]) monthMap[ym] = {};
+      for (const item of (order.il || [])) {
+        if (!item.i) continue;
+        if (!monthMap[ym][item.i]) monthMap[ym][item.i] = { n: item.n, s: 0, c: 0 };
+        monthMap[ym][item.i].s += item.s;
+        monthMap[ym][item.i].c += item.c;
       }
     }
-
-    // Simple compact function (no noise removal to keep popup minimal)
-    function compactName(name) {
-      return String(name || '').replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ').replace(/\s+/g, ' ').trim();
-    }
-
     const mi = {};
-    for (const [ym, map] of Object.entries(monthlyItems)) {
-      mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 20).map(x => ({
-         n: compactName(x.n).substring(0, 40),
-         s: Math.round(x.s),
-         c: x.c
-      }));
+    for (const [ym, map] of Object.entries(monthMap)) {
+      mi[ym] = Object.values(map)
+        .sort((a, b) => b.s - a.s)
+        .slice(0, 20)
+        .map(x => ({ n: compactItemName(x.n).substring(0, 40), s: Math.round(x.s), c: x.c }));
     }
 
+    // Build yearly stats
     const yd = {};
     for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
       yd[yr] = {
-        t:  Math.round(ydata.total.tongTien),
-        o:  ydata.total.donHang,
+        t: Math.round(ydata.total.tongTien),
+        o: ydata.total.donHang,
         ip: ydata.total.sanPham,
-        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
-        m:  Object.fromEntries(
+        s: Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+        m: Object.fromEntries(
           Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
         )
       };
     }
-    
+
     const ps = data.thongKeTheoThang || {};
-    const dashData = {
+    const payload = {
       v:    1,
       t:    Math.round(data.tongtienhang),
       o:    data.tongDonHang,
@@ -335,30 +349,33 @@ document.addEventListener('DOMContentLoaded', () => {
         '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
         '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
       },
+      // Top 150 items — names pre-cleaned, dashboard classifies categories
       ti: (data.topItems || []).slice(0, 150).map(i => ({
-        n: compactName(i.name).substring(0, 45),
+        n: compactItemName(i.name).substring(0, 45),
         s: Math.round(i.spent),
         c: i.count
       }))
     };
-    
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
+
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     return `${DASHBOARD_BASE}/#d=${encoded}`;
+  }
+
+  function openDashboardWithData(data) {
+    try {
+      chrome.tabs.create({ url: buildDashboardUrl(data) });
+    } catch (e) {
+      console.error('[Popup] Failed to build dashboard URL:', e);
+      chrome.tabs.create({ url: DASHBOARD_BASE });
+    }
   }
 
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
-      console.log('[Popup] Opening dashboard, lastCompleteData:', !!lastCompleteData);
       if (lastCompleteData) {
-        console.log('[Popup] Data sample:', {
-          tongtienhang: lastCompleteData.tongtienhang,
-          tongDonHang: lastCompleteData.tongDonHang,
-          topItemsCount: (lastCompleteData.topItems || []).length
-        });
         openDashboardWithData(lastCompleteData);
       } else {
-        console.log('[Popup] No data available, opening empty dashboard');
         chrome.tabs.create({ url: DASHBOARD_BASE + '/' });
       }
     });
