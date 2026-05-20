@@ -717,6 +717,9 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
     }
 
     async function initDashboard() {
+      // Load categories first so keyword classification is ready!
+      await initializeCategories();
+
       // Fallback: if ti is absent from the export, derive it by aggregating mi (monthly items)
       if (!d.ti || !d.ti.length) {
         const miMap = {};
