@@ -1831,10 +1831,25 @@
       ───────────────────────────────────────────────── */
       function parseData() {
         try {
+          console.log('[Dashboard] Parsing URL hash:', location.hash.substring(0, 100) + '...');
           const match = location.hash.match(/[#&]d=([^&]+)/);
-          if (!match) return null;
-          return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
-        } catch { return null; }
+          if (!match) {
+            console.log('[Dashboard] No data hash found in URL');
+            return null;
+          }
+          console.log('[Dashboard] Found data hash, length:', match[1].length);
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+          console.log('[Dashboard] Successfully parsed data:', {
+            version: decoded.v,
+            totalSpend: decoded.t,
+            orders: decoded.o,
+            topItemsCount: (decoded.ti || []).length
+          });
+          return decoded;
+        } catch (e) { 
+          console.error('[Dashboard] Parse error:', e);
+          return null; 
+        }
       }
 
       /* ─────────────────────────────────────────────────
@@ -2465,36 +2480,8 @@
       }
 
       /* ─────────────────────────────────────────────────
-         Boot - Handle extension data or URL hash
+         Boot - Parse data from URL hash
       ───────────────────────────────────────────────── */
-      
-      // Check if opened from extension with raw data
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('source') === 'extension') {
-        console.log('[Dashboard] Opened from extension, checking for raw data...');
-        
-        // Try to get raw data from chrome.storage.local (if available)
-        if (typeof chrome !== 'undefined' && chrome.storage) {
-          chrome.storage.local.get(['shopee_dashboard_data'], (result) => {
-            if (result.shopee_dashboard_data) {
-              console.log('[Dashboard] Found extension data, building URL...');
-              const url = buildDashboardUrlFromExtension(result.shopee_dashboard_data);
-              // Clean up storage
-              chrome.storage.local.remove(['shopee_dashboard_data']);
-              // Redirect to proper dashboard URL
-              window.location.href = url;
-              return;
-            }
-            // No data found, show no-data view
-            renderNoData();
-          });
-          return;
-        }
-        
-        // No chrome.storage available, show no-data
-        renderNoData();
-        return;
-      }
       
       const d = parseData();
       console.log('[Dashboard] Parsed data:', {
@@ -2921,126 +2908,7 @@
       window.generateShareCard = generateShareCard;
     })();
 
-    // Compact item names for URL encoding (moved from popup/script.js)
-    function compactItemNameForUrl(name) {
-      let s = String(name || '');
-      
-      // Remove promotional tags and brackets
-      s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
-      
-      // Comprehensive Shopee noise words based on real-world patterns, sorted by length DESC
-      const shopeeNoiseWords = [
-        // Promo & Price (long phrases first)
-        'freeship extra plus', 'miễn phí vận chuyển', 'giao hỏa tốc 2h', 'hoàn xu extra', 
-        'cam kết chính hãng', 'bảo hành trọn đời', 'ship hỏa tốc', 'hỏa tốc 2h', 
-        'freeship extra', 'rẻ vô địch', 'giá hủy diệt', 'mua 1 tặng 1', 'flash sale',
-        'date mới nhất', 'hàng nội địa', 'nguyên seal', 'chính ngạch', 'tận xưởng',
-        'hot trend', 'siêu hot', 'mẫu mới', 'xịn xò', 'cực xinh',
-        
-        // Medium phrases
-        'khuyến mãi', 'giảm giá', 'flashsale', 'siêu sale', 'deal sốc', 
-        'hoàn xu', 'quà tặng', 'tặng kèm', 'kèm quà', 'thanh lý', 
-        'xả hàng', 'xả kho', 'giá sỉ', 'sỉ lẻ', 'chuẩn auth',
-        'hàng chuẩn', 'bảo hành', 'cam kết', 'tem phụ', 'loại 1',
-        'giao ngay', 'siêu tốc', 'hỏa tốc', 'nowship', 'xách tay',
-        'date mới', 'fullbox', 'cao cấp', 'chính hãng', 'nhập khẩu',
-        
-        // Short terms
-        'freeship', 'deal', 'sale', 'authentic', 'hoàn tiền', 'uy tín', 
-        'auth', 'real', 'fake', 'grab', 'ship', 'mới nhất', 'new', 'cũ',
-        'trend', 'hot', 'mới'
-      ].sort((a, b) => b.length - a.length); // Sort by length DESC - critical for proper matching
-      
-      // Convert to lowercase for noise removal
-      let lower = s.toLowerCase();
-      
-      // Remove noise words (already sorted by length DESC to avoid partial matching issues)
-      for (const noise of shopeeNoiseWords) {
-        // Escape special regex chars and use word boundaries for precise matching
-        const escaped = noise.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp('\\b' + escaped + '\\b', 'gi');
-        lower = lower.replace(regex, ' ');
-      }
-      
-      // Remove excessive punctuation and normalize spaces
-      lower = lower.replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
-      
-      // Filter out single characters and very short words, but keep full descriptive name
-      const words = lower.split(' ').filter(w => w.length > 1);
-      return words.join(' '); // Keep all meaningful words after noise removal
-    }
-
-    // Build dashboard URL from raw extension data (moved from popup/script.js)
-    function buildDashboardUrlFromExtension(data) {
-      const monthlyItems = {};
-      if (data.cachePayload && data.cachePayload.miniOrders) {
-        for (const order of data.cachePayload.miniOrders) {
-          if (!order.ts) continue;
-          const d_obj = new Date(order.ts * 1000);
-          const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
-          if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
-          for (const item of (order.il || [])) {
-             if (!item.i) continue;
-             if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
-             monthlyItems[y_m][item.i].s += item.s;
-             monthlyItems[y_m][item.i].c += item.c;
-          }
-        }
-      }
-      const mi = {};
-      for (const [ym, map] of Object.entries(monthlyItems)) {
-        // Keep top 20 per month (dashboard renders at most 20); compact names to reduce base64 size
-        mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 20).map(x => ({
-           n: compactItemNameForUrl(x.n).substring(0, 45), // Longer after aggressive noise removal
-           s: Math.round(x.s),
-           c: x.c
-        }));
-      }
-
-      const yd = {};
-      for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
-        yd[yr] = {
-          t:  Math.round(ydata.total.tongTien),
-          o:  ydata.total.donHang,
-          ip: ydata.total.sanPham,
-          s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
-          m:  Object.fromEntries(
-            Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
-          )
-        };
-      }
-      const ps = data.thongKeTheoThang || {};
-      const dashData = {
-        v:    1,
-        t:    Math.round(data.tongtienhang),
-        o:    data.tongDonHang,
-        s:    Math.round(Math.max(0, data.tongTienTietKiem)),
-        ip:   data.tongSanPhamDaMua,
-        ship: Math.round(data.tongPhiShip || 0),
-        ts:   Math.floor(Date.now() / 1000),
-        yd,
-        mi,
-        ps: {
-          '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
-          '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
-          '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
-          '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
-        },
-        ti: (() => {
-          // Send top 150 items (no cat — dashboard classifies itself)
-          return (data.topItems || []).slice(0, 150).map(i => ({
-            n: compactItemNameForUrl(i.name).substring(0, 50),
-            s: Math.round(i.spent),
-            c: i.count
-          }));
-        })()
-      };
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
-      return `${window.location.origin}${window.location.pathname}#d=${encoded}`;
-    }
-
-    // Expose globally for extension message passing
-    window.buildDashboardUrlFromExtension = buildDashboardUrlFromExtension;
+    // Extension helpers - functions moved to extension for direct use
 
     })();
   </script>

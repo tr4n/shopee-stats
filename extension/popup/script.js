@@ -258,21 +258,107 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Dashboard URL ===
   const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
 
-  // Store data and open dashboard - dashboard will read from storage and build its own URL
+  // Build URL locally and pass to dashboard - simpler approach  
   function openDashboardWithData(data) {
-    // Store raw extension data for dashboard to process
-    chrome.storage.local.set({ 'shopee_dashboard_data': data }, () => {
-      // Open dashboard with extension flag - dashboard will read storage and redirect with proper URL
-      chrome.tabs.create({ url: `${DASHBOARD_BASE}?source=extension&ts=${Date.now()}` });
-    });
+    try {
+      // Build the URL directly in popup (keep the logic here for now)
+      const url = buildDashboardUrlLocal(data);
+      console.log('[Popup] Built dashboard URL, length:', url.length);
+      console.log('[Popup] URL preview:', url.substring(0, 200) + '...');
+      chrome.tabs.create({ url });
+    } catch (e) {
+      console.error('[Popup] Failed to build dashboard URL:', e);
+      // Fallback: open dashboard without data
+      chrome.tabs.create({ url: DASHBOARD_BASE });
+    }
+  }
+
+  // Rebuild the URL building logic locally (simplified from what was moved to dashboard)
+  function buildDashboardUrlLocal(data) {
+    const monthlyItems = {};
+    if (data.cachePayload && data.cachePayload.miniOrders) {
+      for (const order of data.cachePayload.miniOrders) {
+        if (!order.ts) continue;
+        const d_obj = new Date(order.ts * 1000);
+        const y_m = d_obj.getFullYear() + '-' + (d_obj.getMonth() + 1);
+        if (!monthlyItems[y_m]) monthlyItems[y_m] = {};
+        for (const item of (order.il || [])) {
+           if (!item.i) continue;
+           if (!monthlyItems[y_m][item.i]) monthlyItems[y_m][item.i] = { n: item.n, s: 0, c: 0 };
+           monthlyItems[y_m][item.i].s += item.s;
+           monthlyItems[y_m][item.i].c += item.c;
+        }
+      }
+    }
+
+    // Simple compact function (no noise removal to keep popup minimal)
+    function compactName(name) {
+      return String(name || '').replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    const mi = {};
+    for (const [ym, map] of Object.entries(monthlyItems)) {
+      mi[ym] = Object.values(map).sort((a,b) => b.s - a.s).slice(0, 20).map(x => ({
+         n: compactName(x.n).substring(0, 40),
+         s: Math.round(x.s),
+         c: x.c
+      }));
+    }
+
+    const yd = {};
+    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
+      yd[yr] = {
+        t:  Math.round(ydata.total.tongTien),
+        o:  ydata.total.donHang,
+        ip: ydata.total.sanPham,
+        s:  Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+        m:  Object.fromEntries(
+          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
+        )
+      };
+    }
+    
+    const ps = data.thongKeTheoThang || {};
+    const dashData = {
+      v:    1,
+      t:    Math.round(data.tongtienhang),
+      o:    data.tongDonHang,
+      s:    Math.round(Math.max(0, data.tongTienTietKiem)),
+      ip:   data.tongSanPhamDaMua,
+      ship: Math.round(data.tongPhiShip || 0),
+      ts:   Math.floor(Date.now() / 1000),
+      yd,
+      mi,
+      ps: {
+        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
+        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
+        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
+        '1y': Math.round((ps['1_nam']   || {}).tongTien || 0)
+      },
+      ti: (data.topItems || []).slice(0, 150).map(i => ({
+        n: compactName(i.name).substring(0, 45),
+        s: Math.round(i.spent),
+        c: i.count
+      }))
+    };
+    
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(dashData))));
+    return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
 
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
+      console.log('[Popup] Opening dashboard, lastCompleteData:', !!lastCompleteData);
       if (lastCompleteData) {
+        console.log('[Popup] Data sample:', {
+          tongtienhang: lastCompleteData.tongtienhang,
+          tongDonHang: lastCompleteData.tongDonHang,
+          topItemsCount: (lastCompleteData.topItems || []).length
+        });
         openDashboardWithData(lastCompleteData);
       } else {
+        console.log('[Popup] No data available, opening empty dashboard');
         chrome.tabs.create({ url: DASHBOARD_BASE + '/' });
       }
     });
