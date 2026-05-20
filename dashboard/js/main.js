@@ -146,13 +146,8 @@ function setupSupportButton(d) {
   const descEl = document.getElementById('support-desc');
   const emailEl = document.getElementById('support-email');
   const noteEl = document.getElementById('support-note');
-  const formEl = document.getElementById('support-form');
-  const iframeEl = document.getElementById('support-submit-iframe');
 
   if (!btn || !modal) return;
-
-  let screenshotBase64 = '';
-  let screenshotFile = null;
 
   if (emailEl) {
     emailEl.value = localStorage.getItem('support_email') || '';
@@ -235,107 +230,7 @@ function setupSupportButton(d) {
     }
   }
 
-  // Helper to compress image before attaching to keep email URL length small
-  function compressImage(file, callback) {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 400;
-        const MAX_HEIGHT = 400;
-        let width = img.width;
-        let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress as JPEG with low quality (0.4) to keep it extremely small (~2-4KB)
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.4);
-        callback(compressedDataUrl);
-      };
-    };
-  }
-
-  // Screenshot Upload Box Event Listeners
-  const uploadBox = document.getElementById('screenshot-upload-box');
-  const fileInput = document.getElementById('support-screenshot');
-  const previewContainer = document.getElementById('screenshot-preview-container');
-  const previewImg = document.getElementById('screenshot-preview');
-  const clearBtn = document.getElementById('btn-clear-screenshot');
-
-  if (uploadBox && fileInput) {
-    uploadBox.addEventListener('click', () => fileInput.click());
-
-    uploadBox.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadBox.style.borderColor = 'var(--primary)';
-    });
-
-    uploadBox.addEventListener('dragleave', () => {
-      uploadBox.style.borderColor = 'var(--border)';
-    });
-
-    uploadBox.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadBox.style.borderColor = 'var(--border)';
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleFile(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) {
-        handleFile(e.target.files[0]);
-      }
-    });
-
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Vui lòng chỉ chọn tệp hình ảnh!');
-        return;
-      }
-      screenshotFile = file;
-      compressImage(file, (compressedBase64) => {
-        screenshotBase64 = compressedBase64;
-        if (previewImg) previewImg.src = compressedBase64;
-        if (previewContainer) previewContainer.style.display = 'block';
-        if (clearBtn) clearBtn.style.display = 'inline-block';
-        const span = uploadBox.querySelector('span');
-        if (span) span.textContent = `📸 Đã chọn: ${file.name}`;
-      });
-    }
-
-    if (clearBtn) {
-      clearBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        fileInput.value = '';
-        screenshotFile = null;
-        screenshotBase64 = '';
-        if (previewImg) previewImg.src = '';
-        if (previewContainer) previewContainer.style.display = 'none';
-        clearBtn.style.display = 'none';
-        const span = uploadBox.querySelector('span');
-        if (span) span.textContent = '📸 Chọn ảnh hoặc kéo thả vào đây';
-      });
-    }
-  }
   btn.addEventListener('click', () => {
     const info = getDeviceInfo();
     const b64 = buildSupportPayload();
@@ -363,10 +258,6 @@ function setupSupportButton(d) {
       ? `Yêu cầu hỗ trợ sẽ được gửi trực tiếp tới hòm thư của nhà phát triển (<strong>${escHtml(email)}</strong>). Chúng tôi sẽ phản hồi lại bạn sớm nhất có thể.`
       : 'Không tìm thấy địa chỉ email hỗ trợ.';
 
-    if (formEl) {
-      formEl.action = `https://formsubmit.co/${encodeURIComponent(email)}`;
-    }
-
     modal.classList.add('active');
     setTimeout(() => {
       if (emailEl && !emailEl.value) {
@@ -380,118 +271,101 @@ function setupSupportButton(d) {
   closeBtn.addEventListener('click', () => modal.classList.remove('active'));
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
-  let isSubmitting = false;
+  sendBtn.addEventListener('click', () => {
+    const userEmail = emailEl ? emailEl.value.trim() : '';
+    const desc = descEl ? descEl.value.trim() : '';
+    const adminEmail = window.APP_CONFIG?.email || 'quanghuytran.hust@gmail.com';
+    const statusEl = document.getElementById('support-status');
 
-  if (formEl) {
-    formEl.addEventListener('submit', (e) => {
-      const userEmail = emailEl ? emailEl.value.trim() : '';
-      const desc = descEl ? descEl.value.trim() : '';
-      const statusEl = document.getElementById('support-status');
+    if (!statusEl) return;
 
-      if (!statusEl) return;
+    // Validate email format if provided
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (userEmail && !emailRegex.test(userEmail)) {
+      statusEl.innerHTML = '<span style="color: var(--primary); font-weight: bold;">⚠️ Vui lòng nhập địa chỉ email liên hệ hợp lệ hoặc để trống.</span>';
+      if (emailEl) emailEl.focus();
+      return;
+    }
 
-      // Validate email format if provided
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (userEmail && !emailRegex.test(userEmail)) {
-        e.preventDefault();
-        statusEl.innerHTML = '<span style="color: var(--primary); font-weight: bold;">⚠️ Vui lòng nhập địa chỉ email liên hệ hợp lệ hoặc để trống.</span>';
-        if (emailEl) emailEl.focus();
-        return;
-      }
+    statusEl.innerHTML = '<span style="color: var(--muted);">⏳ Đang gửi yêu cầu hỗ trợ, vui lòng đợi...</span>';
 
-      // Populate hidden fields for form submission
-      const info = getDeviceInfo();
-      const b64 = buildSupportPayload();
-      const subject = `[Shopee Analytics] Yêu cầu hỗ trợ — ${info.browser} / ${info.os}`;
-      
-      const messageBody = [
-        `Email liên hệ: ${userEmail || '(Không cung cấp)'}`,
-        `Mô tả vấn đề:\n${desc || '(Không cung cấp)'}`,
-        `\n─────────────────────────────────────`,
-        `THÔNG TIN THIẾT BỊ:`,
-        `• Trình duyệt : ${info.browser}`,
-        `• Hệ điều hành: ${info.os}`,
-        `• Màn hình    : ${info.screen} (DPR ${info.dpr})`,
-        `• Viewport    : ${info.viewport}`,
-        `• Dữ liệu tại : ${info.dataDate}`,
-        `• Tóm tắt     : ${info.summary}`,
-        `• Chrome AI   : ${info.chromeAI}`,
-        `• Phiên bản Ext: ${info.extVersion}`,
-      ].join('\n');
+    // Disable inputs to avoid double submissions
+    sendBtn.disabled = true;
+    const originalBtnHTML = sendBtn.innerHTML;
+    sendBtn.innerHTML = '⏳ Đang gửi...';
+    if (emailEl) emailEl.disabled = true;
+    if (descEl) descEl.disabled = true;
 
-      const subjectInput = document.getElementById('support-form-subject');
-      const emailInputHidden = document.getElementById('support-form-email');
-      const b64Input = document.getElementById('support-form-b64');
-      const messageInput = document.getElementById('support-form-message');
+    const info = getDeviceInfo();
+    const b64 = buildSupportPayload();
+    const subject = `[Shopee Analytics] Yêu cầu hỗ trợ — ${info.browser} / ${info.os}`;
+    
+    const messageBody = [
+      `Email liên hệ: ${userEmail || '(Không cung cấp)'}`,
+      `Mô tả vấn đề:\n${desc || '(Không cung cấp)'}`,
+      `\n─────────────────────────────────────`,
+      `THÔNG TIN THIẾT BỊ:`,
+      `• Trình duyệt : ${info.browser}`,
+      `• Hệ điều hành: ${info.os}`,
+      `• Màn hình    : ${info.screen} (DPR ${info.dpr})`,
+      `• Viewport    : ${info.viewport}`,
+      `• Dữ liệu tại : ${info.dataDate}`,
+      `• Tóm tắt     : ${info.summary}`,
+      `• Chrome AI   : ${info.chromeAI}`,
+      `• Phiên bản Ext: ${info.extVersion}`,
+    ].join('\n');
 
-      if (subjectInput) subjectInput.value = subject;
-      if (emailInputHidden) emailInputHidden.value = userEmail || 'anonymous@shopee-stats.com';
-      if (b64Input) b64Input.value = b64 || '';
-      if (messageInput) messageInput.value = messageBody;
-
-      // If dragged-and-dropped file exists, make sure to attach it to the file input
-      if (screenshotFile && fileInput) {
-        try {
-          const dataTransfer = new DataTransfer();
-          dataTransfer.items.add(screenshotFile);
-          fileInput.files = dataTransfer.files;
-        } catch (err) {
-          console.warn('Không thể gán screenshotFile cho fileInput:', err);
-        }
-      }
-
-      isSubmitting = true;
-      statusEl.innerHTML = '<span style="color: var(--muted);">⏳ Đang gửi yêu cầu hỗ trợ, vui lòng đợi...</span>';
-
-      // Disable inputs to avoid double submissions
-      sendBtn.disabled = true;
-      sendBtn.innerHTML = '⏳ Đang gửi...';
-      if (emailEl) emailEl.disabled = true;
-      if (descEl) descEl.disabled = true;
-    });
-  }
-
-  if (iframeEl) {
-    iframeEl.addEventListener('load', () => {
-      if (isSubmitting) {
-        isSubmitting = false;
-
-        // Re-enable form fields
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-          Gửi yêu cầu hỗ trợ
-        `;
-        if (emailEl) emailEl.disabled = false;
-        if (descEl) descEl.disabled = false;
-
-        const userEmail = emailEl ? emailEl.value.trim() : '';
-        const statusEl = document.getElementById('support-status');
-        if (statusEl) {
-          statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Gửi hỗ trợ thành công! Cảm ơn bạn.</span>';
-        }
-
+    // Perform JSON fetch (fully CORS-compliant in FormSubmit AJAX API)
+    fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: userEmail || 'anonymous@shopee-stats.com',
+        _subject: subject,
+        message: messageBody,
+        raw_data_base64: b64 || ''
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`Mã phản hồi HTTP: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      if (data.success === 'true' || data.success === true) {
+        statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Gửi hỗ trợ thành công! Chúng tôi sẽ phản hồi sớm.</span>';
+        
         // Save email for next time
         if (userEmail) {
           localStorage.setItem('support_email', userEmail);
         }
 
-        // Clear description and reset uploaded file preview
+        // Clear description
         if (descEl) descEl.value = '';
-        const clearBtn = document.getElementById('btn-clear-screenshot');
-        if (clearBtn) clearBtn.click();
 
         // Close support modal after a short delay
         setTimeout(() => {
           modal.classList.remove('active');
-          if (statusEl) statusEl.innerHTML = '';
+          statusEl.innerHTML = '';
         }, 2200);
+      } else {
+        throw new Error(data.message || 'Lỗi từ máy chủ FormSubmit.');
       }
+    })
+    .catch(err => {
+      console.error('Lỗi FormSubmit:', err);
+      statusEl.innerHTML = `<span style="color: var(--primary); font-weight: bold;">❌ Gửi thất bại: ${err.message}.</span><br><span style="font-size: 11px; color: var(--muted);">Bạn có thể gửi email trực tiếp tới: ${adminEmail}</span>`;
+    })
+    .finally(() => {
+      // Re-enable form fields
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = originalBtnHTML;
+      if (emailEl) emailEl.disabled = false;
+      if (descEl) descEl.disabled = false;
     });
-  }
+  });
 }
 
 /* ── Share Modal ─────────────────────────────── */
