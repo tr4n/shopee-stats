@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Shopee Analytics Pro - Thống Kê Chi Tiêu & Quản Lý Đơn Hàng",
+  "name": "Shopee Analytics Pro - Thống Kê Chi Tiêu",
   "short_name": "Shopee Analytics",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Tiện ích phân tích và thống kê chi tiết số tiền bạn đã mua sắm trên Shopee theo từng tháng và năm. Trải nghiệm ngay!",
   "minimum_chrome_version": "95",
   "permissions": [
