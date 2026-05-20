@@ -148,6 +148,8 @@ function setupSupportButton(d) {
 
   if (!btn || !modal) return;
 
+  let screenshotBase64 = '';
+
   function getDeviceInfo() {
     const ua = navigator.userAgent;
     let browser = 'Unknown', bVersion = '';
@@ -172,6 +174,16 @@ function setupSupportButton(d) {
     else if (/iPhone OS ([\d_]+)/.test(ua)) os = 'iOS ' + ua.match(/iPhone OS ([\d_]+)/)[1].replace(/_/g, '.');
     else if (/Linux/.test(ua)) os = 'Linux';
 
+    let extVersion = 'Không rõ (Chạy trực tiếp)';
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
+        extVersion = chrome.runtime.getManifest().version;
+      }
+    } catch (e) { /* noop */ }
+    if ((extVersion.includes('Không rõ') || !extVersion) && d && d.ev) {
+      extVersion = d.ev;
+    }
+
     return {
       browser: `${browser} ${bVersion}`.trim(),
       os,
@@ -181,6 +193,7 @@ function setupSupportButton(d) {
       dataDate: d?.ts ? fmtDate(d.ts) : '—',
       summary: d ? `${fmtVND(d.t)} · ${fmtNum(d.o)} đơn` : '—',
       chromeAI: chromeAISupportStatus,
+      extVersion: extVersion,
     };
   }
 
@@ -199,6 +212,11 @@ function setupSupportButton(d) {
         ti: (d.ti || []).slice(0, 10).map(i => ({ n: i.n, s: i.s, c: i.c })),
         cs: (d.cs || []).slice(0, 5).map(c => ({ name: c.name, s: c.s, c: c.c })),
       };
+      // Include extension version in data payload too, if we have it
+      const info = getDeviceInfo();
+      if (info.extVersion && !info.extVersion.includes('Không rõ')) {
+        payload.ev = info.extVersion;
+      }
       const json = JSON.stringify(payload);
       const bytes = new TextEncoder().encode(json);
       let bin = '';
@@ -206,6 +224,106 @@ function setupSupportButton(d) {
       return btoa(bin);
     } catch {
       return '';
+    }
+  }
+
+  // Helper to compress image before attaching to keep email URL length small
+  function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress as JPEG with low quality (0.4) to keep it extremely small (~2-4KB)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.4);
+        callback(compressedDataUrl);
+      };
+    };
+  }
+
+  // Screenshot Upload Box Event Listeners
+  const uploadBox = document.getElementById('screenshot-upload-box');
+  const fileInput = document.getElementById('support-screenshot');
+  const previewContainer = document.getElementById('screenshot-preview-container');
+  const previewImg = document.getElementById('screenshot-preview');
+  const clearBtn = document.getElementById('btn-clear-screenshot');
+
+  if (uploadBox && fileInput) {
+    uploadBox.addEventListener('click', () => fileInput.click());
+
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.style.borderColor = 'var(--primary)';
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+      uploadBox.style.borderColor = 'var(--border)';
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.style.borderColor = 'var(--border)';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chỉ chọn tệp hình ảnh!');
+        return;
+      }
+      compressImage(file, (compressedBase64) => {
+        screenshotBase64 = compressedBase64;
+        if (previewImg) previewImg.src = compressedBase64;
+        if (previewContainer) previewContainer.style.display = 'block';
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        const span = uploadBox.querySelector('span');
+        if (span) span.textContent = `📸 Đã chọn: ${file.name}`;
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.value = '';
+        screenshotBase64 = '';
+        if (previewImg) previewImg.src = '';
+        if (previewContainer) previewContainer.style.display = 'none';
+        clearBtn.style.display = 'none';
+        const span = uploadBox.querySelector('span');
+        if (span) span.textContent = '📸 Chọn ảnh hoặc kéo thả vào đây';
+      });
     }
   }
 
@@ -221,6 +339,7 @@ function setupSupportButton(d) {
       `Dữ liệu tại : ${escHtml(info.dataDate)}`,
       `Tóm tắt     : ${escHtml(info.summary)}`,
       `Chrome AI   : ${escHtml(info.chromeAI)}`,
+      `Phiên bản Ext: ${escHtml(info.extVersion)}`,
     ].join('<br>');
 
     const previewEl = document.getElementById('support-data-preview');
@@ -265,13 +384,25 @@ function setupSupportButton(d) {
       `• Dữ liệu tại : ${info.dataDate}`,
       `• Tóm tắt     : ${info.summary}`,
       `• Chrome AI   : ${info.chromeAI}`,
+      `• Phiên bản Ext: ${info.extVersion}`,
       '',
       '─────────────────────────────────────',
       'DỮ LIỆU (BASE64):',
       b64 || '(không có)',
-    ].join('\n');
+    ];
 
-    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    if (screenshotBase64) {
+      body.push(
+        '',
+        '─────────────────────────────────────',
+        'ẢNH CHỤP MÀN HÌNH (COMPRESSED BASE64):',
+        screenshotBase64,
+        '',
+        '*(Mẹo: Bạn có thể dán hoặc đính kèm ảnh chụp màn hình trực tiếp vào ứng dụng email để hình ảnh rõ nét hơn)*'
+      );
+    }
+
+    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body.join('\n'))}`;
     window.location.href = mailto;
   });
 }
