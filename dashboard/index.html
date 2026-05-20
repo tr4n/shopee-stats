@@ -1343,7 +1343,7 @@
         if (!s) return s;
         return String(s).charAt(0).toUpperCase() + String(s).slice(1);
       }
-      function renderAIInsight(text) {
+      function renderAIInsight(text, cardId) {
         // Split text by newlines into paragraphs/ideas
         const paragraphs = text
           .split(/\n+/)
@@ -1357,7 +1357,10 @@
         const items = paragraphs.map((p, i) =>
           `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
         ).join('');
-        return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span></div><div class="insight-ai-body">${items}</div>`;
+        const refreshBtn = cardId
+          ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại">🔄 Phân tích lại</button>`
+          : '';
+        return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
       }
 
       // Legacy map for backward compatibility with old dashboard URLs (format: { id, s, c })
