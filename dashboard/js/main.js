@@ -59,26 +59,39 @@ function parseData() {
   } catch { return null; }
 }
 
-/* ── Handle first-time ?d= injection ─────────── */
-// When the extension opens dashboard with ?d=BASE64:
-//   1. Parse the payload
-//   2. Persist to localStorage under a millis ID
-//   3. Redirect to clean ?id=MILLIS URL
+/* ── Handle first-time data injection ────────── */
+// Supports two entry formats:
+//   #d=BASE64  — hash (preferred: no URL encoding issues, works with file://)
+//   ?d=BASE64  — query param (fallback: URLSearchParams decodes + as space, so we fix it)
+// Stores payload under a millis ID, then redirects to clean ?id=MILLIS URL.
 // Returns true if a redirect was triggered (boot should be skipped).
 const _hasRawDataParam = (function () {
-  const raw = new URLSearchParams(location.search).get('d');
-  if (!raw) return false;
-  try {
-    const parsed = JSON.parse(decodeURIComponent(escape(atob(raw))));
-    if (parsed && parsed.t) {
-      const id = Date.now();
-      localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
-      location.replace(location.pathname + '?id=' + id);
-      return true;
-    }
-  } catch (e) {
-    console.error('[Dashboard] Failed to parse ?d= param:', e);
+  function tryParse(raw) {
+    if (!raw) return null;
+    // Attempt 1: restore + characters that URLSearchParams/browser may have turned into spaces
+    try { return JSON.parse(decodeURIComponent(escape(atob(raw.replace(/ /g, '+'))))); } catch { /* noop */ }
+    // Attempt 2: decode as-is
+    try { return JSON.parse(decodeURIComponent(escape(atob(raw)))); } catch { /* noop */ }
+    return null;
   }
+
+  // Priority 1: #d= hash — no encoding issues, recommended for testing
+  const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
+  // Priority 2: ?d= query param — raw extraction avoids URLSearchParams + → space issue
+  const qMatch = location.search.match(/[?&]d=([^&]*)/);
+
+  const raw = hashMatch?.[1] || qMatch?.[1];
+  if (!raw) return false;
+
+  const parsed = tryParse(raw);
+  if (parsed?.t) {
+    const id = Date.now();
+    localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
+    location.replace('result.html?id=' + id);
+    return true;
+  }
+
+  console.error('[Dashboard] Failed to parse data from URL (hash or query param)');
   return false;
 })();
 
