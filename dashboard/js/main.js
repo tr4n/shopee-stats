@@ -253,10 +253,7 @@ function setupSupportButton(d) {
         : '(Không có dữ liệu)';
     }
 
-    const email = window.APP_CONFIG?.email || 'quanghuytran.hust@gmail.com';
-    noteEl.innerHTML = email
-      ? `Yêu cầu hỗ trợ sẽ được gửi trực tiếp tới hòm thư của nhà phát triển (<strong>${escHtml(email)}</strong>). Chúng tôi sẽ phản hồi lại bạn sớm nhất có thể.`
-      : 'Không tìm thấy địa chỉ email hỗ trợ.';
+    noteEl.innerHTML = 'Yêu cầu hỗ trợ sẽ được điền sẵn vào <strong>Google Form</strong>. Bạn chỉ cần nhấn nút <strong>Gửi</strong> ở trang mới để hoàn tất.';
 
     modal.classList.add('active');
     setTimeout(() => {
@@ -274,7 +271,6 @@ function setupSupportButton(d) {
   sendBtn.addEventListener('click', () => {
     const userEmail = emailEl ? emailEl.value.trim() : '';
     const desc = descEl ? descEl.value.trim() : '';
-    const adminEmail = window.APP_CONFIG?.email || 'quanghuytran.hust@gmail.com';
     const statusEl = document.getElementById('support-status');
 
     if (!statusEl) return;
@@ -287,84 +283,50 @@ function setupSupportButton(d) {
       return;
     }
 
-    statusEl.innerHTML = '<span style="color: var(--muted);">⏳ Đang gửi yêu cầu hỗ trợ, vui lòng đợi...</span>';
-
-    // Disable inputs to avoid double submissions
-    sendBtn.disabled = true;
-    const originalBtnHTML = sendBtn.innerHTML;
-    sendBtn.innerHTML = '⏳ Đang gửi...';
-    if (emailEl) emailEl.disabled = true;
-    if (descEl) descEl.disabled = true;
+    statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang chuyển hướng đến Google Form đã điền sẵn...</span>';
 
     const info = getDeviceInfo();
     const b64 = buildSupportPayload();
-    const subject = `[Shopee Analytics] Yêu cầu hỗ trợ — ${info.browser} / ${info.os}`;
     
-    const messageBody = [
-      `Email liên hệ: ${userEmail || '(Không cung cấp)'}`,
-      `Mô tả vấn đề:\n${desc || '(Không cung cấp)'}`,
-      `\n─────────────────────────────────────`,
-      `THÔNG TIN THIẾT BỊ:`,
-      `• Trình duyệt : ${info.browser}`,
-      `• Hệ điều hành: ${info.os}`,
-      `• Màn hình    : ${info.screen} (DPR ${info.dpr})`,
-      `• Viewport    : ${info.viewport}`,
-      `• Dữ liệu tại : ${info.dataDate}`,
-      `• Tóm tắt     : ${info.summary}`,
-      `• Chrome AI   : ${info.chromeAI}`,
-      `• Phiên bản Ext: ${info.extVersion}`,
+    const deviceInfoStr = [
+      `Trình duyệt : ${info.browser}`,
+      `Hệ điều hành: ${info.os}`,
+      `Màn hình    : ${info.screen} (DPR ${info.dpr})`,
+      `Viewport    : ${info.viewport}`,
+      `Dữ liệu tại : ${info.dataDate}`,
+      `Tóm tắt     : ${info.summary}`,
+      `Chrome AI   : ${info.chromeAI}`,
+      `Phiên bản Ext: ${info.extVersion}`,
     ].join('\n');
 
-    // Perform JSON fetch (fully CORS-compliant in FormSubmit AJAX API)
-    fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: userEmail || 'anonymous@shopee-stats.com',
-        _subject: subject,
-        message: messageBody,
-        raw_data_base64: b64 || ''
-      })
-    })
-    .then(res => {
-      if (!res.ok) throw new Error(`Mã phản hồi HTTP: ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      if (data.success === 'true' || data.success === true) {
-        statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Gửi hỗ trợ thành công! Chúng tôi sẽ phản hồi sớm.</span>';
-        
-        // Save email for next time
-        if (userEmail) {
-          localStorage.setItem('support_email', userEmail);
-        }
+    // Construct pre-filled Google Form URL
+    const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
+    const formUrl = `${baseUrl}` +
+      `&entry.1189199588=${encodeURIComponent(userEmail)}` +
+      `&entry.1848321568=${encodeURIComponent(desc)}` +
+      `&entry.322741036=${encodeURIComponent(deviceInfoStr)}` +
+      `&entry.825360=${encodeURIComponent(b64 || '')}`;
 
-        // Clear description
-        if (descEl) descEl.value = '';
+    // Save email for next time
+    if (userEmail) {
+      localStorage.setItem('support_email', userEmail);
+    }
 
-        // Close support modal after a short delay
-        setTimeout(() => {
-          modal.classList.remove('active');
-          statusEl.innerHTML = '';
-        }, 2200);
-      } else {
-        throw new Error(data.message || 'Lỗi từ máy chủ FormSubmit.');
-      }
-    })
-    .catch(err => {
-      console.error('Lỗi FormSubmit:', err);
-      statusEl.innerHTML = `<span style="color: var(--primary); font-weight: bold;">❌ Gửi thất bại: ${err.message}.</span><br><span style="font-size: 11px; color: var(--muted);">Bạn có thể gửi email trực tiếp tới: ${adminEmail}</span>`;
-    })
-    .finally(() => {
-      // Re-enable form fields
-      sendBtn.disabled = false;
-      sendBtn.innerHTML = originalBtnHTML;
-      if (emailEl) emailEl.disabled = false;
-      if (descEl) descEl.disabled = false;
-    });
+    // Open pre-filled Google Form in new tab
+    window.open(formUrl, '_blank');
+
+    // Clear description
+    if (descEl) descEl.value = '';
+
+    // Show success message and close modal after short delay
+    setTimeout(() => {
+      statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Vui lòng nhấn "Gửi" trên trang Google Form vừa mở.</span>';
+    }, 1000);
+
+    setTimeout(() => {
+      modal.classList.remove('active');
+      statusEl.innerHTML = '';
+    }, 3200);
   });
 }
 
