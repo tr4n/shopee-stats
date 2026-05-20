@@ -1006,30 +1006,38 @@
       margin-left: auto;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      background: none;
-      border: 1px solid var(--border, rgba(0,0,0,0.1));
-      border-radius: 20px;
-      padding: 3px 10px;
+      gap: 6px;
+      background: rgba(38, 170, 153, 0.06);
+      border: 1px solid rgba(38, 170, 153, 0.15);
+      border-radius: 12px;
+      padding: 4px 10px;
       font-size: 11px;
       font-weight: 600;
-      color: var(--muted);
+      color: rgba(38, 170, 153, 0.85);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s ease-in-out;
       white-space: nowrap;
       flex-shrink: 0;
     }
     .ai-refresh-btn:hover {
-      background: var(--surface);
-      color: var(--primary);
-      border-color: var(--primary);
+      background: rgba(38, 170, 153, 0.15);
+      color: var(--green);
+      border-color: rgba(38, 170, 153, 0.4);
+      transform: translateY(-1px);
+    }
+    .ai-refresh-btn:hover .refresh-icon {
+      transform: rotate(180deg);
     }
     .ai-refresh-btn:active {
       transform: scale(0.95);
     }
-    .ai-refresh-btn .spin {
+    .ai-refresh-btn .refresh-icon {
+      transition: transform 0.4s ease;
       display: inline-block;
-      animation: ai-spin 0.9s linear infinite;
+      flex-shrink: 0;
+    }
+    .ai-refresh-btn .refresh-icon.spin {
+      animation: ai-spin 1s linear infinite;
     }
     @keyframes ai-spin {
       from { transform: rotate(0deg); }
@@ -1358,7 +1366,13 @@
           `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
         ).join('');
         const refreshBtn = cardId
-          ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại">🔄 Phân tích lại</button>`
+          ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại">
+              <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Phân tích lại</span>
+             </button>`
           : '';
         return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
       }
@@ -1950,7 +1964,13 @@
           const btn = aiEl.querySelector('.ai-refresh-btn');
           if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span class="spin">🔄</span> Đang phân tích...';
+            btn.innerHTML = `
+              <svg class="refresh-icon spin" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Đang phân tích...</span>
+            `;
           }
         }
 
