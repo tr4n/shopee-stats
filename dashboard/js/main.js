@@ -488,19 +488,19 @@ if (!_hasRawDataParam) {
       let specificPrompt;
       if (isCurrentYear) {
         specificPrompt = `This is the spend data for THIS current year (${yr}):
-1. Identify the exact month with the highest total spend. Analyze the monthly total and order count, assessing whether this represents a major spike.
-2. Propose advice on setting a specific monthly budget limit to avoid overspending during similar peak periods.
-Requirements: Output in VIETNAMESE. Structure into 2 paragraphs. Use **bold** for the month name and budget numbers.`;
+1. Identify the exact month with the highest total spend. Predict the user's shopping mood, consumer psychology, or what emotional/lifestyle factor might have triggered this spending peak during that specific time of the year.
+2. Characterize their spending personality based on this peak. Do NOT give budget/saving advice.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for the month name and key personality traits.`;
       } else if (isLastYear) {
         specificPrompt = `This is the spend data for LAST year (${yr}):
-1. Identify the exact month with the highest total spend. Analyze the spend levels.
-2. Draw a concrete lesson for this year (${currentYear})—suggest how they should set budget limits in advance for peak shopping months.
-Requirements: Output in VIETNAMESE. Structure into 2 paragraphs. Use **bold** for the month name and main advice.`;
+1. Identify the month with the highest total spend. Predict their consumer mindset and lifestyle state during that peak month last year.
+2. Highlight a pattern of how their emotional shopping habits have evolved or carried over to this year. Do NOT give saving/budgeting tips.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for the month name and main psychology remarks.`;
       } else {
         specificPrompt = `This is the spend data from ${yearDiff} years ago (${yr}):
-1. Identify the month with the highest spend, and analyze the monthly totals.
-2. Reflect on the seasonal patterns in their shopping behavior back then.
-Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** for the month name and important observations.`;
+1. Identify the month with the highest spend and predict what kind of shopping mood or lifestyle phase they were in during that period.
+2. Reflect on the seasonal changes or nostalgia of their consumer personality back then. Do NOT give saving/budgeting advice.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for the month name and psychological observations.`;
       }
 
       enrichWithAI('insight-monthly',
@@ -523,9 +523,9 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
       const context = `Month ${enMonth}/${year}: total spend ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.`;
       
       const specificPrompt = `This is the Shopee spend data for ${enMonth} of Year ${year}:
-1. Analyze the total spend in this month (${fmtVNDEng(monthTotal)}) across ${totalItemsCount} purchases.
-2. Offer 1 specific tip or rule to control spending next month.
-Requirements: Output in VIETNAMESE. Keep it concise (1-2 paragraphs, max 3 sentences total). Use **bold** for month/year and total amount.`;
+1. Analyze the total spend of ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.
+2. Predict the user's shopping mood, mental state, or lifestyle priorities that drove their shopping behavior during this specific month and year. Do NOT give saving or spending control advice.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for the month/year and key psychological findings.`;
 
       enrichWithAI('insight-monthly', context, specificPrompt, `insight-monthly-${year}-${monthStr}`);
     }
@@ -605,7 +605,9 @@ Requirements: Output in VIETNAMESE. Keep it concise (1-2 paragraphs, max 3 sente
     }
     window.categorizeMiItems = categorizeMiItems;
 
-    function triggerCategoryAIInsight(cs, ti, total, cacheKey) {
+    function triggerCategoryAIInsight(cs, ti, total, cacheKey, year) {
+      const activeYear = year || 'all';
+      const periodText = activeYear === 'all' ? 'all-time' : `year ${activeYear}`;
       const filteredCs = (cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác');
       if (!filteredCs.length) return;
       const analyzedTotal = cs.reduce((sum, c) => sum + c.s, 0) || total || 1;
@@ -616,11 +618,11 @@ Requirements: Output in VIETNAMESE. Keep it concise (1-2 paragraphs, max 3 sente
       }).join('; ');
       
       enrichWithAI('insight-categories',
-        `Spending breakdown by category: ${catLines}.`,
-        `Ignore the category 'Others / Uncategorized' entirely:
-1. Find the category with the highest percentage (%) of total spend and label it as the 'spending trap'.
-2. Suggest a financial brake rule tailored to this category to control spending in the future.
-Requirements: Output in VIETNAMESE. Format into 1-2 paragraphs (max 3 sentences). Use **bold** for category names and rule names.`,
+        `Spending breakdown by category for the period (${periodText}): ${catLines}.`,
+        `This is the spend data for the period (${periodText}). Ignore the category 'Others / Uncategorized' entirely:
+1. Find the category with the highest percentage (%) of total spend. Label this category and explain what it reveals about the user's dominant consumer personality, lifestyle priority, or psychological desires.
+2. Explain how this category distribution defines their lifestyle archetype (e.g., tech-enthusiast, self-care addict, homebody). Do NOT give financial advice or brake rules.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for category names and their lifestyle archetype.`,
         cacheKey
       );
     }
@@ -641,8 +643,8 @@ Requirements: Output in VIETNAMESE. Format into 1-2 paragraphs (max 3 sentences)
       
       const specificPrompt = `This is the Shopee spend data for the category "${enCat}" in ${periodText}:
 1. The user spent a total of ${fmtVNDEng(catTotal)} across ${catCount} purchases in this category.
-2. Give an honest, humorous personal finance advice targeting this specific category spending. For instance, if they spent on Beauty & Health, talk about skincare/styling vs. saving. If they spent on Electronics & Tech, talk about gear acquisition syndrome.
-Requirements: Output in VIETNAMESE. Keep it to 1-2 paragraphs (max 3 sentences). Use **bold** for category name and main advice.`;
+2. Provide a humorous, honest diagnostic of their shopping psychology or personality traits driven by this specific category (e.g., appearance-obsessed, retail therapist, shiny object syndrome). Do NOT give saving or personal finance advice.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for the category name and key consumer personality trait.`;
 
       enrichWithAI('insight-categories', context, specificPrompt, `insight-categories-${year}-${catName}`);
     }
@@ -662,10 +664,9 @@ Requirements: Output in VIETNAMESE. Keep it to 1-2 paragraphs (max 3 sentences).
       const context = `Year ${year}: total spend ${fmtVNDEng(yearData.t || 0)} across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVNDEng(avgOrderValue)} per order. Top products: ${itemsStr}.`;
       
       const specificPrompt = `This is the Shopee spend data for the year ${year}:
-1. Analyze the total spend and order count. Assess the purchasing frequency and the average spend per order.
-2. Name the top product(s) of this year: ${itemsStr}. Highlight if they spent too much on these items.
-3. Suggest a concrete financial tip or budget rule tailored to this year's shopping profile to curb similar spending in the future.
-Requirements: Output in VIETNAMESE. Format into 2 concise paragraphs. Use **bold** for product names, spend amounts, and rules.`;
+1. Analyze the total spend and order count. Name the top product(s) of this year: ${itemsStr}.
+2. Predict the user's spending habits, lifestyle archetype, or consumer personality profile that defined their year ${year}. Do NOT suggest any financial tips, budgets, or rules to curb spending.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for product names, spend amounts, and personality profile name.`;
 
       enrichWithAI('insight-yearly', context, specificPrompt, `insight-yearly-${year}`);
     }
@@ -786,7 +787,7 @@ Requirements: Output in VIETNAMESE. Format into 2 concise paragraphs. Use **bold
 
       if (_categorizationFinished) {
         const key = year === 'all' ? 'insight-categories-all' : `insight-categories-${year}`;
-        triggerCategoryAIInsight(cs, ti, total, key);
+        triggerCategoryAIInsight(cs, ti, total, key, year);
       }
     }
 
@@ -839,10 +840,9 @@ Requirements: Output in VIETNAMESE. Format into 2 concise paragraphs. Use **bold
           yoyLine
         ].filter(Boolean).join(' '),
         `Based on the total spend, order count, and voucher savings data:
-1. Compare the year with the highest spend against the other historical years.
-2. Evaluate the purchasing efficiency: if the order count is extremely high but total savings (from vouchers) is a tiny fraction of the total spend, criticize the habit of buying minor items frequently without utilizing discount codes.
-3. Propose a specific order bundling rule to increase the savings rate for the upcoming year.
-Requirements: Output in VIETNAMESE. Write in distinct paragraphs. Use **bold** for key numbers and major remarks.`
+1. Compare the year with the highest spend against the other years, and predict the shift in the user's shopping mindset or lifestyle between those periods.
+2. Diagnose their overall shopping personality archetype (e.g. dopamine chaser, voucher hunter, impulse buyer) based on the balance of orders, total spend, and voucher savings. Do NOT suggest saving rules or order bundling methods.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for key periods, amounts, and their shopping archetype.`
       );
 
       // 2. Items AI insight
@@ -851,13 +851,13 @@ Requirements: Output in VIETNAMESE. Write in distinct paragraphs. Use **bold** f
       enrichWithAI('insight-items',
         `Top purchased products: ${itemNames}.`,
         `Review the list of top purchased product names: ${itemNames}.
-Based solely on these product names, guess the user's shopping interests, lifestyle, or hobbies. Provide a humorous, friendly personal finance analysis and suggestion.
-Requirements: Output in VIETNAMESE. Keep it concise (1-2 paragraphs, max 3 sentences total). Use **bold** for product names and key remarks.`
+Based solely on these product names, predict the user's consumer personality, lifestyle archetype, hobbies, or mood. Provide a humorous, friendly psychological analysis. Do NOT give saving suggestions or financial advice.
+Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for product names and key personality traits.`
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
       if (_activeCatYear === 'all') {
-        triggerCategoryAIInsight(d.cs, d.ti, d.t, 'insight-categories-all');
+        triggerCategoryAIInsight(d.cs, d.ti, d.t, 'insight-categories-all', 'all');
       }
 
       // 4. Monthly insight for current active year

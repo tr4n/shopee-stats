@@ -19,7 +19,7 @@ window.clearCategorySelection = function() {
     renderInsightCard('insight-categories', computeCategoryInsights(currentCatData.cs, currentCatData.total));
     if (window.triggerCategoryAIInsight) {
       const cacheKey = `insight-categories-${currentCatData.year}`;
-      window.triggerCategoryAIInsight(currentCatData.cs, currentCatData.ti, currentCatData.total, cacheKey);
+      window.triggerCategoryAIInsight(currentCatData.cs, currentCatData.ti, currentCatData.total, cacheKey, currentCatData.year);
     }
   }
 };
