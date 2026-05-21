@@ -109,20 +109,24 @@ let chromeAISupportStatus = 'Đang kiểm tra...';
   try {
     if (typeof LanguageModel !== 'undefined') {
       const status = await LanguageModel.availability();
-      if (status === 'readily') {
+      if (status === 'readily' || status === 'available') {
         chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng)';
-      } else if (status === 'after-download') {
+      } else if (status === 'after-download' || status === 'downloadable') {
         chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model)';
+      } else if (status === 'downloading') {
+        chromeAISupportStatus = 'Có hỗ trợ (Đang tải model...)';
       } else {
         chromeAISupportStatus = `Không hỗ trợ (Trạng thái: ${status})`;
       }
     } else if (typeof ai !== 'undefined' && ai.languageModel) {
       const capabilities = await ai.languageModel.capabilities();
-      if (capabilities && capabilities.available !== 'no') {
-        if (capabilities.available === 'readily') {
+      if (capabilities && ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(capabilities.available)) {
+        if (capabilities.available === 'readily' || capabilities.available === 'available') {
           chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng - window.ai)';
-        } else if (capabilities.available === 'after-download') {
+        } else if (capabilities.available === 'after-download' || capabilities.available === 'downloadable') {
           chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model - window.ai)';
+        } else if (capabilities.available === 'downloading') {
+          chromeAISupportStatus = 'Có hỗ trợ (Đang tải model... - window.ai)';
         } else {
           chromeAISupportStatus = `Không hỗ trợ (window.ai: ${capabilities.available})`;
         }

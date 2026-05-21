@@ -34,7 +34,8 @@ async function getAIInsightSession() {
   if (typeof LanguageModel === 'undefined') return null;
   try {
     const status = await LanguageModel.availability();
-    if (status === 'unavailable') return null;
+    const isAvail = ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
+    if (!isAvail) return null;
     _aiInsightSession = await LanguageModel.create({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }]
     });
@@ -53,7 +54,7 @@ const _aiAvailabilityPromise = (async () => {
   if (typeof LanguageModel === 'undefined') return false;
   try {
     const status = await LanguageModel.availability();
-    return status !== 'unavailable';
+    return ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
   } catch (e) {
     return false;
   }

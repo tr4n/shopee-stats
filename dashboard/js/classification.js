@@ -95,7 +95,8 @@ async function getDashCatSession() {
   if (typeof LanguageModel === 'undefined') return null;
   try {
     const status = await LanguageModel.availability();
-    if (status === 'unavailable') return null;
+    const isAvail = ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
+    if (!isAvail) return null;
     await initializeCategories();
     const categoriesDesc = _categoriesData.categories.map(cat =>
       `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚 ]/g, '')}`
