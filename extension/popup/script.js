@@ -270,34 +270,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Build yearly stats
     const yd = {};
-    for (const [yr, ydata] of Object.entries(data.thongKeTheoNam || {})) {
+    for (const [yr, ydata] of Object.entries(data.yearlyStats || {})) {
       yd[yr] = {
-        t: Math.round(ydata.total.tongTien),
-        o: ydata.total.donHang,
-        ip: ydata.total.sanPham,
-        s: Math.round(Math.max(0, ydata.total.tienChuaGiam - ydata.total.tongTien)),
+        t: Math.round(ydata.total.totalSpent),
+        o: ydata.total.orderCount,
+        ip: ydata.total.itemCount,
+        s: Math.round(Math.max(0, ydata.total.rawSpent - ydata.total.totalSpent)),
         m: Object.fromEntries(
-          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.tongTien)])
+          Object.entries(ydata.months).map(([mo, md]) => [mo, Math.round(md.totalSpent)])
         )
       };
     }
 
-    const ps = data.thongKeTheoThang || {};
+    const ps = data.monthlyStats || {};
     const payload = {
       v: 2,
       ev: (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : '',
-      t: Math.round(data.tongtienhang),
-      o: data.tongDonHang,
-      s: Math.round(Math.max(0, data.tongTienTietKiem)),
-      ip: data.tongSanPhamDaMua,
+      t: Math.round(data.totalSpent),
+      o: data.totalOrders,
+      s: Math.round(Math.max(0, data.totalSaved)),
+      ip: data.totalItems,
       ts: Math.floor(Date.now() / 1000),
       yd,
       mi,
       ps: {
-        '1m': Math.round((ps['1_thang'] || {}).tongTien || 0),
-        '3m': Math.round((ps['3_thang'] || {}).tongTien || 0),
-        '6m': Math.round((ps['6_thang'] || {}).tongTien || 0),
-        '1y': Math.round((ps['1_nam'] || {}).tongTien || 0)
+        '1m': Math.round((ps['1_month'] || {}).totalSpent || 0),
+        '3m': Math.round((ps['3_months'] || {}).totalSpent || 0),
+        '6m': Math.round((ps['6_months'] || {}).totalSpent || 0),
+        '1y': Math.round((ps['1_year'] || {}).totalSpent || 0)
       },
       // Top 150 items — names pre-cleaned, dashboard classifies categories
       ti: (data.topItems || []).slice(0, 150).map(i => ({
@@ -512,17 +512,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderResults(data) {
     lastCompleteData = data;
 
-    totalSpentEl.textContent = pxgPrice(data.tongtienhang);
-    rankBadgeEl.textContent = getRankBadge(data.tongtienhang);
+    totalSpentEl.textContent = pxgPrice(data.totalSpent);
+    rankBadgeEl.textContent = getRankBadge(data.totalSpent);
 
-    renderTrendBadges(data.thongKeTheoNam);
-    renderPercentile(data.thongKeTheoNam);
+    renderTrendBadges(data.yearlyStats);
+    renderPercentile(data.yearlyStats);
 
     showState(stateResult);
   }
 
   // === Trend Badges ===
-  function renderTrendBadges(thongKeTheoNam) {
+  function renderTrendBadges(yearlyStats) {
     const now = new Date();
     const curYear = now.getFullYear();
     const curMonth = String(now.getMonth() + 1);
@@ -530,10 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevMonthYear = now.getMonth() === 0 ? curYear - 1 : curYear;
     const prevYear = curYear - 1;
 
-    const curMonthVal = thongKeTheoNam[curYear]?.months?.[curMonth]?.tongTien || 0;
-    const prevMonthVal = thongKeTheoNam[prevMonthYear]?.months?.[prevMonth]?.tongTien || 0;
-    const curYearVal = thongKeTheoNam[curYear]?.total?.tongTien || 0;
-    const prevYearVal = thongKeTheoNam[prevYear]?.total?.tongTien || 0;
+    const curMonthVal = yearlyStats[curYear]?.months?.[curMonth]?.totalSpent || 0;
+    const prevMonthVal = yearlyStats[prevMonthYear]?.months?.[prevMonth]?.totalSpent || 0;
+    const curYearVal = yearlyStats[curYear]?.total?.totalSpent || 0;
+    const prevYearVal = yearlyStats[prevYear]?.total?.totalSpent || 0;
 
     const badges = [];
     if (curMonthVal > 0 && prevMonthVal > 0) {
@@ -556,9 +556,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === Percentile ===
-  function renderPercentile(thongKeTheoNam) {
+  function renderPercentile(yearlyStats) {
     const curYear = new Date().getFullYear();
-    const annualSpent = thongKeTheoNam[curYear]?.total?.tongTien || 0;
+    const annualSpent = yearlyStats[curYear]?.total?.totalSpent || 0;
     if (annualSpent > 0) {
       const beat = getSpendingPercentile(annualSpent);
       percentileTextEl.textContent = `Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN (ước tính ${curYear})`;

@@ -103,10 +103,10 @@
   }
 
   function addToPeriod(periods, key, o) {
-    periods[key].tongTien += o.finalCost;
-    periods[key].donHang += 1;
-    periods[key].sanPham += o.itemCount;
-    periods[key].tienChuaGiam += o.rawCost;
+    periods[key].totalSpent += o.finalCost;
+    periods[key].orderCount += 1;
+    periods[key].itemCount += o.itemCount;
+    periods[key].rawSpent += o.rawCost;
   }
 
   function computeStats(orders) {
@@ -121,10 +121,10 @@
     const ref1Y = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
 
     const periods = {
-      '1_thang': { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 },
-      '3_thang': { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 },
-      '6_thang': { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 },
-      '1_nam':   { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 }
+      '1_month': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '3_months': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '6_months': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '1_year':   { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 }
     };
     const byYear = {};
 
@@ -138,42 +138,42 @@
         const yr = d.getFullYear();
         const mo = String(d.getMonth() + 1);
 
-        if (d >= ref1M) addToPeriod(periods, '1_thang', o);
-        if (d >= ref3M) addToPeriod(periods, '3_thang', o);
-        if (d >= ref6M) addToPeriod(periods, '6_thang', o);
-        if (d >= ref1Y) addToPeriod(periods, '1_nam', o);
+        if (d >= ref1M) addToPeriod(periods, '1_month', o);
+        if (d >= ref3M) addToPeriod(periods, '3_months', o);
+        if (d >= ref6M) addToPeriod(periods, '6_months', o);
+        if (d >= ref1Y) addToPeriod(periods, '1_year', o);
 
         if (!byYear[yr]) {
           byYear[yr] = {
-            total: { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 },
+            total: { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
             months: {}
           };
         }
         const yt = byYear[yr].total;
-        yt.tongTien += o.finalCost;
-        yt.donHang += 1;
-        yt.sanPham += o.itemCount;
-        yt.tienChuaGiam += o.rawCost;
+        yt.totalSpent += o.finalCost;
+        yt.orderCount += 1;
+        yt.itemCount += o.itemCount;
+        yt.rawSpent += o.rawCost;
 
         if (!byYear[yr].months[mo]) {
-          byYear[yr].months[mo] = { tongTien: 0, donHang: 0, sanPham: 0, tienChuaGiam: 0 };
+          byYear[yr].months[mo] = { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 };
         }
         const mt = byYear[yr].months[mo];
-        mt.tongTien += o.finalCost;
-        mt.donHang += 1;
-        mt.sanPham += o.itemCount;
-        mt.tienChuaGiam += o.rawCost;
+        mt.totalSpent += o.finalCost;
+        mt.orderCount += 1;
+        mt.itemCount += o.itemCount;
+        mt.rawSpent += o.rawCost;
       }
     }
 
     return {
-      tongDonHang: orders.length,
-      tongtienhang: totalSpentAmt,
-      tongTienTietKiem: totalOriginalAmt - totalSpentAmt,
-      tongSanPhamDaMua: totalItemCount,
-      thongKeTheoThang: periods,
-      thongKeTheoNam: byYear,
-      tongtienhangchuagiam: totalOriginalAmt
+      totalOrders: orders.length,
+      totalSpent: totalSpentAmt,
+      totalSaved: totalOriginalAmt - totalSpentAmt,
+      totalItems: totalItemCount,
+      monthlyStats: periods,
+      yearlyStats: byYear,
+      totalRawSpent: totalOriginalAmt
     };
   }
 
