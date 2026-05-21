@@ -114,7 +114,6 @@
     let totalSpentAmt = 0;
     let totalOriginalAmt = 0;
     let totalItemCount = 0;
-    let totalShippingFee = 0;
 
     const now = new Date();
     const ref1M = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
@@ -134,7 +133,6 @@
       totalSpentAmt += o.finalCost;
       totalOriginalAmt += o.rawCost;
       totalItemCount += o.itemCount;
-      totalShippingFee += (o.shippingFee || 0);
 
       if (o.ts) {
         const d = new Date(o.ts * 1000);
@@ -174,7 +172,6 @@
       tongtienhang: totalSpentAmt,
       tongTienTietKiem: totalOriginalAmt - totalSpentAmt,
       tongSanPhamDaMua: totalItemCount,
-      tongPhiShip: totalShippingFee,
       thongKeTheoThang: periods,
       thongKeTheoNam: byYear,
       tongtienhangchuagiam: totalOriginalAmt
@@ -259,7 +256,6 @@
 
           const infoCard = order.info_card || {};
           const finalCost = (infoCard.final_total || 0) / 100000;
-          const shippingFee = (infoCard.shipping_fee || infoCard.actual_shipping_cost || 0) / 100000;
 
           let rawCost = 0;
           let itemCount = 0;
@@ -314,7 +310,7 @@
             }
           }
 
-          newMiniOrders.push({ ts: rawTs, finalCost, rawCost, itemCount, shippingFee, il: orderItemList });
+          newMiniOrders.push({ ts: rawTs, finalCost, rawCost, itemCount, il: orderItemList });
         }
 
         offsetIndex += LIMIT;

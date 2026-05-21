@@ -1319,3 +1319,122 @@ body {
 .support-note strong {
   color: var(--text);
 }
+
+.support-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.support-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.support-action-btn:hover {
+  background: var(--border);
+  border-color: var(--muted);
+  transform: translateY(-1px);
+}
+
+.support-action-btn:active {
+  transform: scale(0.98);
+}
+
+.support-action-btn--primary {
+  background: linear-gradient(135deg, hsl(170, 60%, 35%), hsl(170, 60%, 28%));
+  border-color: transparent;
+  color: #fff;
+}
+
+.support-action-btn--primary:hover {
+  background: linear-gradient(135deg, hsl(170, 60%, 40%), hsl(170, 60%, 33%));
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Oversize notice — shown when data is too large for URL prefill */
+.support-oversize-notice {
+  background: hsl(35, 80%, 97%);
+  border: 1.5px solid hsl(35, 70%, 80%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+  text-align: center;
+}
+
+[data-theme="dark"] .support-oversize-notice {
+  background: hsl(35, 30%, 15%);
+  border-color: hsl(35, 40%, 35%);
+}
+
+.support-oversize-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.support-oversize-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: hsl(35, 60%, 30%);
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .support-oversize-title {
+  color: hsl(35, 70%, 65%);
+}
+
+.support-oversize-body {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.support-oversize-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.support-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.support-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: hsl(170, 55%, 35%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.support-oversize-actions {
+  display: flex;
+  gap: 8px;
+}

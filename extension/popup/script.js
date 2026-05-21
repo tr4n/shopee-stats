@@ -291,13 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ps = data.thongKeTheoThang || {};
     const payload = {
-      v: 1,
+      v: 2,
       ev: (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : '',
       t: Math.round(data.tongtienhang),
       o: data.tongDonHang,
       s: Math.round(Math.max(0, data.tongTienTietKiem)),
       ip: data.tongSanPhamDaMua,
-      ship: Math.round(data.tongPhiShip || 0),
       ts: Math.floor(Date.now() / 1000),
       yd,
       mi,
@@ -315,6 +314,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }))
     };
 
+    // Use LZString compression (v2 format: ?lz=)
+    // Falls back to Base64 (#d=) if LZString is not available
+    try {
+      if (typeof LZString !== 'undefined') {
+        const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
+        return `${DASHBOARD_BASE}/?lz=${compressed}`;
+      }
+    } catch (e) {
+      console.warn('[Popup] LZString compression failed, falling back to Base64:', e);
+    }
+    // Fallback: Base64 (legacy format)
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
