@@ -121,7 +121,7 @@ async function classifyKharItems(ti, d) {
 
   // Apply cached overrides first (fastest path)
   for (const item of ti) {
-    if (item.cat && item.cat !== '🏷️ Khác') continue;
+    if (!isInvalidCat(item.cat)) continue;
     const key = item.n.toLowerCase().substring(0, 120);
     if (_dashCache.cats[key]) item.cat = _dashCache.cats[key];
   }
@@ -130,7 +130,7 @@ async function classifyKharItems(ti, d) {
   const toClassify = [];
   const seen = new Set();
   for (const item of ti) {
-    if (item.cat !== '🏷️ Khác') continue;
+    if (!isInvalidCat(item.cat)) continue;
     const key = item.n.toLowerCase().substring(0, 120);
     if (!seen.has(key)) {
       seen.add(key);
@@ -174,7 +174,7 @@ async function classifyKharItems(ti, d) {
         if (!resolved) continue;
         const { key } = batch[j];
         for (const item of ti) {
-          if (item.cat === '🏷️ Khác' && item.n.toLowerCase().substring(0, 120) === key) {
+          if (isInvalidCat(item.cat) && item.n.toLowerCase().substring(0, 120) === key) {
             item.cat = resolved;
             batchPatched++;
           }
@@ -195,11 +195,21 @@ async function classifyKharItems(ti, d) {
   }
 
   if (totalPatched > 0) {
+    // Clear cached AI insights since categorization changed
+    if (_dashCache && _dashCache.insights) {
+      _dashCache.insights = {};
+    }
     saveDashCache();
+    if (window.categorizeMiItems) {
+      window.categorizeMiItems(d, ti);
+    }
     d.cs = buildCsFromTi(ti);
     requestAnimationFrame(() => {
       renderTopItems(ti);
       renderCategories(d.cs, ti);
+      if (window.runAIInsightsNarrative) {
+        window.runAIInsightsNarrative(d);
+      }
     });
     console.log(`[Dashboard] AI classified ${totalPatched} items`);
   }

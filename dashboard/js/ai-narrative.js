@@ -37,7 +37,13 @@ async function getAIInsightSession() {
     const isAvail = ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
     if (!isAvail) return null;
     _aiInsightSession = await LanguageModel.create({
-      initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }]
+      initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
+      expectedInputs: [
+        { type: "text", languages: ["en", "vi"] }
+      ],
+      expectedOutputs: [
+        { type: "text", languages: ["vi"] }
+      ]
     });
     return _aiInsightSession;
   } catch (e) {
@@ -115,7 +121,7 @@ async function _executeAIInsight(cardId) {
   if (!session) { aiEl.remove(); return; }
 
   try {
-    const fullPrompt = `DỮ LIỆU CHI TIÊU:\n${args.context}\n\nYÊU CẦU: ${args.specificPrompt}`;
+    const fullPrompt = `SPENDING DATA:\n${args.context}\n\nREQUEST: ${args.specificPrompt}`;
     const result = await session.prompt(fullPrompt);
     if (result && result.trim()) {
       const text = result.trim();

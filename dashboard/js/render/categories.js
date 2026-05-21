@@ -7,6 +7,23 @@
 let catChart = null;
 let currentCatData = null;
 
+window.currentCategorySelection = null;
+
+window.clearCategorySelection = function() {
+  window.currentCategorySelection = null;
+  const card = document.getElementById('card-cat-items');
+  if (card) card.style.display = 'none';
+  document.querySelectorAll('#cat-bars .cat-row').forEach(r => r.classList.remove('cat-row-active'));
+  
+  if (currentCatData) {
+    renderInsightCard('insight-categories', computeCategoryInsights(currentCatData.cs, currentCatData.total));
+    if (window.triggerCategoryAIInsight) {
+      const cacheKey = `insight-categories-${currentCatData.year}`;
+      window.triggerCategoryAIInsight(currentCatData.cs, currentCatData.ti, currentCatData.total, cacheKey);
+    }
+  }
+};
+
 function showCatItems(catName, ti) {
   const card = document.getElementById('card-cat-items');
   const title = document.getElementById('cat-items-title');
@@ -27,7 +44,10 @@ function showCatItems(catName, ti) {
     r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
   });
 
-  title.textContent = catName + ' — Top Sản Phẩm';
+  title.innerHTML = `
+    <span>${escHtml(catName)} — Top Sản Phẩm</span>
+    <button class="clear-sel-btn" onclick="window.clearCategorySelection()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; margin-left:8px; vertical-align:middle;" title="Bỏ chọn">✕</button>
+  `;
   card.style.display = 'block';
 
   if (items.length === 0) {
@@ -50,12 +70,25 @@ function showCatItems(catName, ti) {
         <div class="top-val">${fmtVND(item.s)}</div>
       </div>`;
   }).join('');
+
+  if (currentCatData) {
+    const categoryStats = currentCatData.cs.find(c => resolveCatLabel(c) === catName || c.name === catName);
+    if (categoryStats && window.computeSingleCategoryInsights) {
+      const catTotal = categoryStats.s;
+      const catCount = categoryStats.c;
+      renderInsightCard('insight-categories', window.computeSingleCategoryInsights(catName, catTotal, catCount, items, currentCatData.total));
+    }
+    if (window.triggerSingleCategoryAIInsight) {
+      window.triggerSingleCategoryAIInsight(currentCatData.cs, currentCatData.ti, currentCatData.total, catName, currentCatData.year, currentCatData.total);
+    }
+  }
+
   reveal(card);
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function renderCategories(cs, ti) {
-  currentCatData = { cs, ti };
+function renderCategories(cs, ti, total, year) {
+  currentCatData = { cs, ti, total: total || (window.currentDashData ? window.currentDashData.t : 0), year: year || 'all' };
   if (!cs || cs.length === 0) {
     document.getElementById('cat-bars').innerHTML =
       '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
@@ -76,7 +109,15 @@ function renderCategories(cs, ti) {
   }).join('');
 
   bars.querySelectorAll('.cat-row').forEach(row => {
-    row.addEventListener('click', () => showCatItems(row.getAttribute('data-cat'), ti));
+    row.addEventListener('click', () => {
+      const cat = row.getAttribute('data-cat');
+      if (window.currentCategorySelection === cat) {
+        window.clearCategorySelection();
+      } else {
+        window.currentCategorySelection = cat;
+        showCatItems(cat, ti);
+      }
+    });
   });
 
   // Animate bars on scroll into view

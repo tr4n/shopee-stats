@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!monthMap[ym]) monthMap[ym] = {};
       for (const item of (order.il || [])) {
         if (!item.i) continue;
-        if (!monthMap[ym][item.i]) monthMap[ym][item.i] = { n: item.n, s: 0, c: 0 };
+        if (!monthMap[ym][item.i]) monthMap[ym][item.i] = { n: item.n, s: 0, c: 0, cat: item.cat };
         monthMap[ym][item.i].s += item.s;
         monthMap[ym][item.i].c += item.c;
       }
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mi[ym] = Object.values(map)
         .sort((a, b) => b.s - a.s)
         .slice(0, 20)
-        .map(x => ({ n: compactItemName(x.n).substring(0, 40), s: Math.round(x.s), c: x.c }));
+        .map(x => ({ n: compactItemName(x.n).substring(0, 40), s: Math.round(x.s), c: x.c, cat: x.cat }));
     }
 
     // Build yearly stats
@@ -394,7 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ti: (data.topItems || []).slice(0, 150).map(i => ({
         n: compactItemName(i.name).substring(0, 45),
         s: Math.round(i.spent),
-        c: i.count
+        c: i.count,
+        cat: i.cat
       }))
     };
 

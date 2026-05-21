@@ -105,15 +105,22 @@ function renderYearlyChart(yd, d) {
       }]
     },
     options: {
-      ...CHART_CFG,
       onClick: (e, elements) => {
         if (elements && elements.length > 0) {
           const index = elements[0].index;
           const year = years[index];
-          showYearlyTopItems(year, d);
-          const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
-          yearlyChart.data.datasets[0].backgroundColor = newColors;
-          yearlyChart.update();
+          if (window.currentYearSelection === year) {
+            window.clearYearlySelection(d);
+          } else {
+            window.currentYearSelection = year;
+            showYearlyTopItems(year, d);
+            const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
+            yearlyChart.data.datasets[0].backgroundColor = newColors;
+            yearlyChart.update();
+            if (window.triggerYearlyAIInsight) {
+              window.triggerYearlyAIInsight(d, year);
+            }
+          }
         }
       },
       plugins: {
@@ -134,7 +141,10 @@ function renderYearlyChart(yd, d) {
 function showYearlyTopItems(year, d) {
   const card = document.getElementById('card-yearly-items');
   const tbody = document.querySelector('#yearly-items-table tbody');
-  document.getElementById('yearly-items-title').textContent = `🛒 Top Sản Phẩm Năm ${year}`;
+  document.getElementById('yearly-items-title').innerHTML = `
+    <span>🛒 Top Sản Phẩm Năm ${year}</span>
+    <button class="clear-sel-btn" onclick="window.clearYearlySelection(window.currentDashData)" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; margin-left:8px; vertical-align:middle;" title="Bỏ chọn">✕</button>
+  `;
 
   if (!d || !d.mi) return;
 

@@ -345,7 +345,7 @@
         for (const item of (order.il || [])) {
           const uId = item.i || item.n;
           if (!allItemAggr[uId]) {
-            allItemAggr[uId] = { name: item.n, spent: 0, count: 0 };
+            allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat };
           }
           allItemAggr[uId].spent += item.s;
           allItemAggr[uId].count += item.c;

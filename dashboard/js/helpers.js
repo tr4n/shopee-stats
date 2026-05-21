@@ -84,9 +84,26 @@ const LEGACY_CAT_NAMES = {
 };
 
 function resolveCatLabel(c) {
-  if (c.name) return c.name;
+  if (c.name) {
+    if (!isNaN(Number(c.name)) && LEGACY_CAT_NAMES[c.name]) {
+      return LEGACY_CAT_NAMES[c.name];
+    }
+    if (!isNaN(Number(c.name))) {
+      return 'Danh mục #' + c.name;
+    }
+    return c.name;
+  }
   if (c.id) return LEGACY_CAT_NAMES[c.id] || 'Danh mục #' + c.id;
   return 'Khác';
+}
+
+function isInvalidCat(cat) {
+  if (!cat || cat === '🏷️ Khác' || cat === 'Khác') return true;
+  if (!isNaN(Number(cat))) {
+    if (LEGACY_CAT_NAMES[cat]) return false;
+    return true;
+  }
+  return false;
 }
 
 const CHART_CFG = {

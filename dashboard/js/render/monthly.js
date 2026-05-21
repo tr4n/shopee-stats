@@ -7,11 +7,11 @@
 
 let monthlyChart = null;
 let currentMonthlyItems = [];
-let currentMonthlySelection = { year: String(new Date().getFullYear()), month: null };
+window.currentMonthlySelection = { year: String(new Date().getFullYear()), month: null };
 
 function renderMonthly(yd, year, d) {
-  currentMonthlySelection.year = String(year);
-  currentMonthlySelection.month = null;
+  window.currentMonthlySelection.year = String(year);
+  window.currentMonthlySelection.month = null;
   const ydata = yd[year];
   if (!ydata) return;
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
@@ -49,7 +49,11 @@ function renderMonthly(yd, year, d) {
         if (elements.length > 0) {
           const index = elements[0].index;
           const monthStr = months[index];
-          showMonthlyItems(d, year, monthStr);
+          if (window.currentMonthlySelection.month === monthStr) {
+            window.clearMonthlySelection(d);
+          } else {
+            showMonthlyItems(d, year, monthStr);
+          }
         }
       }
     }
@@ -58,18 +62,28 @@ function renderMonthly(yd, year, d) {
 }
 
 function showMonthlyItems(d, year, monthStr) {
-  currentMonthlySelection = { year: String(year), month: monthStr };
+  window.currentMonthlySelection = { year: String(year), month: monthStr };
   const ym = year + '-' + monthStr;
   currentMonthlyItems = (d.mi && d.mi[ym]) || [];
 
-  document.getElementById('monthly-items-title').textContent =
-    `🏆 Top Sản Phẩm Tháng ${monthStr}/${year}`;
+  document.getElementById('monthly-items-title').innerHTML = `
+    <span>🏆 Top Sản Phẩm Tháng ${monthStr}/${year}</span>
+    <button class="clear-sel-btn" onclick="window.clearMonthlySelection(window.currentDashData)" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; margin-left:8px; vertical-align:middle;" title="Bỏ chọn">✕</button>
+  `;
 
   const container = document.getElementById('card-monthly-items');
   container.style.display = 'block';
   reveal(container);
 
   renderMonthlyItemsList();
+  
+  if (window.computeSingleMonthInsights) {
+    renderInsightCard('insight-monthly', window.computeSingleMonthInsights(d, year, monthStr));
+  }
+  if (window.triggerSingleMonthAIInsight) {
+    window.triggerSingleMonthAIInsight(d, year, monthStr);
+  }
+  
   container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
