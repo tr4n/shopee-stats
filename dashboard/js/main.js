@@ -213,12 +213,23 @@ function setupSupportButton(d) {
       const origText = downloadRawBtn.innerHTML;
       downloadRawBtn.innerHTML = '<span>⏳ Đang chuẩn bị tải...</span>';
       try {
-        const jsonStr = JSON.stringify(d, null, 2);
-        const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
+        const jsonStr = JSON.stringify(d);
+        let compressed = '';
+        if (typeof LZString !== 'undefined') {
+          compressed = LZString.compressToEncodedURIComponent(jsonStr);
+        } else {
+          // Fallback: Base64
+          const bytes = new TextEncoder().encode(jsonStr);
+          let bin = '';
+          for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+          compressed = btoa(bin);
+        }
+
+        const blob = new Blob([compressed], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `shopee-stats-raw-${d.ts || Date.now()}.txt`;
+        link.download = `shopee-stats-compressed-${d.ts || Date.now()}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
