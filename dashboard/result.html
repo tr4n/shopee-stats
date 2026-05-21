@@ -255,8 +255,16 @@
 
           <div class="support-field">
             <label class="support-label">
+              Email liên hệ của bạn
+              <span class="support-hint">(tùy chọn)</span>
+            </label>
+            <input type="email" id="support-email" class="support-textarea" style="min-height: auto; padding: 10px 12px;" placeholder="Ví dụ: email-cua-ban@gmail.com">
+          </div>
+
+          <div class="support-field">
+            <label class="support-label">
               Mô tả vấn đề gặp phải
-              <span class="support-required">*</span>
+              <span class="support-hint">(tùy chọn)</span>
             </label>
             <textarea id="support-desc" class="support-textarea"
               placeholder="Ví dụ: Biểu đồ không hiển thị, dữ liệu bị thiếu tháng, extension báo lỗi khi quét..."></textarea>
@@ -283,10 +291,12 @@
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
             </svg>
-            Mở ứng dụng email để gửi
+            Gửi yêu cầu hỗ trợ
           </button>
+          
+          <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
 
-          <p class="support-note" id="support-note"></p>
+          <p class="support-note" id="support-note" style="margin-top: 10px;"></p>
 
         </div>
       </div>

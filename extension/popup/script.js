@@ -292,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ps = data.thongKeTheoThang || {};
     const payload = {
       v: 1,
+      ev: (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : '',
       t: Math.round(data.tongtienhang),
       o: data.tongDonHang,
       s: Math.round(Math.max(0, data.tongTienTietKiem)),

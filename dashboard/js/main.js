@@ -103,6 +103,40 @@ const _hasRawDataParam = (function () {
   return false;
 })();
 
+/* ── Chrome AI Support Check ─────────────────── */
+let chromeAISupportStatus = 'Đang kiểm tra...';
+(async () => {
+  try {
+    if (typeof LanguageModel !== 'undefined') {
+      const status = await LanguageModel.availability();
+      if (status === 'readily') {
+        chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng)';
+      } else if (status === 'after-download') {
+        chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model)';
+      } else {
+        chromeAISupportStatus = `Không hỗ trợ (Trạng thái: ${status})`;
+      }
+    } else if (typeof ai !== 'undefined' && ai.languageModel) {
+      const capabilities = await ai.languageModel.capabilities();
+      if (capabilities && capabilities.available !== 'no') {
+        if (capabilities.available === 'readily') {
+          chromeAISupportStatus = 'Có hỗ trợ (Sẵn sàng sử dụng - window.ai)';
+        } else if (capabilities.available === 'after-download') {
+          chromeAISupportStatus = 'Có hỗ trợ (Cần tải thêm model - window.ai)';
+        } else {
+          chromeAISupportStatus = `Không hỗ trợ (window.ai: ${capabilities.available})`;
+        }
+      } else {
+        chromeAISupportStatus = 'Không hỗ trợ (window.ai không khả dụng)';
+      }
+    } else {
+      chromeAISupportStatus = 'Không hỗ trợ (Trình duyệt không có API Chrome AI)';
+    }
+  } catch (e) {
+    chromeAISupportStatus = `Không hỗ trợ (Lỗi: ${e.message})`;
+  }
+})();
+
 /* ── Support Modal ───────────────────────────── */
 function setupSupportButton(d) {
   const btn = document.getElementById('btn-support');
@@ -110,9 +144,14 @@ function setupSupportButton(d) {
   const closeBtn = document.getElementById('btn-close-support');
   const sendBtn = document.getElementById('btn-send-support');
   const descEl = document.getElementById('support-desc');
+  const emailEl = document.getElementById('support-email');
   const noteEl = document.getElementById('support-note');
 
   if (!btn || !modal) return;
+
+  if (emailEl) {
+    emailEl.value = localStorage.getItem('support_email') || '';
+  }
 
   function getDeviceInfo() {
     const ua = navigator.userAgent;
@@ -138,6 +177,16 @@ function setupSupportButton(d) {
     else if (/iPhone OS ([\d_]+)/.test(ua)) os = 'iOS ' + ua.match(/iPhone OS ([\d_]+)/)[1].replace(/_/g, '.');
     else if (/Linux/.test(ua)) os = 'Linux';
 
+    let extVersion = 'Không rõ (Chạy trực tiếp)';
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
+        extVersion = chrome.runtime.getManifest().version;
+      }
+    } catch (e) { /* noop */ }
+    if ((extVersion.includes('Không rõ') || !extVersion) && d && d.ev) {
+      extVersion = d.ev;
+    }
+
     return {
       browser: `${browser} ${bVersion}`.trim(),
       os,
@@ -146,6 +195,8 @@ function setupSupportButton(d) {
       viewport: `${window.innerWidth}×${window.innerHeight}`,
       dataDate: d?.ts ? fmtDate(d.ts) : '—',
       summary: d ? `${fmtVND(d.t)} · ${fmtNum(d.o)} đơn` : '—',
+      chromeAI: chromeAISupportStatus,
+      extVersion: extVersion,
     };
   }
 
@@ -164,6 +215,11 @@ function setupSupportButton(d) {
         ti: (d.ti || []).slice(0, 10).map(i => ({ n: i.n, s: i.s, c: i.c })),
         cs: (d.cs || []).slice(0, 5).map(c => ({ name: c.name, s: c.s, c: c.c })),
       };
+      // Include extension version in data payload too, if we have it
+      const info = getDeviceInfo();
+      if (info.extVersion && !info.extVersion.includes('Không rõ')) {
+        payload.ev = info.extVersion;
+      }
       const json = JSON.stringify(payload);
       const bytes = new TextEncoder().encode(json);
       let bin = '';
@@ -173,6 +229,7 @@ function setupSupportButton(d) {
       return '';
     }
   }
+
 
   btn.addEventListener('click', () => {
     const info = getDeviceInfo();
@@ -185,57 +242,91 @@ function setupSupportButton(d) {
       `Viewport    : ${escHtml(info.viewport)}`,
       `Dữ liệu tại : ${escHtml(info.dataDate)}`,
       `Tóm tắt     : ${escHtml(info.summary)}`,
+      `Chrome AI   : ${escHtml(info.chromeAI)}`,
+      `Phiên bản Ext: ${escHtml(info.extVersion)}`,
     ].join('<br>');
 
     const previewEl = document.getElementById('support-data-preview');
-    previewEl.textContent = b64
-      ? b64.substring(0, 300) + (b64.length > 300 ? ' …' : '')
-      : '(Không có dữ liệu)';
+    if (previewEl) {
+      previewEl.textContent = b64
+        ? b64.substring(0, 300) + (b64.length > 300 ? ' …' : '')
+        : '(Không có dữ liệu)';
+    }
 
-    const email = window.APP_CONFIG?.email || '';
-    noteEl.innerHTML = email
-      ? `Email sẽ gửi tới <strong>${escHtml(email)}</strong> — nội dung đã soạn sẵn, bạn có thể xem lại trước khi nhấn Gửi.`
-      : 'Không tìm thấy địa chỉ email hỗ trợ.';
+    noteEl.innerHTML = 'Yêu cầu hỗ trợ sẽ được điền sẵn vào <strong>Google Form</strong>. Bạn chỉ cần nhấn nút <strong>Gửi</strong> ở trang mới để hoàn tất.';
 
     modal.classList.add('active');
-    setTimeout(() => descEl.focus(), 150);
+    setTimeout(() => {
+      if (emailEl && !emailEl.value) {
+        emailEl.focus();
+      } else {
+        descEl.focus();
+      }
+    }, 150);
   });
 
   closeBtn.addEventListener('click', () => modal.classList.remove('active'));
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
   sendBtn.addEventListener('click', () => {
-    const info = getDeviceInfo();
-    const b64 = buildSupportPayload();
-    const desc = descEl.value.trim() || '(Chưa nhập mô tả)';
-    const email = window.APP_CONFIG?.email || '';
+    const userEmail = emailEl ? emailEl.value.trim() : '';
+    const desc = descEl ? descEl.value.trim() : '';
+    const statusEl = document.getElementById('support-status');
 
-    if (!email) {
-      noteEl.textContent = '⚠️ Không tìm thấy địa chỉ email hỗ trợ trong cấu hình.';
+    if (!statusEl) return;
+
+    // Validate email format if provided
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (userEmail && !emailRegex.test(userEmail)) {
+      statusEl.innerHTML = '<span style="color: var(--primary); font-weight: bold;">⚠️ Vui lòng nhập địa chỉ email liên hệ hợp lệ hoặc để trống.</span>';
+      if (emailEl) emailEl.focus();
       return;
     }
 
-    const subject = `[Shopee Analytics] Yêu cầu hỗ trợ — ${info.browser} / ${info.os}`;
-    const body = [
-      'MÔ TẢ VẤN ĐỀ:',
-      desc,
-      '',
-      '─────────────────────────────────────',
-      'THÔNG TIN THIẾT BỊ:',
-      `• Trình duyệt : ${info.browser}`,
-      `• Hệ điều hành: ${info.os}`,
-      `• Màn hình    : ${info.screen} (DPR ${info.dpr})`,
-      `• Viewport    : ${info.viewport}`,
-      `• Dữ liệu tại : ${info.dataDate}`,
-      `• Tóm tắt     : ${info.summary}`,
-      '',
-      '─────────────────────────────────────',
-      'DỮ LIỆU (BASE64):',
-      b64 || '(không có)',
+    statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang chuyển hướng đến Google Form đã điền sẵn...</span>';
+
+    const info = getDeviceInfo();
+    const b64 = buildSupportPayload();
+    
+    const deviceInfoStr = [
+      `Trình duyệt : ${info.browser}`,
+      `Hệ điều hành: ${info.os}`,
+      `Màn hình    : ${info.screen} (DPR ${info.dpr})`,
+      `Viewport    : ${info.viewport}`,
+      `Dữ liệu tại : ${info.dataDate}`,
+      `Tóm tắt     : ${info.summary}`,
+      `Chrome AI   : ${info.chromeAI}`,
+      `Phiên bản Ext: ${info.extVersion}`,
     ].join('\n');
 
-    const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
+    // Construct pre-filled Google Form URL
+    const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
+    const formUrl = `${baseUrl}` +
+      `&entry.1189199588=${encodeURIComponent(userEmail)}` +
+      `&entry.1848321568=${encodeURIComponent(desc)}` +
+      `&entry.322741036=${encodeURIComponent(deviceInfoStr)}` +
+      `&entry.825360=${encodeURIComponent(b64 || '')}`;
+
+    // Save email for next time
+    if (userEmail) {
+      localStorage.setItem('support_email', userEmail);
+    }
+
+    // Open pre-filled Google Form in new tab
+    window.open(formUrl, '_blank');
+
+    // Clear description
+    if (descEl) descEl.value = '';
+
+    // Show success message and close modal after short delay
+    setTimeout(() => {
+      statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Vui lòng nhấn "Gửi" trên trang Google Form vừa mở.</span>';
+    }, 1000);
+
+    setTimeout(() => {
+      modal.classList.remove('active');
+      statusEl.innerHTML = '';
+    }, 3200);
   });
 }
 
@@ -463,8 +554,11 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
           const k40 = item.n.toLowerCase().substring(0, 40);
           if (!map[k]) {
             map[k] = { n: item.n, s: 0, c: 0 };
+            // 0. Use item.cat if already present in d.mi
+            if (item.cat && item.cat !== '🏷️ Khác') {
+              map[k].cat = item.cat;
             // 1. Prefer tiItems classification (matched on 40-char prefix)
-            if (catLookup[k40]) {
+            } else if (catLookup[k40]) {
               map[k].cat = catLookup[k40];
             // 2. Fallback to cache (try both full key and 40-char prefix)
             } else if (_dashCache.cats[k] || _dashCache.cats[k40]) {
@@ -480,6 +574,35 @@ Requirements: Output in VIETNAMESE. Write in 2 clear paragraphs. Use **bold** fo
         }
       }
       return Object.values(map).sort((a, b) => b.s - a.s);
+    }
+
+    function categorizeMiItems(d, tiItems) {
+      if (!d.mi) return;
+      const catLookup = {};
+      for (const item of (tiItems || [])) {
+        if (item.cat && item.cat !== '🏷️ Khác') {
+          const k = item.n.toLowerCase().substring(0, 40);
+          catLookup[k] = item.cat;
+        }
+      }
+
+      for (const key of Object.keys(d.mi)) {
+        for (const item of (d.mi[key] || [])) {
+          if (item.cat && item.cat !== '🏷️ Khác') continue;
+
+          const k = item.n.toLowerCase().substring(0, 120);
+          const k40 = item.n.toLowerCase().substring(0, 40);
+
+          if (catLookup[k40]) {
+            item.cat = catLookup[k40];
+          } else if (_dashCache.cats[k] || _dashCache.cats[k40]) {
+            item.cat = _dashCache.cats[k] || _dashCache.cats[k40];
+          } else {
+            const kwCat = classifyByNameSync(item.n);
+            item.cat = kwCat || '🏷️ Khác';
+          }
+        }
+      }
     }
 
     function triggerCategoryAIInsight(cs, ti, total, cacheKey) {
@@ -626,6 +749,9 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
     }
 
     async function initDashboard() {
+      // Load categories first so keyword classification is ready!
+      await initializeCategories();
+
       // Fallback: if ti is absent from the export, derive it by aggregating mi (monthly items)
       if (!d.ti || !d.ti.length) {
         const miMap = {};
@@ -654,6 +780,9 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
       for (const item of tiItems) {
         if (!item.cat) item.cat = '🏷️ Khác';
       }
+
+      // 2b. Categorize mi items with whatever is currently available (cached / keyword)
+      categorizeMiItems(d, tiItems);
 
       // 3. Build initial catStats from classified ti
       d.cs = buildCsFromTi(tiItems);
@@ -744,6 +873,7 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
 
       // 7. Categorization is now 100% finished — update final state
       _categorizationFinished = true;
+      categorizeMiItems(d, tiItems);
       d.cs = buildCsFromTi(tiItems);
 
       // Persist final classified data so next load skips all classification steps
