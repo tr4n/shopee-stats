@@ -39,10 +39,10 @@ async function getAIInsightSession() {
     _aiInsightSession = await LanguageModel.create({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
       expectedInputs: [
-        { type: "text", languages: ["en", "vi"] }
+        { type: "text", languages: ["en"] }
       ],
       expectedOutputs: [
-        { type: "text", languages: ["vi"] }
+        { type: "text", languages: ["en"] }
       ]
     });
     return _aiInsightSession;
