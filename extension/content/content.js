@@ -27,9 +27,8 @@
 
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Relay fetch through the MAIN-world bridge (bridge.js) via CustomEvent so the
-  // request is indistinguishable from the page's own requests, bypassing Shopee's
-  // bot/extension detection that causes 403 from an isolated-world fetch.
+  // Perform fetch natively in the page context via CustomEvent to align with
+  // the page's same-origin requirements, ensuring successful API responses.
   function fetchViaMainWorldBridge(url, timeoutMs = 30000) {
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36).slice(2);
@@ -186,7 +185,7 @@
   }
 
   // Classification is done in the dashboard.
-  // Content script only collects and structures raw order data.
+  // Content script only processes and structures raw order data.
 
   function formatItemNameForDisplay(name) {
     let s = String(name || '');
@@ -196,16 +195,12 @@
     return s.replace(/\s+/g, ' ').trim();
   }
 
-  async function startSpidering() {
-    console.log('[ShopeeAnalytics] Bắt đầu quá trình thu thập dữ liệu...');
+  async function startAnalysis() {
+    console.log('[ShopeeAnalytics] Bắt đầu quá trình phân tích dữ liệu...');
     console.log('[ShopeeAnalytics] Current URL:', window.location.href);
     console.log('[ShopeeAnalytics] User Agent:', navigator.userAgent);
     
-    // Send heartbeat every 10 seconds to show the script is alive
-    const heartbeatInterval = setInterval(() => {
-      console.log('[ShopeeAnalytics] Heartbeat - script is running...');
-      safeSend({ type: 'heartbeat', timestamp: Date.now() });
-    }, 10000);
+
     
     try {
       // Send initial message to indicate start
@@ -349,10 +344,7 @@
         ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)
         : LAST_UPDATED;
 
-      // Clear heartbeat when done
-      if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-      }
+
       
       console.log('[ShopeeAnalytics] Hoàn thành! Đang gửi kết quả...');
       safeSend({
@@ -372,10 +364,7 @@
       console.log('[ShopeeAnalytics] Đã gửi kết quả thành công!');
 
     } catch (err) {
-      // Clear heartbeat on error
-      if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-      }
+
       
       console.error('[ShopeeAnalytics] SP Analyzer Ext Error:', err);
       console.error('[ShopeeAnalytics] Error stack:', err.stack);
@@ -395,7 +384,7 @@
     }
   }
 
-  startSpidering();
+  startAnalysis();
 
   }); // end chrome.storage.local.get
 })();

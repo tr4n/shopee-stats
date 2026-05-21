@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="icon" type="image/png" href="../icons/icon128.png">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="app-container">
     <header class="header">
@@ -15,7 +17,9 @@
         <h1>Shopee Analytics</h1>
       </div>
       <button id="theme-toggle" class="icon-btn" title="Chuyển chế độ giao diện">
-        <svg id="theme-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="theme-icon" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
       </button>
     </header>
 
@@ -43,24 +47,26 @@
         <div class="loader">
           <div class="spinner"></div>
         </div>
-        <h2 class="loading-title">Đang tổng hợp dữ liệu...</h2>
+        <h2 class="loading-title">Đang phân tích...</h2>
         <div class="progress-wrapper">
           <div class="progress-bar-track">
             <div id="progress-bar-fill" class="progress-bar-fill"></div>
           </div>
           <p id="progress-text" class="progress-text">Vui lòng chờ trong giây lát</p>
         </div>
-        
+
         <!-- Debug Panel -->
-        <div id="debug-panel" class="debug-panel" style="display: none; margin-top: 15px; font-size: 12px; opacity: 0.7;">
+        <div id="debug-panel" class="debug-panel"
+          style="display: none; margin-top: 15px; font-size: 12px; opacity: 0.7;">
           <details>
             <summary style="cursor: pointer;">🔍 Thông tin debug</summary>
-            <div class="debug-content" style="margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; font-family: monospace;">
-              <div><strong>Heartbeat:</strong> <span id="debug-heartbeat">Chưa có</span></div>
+            <div class="debug-content"
+              style="margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; font-family: monospace;">
               <div><strong>Thời gian:</strong> <span id="debug-timer">0s</span></div>
               <div><strong>URL:</strong> <span id="debug-url">-</span></div>
               <div><strong>Status:</strong> <span id="debug-status">Đang khởi tạo</span></div>
-              <button id="btn-cancel-debug" class="btn-secondary" style="margin-top: 10px; width: 100%; padding: 8px;">Hủy tiến trình</button>
+              <button id="btn-cancel-debug" class="btn-secondary"
+                style="margin-top: 10px; width: 100%; padding: 8px;">Hủy tiến trình</button>
             </div>
           </details>
         </div>
@@ -79,12 +85,16 @@
         </div>
 
         <div class="action-row" style="flex-direction: column; gap: 12px; margin-top: 30px;">
-          <button id="btn-open-dashboard" class="btn-primary" style="width: 100%; margin: 0; padding: 14px; background: linear-gradient(135deg, #26aa99 0%, #1c8d7e 100%); font-size: 15px; font-weight: bold;">📊 Xem chi tiết</button>
-          <button id="btn-restart" class="btn-outline-sm" style="width: 100%; padding: 12px; font-size: 14px;">↺ Thống kê lại</button>
+          <button id="btn-open-dashboard" class="btn-primary"
+            style="width: 100%; margin: 0; padding: 14px; background: linear-gradient(135deg, #26aa99 0%, #1c8d7e 100%); font-size: 15px; font-weight: bold;">📊
+            Xem chi tiết</button>
+          <button id="btn-restart" class="btn-outline-sm" style="width: 100%; padding: 12px; font-size: 14px;">↺ Thống
+            kê lại</button>
         </div>
       </div>
     </main>
-    <footer class="app-footer" style="text-align: center; padding: 10px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);">
+    <footer class="app-footer"
+      style="text-align: center; padding: 10px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);">
       <span id="author-info"></span>
     </footer>
   </div>
@@ -92,4 +102,5 @@
   <script src="../config.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

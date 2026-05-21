@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Debug elements
   const debugPanel = document.getElementById('debug-panel');
-  const debugHeartbeat = document.getElementById('debug-heartbeat');
   const debugTimerEl = document.getElementById('debug-timer');
   const debugUrl = document.getElementById('debug-url');
   const debugStatus = document.getElementById('debug-status');
@@ -35,8 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // === App State ===
   let cacheData = null;
   let lastCompleteData = null;
-  let lastHeartbeat = null;
-  let heartbeatCount = 0;
   let analysisStartTime = null;
   let debugTimerInterval = null;
 
@@ -180,9 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
     progressText.textContent = 'Vui lòng chờ trong giây lát';
 
 
-    // Reset heartbeat tracking
-    lastHeartbeat = null;
-    heartbeatCount = 0;
     analysisStartTime = null;
 
     if (debugTimerInterval) {
@@ -191,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Reset debug info
-    if (debugHeartbeat) debugHeartbeat.textContent = 'Chưa có';
     if (debugTimerEl) debugTimerEl.textContent = '0s';
     if (debugUrl) debugUrl.textContent = '-';
     if (debugStatus) debugStatus.textContent = 'Đang khởi tạo';
@@ -349,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // === Start Extractor ===
+  // === Start Analysis ===
   btnStart.addEventListener('click', async () => {
     errorMessage.textContent = '';
     try {
@@ -407,21 +400,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
-        // Inject bridge first in MAIN world so fetch calls are native page requests (avoids 403)
+        // Load bridge script in main world to allow native same-origin requests
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           files: ['content/bridge.js'],
           world: 'MAIN'
         });
-        console.log('[ShopeeAnalytics] Bridge script injected (MAIN world)');
+        console.log('[ShopeeAnalytics] Bridge script loaded (MAIN world)');
 
         if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
-        console.log('[ShopeeAnalytics] Content script injected successfully');
+        console.log('[ShopeeAnalytics] Content script loaded successfully');
         if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
 
       } catch (e) {
-        console.error('[ShopeeAnalytics] Failed to inject content script:', e);
+        console.error('[ShopeeAnalytics] Failed to load content script:', e);
         throw new Error('Lỗi khi tải content script. Vui lòng thử lại.');
       }
     } catch (err) {
@@ -447,23 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressText.textContent = `Đã xử lý ${processed.toLocaleString()}/${(message.total || 0).toLocaleString()} đơn (${pct}%)`;
       } else {
         progressBarFill.classList.add('indeterminate');
-        const heartbeatInfo = lastHeartbeat ? ` [❤️ ${heartbeatCount}]` : '';
-        progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...${heartbeatInfo}`;
-      }
-    } else if (message.type === 'heartbeat') {
-      // Update heartbeat info
-      lastHeartbeat = Date.now();
-      heartbeatCount++;
-      console.log(`[ShopeeAnalytics] Heartbeat received #${heartbeatCount}`);
-
-      // Update debug info
-      if (debugHeartbeat) debugHeartbeat.textContent = `${heartbeatCount} nhịp (${new Date(lastHeartbeat).toLocaleTimeString()})`;
-      if (debugStatus) debugStatus.textContent = 'Content script đang chạy bình thường';
-
-      // Update progress text to show script is alive
-      if (progressText.textContent.includes('đơn hàng')) {
-        const currentText = progressText.textContent.replace(/\s*\[❤️.*?\]/, '');
-        progressText.textContent = `${currentText} [❤️ ${heartbeatCount}]`;
+        progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
       }
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
