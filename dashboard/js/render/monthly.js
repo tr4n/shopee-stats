@@ -70,6 +70,7 @@ function showMonthlyItems(d, year, monthStr) {
   reveal(container);
 
   renderMonthlyItemsList();
+  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function renderMonthlyItemsList() {
