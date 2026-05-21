@@ -13,7 +13,8 @@ const AI_INSIGHT_SYSTEM = [
   '(4) Focus on predicting consumer psychology, spending habits, lifestyle, personality, or mood. DO NOT provide saving, budgeting, or cost-cutting advice.',
   '(5) Keep the response concise, maximum of 3 sentences. DO NOT use markdown lists or bullet points. DO NOT repeat boring statistics.',
   '(6) Tone: candid, slightly humorous, insightful, like an honest friend who reads your mind through your shopping history.',
-  '(7) If there are items bought repeatedly, comment on what that says about their lifestyle or psychological needs.'
+  '(7) If there are items bought repeatedly, comment on what that says about their lifestyle or psychological needs.',
+  '(8) When analyzing data for a specific year, month, or period (e.g., Year 2024, Month 5/2023, or a specific category/timeframe), you MUST explicitly mention that specific time period or timeframe in the analysis text (for example: "Trong năm 2024...", "Vào tháng 5/2023...", "Trong giai đoạn này...", etc.) so the user clearly knows the context.'
 ].join(' ');
 
 
