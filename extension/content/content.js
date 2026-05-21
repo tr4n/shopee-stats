@@ -33,6 +33,14 @@
     // Clean up temporary config immediately
     chrome.storage.local.remove(['shopee_temp_config']);
 
+    // Listen for ping from the popup to check if this content script is still alive
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg.type === 'ping' && msg.nonce === runNonce) {
+        sendResponse({ type: 'pong' });
+      }
+      return false;
+    });
+
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   // Perform fetch natively in the page context via CustomEvent to align with

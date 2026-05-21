@@ -183,17 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
   checkCacheInfo(3);
 
   // On popup open: check if a previous run is still active (popup may have been closed mid-run).
-  // If the lock is fresh, restore the loading UI so the user knows analysis is in progress.
-  // If the lock is stale (> LOCK_TTL_MS), clear it and let the user start fresh.
+  // If the lock is fresh, ping the content script to verify it is still alive.
+  // If the content script is dead (tab closed/reloaded), clear the lock and start fresh.
   getAnalysisLock().then(lock => {
     if (!lock) return;
     const age = Date.now() - (lock.startTime || 0);
     if (age < LOCK_TTL_MS) {
-      // Another run is still likely in progress — show loading state
-      _currentRunNonce = lock.nonce;  // accept messages from the running instance
-      resetProgress();
-      progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
-      showState(stateLoading);
+      // Ping the content script to verify it is still alive in that tab
+      chrome.tabs.sendMessage(lock.tabId, { type: 'ping', nonce: lock.nonce }, (response) => {
+        const err = chrome.runtime.lastError;
+        if (err || !response || response.type !== 'pong') {
+          console.warn('[ShopeeAnalytics] Content script is not responding. Clearing stale lock. Error:', err?.message);
+          clearAnalysisLock();
+          showState(stateInitial);
+        } else {
+          // Another run is confirmed active — show loading state
+          _currentRunNonce = lock.nonce;  // accept messages from the running instance
+          resetProgress();
+          progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
+          showState(stateLoading);
+        }
+      });
     } else {
       // Stale lock from a crashed/timed-out run — remove it silently
       console.warn('[ShopeeAnalytics] Clearing stale analysis lock (age:', Math.round(age / 1000), 's)');
