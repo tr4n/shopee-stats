@@ -40,15 +40,16 @@ function renderAnalyzeButton(cardId) {
   </div>`;
 }
 
+function parseBold(raw) {
+  return escHtml(raw).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 function renderAIInsight(text, cardId) {
   const paragraphs = text
     .split(/\n+/)
     .map(p => p.trim())
     .filter(p => p.length > 0);
   const bullets = ['💡', '⚡', '🎯', '💰', '📌'];
-  function parseBold(raw) {
-    return escHtml(raw).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  }
   const items = paragraphs.map((p, i) =>
     `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
   ).join('');
