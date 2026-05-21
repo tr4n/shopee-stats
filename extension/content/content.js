@@ -33,10 +33,17 @@
     // Clean up temporary config immediately
     chrome.storage.local.remove(['shopee_temp_config']);
 
-    // Listen for ping from the popup to check if this content script is still alive
+    let isCancelled = false;
+
+    // Listen for ping/cancel from the popup
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-      if (msg.type === 'ping' && msg.nonce === runNonce) {
-        sendResponse({ type: 'pong' });
+      if (msg.nonce === runNonce) {
+        if (msg.type === 'ping') {
+          sendResponse({ type: 'pong' });
+        } else if (msg.type === 'cancel') {
+          isCancelled = true;
+          console.log('[ShopeeAnalytics] Cancel request received from popup.');
+        }
       }
       return false;
     });
@@ -237,6 +244,9 @@
       }
 
       while (hasMoreData && !hitCache) {
+        if (isCancelled) {
+          throw new Error('Tiến trình đã bị hủy.');
+        }
         if (offsetIndex > 0) await sleep(200);
 
         console.log(`[ShopeeAnalytics] Đang tải batch ${Math.floor(offsetIndex / LIMIT) + 1}...`);
@@ -360,28 +370,52 @@
         ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)
         : LAST_UPDATED;
 
+      const cachePayload = {
+        fetchTime: Math.floor(Date.now() / 1000),
+        lastUpdated: newLastUpdated || LAST_UPDATED,
+        listType: LIST_TYPE,
+        miniOrders: allMiniOrders,
+        itemMap: cappedItemMap
+      };
 
-      
-      console.log('[ShopeeAnalytics] Hoàn thành! Đang gửi kết quả...');
-      safeSend({
-        type: 'complete',
-        data: {
-          ...stats,
-          topItems,
-          cachePayload: {
-            fetchTime: Math.floor(Date.now() / 1000),
-            lastUpdated: newLastUpdated || LAST_UPDATED,
-            listType: LIST_TYPE,
-            miniOrders: allMiniOrders,
-            itemMap: cappedItemMap
+      const completeMsgData = {
+        ...stats,
+        topItems,
+        cachePayload
+      };
+
+      console.log('[ShopeeAnalytics] Hoàn thành! Đang lưu cache và cập nhật lock...');
+      chrome.storage.local.set({ shopee_cache: cachePayload }, () => {
+        chrome.storage.local.get(['shopee_analysis_lock'], (r) => {
+          const existingLock = r.shopee_analysis_lock;
+          if (existingLock && existingLock.nonce === runNonce) {
+            chrome.storage.local.set({
+              shopee_analysis_lock: {
+                ...existingLock,
+                status: 'completed',
+                result: completeMsgData
+              }
+            }, () => {
+              console.log('[ShopeeAnalytics] Đã cập nhật lock sang completed. Đang gửi kết quả...');
+              safeSend({
+                type: 'complete',
+                data: completeMsgData
+              });
+            });
+          } else {
+            safeSend({
+              type: 'complete',
+              data: completeMsgData
+            });
           }
-        }
+        });
       });
-      console.log('[ShopeeAnalytics] Đã gửi kết quả thành công!');
 
     } catch (err) {
-
-      
+      if (isCancelled) {
+        console.log('[ShopeeAnalytics] Analysis stopped due to user cancellation.');
+        return;
+      }
       console.error('[ShopeeAnalytics] SP Analyzer Ext Error:', err);
       console.error('[ShopeeAnalytics] Error stack:', err.stack);
       
@@ -396,7 +430,22 @@
         errorMessage = 'Lỗi xử lý dữ liệu. Tải lại trang Shopee và thử lại.';
       }
       
-      safeSend({ type: 'error', message: errorMessage });
+      chrome.storage.local.get(['shopee_analysis_lock'], (r) => {
+        const existingLock = r.shopee_analysis_lock;
+        if (existingLock && existingLock.nonce === runNonce) {
+          chrome.storage.local.set({
+            shopee_analysis_lock: {
+              ...existingLock,
+              status: 'failed',
+              error: errorMessage
+            }
+          }, () => {
+            safeSend({ type: 'error', message: errorMessage });
+          });
+        } else {
+          safeSend({ type: 'error', message: errorMessage });
+        }
+      });
     }
   }
 

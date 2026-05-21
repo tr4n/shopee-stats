@@ -24,7 +24,9 @@ chrome.tabs.onRemoved.addListener((tabId) => {
     const lock = result.shopee_analysis_lock;
     if (lock && lock.tabId === tabId) {
       console.log('[ShopeeAnalytics] Tab closed, clearing analysis lock');
-      chrome.storage.local.remove(['shopee_analysis_lock']);
+      chrome.storage.local.remove(['shopee_analysis_lock'], () => {
+        chrome.runtime.sendMessage({ type: 'lock_cleared' }).catch(() => {});
+      });
     }
   });
 });
@@ -36,7 +38,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       const lock = result.shopee_analysis_lock;
       if (lock && lock.tabId === tabId) {
         console.log('[ShopeeAnalytics] Tab navigated or reloaded, clearing analysis lock');
-        chrome.storage.local.remove(['shopee_analysis_lock']);
+        chrome.storage.local.remove(['shopee_analysis_lock'], () => {
+          chrome.runtime.sendMessage({ type: 'lock_cleared' }).catch(() => {});
+        });
       }
     });
   }

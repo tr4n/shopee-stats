@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const LOCK_KEY = 'shopee_analysis_lock';
   const LOCK_TTL_MS = 8 * 60 * 1000; // 8 minutes — longer than worst-case fetch time
   let _currentRunNonce = null;
+  let _currentRunTabId = null;
 
   function _genNonce() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function clearAnalysisLock() {
     _currentRunNonce = null;
+    _currentRunTabId = null;
     chrome.storage.local.remove([LOCK_KEY]);
   }
   function getAnalysisLock() {
@@ -182,11 +184,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkCacheInfo(3);
 
-  // On popup open: check if a previous run is still active (popup may have been closed mid-run).
-  // If the lock is fresh, ping the content script to verify it is still alive.
-  // If the content script is dead (tab closed/reloaded), clear the lock and start fresh.
+  // On popup open: check if a previous run is still active, completed, or failed.
   getAnalysisLock().then(lock => {
     if (!lock) return;
+
+    if (lock.status === 'completed') {
+      console.log('[ShopeeAnalytics] Analysis completed in background. Showing results.');
+      renderResults(lock.result);
+      clearAnalysisLock();
+      return;
+    }
+
+    if (lock.status === 'failed') {
+      console.warn('[ShopeeAnalytics] Analysis failed in background. Showing error:', lock.error);
+      showError(lock.error);
+      clearAnalysisLock();
+      return;
+    }
+
     const age = Date.now() - (lock.startTime || 0);
     if (age < LOCK_TTL_MS) {
       // Ping the content script to verify it is still alive in that tab
@@ -199,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           // Another run is confirmed active — show loading state
           _currentRunNonce = lock.nonce;  // accept messages from the running instance
+          _currentRunTabId = lock.tabId;
           resetProgress();
           progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
           showState(stateLoading);
@@ -247,24 +263,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // === Restart / Cancel ===
+  function cancelRunningAnalysis() {
+    if (_currentRunTabId && _currentRunNonce) {
+      chrome.tabs.sendMessage(_currentRunTabId, { type: 'cancel', nonce: _currentRunNonce }, () => {
+        // Ignore error if tab closed/reloaded
+        const err = chrome.runtime.lastError;
+      });
+    }
+    cancelRunningAnalysisNoSignal();
+  }
+
+  function cancelRunningAnalysisNoSignal() {
+    clearAnalysisLock();
+    showState(stateInitial);
+  }
+
   const btnCancelDebug = document.getElementById('btn-cancel-debug');
   if (btnCancelDebug) {
     btnCancelDebug.addEventListener('click', () => {
-      clearAnalysisLock();
-      showState(stateInitial);
+      cancelRunningAnalysis();
     });
   }
 
   if (btnCancelProgress) {
     btnCancelProgress.addEventListener('click', () => {
-      clearAnalysisLock();
-      showState(stateInitial);
+      cancelRunningAnalysis();
     });
   }
 
   btnRestart.addEventListener('click', () => {
-    clearAnalysisLock();
-    showState(stateInitial);
+    cancelRunningAnalysis();
     errorMessage.textContent = '';
     checkCacheInfo(getSelectedListType());
   });
@@ -444,9 +472,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Generate a unique nonce for this run — used to discard messages from stale/parallel runs
+      // Generate a unique nonce for this run — used to discard messages from parallel/stale runs
       const nonce = _genNonce();
       _currentRunNonce = nonce;
+      _currentRunTabId = tab.id;
 
       resetProgress();
       showState(stateLoading);
@@ -514,6 +543,14 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener((message) => {
     console.log('[ShopeeAnalytics] Received message in popup:', message.type);
 
+    if (message.type === 'lock_cleared') {
+      console.log('[ShopeeAnalytics] Lock was cleared by background script. Resetting UI.');
+      cancelRunningAnalysisNoSignal();
+      errorMessage.textContent = '';
+      checkCacheInfo(getSelectedListType());
+      return;
+    }
+
     // Discard analysis progress/error/complete messages if we are not currently running or if the nonces do not match.
     if (['progress', 'error', 'complete'].includes(message.type)) {
       if (message.nonce !== _currentRunNonce) {
@@ -535,50 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
-
       clearAnalysisLock();
-
-      if (debugTimerInterval) {
-        clearInterval(debugTimerInterval);
-        debugTimerInterval = null;
-      }
-
-      if (debugStatus) debugStatus.textContent = 'Lỗi: ' + (message.message || 'Không xác định');
-
-      showState(stateInitial);
-
-      const errorMsg = message.message || 'Đã có lỗi khi tổng hợp dữ liệu.';
-
-      if (errorMsg.includes('đăng nhập')) {
-        errorMessage.innerHTML = `<div class="error-card">
-          <div class="error-card-icon">❌</div>
-          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
-          <div class="error-card-body">
-            <strong>💡 Giải pháp:</strong><br>
-            1. Đăng nhập lại tài khoản Shopee<br>
-            2. Tải lại trang (F5) và thử lại
-          </div>
-        </div>`;
-      } else if (errorMsg.includes('403') || errorMsg.includes('Shopee từ chối')) {
-        errorMessage.innerHTML = `<div class="error-card">
-          <div class="error-card-icon">🚫</div>
-          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
-          <div class="error-card-body">
-            <strong>💡 Giải pháp:</strong><br>
-            1. Tải lại trang Shopee (F5)<br>
-            2. Đảm bảo đã đăng nhập Shopee<br>
-            3. Bấm "Bắt Đầu Thống Kê" lại
-          </div>
-        </div>`;
-      } else {
-        errorMessage.innerHTML = `<div class="error-card">
-          <div class="error-card-icon">⚠️</div>
-          <div class="error-card-title">${escapeHtml(errorMsg)}</div>
-          <div class="error-card-body">
-            Tải lại trang Shopee và thử lại nhé.
-          </div>
-        </div>`;
-      }
+      showError(message.message);
     } else if (message.type === 'complete') {
 
       clearAnalysisLock();
@@ -600,6 +595,50 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
+
+  function showError(errorMsg) {
+    if (debugTimerInterval) {
+      clearInterval(debugTimerInterval);
+      debugTimerInterval = null;
+    }
+
+    if (debugStatus) debugStatus.textContent = 'Lỗi: ' + (errorMsg || 'Không xác định');
+
+    showState(stateInitial);
+
+    const msg = errorMsg || 'Đã có lỗi khi tổng hợp dữ liệu.';
+
+    if (msg.includes('đăng nhập')) {
+      errorMessage.innerHTML = `<div class="error-card">
+        <div class="error-card-icon">❌</div>
+        <div class="error-card-title">${escapeHtml(msg)}</div>
+        <div class="error-card-body">
+          <strong>💡 Giải pháp:</strong><br>
+          1. Đăng nhập lại tài khoản Shopee<br>
+          2. Tải lại trang (F5) và thử lại
+        </div>
+      </div>`;
+    } else if (msg.includes('403') || msg.includes('Shopee từ chối')) {
+      errorMessage.innerHTML = `<div class="error-card">
+        <div class="error-card-icon">🚫</div>
+        <div class="error-card-title">${escapeHtml(msg)}</div>
+        <div class="error-card-body">
+          <strong>💡 Giải pháp:</strong><br>
+          1. Tải lại trang Shopee (F5)<br>
+          2. Đảm bảo đã đăng nhập Shopee<br>
+          3. Bấm "Bắt Đầu Thống Kê" lại
+        </div>
+      </div>`;
+    } else {
+      errorMessage.innerHTML = `<div class="error-card">
+        <div class="error-card-icon">⚠️</div>
+        <div class="error-card-title">${escapeHtml(msg)}</div>
+        <div class="error-card-body">
+          Tải lại trang Shopee và thử lại nhé.
+        </div>
+      </div>`;
+    }
+  }
 
   // === Render Results ===
   function renderResults(data) {
