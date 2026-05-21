@@ -173,15 +173,30 @@ function showYearlyTopItems(year, d) {
 
 function renderPeriod(ps) {
   const items = [
-    { label: '1 Tháng', val: ps['1m'] },
-    { label: '3 Tháng', val: ps['3m'] },
-    { label: '6 Tháng', val: ps['6m'] },
-    { label: '1 Năm', val: ps['1y'] }
+    { label: '1 Tháng', val: ps['1m'] || 0 },
+    { label: '3 Tháng', val: ps['3m'] || 0 },
+    { label: '6 Tháng', val: ps['6m'] || 0 },
+    { label: '1 Năm', val: ps['1y'] || 0 }
   ];
-  document.getElementById('period-grid').innerHTML = items.map(item => `
-    <div class="period-box">
-      <div class="period-box-val">${fmtVND(item.val)}</div>
-      <div class="period-box-label">${item.label} gần nhất</div>
-    </div>`).join('');
+  const maxVal = Math.max(ps['1y'] || 1, 1);
+  const container = document.getElementById('period-grid');
+  container.innerHTML = items.map(item => {
+    const pct = Math.round((item.val / maxVal) * 100);
+    return `
+      <div class="period-row">
+        <div class="period-label">${item.label}</div>
+        <div class="period-bar-wrap">
+          <div class="period-bar-fill" data-pct="${pct}" style="width: 0%"></div>
+        </div>
+        <div class="period-val">${fmtVND(item.val)}</div>
+      </div>`;
+  }).join('');
+
+  setTimeout(() => {
+    container.querySelectorAll('.period-bar-fill').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-pct') + '%';
+    });
+  }, 50);
+
   reveal(document.getElementById('card-period'));
 }
