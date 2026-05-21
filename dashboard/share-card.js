@@ -148,7 +148,7 @@
     logoImg.src = '../extension/icons/icon128.png';
     await new Promise(r => { logoImg.onload = r; logoImg.onerror = r; });
 
-    const FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    const FONT = "Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     const PAD = 80;
 
     const tColors = THEMES[theme] || THEMES.light;
