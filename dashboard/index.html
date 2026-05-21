@@ -107,6 +107,7 @@
     <a class="btn" id="btn-reload" style="display:none" href="index.html">Thử lại</a>
   </div>
 
+  <script src="js/lz-string.min.js"></script>
   <script>
     (function () {
       const PREFIX = 'shopee_dash_data_';
@@ -117,6 +118,14 @@
 
         // Try raw JSON first (in case someone pastes JSON directly)
         try { return JSON.parse(trimmed); } catch { /* noop */ }
+
+        // Try LZString decompression (new v2 format)
+        if (typeof LZString !== 'undefined') {
+          try {
+            const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
+            if (decompressed) return JSON.parse(decompressed);
+          } catch { /* noop */ }
+        }
 
         // Try base64 — restore + chars that URL encoding may have turned into spaces
         for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
@@ -140,10 +149,11 @@
         document.getElementById('btn-reload').style.display = 'inline-block';
       }
 
-      // Detect data from #d= hash (priority) or ?d= query param
+      // Detect data from #lz= hash (LZString compressed), #d= hash (legacy), or ?d= query param
+      const lzMatch = location.hash.match(/[#&]lz=([^&]*)/);
       const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
       const qMatch = location.search.match(/[?&]d=([^&]*)/);
-      const raw = hashMatch?.[1] || qMatch?.[1];
+      const raw = lzMatch?.[1] || hashMatch?.[1] || qMatch?.[1];
 
       if (!raw) {
         showError('Không tìm thấy dữ liệu trong URL. Hãy mở lại từ extension Shopee Analytics.');
