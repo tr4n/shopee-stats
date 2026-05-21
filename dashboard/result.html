@@ -252,36 +252,55 @@
           <button id="btn-close-support" class="btn-close">&times;</button>
         </div>
         <div class="support-body">
-
-          <div class="support-oversize-notice" style="background: var(--green-dim); border-color: rgba(38, 170, 153, 0.2); text-align: left; margin-top: 0;">
-            <div class="support-oversize-body" style="color: var(--text); font-size: 13.5px; font-weight: 500; margin-bottom: 12px;">
-              Để dễ dàng điều tra và tái hiện lỗi của bạn, chúng tôi cần bạn đính kèm file dữ liệu chi tiêu vào Google Form theo hướng dẫn dưới đây:
-            </div>
-            
-            <div class="support-oversize-steps" style="margin-bottom: 0;">
-              <div class="support-step" style="margin-bottom: 12px; align-items: flex-start;">
-                <span class="support-step-num" style="background: var(--primary); margin-top: 2px;">1</span>
-                <span>Tải file dữ liệu chi tiêu (.json) về máy bằng cách nhấn nút <strong>Tải file dữ liệu gốc</strong> bên dưới.</span>
-              </div>
-              <div class="support-step" style="align-items: flex-start;">
-                <span class="support-step-num" style="background: var(--primary); margin-top: 2px;">2</span>
-                <span>Nhấn nút <strong>Mở Google Form</strong> bên dưới để điền mô tả lỗi và đính kèm file vừa tải.</span>
-              </div>
+          <!-- Soft Info box -->
+          <div class="support-oversize-notice"
+            style="background: rgba(74, 144, 217, 0.06); border: 1.5px solid rgba(74, 144, 217, 0.15); text-align: left; margin-top: 0; padding: 14px 16px; border-radius: 12px;">
+            <div class="support-oversize-body"
+              style="color: var(--text); font-size: 13px; font-weight: 500; margin-bottom: 0; line-height: 1.5;">
+              🤖 <strong>Để dễ dàng điều tra và tái hiện lỗi của bạn</strong>, chúng tôi cần bạn tải file dữ liệu chi
+              tiêu và đính kèm vào Google Form theo hướng dẫn dưới đây:
             </div>
           </div>
 
-          <div class="support-actions-row" style="margin-top: 8px; margin-bottom: 0;">
-            <button id="btn-download-raw" class="support-action-btn" style="flex: 1; padding: 12px; font-size: 14px;">
-              <span>💾 Tải file dữ liệu gốc</span>
-            </button>
+          <!-- Description field -->
+          <div class="support-field" style="margin-top: 4px;">
+            <label class="support-label">
+              Mô tả vấn đề gặp phải
+              <span class="support-hint">(tùy chọn)</span>
+            </label>
+            <textarea id="support-desc" class="support-textarea"
+              placeholder="Ví dụ: Biểu đồ không tải được, dữ liệu năm 2026 bị hiển thị sai..."></textarea>
           </div>
 
-          <button id="btn-send-support" class="support-send-btn" style="margin-top: 8px;">
-            📝 Mở Google Form...
-          </button>
+          <!-- Interactive Steps Box -->
+          <div
+            style="background: var(--dark); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border);">
+            <!-- Step 1 -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="support-step" style="align-items: center;">
+                <span class="support-step-num" style="background: var(--primary);">1</span>
+                <span>Tải file đính kèm (.txt) về máy:</span>
+              </div>
+              <button id="btn-download-raw" class="support-action-btn" style="width: 100%; padding: 11px;">
+                <span>💾 Tải file đính kèm (.txt)</span>
+              </button>
+            </div>
+
+            <div style="height: 1px; background: var(--border); margin: 2px 0;"></div>
+
+            <!-- Step 2 -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="support-step" style="align-items: center;">
+                <span class="support-step-num" style="background: var(--primary);">2</span>
+                <span>Mở form và đính kèm file vừa tải:</span>
+              </div>
+              <button id="btn-send-support" class="support-send-btn" style="margin-top: 4px;">
+                📝 Mở Google Form...
+              </button>
+            </div>
+          </div>
 
           <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
-
         </div>
       </div>
     </div>

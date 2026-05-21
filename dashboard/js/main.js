@@ -214,11 +214,11 @@ function setupSupportButton(d) {
       downloadRawBtn.innerHTML = '<span>⏳ Đang chuẩn bị tải...</span>';
       try {
         const jsonStr = JSON.stringify(d, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `shopee-stats-raw-${d.ts || Date.now()}.json`;
+        link.download = `shopee-stats-raw-${d.ts || Date.now()}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -244,6 +244,9 @@ function setupSupportButton(d) {
     const statusEl = document.getElementById('support-status');
     if (!statusEl) return;
 
+    const descEl = document.getElementById('support-desc');
+    const desc = descEl ? descEl.value.trim() : '';
+
     const info = getDeviceInfo();
     const deviceInfoStr = [
       `Trình duyệt : ${info.browser}`,
@@ -257,10 +260,12 @@ function setupSupportButton(d) {
     ].join('\n');
 
     const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
-    const formUrlEmpty = `${baseUrl}&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
+    const formUrlEmpty = `${baseUrl}&entry.1848321568=${encodeURIComponent(desc)}&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
 
     statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang mở Google Form...</span>';
     window.open(formUrlEmpty, '_blank');
+
+    if (descEl) descEl.value = '';
 
     setTimeout(() => {
       statusEl.innerHTML = '';
