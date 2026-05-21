@@ -189,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!lock) return;
 
     if (lock.status === 'completed') {
-      console.log('[ShopeeAnalytics] Analysis completed in background. Showing results.');
       renderResults(lock.result);
       clearAnalysisLock();
       return;
@@ -455,8 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      console.log('[ShopeeAnalytics] Current tab URL:', tab.url);
-
       if (!tab.url.includes('shopee.vn')) {
         errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để sử dụng tiện ích này.';
         document.getElementById('link-go-to-shopee').addEventListener('click', (e) => {
@@ -519,11 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
           files: ['content/bridge.js'],
           world: 'MAIN'
         });
-        console.log('[ShopeeAnalytics] Bridge script loaded (MAIN world)');
 
         if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
-        console.log('[ShopeeAnalytics] Content script loaded successfully');
         if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
 
       } catch (e) {
@@ -541,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Message Listener ===
   chrome.runtime.onMessage.addListener((message) => {
-    console.log('[ShopeeAnalytics] Received message in popup:', message.type);
 
     if (message.type === 'lock_cleared') {
       console.log('[ShopeeAnalytics] Lock was cleared by background script. Resetting UI.');

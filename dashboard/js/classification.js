@@ -201,6 +201,6 @@ async function classifyKharItems(ti, d) {
       renderTopItems(ti);
       renderCategories(d.cs, ti);
     });
-    console.log(`[Dashboard] AI classified ${totalPatched} items in ${Math.ceil(toClassify.length / BATCH_SIZE)} batches → cache saved`);
+    console.log(`[Dashboard] AI classified ${totalPatched} items`);
   }
 }

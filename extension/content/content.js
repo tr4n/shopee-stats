@@ -42,7 +42,6 @@
           sendResponse({ type: 'pong' });
         } else if (msg.type === 'cancel') {
           isCancelled = true;
-          console.log('[ShopeeAnalytics] Cancel request received from popup.');
         }
       }
       return false;
@@ -76,7 +75,6 @@
     let lastErr;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        console.log(`[ShopeeAnalytics] Đang gọi API Shopee (Lần ${attempt}/${MAX_RETRIES}): ${url}`);
         const result = await fetchViaMainWorldBridge(url);
 
         if (result.networkError) throw new Error('Lỗi mạng. Kiểm tra kết nối internet.');
@@ -220,14 +218,9 @@
 
   async function startAnalysis() {
     console.log('[ShopeeAnalytics] Bắt đầu quá trình phân tích dữ liệu...');
-    console.log('[ShopeeAnalytics] Current URL:', window.location.href);
-    console.log('[ShopeeAnalytics] User Agent:', navigator.userAgent);
-    
-
     
     try {
       // Send initial message to indicate start
-      console.log('[ShopeeAnalytics] Sending initial progress message...');
       safeSend({ type: 'progress', message: 'Đang khởi tạo...', processed: 0, total: 0, pct: -1 });
 
       let offsetIndex = 0;
@@ -248,8 +241,6 @@
           throw new Error('Tiến trình đã bị hủy.');
         }
         if (offsetIndex > 0) await sleep(200);
-
-        console.log(`[ShopeeAnalytics] Đang tải batch ${Math.floor(offsetIndex / LIMIT) + 1}...`);
         
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
         const json = await fetchWithRetry(url);
@@ -257,8 +248,6 @@
         if (!json || typeof json !== 'object') {
           throw new Error('Dữ liệu trả về từ Shopee không hợp lệ. Vui lòng tải lại trang và thử lại.');
         }
-
-        console.log(`[ShopeeAnalytics] Batch ${Math.floor(offsetIndex / LIMIT) + 1}: Nhận được ${(json.data?.details_list || []).length} đơn hàng`);
 
         if (offsetIndex === 0) {
           totalCount = (json && json.data && (json.data.total || json.data.total_count)) || 0;
@@ -396,7 +385,6 @@
                 result: completeMsgData
               }
             }, () => {
-              console.log('[ShopeeAnalytics] Đã cập nhật lock sang completed. Đang gửi kết quả...');
               safeSend({
                 type: 'complete',
                 data: completeMsgData

@@ -7,7 +7,6 @@
 let currentTopItems = [];
 
 function renderTopItems(ti) {
-  console.log('[Dashboard] renderTopItems', { itemCount: (ti || []).length, sampleItems: (ti || []).slice(0, 2) });
   currentTopItems = ti || [];
   renderTopItemsList();
   reveal(document.getElementById('card-items'));

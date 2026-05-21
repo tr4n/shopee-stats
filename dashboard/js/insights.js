@@ -307,13 +307,6 @@ function renderInsightCard(id, insightItems) {
   const card = document.getElementById(id);
   const list = document.getElementById(id + '-list');
 
-  console.log(`[Dashboard] renderInsightCard('${id}')`, {
-    card: !!card,
-    list: !!list,
-    itemCount: insightItems?.length || 0,
-    items: insightItems?.slice(0, 2) || []
-  });
-
   if (!card || !list || !insightItems || !insightItems.length) return;
 
   list.innerHTML = insightItems.map(item =>
@@ -321,6 +314,4 @@ function renderInsightCard(id, insightItems) {
   ).join('');
   card.style.display = '';
   reveal(card);
-
-  console.log(`[Dashboard] ✅ Insight card '${id}' rendered with ${insightItems.length} items`);
 }

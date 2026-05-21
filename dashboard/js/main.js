@@ -34,7 +34,6 @@ function saveDataToStorage(d) {
   if (!id) return;
   try {
     localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(d));
-    console.log('[Dashboard] Data persisted to storage (id:', id, ')');
   } catch (e) {
     console.warn('[Dashboard] Storage save failed (quota?):', e.message);
   }
@@ -391,20 +390,12 @@ function setupShareButtons(d) {
 // Skip if we're mid-redirect (?d= was detected and location.replace() was called)
 if (!_hasRawDataParam) {
   const d = parseData();
-  console.log('[Dashboard] Parsed data:', {
-    hasData: !!d,
-    sessionId: getSessionId(),
-    totalSpend: d?.t,
-    topItemsCount: (d?.ti || []).length,
-    categoriesCount: (d?.cs || []).length
-  });
 
   if (!d || !d.t) {
     console.warn('[Dashboard] No data or invalid data, showing no-data view');
     renderNoData();
   } else {
     _dashCache = loadDashCache(d.ts);
-    console.log(`[Dashboard] Cache ${Object.keys(_dashCache.cats).length} categories, ${Object.keys(_dashCache.insights).length} insights`);
 
     let _categorizationFinished = false;
     let _activeYear = null;
@@ -632,7 +623,6 @@ Requirements: Output in VIETNAMESE. Format into 2 paragraphs: Paragraph 1 identi
     }
 
     function runAIInsightsNarrative(d) {
-      console.log('[Dashboard] Setting up AI insight buttons...');
       const years = Object.keys(d.yd || {}).map(Number).sort((a, b) => b - a);
       const curYear = years[0];
       const prevYear = years[1];
@@ -806,7 +796,6 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
             renderTopItems(tiItems);
             // Persist progress so partial results survive a page refresh
             saveDataToStorage(d);
-            console.log('[Dashboard] Categories updated after async keyword classification');
           }
         } catch (error) {
           console.error('[Dashboard] Error in async keyword classification:', error);
@@ -815,7 +804,6 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
         // 6. Run AI category classification if any remaining '🏷️ Khác' items
         const uncategorizedCount = tiItems.filter(item => item.cat === '🏷️ Khác').length;
         if (uncategorizedCount > 0) {
-          console.log(`[Dashboard] Running AI category classification for ${uncategorizedCount} items...`);
           try {
             await classifyKharItems(tiItems, d);
           } catch (e) {
@@ -823,7 +811,7 @@ Requirements: Output in VIETNAMESE. Structure the analysis into 2 separate parag
           }
         }
       } else {
-        console.log('[Dashboard] All items already categorized (loaded from storage) — skipping classification');
+        // Skip classification if already loaded from storage
       }
 
       // 7. Categorization is now 100% finished — update final state
