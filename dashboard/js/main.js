@@ -156,8 +156,6 @@ function setupSupportButton(d) {
   const modal = document.getElementById('support-modal');
   const closeBtn = document.getElementById('btn-close-support');
   const sendBtn = document.getElementById('btn-send-support');
-  const descEl = document.getElementById('support-desc');
-  const noteEl = document.getElementById('support-note');
 
   if (!btn || !modal) return;
 
@@ -208,55 +206,12 @@ function setupSupportButton(d) {
     };
   }
 
-  // Build a compressed payload using LZString for full data integrity
-  // Falls back to Base64 if LZString is not available
-  function buildSupportPayload() {
-    if (!d) return { compressed: '', tooLarge: false };
-    try {
-      const json = JSON.stringify(d);
-      if (typeof LZString !== 'undefined') {
-        const compressed = LZString.compressToEncodedURIComponent(json);
-        return { compressed, tooLarge: false };
-      }
-      // Fallback: Base64
-      const bytes = new TextEncoder().encode(json);
-      let bin = '';
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      return { compressed: btoa(bin), tooLarge: false };
-    } catch {
-      return { compressed: '', tooLarge: false };
-    }
-  }
-
-
-  const copyRawBtn = document.getElementById('btn-copy-raw');
-  if (copyRawBtn) {
-    copyRawBtn.addEventListener('click', async () => {
-      if (!d) return alert('Không có dữ liệu gốc!');
-      const origText = copyRawBtn.innerHTML;
-      copyRawBtn.innerHTML = '<span>⏳ Đang sao chép...</span>';
-      try {
-        const json = JSON.stringify(d);
-        const bytes = new TextEncoder().encode(json);
-        let bin = '';
-        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-        const fullBase64 = btoa(bin);
-        
-        await navigator.clipboard.writeText(fullBase64);
-        copyRawBtn.innerHTML = '<span>✓ Đã copy dữ liệu gốc!</span>';
-      } catch (e) {
-        console.error(e);
-        copyRawBtn.innerHTML = '<span>❌ Lỗi sao chép</span>';
-      } finally {
-        setTimeout(() => { copyRawBtn.innerHTML = origText; }, 2000);
-      }
-    });
-  }
-
   const downloadRawBtn = document.getElementById('btn-download-raw');
   if (downloadRawBtn) {
     downloadRawBtn.addEventListener('click', () => {
       if (!d) return alert('Không có dữ liệu gốc!');
+      const origText = downloadRawBtn.innerHTML;
+      downloadRawBtn.innerHTML = '<span>⏳ Đang chuẩn bị tải...</span>';
       try {
         const jsonStr = JSON.stringify(d, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -268,57 +223,28 @@ function setupSupportButton(d) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        downloadRawBtn.innerHTML = '<span>✓ Đã tải file!</span>';
       } catch (e) {
         alert('Lỗi tải dữ liệu: ' + e.message);
+        downloadRawBtn.innerHTML = '<span>❌ Lỗi tải file</span>';
+      } finally {
+        setTimeout(() => { downloadRawBtn.innerHTML = origText; }, 2000);
       }
     });
   }
 
   btn.addEventListener('click', () => {
-    const info = getDeviceInfo();
-    const { compressed } = buildSupportPayload();
-
-    document.getElementById('support-device-info').innerHTML = [
-      `Trình duyệt : ${escHtml(info.browser)}`,
-      `Hệ điều hành: ${escHtml(info.os)}`,
-      `Màn hình    : ${escHtml(info.screen)} (DPR ${info.dpr})`,
-      `Viewport    : ${escHtml(info.viewport)}`,
-      `Dữ liệu tại : ${escHtml(info.dataDate)}`,
-      `Tóm tắt     : ${escHtml(info.summary)}`,
-      `Chrome AI   : ${escHtml(info.chromeAI)}`,
-      `Phiên bản Ext: ${escHtml(info.extVersion)}`,
-    ].join('<br>');
-
-    const previewEl = document.getElementById('support-data-preview');
-    if (previewEl) {
-      previewEl.textContent = compressed
-        ? compressed.substring(0, 300) + (compressed.length > 300 ? ' …' : '')
-        : '(Không có dữ liệu)';
-    }
-
-    noteEl.innerHTML = 'Yêu cầu hỗ trợ sẽ được điền sẵn vào <strong>Google Form</strong>. Bạn chỉ cần nhấn nút <strong>Gửi</strong> ở trang mới.';
-
     modal.classList.add('active');
-    setTimeout(() => {
-      if (descEl) descEl.focus();
-    }, 150);
   });
 
   closeBtn.addEventListener('click', () => modal.classList.remove('active'));
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
-  // Max safe URL length for Google Form prefill (avoid HTTP 414)
-  const SAFE_URL_LIMIT = 7500;
-
   sendBtn.addEventListener('click', () => {
-    const desc = descEl ? descEl.value.trim() : '';
     const statusEl = document.getElementById('support-status');
-
     if (!statusEl) return;
 
     const info = getDeviceInfo();
-    const { compressed } = buildSupportPayload();
-
     const deviceInfoStr = [
       `Trình duyệt : ${info.browser}`,
       `Hệ điều hành: ${info.os}`,
@@ -330,95 +256,18 @@ function setupSupportButton(d) {
       `Phiên bản Ext: ${info.extVersion}`,
     ].join('\n');
 
-    // Construct pre-filled Google Form URL
     const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
-    const formUrl = `${baseUrl}` +
-      `&entry.1848321568=${encodeURIComponent(desc)}` +
-      `&entry.322741036=${encodeURIComponent(deviceInfoStr)}` +
-      `&entry.825360=${compressed || ''}`;
+    const formUrlEmpty = `${baseUrl}&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
 
-    const formUrlEmpty = `${baseUrl}` +
-      `&entry.1848321568=${encodeURIComponent(desc)}` +
-      `&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
+    statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang mở Google Form...</span>';
+    window.open(formUrlEmpty, '_blank');
 
-    if (formUrl.length <= SAFE_URL_LIMIT) {
-      // URL is safe — open prefilled form directly
-      statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang chuyển hướng đến Google Form đã điền sẵn...</span>';
-      window.open(formUrl, '_blank');
-
-      if (descEl) descEl.value = '';
-
-      setTimeout(() => {
-        statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">✅ Vui lòng nhấn "Gửi" trên trang Google Form vừa mở.</span>';
-      }, 1000);
-
-      setTimeout(() => {
-        modal.classList.remove('active');
-        statusEl.innerHTML = '';
-      }, 3200);
-
-    } else {
-      // URL too large — guide user to download + attach file
-      statusEl.innerHTML = `
-        <div class="support-oversize-notice">
-          <div class="support-oversize-icon">📦</div>
-          <div class="support-oversize-title">Dữ liệu của bạn quá lớn để gửi tự động</div>
-          <div class="support-oversize-body">
-            Vì lịch sử mua sắm của bạn rất nhiều, dữ liệu không thể gửi qua link.<br>
-            Vui lòng thực hiện theo 2 bước sau:
-          </div>
-          <div class="support-oversize-steps">
-            <div class="support-step">
-              <span class="support-step-num">1</span>
-              <span>Tải file dữ liệu gốc xuống máy</span>
-            </div>
-            <div class="support-step">
-              <span class="support-step-num">2</span>
-              <span>Mở form, điền mô tả và đính kèm file vừa tải</span>
-            </div>
-          </div>
-          <div class="support-oversize-actions">
-            <button id="btn-download-from-notice" class="support-action-btn" style="flex:1">
-              <span>💾 Tải file dữ liệu</span>
-            </button>
-            <button id="btn-open-form-empty" class="support-action-btn support-action-btn--primary" style="flex:1">
-              <span>📝 Mở Google Form</span>
-            </button>
-          </div>
-        </div>`;
-
-      // Wire up buttons in the notice
-      const dlBtn = document.getElementById('btn-download-from-notice');
-      if (dlBtn) {
-        dlBtn.addEventListener('click', () => {
-          if (!d) return;
-          try {
-            const jsonStr = JSON.stringify(d, null, 2);
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `shopee-stats-raw-${d.ts || Date.now()}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            dlBtn.innerHTML = '<span>✓ Đã tải file!</span>';
-          } catch (e) {
-            dlBtn.innerHTML = '<span>❌ Lỗi tải file</span>';
-          }
-        });
-      }
-
-      const openFormBtn = document.getElementById('btn-open-form-empty');
-      if (openFormBtn) {
-        openFormBtn.addEventListener('click', () => {
-          window.open(formUrlEmpty, '_blank');
-          openFormBtn.innerHTML = '<span>✓ Đã mở form!</span>';
-        });
-      }
-    }
+    setTimeout(() => {
+      statusEl.innerHTML = '';
+      modal.classList.remove('active');
+    }, 1500);
   });
+}
 }
 
 /* ── Share Modal ─────────────────────────────── */

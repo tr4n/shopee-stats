@@ -253,53 +253,34 @@
         </div>
         <div class="support-body">
 
-
-          <div class="support-field">
-            <label class="support-label">
-              Mô tả vấn đề gặp phải
-              <span class="support-hint">(tùy chọn)</span>
-            </label>
-            <textarea id="support-desc" class="support-textarea"
-              placeholder="Ví dụ: Biểu đồ không hiển thị, dữ liệu bị thiếu tháng, extension báo lỗi khi quét..."></textarea>
+          <div class="support-oversize-notice" style="background: var(--green-dim); border-color: rgba(38, 170, 153, 0.2); text-align: left; margin-top: 0;">
+            <div class="support-oversize-body" style="color: var(--text); font-size: 13.5px; font-weight: 500; margin-bottom: 12px;">
+              Để dễ dàng điều tra và tái hiện lỗi của bạn, chúng tôi cần bạn đính kèm file dữ liệu chi tiêu vào Google Form theo hướng dẫn dưới đây:
+            </div>
+            
+            <div class="support-oversize-steps" style="margin-bottom: 0;">
+              <div class="support-step" style="margin-bottom: 12px; align-items: flex-start;">
+                <span class="support-step-num" style="background: var(--primary); margin-top: 2px;">1</span>
+                <span>Tải file dữ liệu chi tiêu (.json) về máy bằng cách nhấn nút <strong>Tải file dữ liệu gốc</strong> bên dưới.</span>
+              </div>
+              <div class="support-step" style="align-items: flex-start;">
+                <span class="support-step-num" style="background: var(--primary); margin-top: 2px;">2</span>
+                <span>Nhấn nút <strong>Mở Google Form</strong> bên dưới để điền mô tả lỗi và đính kèm file vừa tải.</span>
+              </div>
+            </div>
           </div>
 
-          <div class="support-actions-row">
-            <button id="btn-copy-raw" class="support-action-btn">
-              <span>📋 Sao chép dữ liệu gốc</span>
-            </button>
-            <button id="btn-download-raw" class="support-action-btn">
+          <div class="support-actions-row" style="margin-top: 8px; margin-bottom: 0;">
+            <button id="btn-download-raw" class="support-action-btn" style="flex: 1; padding: 12px; font-size: 14px;">
               <span>💾 Tải file dữ liệu gốc</span>
             </button>
           </div>
 
-          <div class="support-field" style="display: none;">
-            <label class="support-label">
-              Thông tin thiết bị
-              <span class="support-hint">(tự động thu thập)</span>
-            </label>
-            <div class="support-info-box" id="support-device-info"></div>
-          </div>
-
-          <div class="support-field" style="display: none;">
-            <label class="support-label">
-              Dữ liệu đính kèm
-              <span class="support-hint">(Giúp tái hiện lỗi nhanh hơn)</span>
-            </label>
-            <div class="support-data-preview" id="support-data-preview"></div>
-          </div>
-
-          <button id="btn-send-support" class="support-send-btn">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-            Gửi yêu cầu hỗ trợ
+          <button id="btn-send-support" class="support-send-btn" style="margin-top: 8px;">
+            📝 Mở Google Form...
           </button>
 
           <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
-
-          <p class="support-note" id="support-note" style="margin-top: 10px;"></p>
 
         </div>
       </div>
