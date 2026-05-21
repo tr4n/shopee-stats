@@ -90,8 +90,8 @@ const _hasRawDataParam = (function () {
     return null;
   }
 
-  // Priority 1: ?lz= query param — LZString compressed (new v2 format)
-  const lzMatch = location.search.match(/[?&]lz=([^&]*)/);
+  // Priority 1: #lz= hash — LZString compressed (new v2 format, hash never sent to server)
+  const lzMatch = location.hash.match(/[#&]lz=([^&]*)/);
   // Priority 2: #d= hash — no encoding issues, recommended for testing
   const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
   // Priority 3: ?d= query param — raw extraction avoids URLSearchParams + → space issue

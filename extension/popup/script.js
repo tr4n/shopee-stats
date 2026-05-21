@@ -314,12 +314,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }))
     };
 
-    // Use LZString compression (v2 format: ?lz=)
+    // Use LZString compression (v2 format: #lz= hash — not sent to server, no HTTP 414 risk)
     // Falls back to Base64 (#d=) if LZString is not available
     try {
       if (typeof LZString !== 'undefined') {
         const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
-        return `${DASHBOARD_BASE}/?lz=${compressed}`;
+        return `${DASHBOARD_BASE}/#lz=${compressed}`;
       }
     } catch (e) {
       console.warn('[Popup] LZString compression failed, falling back to Base64:', e);
