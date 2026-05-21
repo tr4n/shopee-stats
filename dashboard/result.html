@@ -248,59 +248,61 @@
     <div id="support-modal" class="modal-overlay">
       <div class="modal-content modal-support-content">
         <div class="modal-header">
-          <h2>💬 Yêu Cầu Hỗ Trợ</h2>
+          <h2>💬 Hỗ Trợ Kỹ Thuật</h2>
           <button id="btn-close-support" class="btn-close">&times;</button>
         </div>
         <div class="support-body">
-          <!-- Soft Info box -->
-          <div class="support-oversize-notice"
-            style="background: rgba(74, 144, 217, 0.06); border: 1.5px solid rgba(74, 144, 217, 0.15); text-align: left; margin-top: 0; padding: 14px 16px; border-radius: 12px;">
-            <div class="support-oversize-body"
-              style="color: var(--text); font-size: 13px; font-weight: 500; margin-bottom: 0; line-height: 1.5;">
-              🤖 <strong>Để dễ dàng điều tra và tái hiện lỗi của bạn</strong>, chúng tôi cần bạn tải file đính kèm
-              vào Google Form theo hướng dẫn dưới đây:
-            </div>
+          
+          <div class="support-intro">
+            Chào bạn, rất tiếc vì sự cố ngoài ý muốn này khiến bạn gặp bất tiện! Cảm ơn bạn đã phản hồi lỗi, hãy thực hiện hai bước đơn giản dưới đây để chúng mình sớm kiểm tra và hỗ trợ khắc phục nhé:
           </div>
 
           <!-- Description field -->
-          <div class="support-field" style="margin-top: 4px;">
+          <div class="support-field">
             <label class="support-label">
-              Mô tả vấn đề gặp phải
-              <span class="support-hint">(tùy chọn)</span>
+              📝 Mô tả lỗi bạn gặp phải
+              <span class="support-hint">(không bắt buộc)</span>
             </label>
             <textarea id="support-desc" class="support-textarea"
-              placeholder="Ví dụ: Biểu đồ không tải được, dữ liệu năm 2026 bị hiển thị sai..."></textarea>
+              placeholder="Nhập mô tả lỗi tại đây để kỹ thuật viên hiểu rõ hơn vấn đề bạn đang gặp phải..."></textarea>
           </div>
 
-          <!-- Interactive Steps Box -->
-          <div
-            style="background: var(--dark); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border);">
-            <!-- Step 1 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div class="support-step" style="align-items: center;">
-                <span class="support-step-num" style="background: var(--primary);">1</span>
-                <span>Tải file đính kèm (.txt) về máy:</span>
+          <!-- Flattened Steps Layout -->
+          <div class="support-steps-container">
+            <!-- Step 1 Card -->
+            <div class="support-step-card step-1">
+              <div class="support-step-header">
+                <span class="support-step-badge badge-1">1</span>
+                <span class="support-step-title">Tải về file hỗ trợ kỹ thuật</span>
               </div>
-              <button id="btn-download-raw" class="support-action-btn" style="width: 100%; padding: 11px;">
-                <span>💾 Tải file đính kèm (.txt)</span>
-              </button>
+              <p class="support-step-desc">
+                File này chứa thông tin hiển thị của trang giúp kỹ thuật viên dễ dàng mô phỏng và tái hiện lỗi.
+              </p>
+              <div class="support-step-action">
+                <button id="btn-download-raw" class="support-action-btn">
+                  <span>💾 Tải file hỗ trợ (.txt)</span>
+                </button>
+              </div>
             </div>
 
-            <div style="height: 1px; background: var(--border); margin: 2px 0;"></div>
-
-            <!-- Step 2 -->
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div class="support-step" style="align-items: center;">
-                <span class="support-step-num" style="background: var(--primary);">2</span>
-                <span>Mở form và đính kèm file vừa tải:</span>
+            <!-- Step 2 Card -->
+            <div class="support-step-card step-2">
+              <div class="support-step-header">
+                <span class="support-step-badge badge-2">2</span>
+                <span class="support-step-title">Gửi báo cáo lỗi qua Google Form</span>
               </div>
-              <button id="btn-send-support" class="support-send-btn" style="margin-top: 4px;">
-                📝 Mở Google Form...
-              </button>
+              <p class="support-step-desc">
+                Nhấn nút dưới để mở Google Form, gửi kèm mô tả lỗi và đính kèm file hỗ trợ (.txt) vừa tải ở Bước 1.
+              </p>
+              <div class="support-step-action">
+                <button id="btn-send-support" class="support-send-btn">
+                  <span>📝 Mở Google Form...</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div id="support-status" style="margin-top: 10px; font-size: 13px; text-align: center;"></div>
+          <div id="support-status"></div>
         </div>
       </div>
     </div>

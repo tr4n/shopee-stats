@@ -209,9 +209,9 @@ function setupSupportButton(d) {
   const downloadRawBtn = document.getElementById('btn-download-raw');
   if (downloadRawBtn) {
     downloadRawBtn.addEventListener('click', () => {
-      if (!d) return alert('Không có dữ liệu gốc!');
+      if (!d) return alert('Không tìm thấy thông tin kỹ thuật hỗ trợ. Vui lòng tải lại trang và thử lại!');
       const origText = downloadRawBtn.innerHTML;
-      downloadRawBtn.innerHTML = '<span>⏳ Đang chuẩn bị tải...</span>';
+      downloadRawBtn.innerHTML = '<span>⏳ Đang tạo file hỗ trợ...</span>';
       try {
         const jsonStr = JSON.stringify(d);
         let compressed = '';
@@ -229,15 +229,15 @@ function setupSupportButton(d) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `shopee-stats-compressed-${d.ts || Date.now()}.txt`;
+        link.download = `shopee-analytics-support-${d.ts || Date.now()}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        downloadRawBtn.innerHTML = '<span>✓ Đã tải file!</span>';
+        downloadRawBtn.innerHTML = '<span>✓ Đã lưu file thành công!</span>';
       } catch (e) {
-        alert('Lỗi tải dữ liệu: ' + e.message);
-        downloadRawBtn.innerHTML = '<span>❌ Lỗi tải file</span>';
+        alert('Đã xảy ra lỗi khi tạo file: ' + e.message);
+        downloadRawBtn.innerHTML = '<span>❌ Đã xảy ra lỗi</span>';
       } finally {
         setTimeout(() => { downloadRawBtn.innerHTML = origText; }, 2000);
       }
@@ -273,7 +273,7 @@ function setupSupportButton(d) {
     const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
     const formUrlEmpty = `${baseUrl}&entry.1848321568=${encodeURIComponent(desc)}&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
 
-    statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang mở Google Form...</span>';
+    statusEl.innerHTML = '<span style="color: var(--green); font-weight: 600;">📋 Đang mở Google Form hỗ trợ...</span>';
     window.open(formUrlEmpty, '_blank');
 
     if (descEl) descEl.value = '';
