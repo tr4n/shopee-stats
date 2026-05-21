@@ -268,7 +268,6 @@ function setupSupportButton(d) {
     }, 1500);
   });
 }
-}
 
 /* ── Share Modal ─────────────────────────────── */
 function setupShareButtons(d) {
