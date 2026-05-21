@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Element References ===
   const btnStart = document.getElementById('btn-start');
   const btnRestart = document.getElementById('btn-restart');
+  const btnCancelProgress = document.getElementById('btn-cancel-progress');
   const btnClearCache = document.getElementById('btn-clear-cache');
   const btnOpenDashboard = document.getElementById('btn-open-dashboard');
   const themeToggle = document.getElementById('theme-toggle');
@@ -36,6 +37,31 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastCompleteData = null;
   let analysisStartTime = null;
   let debugTimerInterval = null;
+
+  // === Run Lock ===
+  // Prevents two analysis runs overlapping when the popup is closed and reopened mid-run.
+  // Each run gets a unique nonce; messages with a mismatched nonce are dropped.
+  const LOCK_KEY = 'shopee_analysis_lock';
+  const LOCK_TTL_MS = 8 * 60 * 1000; // 8 minutes — longer than worst-case fetch time
+  let _currentRunNonce = null;
+
+  function _genNonce() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  function setAnalysisLock(tabId, nonce) {
+    return new Promise(resolve =>
+      chrome.storage.local.set({ [LOCK_KEY]: { tabId, nonce, startTime: Date.now() } }, resolve)
+    );
+  }
+  function clearAnalysisLock() {
+    _currentRunNonce = null;
+    chrome.storage.local.remove([LOCK_KEY]);
+  }
+  function getAnalysisLock() {
+    return new Promise(resolve =>
+      chrome.storage.local.get([LOCK_KEY], r => resolve(r[LOCK_KEY] || null))
+    );
+  }
 
   // === App Config ===
   const authorInfoEl = document.getElementById('author-info');
@@ -155,6 +181,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   checkCacheInfo(3);
+
+  // On popup open: check if a previous run is still active (popup may have been closed mid-run).
+  // If the lock is fresh, restore the loading UI so the user knows analysis is in progress.
+  // If the lock is stale (> LOCK_TTL_MS), clear it and let the user start fresh.
+  getAnalysisLock().then(lock => {
+    if (!lock) return;
+    const age = Date.now() - (lock.startTime || 0);
+    if (age < LOCK_TTL_MS) {
+      // Another run is still likely in progress — show loading state
+      _currentRunNonce = lock.nonce;  // accept messages from the running instance
+      resetProgress();
+      progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
+      showState(stateLoading);
+    } else {
+      // Stale lock from a crashed/timed-out run — remove it silently
+      console.warn('[ShopeeAnalytics] Clearing stale analysis lock (age:', Math.round(age / 1000), 's)');
+      clearAnalysisLock();
+    }
+  });
   btnClearCache.addEventListener('click', () => {
     chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
@@ -195,11 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelDebug = document.getElementById('btn-cancel-debug');
   if (btnCancelDebug) {
     btnCancelDebug.addEventListener('click', () => {
+      clearAnalysisLock();
+      showState(stateInitial);
+    });
+  }
+
+  if (btnCancelProgress) {
+    btnCancelProgress.addEventListener('click', () => {
+      clearAnalysisLock();
       showState(stateInitial);
     });
   }
 
   btnRestart.addEventListener('click', () => {
+    clearAnalysisLock();
     showState(stateInitial);
     errorMessage.textContent = '';
     checkCacheInfo(getSelectedListType());
@@ -346,6 +400,17 @@ document.addEventListener('DOMContentLoaded', () => {
   btnStart.addEventListener('click', async () => {
     errorMessage.textContent = '';
     try {
+      // Guard: reject if another run is already active (lock is fresh)
+      const existingLock = await getAnalysisLock();
+      if (existingLock && Date.now() - (existingLock.startTime || 0) < LOCK_TTL_MS) {
+        console.warn('[ShopeeAnalytics] Analysis already running (lock held), ignoring duplicate start.');
+        _currentRunNonce = existingLock.nonce;  // sync nonce in case popup was reopened
+        resetProgress();
+        progressText.textContent = 'Đang phân tích... (đã chạy ' + Math.round((Date.now() - existingLock.startTime) / 1000) + 'giây)';
+        showState(stateLoading);
+        return;
+      }
+
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab) {
         errorMessage.textContent = '❌ Không thể xác định tab hiện tại. Vui lòng thử lại.';
@@ -368,8 +433,16 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.textContent = '❌ Extension không thể chạy trên các trang hệ thống. Vui lòng mở trang Shopee.vn thông thường.';
         return;
       }
+
+      // Generate a unique nonce for this run — used to discard messages from stale/parallel runs
+      const nonce = _genNonce();
+      _currentRunNonce = nonce;
+
       resetProgress();
       showState(stateLoading);
+
+      // Acquire run lock before injecting scripts
+      await setAnalysisLock(tab.id, nonce);
 
       // Start debug tracking
       analysisStartTime = Date.now();
@@ -388,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const useCache = cacheData && cacheData.listType === listType && isCacheValid(cacheData);
       const configPayload = {
         listType,
+        nonce,  // content script echoes this back so popup can verify message origin
         lastUpdated: useCache ? (cacheData.lastUpdated || 0) : 0,
         miniOrders: useCache ? cacheData.miniOrders : [],
         itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
@@ -415,12 +489,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       } catch (e) {
         console.error('[ShopeeAnalytics] Failed to load content script:', e);
+        clearAnalysisLock();
         throw new Error('Lỗi khi tải content script. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('[ShopeeAnalytics] Popup script execution error:', err);
-
-
+      clearAnalysisLock();
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
     }
@@ -430,6 +504,13 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener((message) => {
     console.log('[ShopeeAnalytics] Received message in popup:', message.type);
 
+    // Discard analysis progress/error/complete messages if we are not currently running or if the nonces do not match.
+    if (['progress', 'error', 'complete'].includes(message.type)) {
+      if (message.nonce !== _currentRunNonce) {
+        console.warn('[ShopeeAnalytics] Dropping message from mismatching or inactive run:', message.type);
+        return;
+      }
+    }
 
     if (message.type === 'progress') {
       const processed = message.processed || 0;
@@ -445,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
 
-
+      clearAnalysisLock();
 
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);
@@ -489,6 +570,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
       }
     } else if (message.type === 'complete') {
+
+      clearAnalysisLock();
 
       if (debugTimerInterval) {
         clearInterval(debugTimerInterval);

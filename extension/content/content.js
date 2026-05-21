@@ -1,6 +1,8 @@
 (function() {
   'use strict';
 
+  let runNonce = null;
+
   // Guard against "Extension context invalidated" errors
   // that occur when the extension is reloaded while the content script is running.
   function safeSend(msg) {
@@ -8,6 +10,9 @@
       if (!chrome.runtime?.id) {
         console.warn('[ShopeeAnalytics] Extension context invalidated, dropping message:', msg.type);
         return;
+      }
+      if (runNonce) {
+        msg.nonce = runNonce;
       }
       chrome.runtime.sendMessage(msg).catch(() => {});
     } catch (e) {
@@ -21,6 +26,9 @@
     const LAST_UPDATED = cfg.lastUpdated || 0;
     const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
     const CACHED_ITEM_MAP = cfg.itemMap || {};
+    // Nonce ties this content script instance to the popup run that spawned it.
+    // The popup uses it to drop messages from any parallel/stale instances.
+    runNonce = cfg.nonce || null;
 
     // Clean up temporary config immediately
     chrome.storage.local.remove(['shopee_temp_config']);
