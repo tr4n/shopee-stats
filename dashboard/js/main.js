@@ -148,14 +148,9 @@ function setupSupportButton(d) {
   const closeBtn = document.getElementById('btn-close-support');
   const sendBtn = document.getElementById('btn-send-support');
   const descEl = document.getElementById('support-desc');
-  const emailEl = document.getElementById('support-email');
   const noteEl = document.getElementById('support-note');
 
   if (!btn || !modal) return;
-
-  if (emailEl) {
-    emailEl.value = localStorage.getItem('support_email') || '';
-  }
 
   function getDeviceInfo() {
     const ua = navigator.userAgent;
@@ -261,11 +256,7 @@ function setupSupportButton(d) {
 
     modal.classList.add('active');
     setTimeout(() => {
-      if (emailEl && !emailEl.value) {
-        emailEl.focus();
-      } else {
-        descEl.focus();
-      }
+      if (descEl) descEl.focus();
     }, 150);
   });
 
@@ -273,19 +264,10 @@ function setupSupportButton(d) {
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 
   sendBtn.addEventListener('click', () => {
-    const userEmail = emailEl ? emailEl.value.trim() : '';
     const desc = descEl ? descEl.value.trim() : '';
     const statusEl = document.getElementById('support-status');
 
     if (!statusEl) return;
-
-    // Validate email format if provided
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (userEmail && !emailRegex.test(userEmail)) {
-      statusEl.innerHTML = '<span style="color: var(--primary); font-weight: bold;">⚠️ Vui lòng nhập địa chỉ email liên hệ hợp lệ hoặc để trống.</span>';
-      if (emailEl) emailEl.focus();
-      return;
-    }
 
     statusEl.innerHTML = '<span style="color: var(--green); font-weight: bold;">📋 Đang chuyển hướng đến Google Form đã điền sẵn...</span>';
 
@@ -306,15 +288,9 @@ function setupSupportButton(d) {
     // Construct pre-filled Google Form URL
     const baseUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url';
     const formUrl = `${baseUrl}` +
-      `&entry.1189199588=${encodeURIComponent(userEmail)}` +
       `&entry.1848321568=${encodeURIComponent(desc)}` +
       `&entry.322741036=${encodeURIComponent(deviceInfoStr)}` +
       `&entry.825360=${encodeURIComponent(b64 || '')}`;
-
-    // Save email for next time
-    if (userEmail) {
-      localStorage.setItem('support_email', userEmail);
-    }
 
     // Open pre-filled Google Form in new tab
     window.open(formUrl, '_blank');
