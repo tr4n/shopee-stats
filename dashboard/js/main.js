@@ -64,20 +64,49 @@ function parseData() {
 //   ?d=BASE64  — query param (fallback: URLSearchParams decodes + as space, so we fix it)
 // Stores payload under a millis ID, then redirects to clean ?id=MILLIS URL.
 // Returns true if a redirect was triggered (boot should be skipped).
-const _hasRawDataParam = (function () {
-  function tryParse(raw) {
-    if (!raw) return null;
-    const trimmed = raw.trim();
-    // Try raw JSON first
-    try { return JSON.parse(trimmed); } catch { /* noop */ }
-    // Try LZString decompression (new v2 format)
+async function tryParseAsync(raw, paramMode) {
+  if (!raw) return null;
+  let trimmed = raw.trim();
+
+  let mode = null;
+  if (trimmed.startsWith('gz:') || trimmed.startsWith('gz=')) {
+    mode = 'gzip';
+    trimmed = trimmed.substring(3);
+  } else if (trimmed.startsWith('lz:') || trimmed.startsWith('lz=')) {
+    mode = 'lz';
+    trimmed = trimmed.substring(3);
+  } else if (trimmed.startsWith('d:') || trimmed.startsWith('d=')) {
+    mode = 'd';
+    trimmed = trimmed.substring(2);
+  } else if (paramMode) {
+    mode = paramMode;
+  }
+
+  if (mode === 'gzip') {
+    try {
+      let base64 = trimmed.replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) base64 += '=';
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      if (typeof DecompressionStream !== 'undefined') {
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        const text = await new Response(stream).text();
+        return JSON.parse(text);
+      }
+    } catch (e) {
+      console.error('[Dashboard] Gzip decompression failed:', e);
+    }
+  } else if (mode === 'lz') {
     if (typeof LZString !== 'undefined') {
       try {
         const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
         if (decompressed) return JSON.parse(decompressed);
       } catch { /* noop */ }
     }
-    // Try base64 with TextDecoder for proper UTF-8 (Vietnamese) — legacy v1 format
+  } else if (mode === 'd') {
     for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
       try {
         const bin = atob(s);
@@ -86,20 +115,65 @@ const _hasRawDataParam = (function () {
         return JSON.parse(new TextDecoder().decode(bytes));
       } catch { /* noop */ }
     }
-    return null;
   }
 
-  // Priority 1: #lz= hash — LZString compressed (new v2 format, hash never sent to server)
+  // Fallbacks if mode execution failed/not matched
+  if (!mode) {
+    try { return JSON.parse(trimmed); } catch { /* noop */ }
+
+    if (typeof LZString !== 'undefined') {
+      try {
+        const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
+        if (decompressed) return JSON.parse(decompressed);
+      } catch { /* noop */ }
+    }
+
+    for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+      try {
+        const bin = atob(s);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch { /* noop */ }
+    }
+  }
+  return null;
+}
+
+async function checkAndHandleUrlData() {
+  const gzMatch = location.hash.match(/[#&]gz=([^&]*)/);
   const lzMatch = location.hash.match(/[#&]lz=([^&]*)/);
-  // Priority 2: #d= hash — no encoding issues, recommended for testing
   const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
-  // Priority 3: ?d= query param — raw extraction avoids URLSearchParams + → space issue
   const qMatch = location.search.match(/[?&]d=([^&]*)/);
 
-  const raw = lzMatch?.[1] || hashMatch?.[1] || qMatch?.[1];
+  let raw = null;
+  let paramMode = null;
+  if (gzMatch) {
+    raw = gzMatch[1];
+    paramMode = 'gzip';
+  } else if (lzMatch) {
+    raw = lzMatch[1];
+    paramMode = 'lz';
+  } else if (hashMatch) {
+    raw = hashMatch[1];
+    paramMode = 'd';
+  } else if (qMatch) {
+    raw = qMatch[1];
+    paramMode = 'd';
+  }
+
+  if (!raw) {
+    // Check if the hash itself is directly a prefixed key
+    const hash = decodeURIComponent(location.hash.substring(1)).trim();
+    if (hash.startsWith('gz:') || hash.startsWith('lz:') || hash.startsWith('d:') ||
+        hash.startsWith('gz=') || hash.startsWith('lz=') || hash.startsWith('d=')) {
+      raw = hash;
+    }
+  }
+
   if (!raw) return false;
 
-  const parsed = tryParse(raw);
+  const parsed = await tryParseAsync(raw, paramMode);
   if (parsed?.t) {
     const id = Date.now();
     localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
@@ -109,7 +183,7 @@ const _hasRawDataParam = (function () {
 
   console.error('[Dashboard] Failed to parse data from URL (hash or query param)');
   return false;
-})();
+}
 
 /* ── Chrome AI Support Check ─────────────────── */
 let chromeAISupportStatus = 'Đang kiểm tra...';
@@ -207,21 +281,50 @@ function setupSupportButton(d) {
 
   const downloadRawBtn = document.getElementById('btn-download-raw');
   if (downloadRawBtn) {
-    downloadRawBtn.addEventListener('click', () => {
+    downloadRawBtn.addEventListener('click', async () => {
       if (!d) return alert('Không tìm thấy thông tin kỹ thuật hỗ trợ. Vui lòng tải lại trang và thử lại!');
       const origText = downloadRawBtn.innerHTML;
       downloadRawBtn.innerHTML = '<span>⏳ Đang tạo file hỗ trợ...</span>';
       try {
         const jsonStr = JSON.stringify(d);
         let compressed = '';
-        if (typeof LZString !== 'undefined') {
-          compressed = LZString.compressToEncodedURIComponent(jsonStr);
-        } else {
-          // Fallback: Base64
+
+        // Try Gzip compression (prefix with 'gz=')
+        try {
+          if (typeof CompressionStream !== 'undefined') {
+            const stream = new Blob([jsonStr]).stream().pipeThrough(new CompressionStream('gzip'));
+            const buffer = await new Response(stream).arrayBuffer();
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.length; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            compressed = 'gz=' + btoa(binary)
+              .replace(/\+/g, '-')
+              .replace(/\//g, '_')
+              .replace(/=+$/, ''); // URI Safe Base64
+          }
+        } catch (e) {
+          console.warn('[Dashboard] Gzip compression for support file failed, falling back:', e);
+        }
+
+        // Fallback 1: LZString compression (prefix with 'lz=')
+        if (!compressed) {
+          try {
+            if (typeof LZString !== 'undefined') {
+              compressed = 'lz=' + LZString.compressToEncodedURIComponent(jsonStr);
+            }
+          } catch (e) {
+            console.warn('[Dashboard] LZString compression for support file failed:', e);
+          }
+        }
+
+        // Fallback 2: Base64 (prefix with 'd=')
+        if (!compressed) {
           const bytes = new TextEncoder().encode(jsonStr);
           let bin = '';
           for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-          compressed = btoa(bin);
+          compressed = 'd=' + btoa(bin);
         }
 
         const blob = new Blob([compressed], { type: 'text/plain;charset=utf-8' });
@@ -387,8 +490,9 @@ function setupShareButtons(d) {
 }
 
 /* ── Boot ────────────────────────────────────── */
-// Skip if we're mid-redirect (?d= was detected and location.replace() was called)
-if (!_hasRawDataParam) {
+(async function () {
+  const hasRaw = await checkAndHandleUrlData();
+  if (hasRaw) return;
   const d = parseData();
 
   if (!d || !d.t) {
@@ -1029,4 +1133,4 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
 
     initDashboard();
   }
-}
+})();

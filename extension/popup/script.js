@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return result ? result[0].toUpperCase() + result.slice(1) : '';
   }
 
-  function buildDashboardUrl(data) {
+  async function buildDashboardUrl(data) {
     // Build monthly items aggregation
     const monthMap = {};
     for (const order of (data.cachePayload?.miniOrders || [])) {
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ps = data.monthlyStats || {};
     const payload = {
-      v: 2,
+      v: 3, // Version 3 for Gzip format
       ev: (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : '',
       t: Math.round(data.totalSpent),
       o: data.totalOrders,
@@ -399,24 +399,47 @@ document.addEventListener('DOMContentLoaded', () => {
       }))
     };
 
-    // Use LZString compression (v2 format: #lz= hash — not sent to server, no HTTP 414 risk)
-    // Falls back to Base64 (#d=) if LZString is not available
+    const jsonStr = JSON.stringify(payload);
+
+    // Try Gzip compression (new v3 format: #gz= hash — native CompressionStream)
+    try {
+      if (typeof CompressionStream !== 'undefined') {
+        const stream = new Blob([jsonStr]).stream().pipeThrough(new CompressionStream('gzip'));
+        const buffer = await new Response(stream).arrayBuffer();
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const compressed = btoa(binary)
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, ''); // URI Safe Base64
+        return `${DASHBOARD_BASE}/#gz=${compressed}`;
+      }
+    } catch (e) {
+      console.warn('[Popup] Gzip compression failed, falling back:', e);
+    }
+
+    // Try LZString compression (v2 format: #lz= hash)
     try {
       if (typeof LZString !== 'undefined') {
-        const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
+        const compressed = LZString.compressToEncodedURIComponent(jsonStr);
         return `${DASHBOARD_BASE}/#lz=${compressed}`;
       }
     } catch (e) {
       console.warn('[Popup] LZString compression failed, falling back to Base64:', e);
     }
-    // Fallback: Base64 (legacy format)
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+    // Fallback: Base64 (legacy format: #d= hash)
+    const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
     return `${DASHBOARD_BASE}/#d=${encoded}`;
   }
 
-  function openDashboardWithData(data) {
+  async function openDashboardWithData(data) {
     try {
-      chrome.tabs.create({ url: buildDashboardUrl(data) });
+      const url = await buildDashboardUrl(data);
+      chrome.tabs.create({ url });
     } catch (e) {
       console.error('[Popup] Failed to build dashboard URL:', e);
       chrome.tabs.create({ url: DASHBOARD_BASE });

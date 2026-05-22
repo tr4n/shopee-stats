@@ -109,32 +109,81 @@
 
   <script src="js/lz-string.js"></script>
   <script>
-    (function () {
+    (async function () {
       const PREFIX = 'shopee_dash_data_';
 
-      function tryParse(raw) {
+      async function tryParseAsync(raw, paramMode) {
         if (!raw) return null;
-        const trimmed = raw.trim();
+        let trimmed = raw.trim();
 
-        // Try raw JSON first (in case someone pastes JSON directly)
-        try { return JSON.parse(trimmed); } catch { /* noop */ }
-
-        // Try LZString decompression (new v2 format)
-        if (typeof LZString !== 'undefined') {
-          try {
-            const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
-            if (decompressed) return JSON.parse(decompressed);
-          } catch { /* noop */ }
+        let mode = null;
+        if (trimmed.startsWith('gz:') || trimmed.startsWith('gz=')) {
+          mode = 'gzip';
+          trimmed = trimmed.substring(3);
+        } else if (trimmed.startsWith('lz:') || trimmed.startsWith('lz=')) {
+          mode = 'lz';
+          trimmed = trimmed.substring(3);
+        } else if (trimmed.startsWith('d:') || trimmed.startsWith('d=')) {
+          mode = 'd';
+          trimmed = trimmed.substring(2);
+        } else if (paramMode) {
+          mode = paramMode;
         }
 
-        // Try base64 — restore + chars that URL encoding may have turned into spaces
-        for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+        if (mode === 'gzip') {
           try {
-            const bin = atob(s);
-            const bytes = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-            return JSON.parse(new TextDecoder().decode(bytes));
-          } catch { /* noop */ }
+            let base64 = trimmed.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+            if (typeof DecompressionStream !== 'undefined') {
+              const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+              const text = await new Response(stream).text();
+              return JSON.parse(text);
+            }
+          } catch (e) {
+            console.error('[Dashboard] Gzip decompression failed:', e);
+          }
+        } else if (mode === 'lz') {
+          if (typeof LZString !== 'undefined') {
+            try {
+              const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
+              if (decompressed) return JSON.parse(decompressed);
+            } catch { /* noop */ }
+          }
+        } else if (mode === 'd') {
+          for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+            try {
+              const bin = atob(s);
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              return JSON.parse(new TextDecoder().decode(bytes));
+            } catch { /* noop */ }
+          }
+        }
+
+        // Fallbacks if mode execution failed/not matched
+        if (!mode) {
+          try { return JSON.parse(trimmed); } catch { /* noop */ }
+
+          if (typeof LZString !== 'undefined') {
+            try {
+              const decompressed = LZString.decompressFromEncodedURIComponent(trimmed);
+              if (decompressed) return JSON.parse(decompressed);
+            } catch { /* noop */ }
+          }
+
+          for (const s of [trimmed.replace(/ /g, '+'), trimmed]) {
+            try {
+              const bin = atob(s);
+              const bytes = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+              return JSON.parse(new TextDecoder().decode(bytes));
+            } catch { /* noop */ }
+          }
         }
         return null;
       }
@@ -149,18 +198,43 @@
         document.getElementById('btn-reload').style.display = 'inline-block';
       }
 
-      // Detect data from #lz= hash (LZString compressed), #d= hash (legacy), or ?d= query param
+      // Detect data from #gz= hash (Gzip compressed), #lz= hash (LZString compressed), #d= hash (legacy), or ?d= query param
+      const gzMatch = location.hash.match(/[#&]gz=([^&]*)/);
       const lzMatch = location.hash.match(/[#&]lz=([^&]*)/);
       const hashMatch = location.hash.match(/[#&]d=([^&]+)/);
       const qMatch = location.search.match(/[?&]d=([^&]*)/);
-      const raw = lzMatch?.[1] || hashMatch?.[1] || qMatch?.[1];
+      
+      let raw = null;
+      let paramMode = null;
+      if (gzMatch) {
+        raw = gzMatch[1];
+        paramMode = 'gzip';
+      } else if (lzMatch) {
+        raw = lzMatch[1];
+        paramMode = 'lz';
+      } else if (hashMatch) {
+        raw = hashMatch[1];
+        paramMode = 'd';
+      } else if (qMatch) {
+        raw = qMatch[1];
+        paramMode = 'd';
+      }
+
+      if (!raw) {
+        // Check if the hash itself is directly a prefixed key
+        const hash = decodeURIComponent(location.hash.substring(1)).trim();
+        if (hash.startsWith('gz:') || hash.startsWith('lz:') || hash.startsWith('d:') ||
+            hash.startsWith('gz=') || hash.startsWith('lz=') || hash.startsWith('d=')) {
+          raw = hash;
+        }
+      }
 
       if (!raw) {
         showError('Không tìm thấy dữ liệu trong URL. Hãy mở lại từ extension Shopee Analytics.');
         return;
       }
 
-      const parsed = tryParse(raw);
+      const parsed = await tryParseAsync(raw, paramMode);
       if (!parsed || !parsed.t) {
         showError('Dữ liệu không hợp lệ hoặc bị hỏng. Hãy xuất lại dữ liệu từ extension.');
         return;
