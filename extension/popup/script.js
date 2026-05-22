@@ -275,9 +275,47 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
-  function checkCacheInfo(listType) {
-    chrome.storage.local.get(['shopee_cache'], (result) => {
-      const cache = result.shopee_cache;
+  function updateCacheStatus(listType, autoRender = false) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['shopee_cache'], (result) => {
+        const cache = result.shopee_cache;
+        if (cache && cache.listType === listType && isCacheValid(cache)) {
+          cacheData = cache;
+          const elapsedMin = Math.round((Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated)) / 60);
+          let timeStr;
+          if (elapsedMin < 60) timeStr = `${elapsedMin} phút trước`;
+          else if (elapsedMin < 1440) timeStr = `${Math.round(elapsedMin / 60)} giờ trước`;
+          else timeStr = `${Math.round(elapsedMin / 1440)} ngày trước`;
+          cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
+          cacheInfo.classList.remove('hidden');
+          if (btnViewCache) btnViewCache.classList.remove('hidden');
+
+          if (autoRender) {
+            const completeData = getCachedCompleteData(cache);
+            renderResults(completeData);
+          }
+        } else {
+          // Silently drop old-format cache so next run does a full re-fetch
+          if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
+          cacheData = null;
+          cacheInfo.classList.add('hidden');
+          if (btnViewCache) btnViewCache.classList.add('hidden');
+        }
+        resolve();
+      });
+    });
+  }
+
+  // === Unified Initialization ===
+  function initializeApp() {
+    const listType = 3;
+    chrome.storage.local.get(['shopee_cache', 'shopee_analysis_lock', 'theme'], (res) => {
+      // 1. Apply Theme
+      applyTheme(res.theme === 'dark');
+
+      // 2. Parse Cache Info
+      const cache = res.shopee_cache;
+      let hasValidCache = false;
       if (cache && cache.listType === listType && isCacheValid(cache)) {
         cacheData = cache;
         const elapsedMin = Math.round((Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated)) / 60);
@@ -288,63 +326,69 @@ document.addEventListener('DOMContentLoaded', () => {
         cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
         cacheInfo.classList.remove('hidden');
         if (btnViewCache) btnViewCache.classList.remove('hidden');
-
-        // Auto-render cached results
-        const completeData = getCachedCompleteData(cache);
-        renderResults(completeData);
+        hasValidCache = true;
       } else {
-        // Silently drop old-format cache so next run does a full re-fetch
         if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
         cacheData = null;
         cacheInfo.classList.add('hidden');
         if (btnViewCache) btnViewCache.classList.add('hidden');
       }
+
+      // 3. Check Lock State
+      const lock = res.shopee_analysis_lock;
+      if (lock) {
+        if (lock.status === 'completed') {
+          renderResults(lock.result);
+          clearAnalysisLock();
+          return;
+        }
+
+        if (lock.status === 'failed') {
+          console.warn('[ShopeeAnalytics] Analysis failed in background. Showing error:', lock.error);
+          showError(lock.error);
+          clearAnalysisLock();
+          return;
+        }
+
+        const age = Date.now() - (lock.startTime || 0);
+        if (age < LOCK_TTL_MS) {
+          // Ping the content script to verify it is still alive in that tab
+          chrome.tabs.sendMessage(lock.tabId, { type: 'ping', nonce: lock.nonce }, (response) => {
+            const err = chrome.runtime.lastError;
+            if (err || !response || response.type !== 'pong') {
+              console.warn('[ShopeeAnalytics] Content script is not responding. Clearing stale lock. Error:', err?.message);
+              clearAnalysisLock();
+              if (hasValidCache) {
+                renderResults(getCachedCompleteData(cacheData));
+              } else {
+                showState(stateInitial);
+              }
+            } else {
+              // Another run is confirmed active — show loading state
+              _currentRunNonce = lock.nonce;
+              _currentRunTabId = lock.tabId;
+              resetProgress();
+              progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
+              showState(stateLoading);
+            }
+          });
+          return;
+        } else {
+          console.warn('[ShopeeAnalytics] Clearing stale analysis lock (age:', Math.round(age / 1000), 's)');
+          clearAnalysisLock();
+        }
+      }
+
+      // 4. Default View (if no active lock)
+      if (hasValidCache) {
+        renderResults(getCachedCompleteData(cacheData));
+      } else {
+        showState(stateInitial);
+      }
     });
   }
 
-  checkCacheInfo(3);
-
-  // On popup open: check if a previous run is still active, completed, or failed.
-  getAnalysisLock().then(lock => {
-    if (!lock) return;
-
-    if (lock.status === 'completed') {
-      renderResults(lock.result);
-      clearAnalysisLock();
-      return;
-    }
-
-    if (lock.status === 'failed') {
-      console.warn('[ShopeeAnalytics] Analysis failed in background. Showing error:', lock.error);
-      showError(lock.error);
-      clearAnalysisLock();
-      return;
-    }
-
-    const age = Date.now() - (lock.startTime || 0);
-    if (age < LOCK_TTL_MS) {
-      // Ping the content script to verify it is still alive in that tab
-      chrome.tabs.sendMessage(lock.tabId, { type: 'ping', nonce: lock.nonce }, (response) => {
-        const err = chrome.runtime.lastError;
-        if (err || !response || response.type !== 'pong') {
-          console.warn('[ShopeeAnalytics] Content script is not responding. Clearing stale lock. Error:', err?.message);
-          clearAnalysisLock();
-          showState(stateInitial);
-        } else {
-          // Another run is confirmed active — show loading state
-          _currentRunNonce = lock.nonce;  // accept messages from the running instance
-          _currentRunTabId = lock.tabId;
-          resetProgress();
-          progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
-          showState(stateLoading);
-        }
-      });
-    } else {
-      // Stale lock from a crashed/timed-out run — remove it silently
-      console.warn('[ShopeeAnalytics] Clearing stale analysis lock (age:', Math.round(age / 1000), 's)');
-      clearAnalysisLock();
-    }
-  });
+  initializeApp();
   btnClearCache.addEventListener('click', () => {
     chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
@@ -449,6 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function cancelRunningAnalysisNoSignal() {
     clearAnalysisLock();
     showState(stateInitial);
+    updateCacheStatus(getSelectedListType(), false);
   }
 
   const btnCancelDebug = document.getElementById('btn-cancel-debug');
@@ -640,8 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let isTriggering = false;
+
   // === Start Analysis ===
   async function triggerAnalysis() {
+    if (isTriggering) return;
+    isTriggering = true;
+    if (btnStart) btnStart.disabled = true;
     errorMessage.textContent = '';
     try {
       // Guard: reject if another run is already active (lock is fresh)
@@ -744,6 +794,9 @@ document.addEventListener('DOMContentLoaded', () => {
       clearAnalysisLock();
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
+    } finally {
+      isTriggering = false;
+      if (btnStart) btnStart.disabled = false;
     }
   }
 
@@ -756,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('[ShopeeAnalytics] Lock was cleared by background script. Resetting UI.');
       cancelRunningAnalysisNoSignal();
       errorMessage.textContent = '';
-      checkCacheInfo(getSelectedListType());
+      updateCacheStatus(getSelectedListType(), true);
       return;
     }
 
@@ -785,6 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
       clearAnalysisLock();
       showError(message.message);
+      updateCacheStatus(getSelectedListType(), false);
     } else if (message.type === 'complete') {
 
       clearAnalysisLock();
@@ -799,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (message.data && message.data.cachePayload) {
         chrome.storage.local.set({ shopee_cache: message.data.cachePayload }, () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);
+          updateCacheStatus(getSelectedListType(), false);
         });
       }
       renderResults(message.data);
