@@ -953,3 +953,47 @@ body {
   margin-bottom: 12px;
   display: block;
 }
+
+/* Loading Tip Card Container */
+.loading-tip-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 20px;
+  width: 100%;
+  min-height: 80px; /* Fixed height to prevent layout shifts */
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.tip-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  animation: pulse-tip-icon 2.5s ease-in-out infinite;
+}
+
+.loading-tip {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+  opacity: 1;
+  margin: 0;
+}
+
+.loading-tip.fade-out {
+  opacity: 0;
+}
+
+@keyframes pulse-tip-icon {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 4px rgba(255,200,0,0.4)); }
+  100% { transform: scale(1); }
+}
+

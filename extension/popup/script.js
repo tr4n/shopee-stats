@@ -37,6 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastCompleteData = null;
   let analysisStartTime = null;
   let debugTimerInterval = null;
+  let tipsInterval = null;
+
+  const LOADING_TIPS = [
+    "Bạn có biết? Shopee thành lập năm 2015 tại Singapore và nay đã có mặt tại hơn 7 quốc gia!",
+    "Mẹo nhỏ: Săn mã miễn phí vận chuyển vào khung giờ vàng 0h và 12h mỗi ngày để tiết kiệm tối đa.",
+    "Bật mí: Hàng năm vào các ngày đôi như 11.11 hay 12.12 luôn có đợt siêu sale lớn nhất năm.",
+    "Bạn có biết? Tổng số tiền bạn tích lũy từ hoàn xu có thể dùng để giảm trực tiếp vào đơn hàng tiếp theo.",
+    "Mẹo nhỏ: Xem đánh giá kèm video của người mua trước là cách tốt nhất để kiểm chứng chất lượng sản phẩm.",
+    "Hãy thư giãn một chút! Tiện ích đang xử lý dữ liệu hoàn toàn bảo mật ngay trên trình duyệt của bạn.",
+    "Bạn có biết? Đơn hàng ở trạng thái 'Đã hủy' sẽ không bị tính vào tổng chi tiêu của bạn.",
+    "Mẹo nhỏ: Hãy so sánh giá của cùng một sản phẩm ở các shop khác nhau và đọc review trước khi ấn mua nhé!"
+  ];
 
   // === Run Lock ===
   // Prevents two analysis runs overlapping when the popup is closed and reopened mid-run.
@@ -235,11 +247,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // === State ===
+  function startTipsRotation() {
+    if (tipsInterval) clearInterval(tipsInterval);
+    const tipEl = document.getElementById('loading-tip');
+    if (!tipEl) return;
+    
+    let lastIndex = Math.floor(Math.random() * LOADING_TIPS.length);
+    tipEl.textContent = LOADING_TIPS[lastIndex];
+    tipEl.classList.remove('fade-out');
+
+    tipsInterval = setInterval(() => {
+      tipEl.classList.add('fade-out');
+      setTimeout(() => {
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * LOADING_TIPS.length);
+        } while (newIndex === lastIndex && LOADING_TIPS.length > 1);
+        
+        lastIndex = newIndex;
+        tipEl.textContent = LOADING_TIPS[newIndex];
+        tipEl.classList.remove('fade-out');
+      }, 300);
+    }, 4500);
+  }
+
+  function stopTipsRotation() {
+    if (tipsInterval) {
+      clearInterval(tipsInterval);
+      tipsInterval = null;
+    }
+  }
+
   function showState(stateEl) {
     stateInitial.classList.remove('active');
     stateLoading.classList.remove('active');
     stateResult.classList.remove('active');
     stateEl.classList.add('active');
+
+    if (stateEl === stateLoading) {
+      startTipsRotation();
+    } else {
+      stopTipsRotation();
+    }
   }
   function resetProgress() {
     progressBarFill.style.width = '0%';
@@ -588,9 +637,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         progressBarFill.classList.add('indeterminate');
         label = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
-      }
-      if (message.message) {
-        label += ` — ${message.message}`;
       }
       progressText.textContent = label;
     } else if (message.type === 'error') {
