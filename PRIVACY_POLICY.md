@@ -11,7 +11,6 @@ Welcome to **Shopee Analytics Pro** ("the Extension"). We respect your privacy a
 * **Local Processing:** All data aggregation, statistics, and analysis of your Shopee purchases are processed strictly locally inside your web browser.
 * **No Server Uploads:** The Extension **does not** collect, store, or transmit any of your personal data, Shopee credentials, session cookies, or transaction history to external servers. Your data stays yours.
 * **Local Storage:** Calculated statistics are stored securely on your local device using Chrome's local storage API (`chrome.storage.local`) only to enable fast loading next time. You can clear this cache at any time inside the Extension popup.
-* **On-Device AI Classification:** Category classification utilizing Gemini Nano (Chrome Prompt API) is performed **entirely on-device**. No product titles, prices, or metadata are sent to Google or any other cloud services.
 
 ---
 

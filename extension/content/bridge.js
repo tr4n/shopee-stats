@@ -1,5 +1,6 @@
 // Runs in MAIN world (page context) so fetch is identical to the page's own requests.
 // Communicates with the isolated content script via CustomEvents on window.
+// "We use chrome.scripting.executeScript to inject a minimal fetch bridge into the page's execution context (world: 'MAIN'). This is necessary because Shopee's API endpoints use strict Sec-Fetch-Site checks to prevent CSRF and bots. Initiating the fetch from the isolated world content script sets Sec-Fetch-Site: cross-site, causing Shopee to reject it with a HTTP 403 error. The bridge only forwards the API responses back to the extension for local aggregation."
 (function () {
   'use strict';
 
