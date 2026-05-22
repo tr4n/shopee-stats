@@ -40,17 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let tipsInterval = null;
 
   const LOADING_TIPS = [
-    "Mẹo nhỏ: Sau khi đặt hàng thành công, bạn có tối đa 30 phút để tự thay đổi Đơn vị vận chuyển (như chuyển từ SPX sang GHTK/Viettel Post) trong phần Chi tiết đơn hàng nếu Shop chưa chuẩn bị hàng.",
-    "Bạn có biết? Shopee cho phép Trả hàng/Hoàn tiền trong vòng 15 ngày kể từ khi giao hàng thành công đối với tất cả đơn hàng (bao gồm cả sản phẩm không thuộc Shopee Mall) miễn là chưa nhấn 'Đã nhận được hàng'.",
-    "Mẹo nhỏ: Khi trả hàng, nếu chọn phương thức 'Gửi trả hàng tại bưu cục' (mang ra bưu điện gần nhất) hoặc 'Lấy hàng tại nhà', Shopee sẽ hỗ trợ hoàn toàn 100% chi phí vận chuyển hoàn trả đơn hàng.",
-    "Bật mí: Ngay cả khi đã lỡ bấm 'Đã nhận được hàng', bạn vẫn có cơ hội yêu cầu Trả hàng/Hoàn tiền trong vòng 24 giờ tiếp theo nếu liên hệ tổng đài hỗ trợ kịp thời khi đơn hàng phát sinh lỗi.",
-    "Bạn có biết? Shopee Xu có hạn sử dụng là ngày cuối cùng của tháng thứ 3 kể từ tháng nhận xu. Hãy dùng xu để thanh toán hóa đơn điện, nước, internet ngay trên Shopee kẻo hết hạn nhé!",
-    "Bật mí: Xem các video ngắn trên Shopee Video là cách dễ nhất để săn các mã giảm giá 30% - 50% áp dụng trực tiếp cho các sản phẩm có gắn tag Shopee Video.",
-    "Bạn có biết? Nếu có từ 2 đơn hàng giao không thành công (bom hàng) trong vòng 60 ngày, Shopee sẽ tự động khóa phương thức thanh toán Khi nhận hàng (COD) của bạn trong 60 ngày kế tiếp.",
-    "Mẹo nhỏ: Viết đánh giá sản phẩm dài tối thiểu 50 ký tự, đính kèm 1 hình ảnh và 1 video sẽ giúp bạn nhận ngay 200 Shopee Xu (hoặc 400 Xu đối với sản phẩm thuộc Shopee Mall).",
-    "Bật mí: Bạn có thể áp dụng đồng thời tối đa 3 loại mã giảm giá cho 1 đơn hàng: Mã miễn phí vận chuyển, Mã giảm giá/hoàn xu của Shopee, và Mã giảm giá từ chính Shop.",
-    "Mẹo nhỏ: Hãy tìm mua các 'Gói Siêu Voucher' của Shopee chỉ với giá từ 1k - 10k để nhận được chuỗi mã giảm giá và miễn phí vận chuyển có giá trị lớn hơn nhiều lần số tiền mua gói.",
-    "Hãy thư giãn một chút! Tiện ích đang tổng hợp dữ liệu hoàn toàn bảo mật và an toàn ngay trên trình duyệt của bạn."
+    "Shopper đêm muộn: Các nghiên cứu tâm lý chỉ ra rằng những hóa đơn phát sinh sau 23h thường mang tính cảm xúc cao, nhằm giải tỏa căng thẳng.",
+    "Sức mạnh chu kỳ: Việc mua sắm định kỳ vào những ngày cố định trong tháng chứng tỏ bạn có lối sống tổ chức và tính kỷ luật cao.",
+    "Đầu tư trải nghiệm: Chi tiêu cho sách, khóa học hay hoạt động thể chất cho thấy bạn luôn ưu tiên phát triển bản thân trong dài hạn.",
+    "Tư duy thực tế: Việc ưu tiên mua combo hoặc các sản phẩm dung tích lớn tiết lộ bộ óc logic và khả năng kiểm soát tài chính tốt.",
+    "Thợ săn ưu đãi: Kiên nhẫn thu thập đủ mã giảm giá thể hiện sự nhạy bén và mong muốn có được cảm giác 'chiến thắng' khi mua sắm.",
+    "Cái giá tiện lợi: Sẵn sàng trả cao hơn để nhận hàng nhanh chứng tỏ bạn quyết đoán, coi trọng thời gian và hiệu quả công việc.",
+    "Trung thành thương hiệu: Chỉ sử dụng sản phẩm từ một hãng cố định tiết lộ tính cách trân trọng sự an toàn và ổn định.",
+    "Đam mê đổi mới: Thích thử nghiệm những sản phẩm mới ra mắt cho thấy bạn có độ tò mò cao và luôn muốn tìm kiếm trải nghiệm mới.",
+    "Tư duy trả thẳng: Ưu tiên thanh toán ngay thay vì trả góp cho thấy bạn muốn chủ động kiểm soát dòng tiền và ngại các ràng buộc.",
+    "Ví trống ảo: Ví điện tử làm giảm 'nỗi đau chi tiền' (pain of paying) giúp chốt đơn nhanh, trong khi COD đề cao tính chắc chắn.",
+    "Điểm yếu đêm muộn: Ý chí tự kiểm soát của não bộ giảm dần về cuối ngày, khiến giỏ hàng đêm muộn luôn dễ đầy hơn ban ngày.",
+    "Hiệu ứng mỏ neo: Nhìn thấy mức giá cũ bị gạch đi bên cạnh giá sale làm bạn cảm giác món đồ rẻ hơn thực tế dù chưa rõ giá trị thực.",
+    "Nỗi sợ bỏ lỡ (FOMO): Đồng hồ đếm ngược hay cảnh báo giới hạn kích thích vùng khẩn cấp của não, thúc giục bạn chốt đơn nhanh hơn.",
+    "An toàn riêng tư: Phân tích dữ liệu hoàn toàn cục bộ trên trình duyệt của bạn, cam kết bảo mật thông tin và không gửi về máy chủ."
   ];
 
   // === Run Lock ===
@@ -403,16 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // === State ===
   function formatTip(text) {
     if (text.includes(':')) {
-      const idx = text.indexOf(':');
-      const prefix = text.substring(0, idx).trim();
-      const body = text.substring(idx + 1).trim();
-      return `<strong style="color: var(--primary); font-weight: 700;">${prefix}:</strong> ${body}`;
-    }
-    if (text.includes('?')) {
-      const idx = text.indexOf('?');
-      const prefix = text.substring(0, idx + 1).trim();
-      const body = text.substring(idx + 1).trim();
-      return `<strong style="color: var(--green); font-weight: 700;">${prefix}</strong> ${body}`;
+      const parts = text.split(':');
+      const title = parts[0].trim();
+      const body = parts.slice(1).join(':').trim();
+      return `<strong style="color: var(--text-main); font-weight: 700;">${title}:</strong> <span style="font-weight: 500;">${body}</span>`;
     }
     return text;
   }
@@ -438,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
-    }, 10000);
+    }, 8000); // Rotates every 8s (7.7s visible + 300ms transition)
   }
 
   function stopTipsRotation() {

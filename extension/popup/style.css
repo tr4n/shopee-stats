@@ -1007,7 +1007,7 @@ body {
   padding: 16px;
   margin-top: 16px;
   width: 100%;
-  min-height: 88px; /* Fixed height to prevent layout shifts */
+  min-height: 96px; /* Optimized height to prevent layout shifts with micro-insights */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   text-align: left;
   box-sizing: border-box;
@@ -1046,8 +1046,8 @@ body {
 }
 
 .loading-tip {
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--text-muted);
   font-weight: 500;
   transition: opacity 0.3s ease, transform 0.3s ease;
