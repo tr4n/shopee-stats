@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelProgress = document.getElementById('btn-cancel-progress');
   const btnClearCache = document.getElementById('btn-clear-cache');
   const btnOpenDashboard = document.getElementById('btn-open-dashboard');
+  const btnViewCache = document.getElementById('btn-view-cache');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
 
@@ -164,6 +165,107 @@ document.addEventListener('DOMContentLoaded', () => {
     return { items, hasIlData };
   }
 
+  // === Cache Statistics Helpers ===
+  function addToPeriod(periods, key, o) {
+    periods[key].totalSpent += o.finalCost;
+    periods[key].orderCount += 1;
+    periods[key].itemCount += o.itemCount;
+    periods[key].rawSpent += o.rawCost;
+  }
+
+  function computeStats(orders) {
+    let totalSpentAmt = 0;
+    let totalOriginalAmt = 0;
+    let totalItemCount = 0;
+
+    const now = new Date();
+    const ref1M = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    const ref3M = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    const ref6M = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+    const ref1Y = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+
+    const periods = {
+      '1_month': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '3_months': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '6_months': { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+      '1_year':   { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 }
+    };
+    const byYear = {};
+
+    for (const o of orders) {
+      totalSpentAmt += o.finalCost;
+      totalOriginalAmt += o.rawCost;
+      totalItemCount += o.itemCount;
+
+      if (o.ts) {
+        const d = new Date(o.ts * 1000);
+        const yr = d.getFullYear();
+        const mo = String(d.getMonth() + 1);
+
+        if (d >= ref1M) addToPeriod(periods, '1_month', o);
+        if (d >= ref3M) addToPeriod(periods, '3_months', o);
+        if (d >= ref6M) addToPeriod(periods, '6_months', o);
+        if (d >= ref1Y) addToPeriod(periods, '1_year', o);
+
+        if (!byYear[yr]) {
+          byYear[yr] = {
+            total: { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 },
+            months: {}
+          };
+        }
+        const yt = byYear[yr].total;
+        yt.totalSpent += o.finalCost;
+        yt.orderCount += 1;
+        yt.itemCount += o.itemCount;
+        yt.rawSpent += o.rawCost;
+
+        if (!byYear[yr].months[mo]) {
+          byYear[yr].months[mo] = { totalSpent: 0, orderCount: 0, itemCount: 0, rawSpent: 0 };
+        }
+        const mt = byYear[yr].months[mo];
+        mt.totalSpent += o.finalCost;
+        mt.orderCount += 1;
+        mt.itemCount += o.itemCount;
+        mt.rawSpent += o.rawCost;
+      }
+    }
+
+    return {
+      totalOrders: orders.length,
+      totalSpent: totalSpentAmt,
+      totalSaved: totalOriginalAmt - totalSpentAmt,
+      totalItems: totalItemCount,
+      monthlyStats: periods,
+      yearlyStats: byYear,
+      totalRawSpent: totalOriginalAmt
+    };
+  }
+
+  function getTopItems(orders) {
+    const allItemAggr = {};
+    for (const order of orders) {
+      for (const item of (order.il || [])) {
+        const uId = item.i || item.n;
+        if (!allItemAggr[uId]) {
+          allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat };
+        }
+        allItemAggr[uId].spent += item.s;
+        allItemAggr[uId].count += item.c;
+      }
+    }
+    return Object.values(allItemAggr).sort((a, b) => b.spent - a.spent);
+  }
+
+  function getCachedCompleteData(cache) {
+    const stats = computeStats(cache.miniOrders);
+    const topItems = getTopItems(cache.miniOrders);
+    return {
+      ...stats,
+      topItems,
+      cachePayload: cache
+    };
+  }
+
   // === Cache Management ===
   function isCacheValid(cache) {
     if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
@@ -185,11 +287,17 @@ document.addEventListener('DOMContentLoaded', () => {
         else timeStr = `${Math.round(elapsedMin / 1440)} ngày trước`;
         cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
         cacheInfo.classList.remove('hidden');
+        if (btnViewCache) btnViewCache.classList.remove('hidden');
+
+        // Auto-render cached results
+        const completeData = getCachedCompleteData(cache);
+        renderResults(completeData);
       } else {
         // Silently drop old-format cache so next run does a full re-fetch
         if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
         cacheData = null;
         cacheInfo.classList.add('hidden');
+        if (btnViewCache) btnViewCache.classList.add('hidden');
       }
     });
   }
@@ -241,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
       cacheInfo.classList.add('hidden');
+      if (btnViewCache) btnViewCache.classList.add('hidden');
     });
   });
 
@@ -357,9 +466,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnRestart.addEventListener('click', () => {
     cancelRunningAnalysis();
-    errorMessage.textContent = '';
-    checkCacheInfo(getSelectedListType());
+    triggerAnalysis();
   });
+
+  if (btnViewCache) {
+    btnViewCache.addEventListener('click', () => {
+      if (cacheData) {
+        errorMessage.textContent = '';
+        const completeData = getCachedCompleteData(cacheData);
+        renderResults(completeData);
+      }
+    });
+  }
 
   // === Dashboard URL ===
   const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
@@ -523,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === Start Analysis ===
-  btnStart.addEventListener('click', async () => {
+  async function triggerAnalysis() {
     errorMessage.textContent = '';
     try {
       // Guard: reject if another run is already active (lock is fresh)
@@ -540,20 +658,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab) {
         errorMessage.textContent = '❌ Không thể xác định tab hiện tại. Vui lòng thử lại.';
+        showState(stateInitial);
         return;
       }
 
-      if (!tab.url.includes('shopee.vn')) {
-        errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để sử dụng tiện ích này.';
-        document.getElementById('link-go-to-shopee').addEventListener('click', (e) => {
-          e.preventDefault();
-          chrome.tabs.create({ url: 'https://shopee.vn' });
-        });
+      if (!tab.url || !tab.url.includes('shopee.vn')) {
+        showState(stateInitial);
+        errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để thống kê lại / cập nhật dữ liệu mới.';
+        const link = document.getElementById('link-go-to-shopee');
+        if (link) {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            chrome.tabs.create({ url: 'https://shopee.vn' });
+          });
+        }
         return;
       }
 
       // Additional URL checks
       if (tab.url.includes('chrome-extension://') || tab.url.includes('chrome://') || tab.url.includes('moz-extension://')) {
+        showState(stateInitial);
         errorMessage.textContent = '❌ Extension không thể chạy trên các trang hệ thống. Vui lòng mở trang Shopee.vn thông thường.';
         return;
       }
@@ -621,7 +745,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showState(stateInitial);
       errorMessage.textContent = 'Đã có lỗi xảy ra. Hãy tải lại trang Shopee và thử lại nhé.';
     }
-  });
+  }
+
+  btnStart.addEventListener('click', triggerAnalysis);
 
   // === Message Listener ===
   chrome.runtime.onMessage.addListener((message) => {
