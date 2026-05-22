@@ -168,7 +168,7 @@ function showYearlyTopItems(year, d) {
     tbody.innerHTML = aggregatedItems.map(item => `
       <tr>
         <td>
-          <div style="font-weight: 500; margin-bottom: 4px;">${item.n}</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">${item.n}</div>
           <div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>
         </td>
         <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}</td>
