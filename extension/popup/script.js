@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
-    }, 4500);
+    }, 8000);
   }
 
   function stopTipsRotation() {
