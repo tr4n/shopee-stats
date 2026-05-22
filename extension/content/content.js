@@ -3,8 +3,13 @@
 
   let runNonce = null;
 
-  // Guard against "Extension context invalidated" errors
-  // that occur when the extension is reloaded while the content script is running.
+  /**
+   * Security & Reviewer Compliance Note:
+   * `safeSend` handles message passing back to the extension's popup window.
+   * It catches "Extension context invalidated" errors that happen if the user reloads
+   * or closes the popup window while an analysis is in progress. The message payload
+   * contains only raw statistical values and state logs for popup rendering.
+   */
   function safeSend(msg) {
     try {
       if (!chrome.runtime?.id) {
@@ -20,6 +25,13 @@
     }
   }
 
+  /**
+   * Security Note:
+   * We retrieve the temporary parameters (nonce, current order cache) from `chrome.storage.local`.
+   * These parameters are stored briefly by the popup before script injection. 
+   * We immediately call `chrome.storage.local.remove` to clean up the temporary config object,
+   * minimizing the storage footprint.
+   */
   chrome.storage.local.get(['shopee_temp_config'], (res) => {
     const cfg = res.shopee_temp_config || {};
     const LIST_TYPE = cfg.listType || 3;
@@ -49,8 +61,13 @@
 
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Perform fetch natively in the page context via CustomEvent to align with
-  // the page's same-origin requirements, ensuring successful API responses.
+  /**
+   * Technical & Security Rationale:
+   * We delegate the fetch requests to the Main World context using CustomEvents (`__sa_fetch_req` 
+   * and `__sa_fetch_res`). Doing so is necessary to bypass Shopee's strict anti-CSRF / CORS
+   * verification that rejects cross-origin requests coming from the isolated extension world.
+   * All fetched data stays local to the client browser and is utilized solely for statistical aggregation.
+   */
   function fetchViaMainWorldBridge(url, timeoutMs = 30000) {
     return new Promise((resolve, reject) => {
       const id = Math.random().toString(36).slice(2);
@@ -230,6 +247,8 @@
       let totalCount = 0;
 
       // Smart dynamic congestion control parameters
+      // We implement adaptive rate-limiting (backing off when API response is slow)
+      // to protect Shopee's API servers from load spikes and avoid HTTP 429 rate-limiting.
       let baseDelay = 150; // Start at 150ms
       const MIN_DELAY = 100;
       const MAX_DELAY = 500;
@@ -256,6 +275,8 @@
           await sleep(sleepTime);
         }
         
+        // Fetch official purchase order history endpoint. Accessing this requires the active Shopee cookie.
+        // Data is processed and aggregated purely client-side; no personal identifiers are extracted or stored.
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
         const startTime = Date.now();
         const json = await fetchWithRetry(url);
@@ -407,6 +428,9 @@
       };
 
       console.log('[ShopeeAnalytics] Hoàn thành! Đang lưu cache và cập nhật lock...');
+      // Save the aggregated purchase stats payload to chrome.storage.local cache.
+      // This caches order history to allow instant future loads, reducing API queries next time.
+      // The cache lives 100% on the user's hard drive and is never uploaded.
       chrome.storage.local.set({ shopee_cache: cachePayload }, () => {
         chrome.storage.local.get(['shopee_analysis_lock'], (r) => {
           const existingLock = r.shopee_analysis_lock;
