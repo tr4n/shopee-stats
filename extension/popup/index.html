@@ -44,8 +44,10 @@
 
       <!-- Loading State -->
       <div id="loading-state" class="state-view">
-        <div class="loader">
-          <div class="spinner"></div>
+        <div class="loader-container">
+          <div class="spinner-outer"></div>
+          <div class="spinner-inner"></div>
+          <div class="spinner-center">🛍️</div>
         </div>
         <h2 class="loading-title">Đang phân tích...</h2>
         <div class="progress-wrapper">
@@ -57,7 +59,9 @@
 
         <!-- Tip Card Container -->
         <div id="loading-tip-container" class="loading-tip-container">
-          <span class="tip-icon">💡</span>
+          <div class="tip-icon-wrapper">
+            <span class="tip-icon">💡</span>
+          </div>
           <p id="loading-tip" class="loading-tip">Đang kết nối tới Shopee...</p>
         </div>
 

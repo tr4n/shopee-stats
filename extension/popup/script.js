@@ -247,13 +247,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // === State ===
+  function formatTip(text) {
+    if (text.includes(':')) {
+      const idx = text.indexOf(':');
+      const prefix = text.substring(0, idx).trim();
+      const body = text.substring(idx + 1).trim();
+      return `<strong style="color: var(--primary); font-weight: 700;">${prefix}:</strong> ${body}`;
+    }
+    if (text.includes('?')) {
+      const idx = text.indexOf('?');
+      const prefix = text.substring(0, idx + 1).trim();
+      const body = text.substring(idx + 1).trim();
+      return `<strong style="color: var(--green); font-weight: 700;">${prefix}</strong> ${body}`;
+    }
+    return text;
+  }
+
   function startTipsRotation() {
     if (tipsInterval) clearInterval(tipsInterval);
     const tipEl = document.getElementById('loading-tip');
     if (!tipEl) return;
     
     let lastIndex = Math.floor(Math.random() * LOADING_TIPS.length);
-    tipEl.textContent = LOADING_TIPS[lastIndex];
+    tipEl.innerHTML = formatTip(LOADING_TIPS[lastIndex]);
     tipEl.classList.remove('fade-out');
 
     tipsInterval = setInterval(() => {
@@ -265,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } while (newIndex === lastIndex && LOADING_TIPS.length > 1);
         
         lastIndex = newIndex;
-        tipEl.textContent = LOADING_TIPS[newIndex];
+        tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
     }, 4500);
