@@ -229,6 +229,14 @@
       let hitCache = false;
       let totalCount = 0;
 
+      // Smart dynamic congestion control parameters
+      let baseDelay = 150; // Start at 150ms
+      const MIN_DELAY = 100;
+      const MAX_DELAY = 500;
+      let consecutiveSuccessCount = 0;
+      let lastDuration = 0;
+      let lastSleepTime = 0;
+
       const newMiniOrders = [];
 
       const itemMap = {};
@@ -240,13 +248,37 @@
         if (isCancelled) {
           throw new Error('Tiến trình đã bị hủy.');
         }
-        if (offsetIndex > 0) await sleep(200);
+
+        const jitter = Math.floor(Math.random() * 80) + 10; // 10ms - 90ms jitter
+        const sleepTime = offsetIndex > 0 ? (baseDelay + jitter) : 0;
+        lastSleepTime = sleepTime;
+        if (sleepTime > 0) {
+          await sleep(sleepTime);
+        }
         
         const url = `https://shopee.vn/api/v4/order/get_order_list?list_type=${LIST_TYPE}&offset=${offsetIndex}&limit=${LIMIT}`;
+        const startTime = Date.now();
         const json = await fetchWithRetry(url);
+        const duration = Date.now() - startTime;
+        lastDuration = duration;
 
         if (!json || typeof json !== 'object') {
           throw new Error('Dữ liệu trả về từ Shopee không hợp lệ. Vui lòng tải lại trang và thử lại.');
+        }
+
+        // Adapt delay based on API response duration / load signs
+        if (duration > 1500) {
+          baseDelay = Math.min(baseDelay + 50, MAX_DELAY);
+          consecutiveSuccessCount = 0;
+          console.log(`[ShopeeAnalytics] Response slow (${duration}ms). Backing off, base delay: ${baseDelay}ms`);
+        } else if (duration < 600) {
+          consecutiveSuccessCount++;
+          if (consecutiveSuccessCount >= 4) {
+            baseDelay = Math.max(baseDelay - 10, MIN_DELAY);
+            consecutiveSuccessCount = 0;
+          }
+        } else {
+          consecutiveSuccessCount = 0;
         }
 
         if (offsetIndex === 0) {
@@ -330,7 +362,8 @@
           const pct = totalCount > 0
             ? Math.min(Math.round((currentTotal / totalCount) * 100), 99)
             : -1;
-          safeSend({ type: 'progress', processed: currentTotal, total: totalCount, pct });
+          const speedMsg = `tốc độ ${(lastDuration / 1000).toFixed(1)}s/trang, nghỉ ${lastSleepTime}ms`;
+          safeSend({ type: 'progress', message: speedMsg, processed: currentTotal, total: totalCount, pct });
         }
       }
 

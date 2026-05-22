@@ -580,14 +580,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (message.type === 'progress') {
       const processed = message.processed || 0;
       const pct = typeof message.pct === 'number' ? message.pct : -1;
+      let label = '';
       if (pct >= 0) {
         progressBarFill.classList.remove('indeterminate');
         progressBarFill.style.width = pct + '%';
-        progressText.textContent = `Đã xử lý ${processed.toLocaleString()}/${(message.total || 0).toLocaleString()} đơn (${pct}%)`;
+        label = `Đã xử lý ${processed.toLocaleString()}/${(message.total || 0).toLocaleString()} đơn (${pct}%)`;
       } else {
         progressBarFill.classList.add('indeterminate');
-        progressText.textContent = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
+        label = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
       }
+      if (message.message) {
+        label += ` — ${message.message}`;
+      }
+      progressText.textContent = label;
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
       clearAnalysisLock();
