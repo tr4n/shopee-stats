@@ -9,6 +9,150 @@ let _categoriesData = null;
 let DASH_SCORING_CATS = [];
 const MIN_DASH_SCORE = 3;
 
+let _aiToastEl = null;
+let _aiToastTimeout = null;
+
+function injectAIStatusStyles() {
+  if (document.getElementById('ai-toast-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'ai-toast-styles';
+  style.textContent = `
+    .ai-status-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px) saturate(180%);
+      -webkit-backdrop-filter: blur(10px) saturate(180%);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 9999;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13.5px;
+      color: #1e293b;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      font-weight: 550;
+    }
+    .ai-status-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .ai-status-toast.success {
+      border-left: 4px solid #26aa99;
+      background: rgba(240, 253, 250, 0.9);
+    }
+    .ai-status-toast.warning {
+      border-left: 4px solid #ee4d2d;
+      background: rgba(254, 242, 242, 0.9);
+    }
+    .ai-status-toast.info {
+      border-left: 4px solid #ee4d2d;
+    }
+    .ai-toast-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #ee4d2d;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .ai-status-toast.success .ai-toast-dot {
+      background-color: #26aa99;
+    }
+    .ai-status-toast.warning .ai-toast-dot {
+      background-color: #ee4d2d;
+    }
+    .ai-toast-dot.pulse {
+      animation: ai-toast-pulse 1.2s infinite ease-in-out;
+    }
+    @keyframes ai-toast-pulse {
+      0% {
+        transform: scale(0.85);
+        box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.4);
+      }
+      70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(238, 77, 45, 0);
+      }
+      100% {
+        transform: scale(0.85);
+        box-shadow: 0 0 0 0 rgba(238, 77, 45, 0);
+      }
+    }
+    .ai-status-toast.success .ai-toast-dot.pulse {
+      animation: ai-toast-pulse-success 1.2s infinite ease-in-out;
+    }
+    @keyframes ai-toast-pulse-success {
+      0% {
+        transform: scale(0.85);
+        box-shadow: 0 0 0 0 rgba(38, 170, 153, 0.4);
+      }
+      70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 6px rgba(38, 170, 153, 0);
+      }
+      100% {
+        transform: scale(0.85);
+        box-shadow: 0 0 0 0 rgba(38, 170, 153, 0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function showAIChatStatus(text, type = 'info') {
+  injectAIStatusStyles();
+  if (!_aiToastEl) {
+    _aiToastEl = document.createElement('div');
+    _aiToastEl.className = 'ai-status-toast';
+    document.body.appendChild(_aiToastEl);
+  }
+  
+  if (_aiToastTimeout) {
+    clearTimeout(_aiToastTimeout);
+    _aiToastTimeout = null;
+  }
+  
+  let iconHtml = '';
+  if (type === 'success') {
+    iconHtml = '<span class="ai-toast-dot" style="background-color: #26aa99; width: auto; height: auto; border-radius: 0; font-size: 14px;">✨</span>';
+  } else if (type === 'warning') {
+    iconHtml = '<span class="ai-toast-dot" style="background-color: transparent; width: auto; height: auto; border-radius: 0; font-size: 14px;">⚠️</span>';
+  } else {
+    iconHtml = '<span class="ai-toast-dot pulse"></span>';
+  }
+  
+  _aiToastEl.innerHTML = `${iconHtml}<span class="ai-toast-content">${text}</span>`;
+  _aiToastEl.className = `ai-status-toast ${type}`;
+  
+  _aiToastEl.offsetHeight;
+  _aiToastEl.classList.add('show');
+}
+
+function hideAIChatStatus(delay = 0) {
+  if (!_aiToastEl) return;
+  if (_aiToastTimeout) clearTimeout(_aiToastTimeout);
+  
+  _aiToastTimeout = setTimeout(() => {
+    if (_aiToastEl) _aiToastEl.classList.remove('show');
+    _aiToastTimeout = setTimeout(() => {
+      if (_aiToastEl && !_aiToastEl.classList.contains('show')) {
+        _aiToastEl.remove();
+        _aiToastEl = null;
+      }
+    }, 300);
+  }, delay);
+}
+
 async function loadCategories() {
   if (_categoriesData) return _categoriesData;
   try {
@@ -143,7 +287,13 @@ async function classifyKharItems(ti, d) {
 
   if (!toClassify.length) return;
 
+  // Verify that Chrome AI is active/ready before displaying status loader or locking state
+  const session = await getDashCatSession();
+  if (!session) return;
+
   _isClassifying = true;
+  showAIChatStatus('🤖 Đang phân loại danh mục sản phẩm bằng Chrome AI (0%)...', 'info');
+
   try {
     const BATCH_SIZE = 8; // Reduced to minimize AI memory usage
     const MAX_ITEMS = 32; // Total limit to prevent overwhelming AI
@@ -154,15 +304,15 @@ async function classifyKharItems(ti, d) {
       toClassify.splice(MAX_ITEMS);
     }
 
-    const session = await getDashCatSession();
-    if (!session) return;
-
     let totalPatched = 0;
 
     for (let i = 0; i < toClassify.length; i += BATCH_SIZE) {
       try {
-        // Yield to browser between batches for smooth UI
-        if (i > 0) await new Promise(resolve => setTimeout(resolve, 50));
+        // Yield to browser between batches to prevent main thread blocking (increased to 150ms for slower systems)
+        if (i > 0) await new Promise(resolve => setTimeout(resolve, 150));
+
+        const progress = Math.round((i / toClassify.length) * 100);
+        showAIChatStatus(`🤖 Đang phân loại danh mục sản phẩm bằng Chrome AI (${progress}%)...`, 'info');
 
         const batch = toClassify.slice(i, i + BATCH_SIZE);
         const names = batch.map(x => x.item.n).join('\n');
@@ -187,11 +337,41 @@ async function classifyKharItems(ti, d) {
           _dashCache.cats[key] = resolved;
         }
 
-        totalPatched += batchPatched;
+        if (batchPatched > 0) {
+          totalPatched += batchPatched;
+
+          // Clear cached AI insights since categorization changed
+          if (_dashCache && _dashCache.insights) {
+            _dashCache.insights = {};
+          }
+          saveDashCache();
+
+          // Render UI updates progressively per batch (immediate feedback)
+          if (window.updateDashboardUIAfterClassification) {
+            window.updateDashboardUIAfterClassification();
+          } else {
+            if (window.categorizeMiItems) {
+              window.categorizeMiItems(d, ti);
+            }
+            d.cs = buildCsFromTi(ti);
+            if (window.saveDataToStorage) {
+              window.saveDataToStorage(d);
+            }
+            requestAnimationFrame(() => {
+              renderTopItems(ti);
+              renderCategories(d.cs, ti);
+              if (window.runAIInsightsNarrative) {
+                window.runAIInsightsNarrative(d);
+              }
+            });
+          }
+        }
 
       } catch (e) {
         console.warn(`[Dashboard] Batch ${Math.floor(i / BATCH_SIZE) + 1} classification failed:`, e);
         if (isAIFatalError(e)) {
+          showAIChatStatus('⚠️ Không thể tiếp tục phân loại bằng Chrome AI!', 'warning');
+          hideAIChatStatus(4000);
           _dashCatDisabled = true;
           _dashCatSession = null;
           break;
@@ -200,31 +380,15 @@ async function classifyKharItems(ti, d) {
     }
 
     if (totalPatched > 0) {
-      // Clear cached AI insights since categorization changed
-      if (_dashCache && _dashCache.insights) {
-        _dashCache.insights = {};
-      }
-      saveDashCache();
-      if (window.updateDashboardUIAfterClassification) {
-        window.updateDashboardUIAfterClassification();
-      } else {
-        if (window.categorizeMiItems) {
-          window.categorizeMiItems(d, ti);
-        }
-        d.cs = buildCsFromTi(ti);
-        if (window.saveDataToStorage) {
-          window.saveDataToStorage(d);
-        }
-        requestAnimationFrame(() => {
-          renderTopItems(ti);
-          renderCategories(d.cs, ti);
-          if (window.runAIInsightsNarrative) {
-            window.runAIInsightsNarrative(d);
-          }
-        });
-      }
+      showAIChatStatus(`✨ Đã tự động phân loại xong ${totalPatched} sản phẩm bằng AI!`, 'success');
+      hideAIChatStatus(3000);
       console.log(`[Dashboard] AI classified ${totalPatched} items`);
+    } else {
+      hideAIChatStatus(0);
     }
+  } catch (err) {
+    console.error('[Dashboard] Error in classifyKharItems:', err);
+    hideAIChatStatus(0);
   } finally {
     _isClassifying = false;
   }
