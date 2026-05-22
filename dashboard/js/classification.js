@@ -95,7 +95,7 @@ async function getDashCatSession() {
   if (typeof LanguageModel === 'undefined') return null;
   try {
     const status = await LanguageModel.availability();
-    const isAvail = ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
+    const isAvail = ['available', 'readily'].includes(status);
     if (!isAvail) return null;
     await initializeCategories();
     const categoriesDesc = _categoriesData.categories.map(cat =>
@@ -115,8 +115,11 @@ async function getDashCatSession() {
   }
 }
 
+let _isClassifying = false;
+
 // Optimized AI classification with batching and resource management
 async function classifyKharItems(ti, d) {
+  if (_isClassifying) return;
   if (!ti || !ti.length || !_dashCache) return;
 
   // Apply cached overrides first (fastest path)
@@ -140,77 +143,89 @@ async function classifyKharItems(ti, d) {
 
   if (!toClassify.length) return;
 
-  const BATCH_SIZE = 8; // Reduced to minimize AI memory usage
-  const MAX_ITEMS = 32; // Total limit to prevent overwhelming AI
+  _isClassifying = true;
+  try {
+    const BATCH_SIZE = 8; // Reduced to minimize AI memory usage
+    const MAX_ITEMS = 32; // Total limit to prevent overwhelming AI
 
-  if (toClassify.length > MAX_ITEMS) {
-    // Prioritize high-spend items for classification
-    toClassify.sort((a, b) => (b.item.s || 0) - (a.item.s || 0));
-    toClassify.splice(MAX_ITEMS);
-  }
+    if (toClassify.length > MAX_ITEMS) {
+      // Prioritize high-spend items for classification
+      toClassify.sort((a, b) => (b.item.s || 0) - (a.item.s || 0));
+      toClassify.splice(MAX_ITEMS);
+    }
 
-  const session = await getDashCatSession();
-  if (!session) return;
+    const session = await getDashCatSession();
+    if (!session) return;
 
-  let totalPatched = 0;
+    let totalPatched = 0;
 
-  for (let i = 0; i < toClassify.length; i += BATCH_SIZE) {
-    try {
-      // Yield to browser between batches for smooth UI
-      if (i > 0) await new Promise(resolve => setTimeout(resolve, 50));
+    for (let i = 0; i < toClassify.length; i += BATCH_SIZE) {
+      try {
+        // Yield to browser between batches for smooth UI
+        if (i > 0) await new Promise(resolve => setTimeout(resolve, 50));
 
-      const batch = toClassify.slice(i, i + BATCH_SIZE);
-      const names = batch.map(x => x.item.n).join('\n');
-      const raw = await session.prompt(`Classify (one code per line):\n${names}`);
-      const lines = String(raw).split('\n')
-        .map(l => l.trim().toLowerCase().replace(/[^a-z_]/g, ''))
-        .filter(Boolean);
+        const batch = toClassify.slice(i, i + BATCH_SIZE);
+        const names = batch.map(x => x.item.n).join('\n');
+        const raw = await session.prompt(`Classify (one code per line):\n${names}`);
+        const lines = String(raw).split('\n')
+          .map(l => l.trim().toLowerCase().replace(/[^a-z_]/g, ''))
+          .filter(Boolean);
 
-      let batchPatched = 0;
-      const dashCatCodes = getDashCatCodes();
+        let batchPatched = 0;
+        const dashCatCodes = getDashCatCodes();
 
-      for (let j = 0; j < batch.length && j < lines.length; j++) {
-        const resolved = dashCatCodes[lines[j]];
-        if (!resolved) continue;
-        const { key } = batch[j];
-        for (const item of ti) {
-          if (isInvalidCat(item.cat) && item.n.toLowerCase().substring(0, 120) === key) {
-            item.cat = resolved;
-            batchPatched++;
+        for (let j = 0; j < batch.length && j < lines.length; j++) {
+          const resolved = dashCatCodes[lines[j]];
+          if (!resolved) continue;
+          const { key } = batch[j];
+          for (const item of ti) {
+            if (isInvalidCat(item.cat) && item.n.toLowerCase().substring(0, 120) === key) {
+              item.cat = resolved;
+              batchPatched++;
+            }
           }
+          _dashCache.cats[key] = resolved;
         }
-        _dashCache.cats[key] = resolved;
-      }
 
-      totalPatched += batchPatched;
+        totalPatched += batchPatched;
 
-    } catch (e) {
-      console.warn(`[Dashboard] Batch ${Math.floor(i / BATCH_SIZE) + 1} classification failed:`, e);
-      if (isAIFatalError(e)) {
-        _dashCatDisabled = true;
-        _dashCatSession = null;
-        break;
+      } catch (e) {
+        console.warn(`[Dashboard] Batch ${Math.floor(i / BATCH_SIZE) + 1} classification failed:`, e);
+        if (isAIFatalError(e)) {
+          _dashCatDisabled = true;
+          _dashCatSession = null;
+          break;
+        }
       }
     }
-  }
 
-  if (totalPatched > 0) {
-    // Clear cached AI insights since categorization changed
-    if (_dashCache && _dashCache.insights) {
-      _dashCache.insights = {};
-    }
-    saveDashCache();
-    if (window.categorizeMiItems) {
-      window.categorizeMiItems(d, ti);
-    }
-    d.cs = buildCsFromTi(ti);
-    requestAnimationFrame(() => {
-      renderTopItems(ti);
-      renderCategories(d.cs, ti);
-      if (window.runAIInsightsNarrative) {
-        window.runAIInsightsNarrative(d);
+    if (totalPatched > 0) {
+      // Clear cached AI insights since categorization changed
+      if (_dashCache && _dashCache.insights) {
+        _dashCache.insights = {};
       }
-    });
-    console.log(`[Dashboard] AI classified ${totalPatched} items`);
+      saveDashCache();
+      if (window.updateDashboardUIAfterClassification) {
+        window.updateDashboardUIAfterClassification();
+      } else {
+        if (window.categorizeMiItems) {
+          window.categorizeMiItems(d, ti);
+        }
+        d.cs = buildCsFromTi(ti);
+        if (window.saveDataToStorage) {
+          window.saveDataToStorage(d);
+        }
+        requestAnimationFrame(() => {
+          renderTopItems(ti);
+          renderCategories(d.cs, ti);
+          if (window.runAIInsightsNarrative) {
+            window.runAIInsightsNarrative(d);
+          }
+        });
+      }
+      console.log(`[Dashboard] AI classified ${totalPatched} items`);
+    }
+  } finally {
+    _isClassifying = false;
   }
 }

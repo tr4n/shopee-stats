@@ -37,7 +37,7 @@ async function getAIInsightSession() {
   if (typeof LanguageModel === 'undefined') return null;
   try {
     const status = await LanguageModel.availability();
-    const isAvail = ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
+    const isAvail = ['available', 'readily'].includes(status);
     if (!isAvail) return null;
     _aiInsightSession = await LanguageModel.create({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
@@ -59,18 +59,59 @@ async function getAIInsightSession() {
 }
 
 let _isAIAvailable = false;
-const _aiAvailabilityPromise = (async () => {
-  if (typeof LanguageModel === 'undefined') return false;
+let _aiAvailabilityResolve;
+const _aiAvailabilityPromise = new Promise((resolve) => {
+  _aiAvailabilityResolve = resolve;
+});
+
+async function checkAIAvailability() {
+  if (typeof LanguageModel === 'undefined') {
+    _isAIAvailable = false;
+    _aiAvailabilityResolve(false);
+    return;
+  }
   try {
     const status = await LanguageModel.availability();
-    return ['available', 'readily', 'downloadable', 'after-download', 'downloading'].includes(status);
+    if (status === 'available' || status === 'readily') {
+      _isAIAvailable = true;
+      _aiAvailabilityResolve(true);
+    } else if (status === 'downloading' || status === 'after-download' || status === 'downloadable') {
+      // Model download in progress, check again in 5s
+      setTimeout(checkAIAvailability, 5000);
+    } else {
+      _isAIAvailable = false;
+      _aiAvailabilityResolve(false);
+    }
   } catch (e) {
-    return false;
+    _isAIAvailable = false;
+    _aiAvailabilityResolve(false);
   }
-})();
+}
+checkAIAvailability();
 
 _aiAvailabilityPromise.then(avail => {
   _isAIAvailable = avail;
+  if (avail && typeof classifyKharItems === 'function') {
+    const runLateClassification = () => {
+      if (!window.currentDashData) {
+        if (!runLateClassification.retries) runLateClassification.retries = 0;
+        if (runLateClassification.retries < 10) {
+          runLateClassification.retries++;
+          setTimeout(runLateClassification, 200);
+        }
+        return;
+      }
+      const tiItems = window.currentDashData.ti || [];
+      const uncategorizedCount = tiItems.filter(item => isInvalidCat(item.cat)).length;
+      if (uncategorizedCount > 0) {
+        console.log('[Dashboard] AI model became available late. Running background category classification for', uncategorizedCount, 'items.');
+        classifyKharItems(tiItems, window.currentDashData).catch(e => {
+          console.error('[Dashboard] Late AI category classification failed:', e);
+        });
+      }
+    };
+    runLateClassification();
+  }
 });
 
 // cacheKey: optional override for cache lookup (used for per-year monthly insights)

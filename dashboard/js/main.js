@@ -38,6 +38,8 @@ function saveDataToStorage(d) {
     console.warn('[Dashboard] Storage save failed (quota?):', e.message);
   }
 }
+window.saveDataToStorage = saveDataToStorage;
+
 
 /* ── Parse / load data ───────────────────────── */
 function parseData() {
@@ -1095,40 +1097,44 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
         // 6. Run AI category classification if any remaining uncategorized items
         const uncategorizedCount = tiItems.filter(item => isInvalidCat(item.cat)).length;
         if (uncategorizedCount > 0) {
-          try {
-            await classifyKharItems(tiItems, d);
-          } catch (e) {
+          classifyKharItems(tiItems, d).catch(e => {
             console.error('[Dashboard] AI category classification failed:', e);
-          }
+          });
         }
       } else {
         // Skip classification if already loaded from storage
       }
 
+      function updateDashboardUIAfterClassification() {
+        categorizeMiItems(d, tiItems);
+        d.cs = buildCsFromTi(tiItems);
+
+        // Persist classified data
+        saveDataToStorage(d);
+
+        // Re-render UI components
+        renderTopItems(tiItems);
+
+        // Re-render static rule-based cards with final categorized data
+        renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
+        renderInsightCard('insight-items', computeItemInsights(tiItems, d.t));
+
+        // Re-render categories respecting the active year filter
+        if (_activeCatYear !== 'all') {
+          switchCategoryYear(_activeCatYear, d, tiItems);
+        } else {
+          renderCategories(d.cs, tiItems);
+          renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
+        }
+
+        // Set up AI insight buttons (user must click to trigger analysis)
+        runAIInsightsNarrative(d);
+      }
+      window.updateDashboardUIAfterClassification = updateDashboardUIAfterClassification;
+
       // 7. Categorization is now 100% finished — update final state
       _categorizationFinished = true;
-      categorizeMiItems(d, tiItems);
-      d.cs = buildCsFromTi(tiItems);
-
-      // Persist final classified data so next load skips all classification steps
-      saveDataToStorage(d);
-
-      renderTopItems(tiItems);
-
-      // Re-render static rule-based cards with final categorized data
-      renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
-      renderInsightCard('insight-items', computeItemInsights(tiItems, d.t));
-
-      // Re-render categories respecting the active year filter
-      if (_activeCatYear !== 'all') {
-        switchCategoryYear(_activeCatYear, d, tiItems);
-      } else {
-        renderCategories(d.cs, tiItems);
-        renderInsightCard('insight-categories', computeCategoryInsights(d.cs, d.t));
-      }
-
-      // 8. Set up AI insight buttons (user must click to trigger analysis)
-      runAIInsightsNarrative(d);
+      updateDashboardUIAfterClassification();
     }
 
     initDashboard();
