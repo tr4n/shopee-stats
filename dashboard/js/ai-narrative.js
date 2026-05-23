@@ -85,8 +85,20 @@ async function checkAIAvailability() {
   try {
     const status = await getSystemAIAvailability();
     if (status === 'available' || status === 'readily') {
-      _isAIAvailable = true;
-      _aiAvailabilityResolve(true);
+      // Attempt to create a test session to guarantee local execution support
+      const testSession = await createAISession().catch(() => null);
+      if (testSession) {
+        if (typeof testSession.destroy === 'function') {
+          testSession.destroy();
+        } else if (typeof testSession.close === 'function') {
+          testSession.close();
+        }
+        _isAIAvailable = true;
+        _aiAvailabilityResolve(true);
+      } else {
+        _isAIAvailable = false;
+        _aiAvailabilityResolve(false);
+      }
     } else if (status === 'downloading' || status === 'after-download' || status === 'downloadable') {
       // Model download in progress, check again in 5s
       setTimeout(checkAIAvailability, 5000);
