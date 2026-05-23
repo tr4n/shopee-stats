@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
       o: data.totalOrders,
       s: Math.round(Math.max(0, data.totalSaved)),
       ip: data.totalItems,
-      ts: Math.floor(Date.now() / 1000),
+      ts: data.cachePayload?.fetchTime || data.cachePayload?.lastUpdated || Math.floor(Date.now() / 1000),
       yd,
       mi,
       ps: {
