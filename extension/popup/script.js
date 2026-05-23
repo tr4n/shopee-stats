@@ -435,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
-    }, 8000); // Rotates every 8s (7.7s visible + 300ms transition)
+    }, 8888); // Rotates every 8s (7.7s visible + 300ms transition)
   }
 
   function stopTipsRotation() {
