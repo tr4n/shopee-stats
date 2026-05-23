@@ -140,7 +140,7 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   if (_dashCache?.insights[ck]) {
     aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
     aiEl.style.display = ''; // Ensure visible
-    
+
     // Check AI availability to show/hide the refresh button
     _aiAvailabilityPromise.then(avail => {
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
@@ -186,10 +186,10 @@ async function _executeAIInsight(cardId) {
   aiEl.classList.add('loading');
 
   const session = await getAIInsightSession();
-  if (!session) { 
+  if (!session) {
     aiEl.classList.remove('loading');
     aiEl.style.display = 'none';
-    return; 
+    return;
   }
 
   try {
