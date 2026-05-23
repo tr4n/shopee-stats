@@ -182,7 +182,24 @@ async function _executeAIInsight(cardId) {
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
-  aiEl.innerHTML = '';
+  aiEl.innerHTML = `
+    <div class="ai-loading-container">
+      <svg class="ai-loading-icon spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="6" y2="12"></line>
+        <line x1="18" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+      </svg>
+      <div class="ai-loading-text">
+        <div class="ai-loading-status">🤖 Chrome AI đang phân tích dữ liệu...</div>
+        <div class="ai-loading-note">Vì mô hình AI hoạt động ngoại tuyến (offline) ngay trên thiết bị của bạn để đảm bảo bảo mật tuyệt đối dữ liệu, tốc độ phân tích sẽ phụ thuộc vào cấu hình phần cứng của máy. Quá trình này có thể mất từ vài giây tới một phút, bạn vui lòng đợi chút nhé!</div>
+      </div>
+    </div>
+  `;
   aiEl.classList.add('loading');
 
   const session = await getAIInsightSession();
