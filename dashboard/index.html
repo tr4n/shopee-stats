@@ -240,8 +240,8 @@
         return;
       }
 
-      // Store with millis ID
-      const id = Date.now();
+      // Store with ID from the scan timestamp (converted to milliseconds) or fallback to Date.now()
+      const id = parsed.ts ? parsed.ts * 1000 : Date.now();
       try {
         localStorage.setItem(PREFIX + id, JSON.stringify(parsed));
       } catch (e) {

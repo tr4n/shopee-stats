@@ -177,7 +177,7 @@ async function checkAndHandleUrlData() {
 
   const parsed = await tryParseAsync(raw, paramMode);
   if (parsed?.t) {
-    const id = Date.now();
+    const id = parsed.ts ? parsed.ts * 1000 : Date.now();
     localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
     location.replace('result.html?id=' + id);
     return true;
