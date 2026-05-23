@@ -54,7 +54,7 @@ function renderAIInsight(text, cardId) {
     `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
   ).join('');
   const refreshBtn = cardId
-    ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại">
+    ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại" style="display: none">
         <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -148,3 +148,33 @@ const io = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 
 function reveal(el) { if (el) io.observe(el); }
+
+/* ── Unified AI API Utilities ────────────────── */
+async function getSystemAIAvailability() {
+  if (typeof LanguageModel !== 'undefined' && typeof LanguageModel.availability === 'function') {
+    try {
+      return await LanguageModel.availability();
+    } catch (e) {
+      console.warn('[AI Helpers] LanguageModel.availability() failed:', e);
+    }
+  }
+  if (typeof ai !== 'undefined' && ai.languageModel && typeof ai.languageModel.capabilities === 'function') {
+    try {
+      const caps = await ai.languageModel.capabilities();
+      return caps?.available || 'no';
+    } catch (e) {
+      console.warn('[AI Helpers] ai.languageModel.capabilities() failed:', e);
+    }
+  }
+  return 'no';
+}
+
+async function createAISession(options) {
+  if (typeof LanguageModel !== 'undefined' && typeof LanguageModel.create === 'function') {
+    return await LanguageModel.create(options);
+  }
+  if (typeof ai !== 'undefined' && ai.languageModel && typeof ai.languageModel.create === 'function') {
+    return await ai.languageModel.create(options);
+  }
+  throw new Error('AI LanguageModel API not supported');
+}

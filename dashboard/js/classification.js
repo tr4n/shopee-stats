@@ -236,16 +236,15 @@ let _dashCatDisabled = false;
 async function getDashCatSession() {
   if (_dashCatDisabled) return null;
   if (_dashCatSession) return _dashCatSession;
-  if (typeof LanguageModel === 'undefined') return null;
   try {
-    const status = await LanguageModel.availability();
+    const status = await getSystemAIAvailability();
     const isAvail = ['available', 'readily'].includes(status);
     if (!isAvail) return null;
     await initializeCategories();
     const categoriesDesc = _categoriesData.categories.map(cat =>
       `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚 ]/g, '')}`
     ).join(', ');
-    _dashCatSession = await LanguageModel.create({
+    _dashCatSession = await createAISession({
       initialPrompts: [{
         role: 'system', content:
           `Classify Vietnamese products. Categories: ${categoriesDesc}. Return one code per line.`

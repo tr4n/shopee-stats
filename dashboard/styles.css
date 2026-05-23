@@ -999,9 +999,6 @@ body {
   position: relative;
 }
 
-#insight-yearly-ai {
-  display: none !important;
-}
 
 .insight-ai.loading {
   opacity: 0.4;

@@ -117,9 +117,6 @@ function renderYearlyChart(yd, d) {
             const newColors = years.map((y, i) => i === index ? '#ee4d2d' : 'rgba(238,77,45,0.4)');
             yearlyChart.data.datasets[0].backgroundColor = newColors;
             yearlyChart.update();
-            if (window.triggerYearlyAIInsight) {
-              window.triggerYearlyAIInsight(d, year);
-            }
           }
         }
       },

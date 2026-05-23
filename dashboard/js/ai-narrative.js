@@ -31,15 +31,31 @@ function isAIFatalError(error) {
     msg.includes('model not available');
 }
 
+function hideAllAIButtons() {
+  // Hide all main analyze buttons/wrappers
+  document.querySelectorAll('.ai-analyze-wrap').forEach(el => {
+    el.style.display = 'none';
+  });
+  // Remove all refresh buttons
+  document.querySelectorAll('.ai-refresh-btn').forEach(el => {
+    el.remove();
+  });
+  // Also hide empty AI containers (without generated or cached text sentences)
+  document.querySelectorAll('.insight-ai').forEach(el => {
+    if (!el.querySelector('.insight-ai-sentence')) {
+      el.style.display = 'none';
+    }
+  });
+}
+
 async function getAIInsightSession() {
   if (_aiInsightDisabled) return null;
   if (_aiInsightSession) return _aiInsightSession;
-  if (typeof LanguageModel === 'undefined') return null;
   try {
-    const status = await LanguageModel.availability();
+    const status = await getSystemAIAvailability();
     const isAvail = ['available', 'readily'].includes(status);
     if (!isAvail) return null;
-    _aiInsightSession = await LanguageModel.create({
+    _aiInsightSession = await createAISession({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
       expectedInputs: [
         { type: "text", languages: ["en"] }
@@ -53,6 +69,7 @@ async function getAIInsightSession() {
     if (isAIFatalError(e)) {
       console.warn('[Dashboard] AI model fatally broken, disabling AI insights:', e.message);
       _aiInsightDisabled = true;
+      hideAllAIButtons();
     }
     return null;
   }
@@ -65,13 +82,8 @@ const _aiAvailabilityPromise = new Promise((resolve) => {
 });
 
 async function checkAIAvailability() {
-  if (typeof LanguageModel === 'undefined') {
-    _isAIAvailable = false;
-    _aiAvailabilityResolve(false);
-    return;
-  }
   try {
-    const status = await LanguageModel.availability();
+    const status = await getSystemAIAvailability();
     if (status === 'available' || status === 'readily') {
       _isAIAvailable = true;
       _aiAvailabilityResolve(true);
@@ -128,6 +140,18 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
   if (_dashCache?.insights[ck]) {
     aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
     aiEl.style.display = ''; // Ensure visible
+    
+    // Check AI availability to show/hide the refresh button
+    _aiAvailabilityPromise.then(avail => {
+      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+      if (refreshBtn) {
+        if (avail && !_aiInsightDisabled) {
+          refreshBtn.style.display = '';
+        } else {
+          refreshBtn.remove();
+        }
+      }
+    });
     return;
   }
 
@@ -162,7 +186,11 @@ async function _executeAIInsight(cardId) {
   aiEl.classList.add('loading');
 
   const session = await getAIInsightSession();
-  if (!session) { aiEl.remove(); return; }
+  if (!session) { 
+    aiEl.classList.remove('loading');
+    aiEl.style.display = 'none';
+    return; 
+  }
 
   try {
     const fullPrompt = `SPENDING DATA:\n${args.context}\n\nREQUEST: ${args.specificPrompt}`;
@@ -170,22 +198,32 @@ async function _executeAIInsight(cardId) {
     if (result && result.trim()) {
       const text = result.trim();
       aiEl.innerHTML = renderAIInsight(text, cardId);
+      // Reveal the refresh button since we just ran successfully and AI is ready
+      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+      if (refreshBtn) {
+        refreshBtn.style.display = '';
+      }
       if (_dashCache) {
         const ck = args.cacheKey || cardId;
         _dashCache.insights[ck] = text;
         saveDashCache();
       }
     } else {
-      aiEl.remove();
+      aiEl.style.display = 'none';
     }
   } catch (e) {
     console.warn('[Dashboard] AI insight failed:', e);
-    if (isAIFatalError(e)) {
+    const fatal = isAIFatalError(e);
+    if (fatal) {
       _aiInsightDisabled = true;
       _aiInsightSession = null;
+      aiEl.innerHTML = '';
+      aiEl.style.display = 'none';
+      hideAllAIButtons();
+    } else {
+      // Non-fatal error, show the analyze button again so they can retry
+      aiEl.innerHTML = renderAnalyzeButton(cardId);
     }
-    // Show button again so user can retry
-    aiEl.innerHTML = renderAnalyzeButton(cardId);
   } finally {
     aiEl.classList.remove('loading');
   }

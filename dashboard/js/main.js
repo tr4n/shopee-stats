@@ -756,27 +756,6 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
     }
     window.triggerSingleCategoryAIInsight = triggerSingleCategoryAIInsight;
 
-    function triggerYearlyAIInsight(d, year) {
-      if (year === 'all') {
-        runAIInsightsNarrative(d);
-        return;
-      }
-      
-      const yearData = d.yd[year] || {};
-      const avgOrderValue = Math.round((yearData.t || 0) / Math.max(yearData.o || 1, 1));
-      const topItems = getItemsForYear(d.mi, year, d.ti).slice(0, 5);
-      const itemsStr = topItems.map(i => `"${i.n}" (${fmtVNDEng(i.s)})`).join(', ');
-
-      const context = `Year ${year}: total spend ${fmtVNDEng(yearData.t || 0)} across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVNDEng(avgOrderValue)} per order. Top products: ${itemsStr}.`;
-      
-      const specificPrompt = `This is your Shopee spend data for the year ${year}:
-1. Analyze your total spend and order count. Name your top product(s) of this year: ${itemsStr}.
-2. Predict your spending habits, lifestyle archetype, or consumer personality profile that defined your year ${year}. Do NOT suggest any financial tips, budgets, or rules to curb spending.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific year/period (e.g., "Trong năm ${year}...", "Trong giai đoạn này...") in your response. Use **bold** for product names, spend amounts, and personality profile name.`;
-
-      enrichWithAI('insight-yearly', context, specificPrompt, `insight-yearly-${year}`);
-    }
-    window.triggerYearlyAIInsight = triggerYearlyAIInsight;
 
     window.computeSingleMonthInsights = function(d, year, monthStr) {
       const items = [];
@@ -848,7 +827,6 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       }
       
       renderInsightCard('insight-yearly', computeYearlyInsights(d.yd || {}, d));
-      triggerYearlyAIInsight(d, 'all');
     };
 
     window.clearMonthlySelection = function(d) {
@@ -929,27 +907,6 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
         yoyLine = `Year ${curYear} ${pct >= 0 ? 'increased' : 'decreased'} by ${Math.abs(pct)}% compared to year ${prevYear}.`;
       }
 
-      // 1. Yearly overview AI insight
-      const yearSummaryLines = Object.entries(d.yd || {})
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([yr, yd]) => {
-          const saved = Math.round(Math.max(0, (yd.s || 0)));
-          const total = yd.t || 0;
-          const saveRatePct = total > 0 ? Math.round((saved / (total + saved)) * 100) : 0;
-          return `Year ${yr}: spent ${fmtVNDEng(total)} / ${fmtNum(yd.o || 0)} orders / saved ${fmtVNDEng(saved)} (${saveRatePct}% of original price)`;
-        });
-      enrichWithAI('insight-yearly',
-        [
-          `Total spend: ${fmtVNDEng(d.t)} across ${fmtNum(d.o)} orders. Average spend per order: ${fmtVNDEng(avgOrderValue)}.`,
-          `Voucher savings: ${fmtVNDEng(d.s)} (${savingsRate}% of original price).`,
-          `Yearly history: ${yearSummaryLines.join('; ')}.`,
-          yoyLine
-        ].filter(Boolean).join(' '),
-        `Based on your total spend, order count, and voucher savings data:
-1. Compare your year with the highest spend against the other years, and predict the shift in your shopping mindset or lifestyle between those periods.
-2. Diagnose your overall shopping personality archetype (e.g. dopamine chaser, voucher hunter, impulse buyer) based on the balance of orders, total spend, and voucher savings. Do NOT suggest saving rules or order bundling methods.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific period/milestone (e.g., "Trong giai đoạn này...", "Trong những năm qua...") in your response. Use **bold** for key periods, amounts, and your shopping archetype.`
-      );
 
       // 2. Items AI insight
       const top10 = (d.ti || []).slice(0, 10);
