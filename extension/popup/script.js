@@ -508,8 +508,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnRestart.addEventListener('click', () => {
-    cancelRunningAnalysis();
-    triggerAnalysis(true); // Force ignoring cache to fetch clean data from the beginning
+    showState(stateInitial);
+    updateCacheStatus(getSelectedListType(), false);
+    errorMessage.textContent = '';
   });
 
   // === Dashboard URL ===
