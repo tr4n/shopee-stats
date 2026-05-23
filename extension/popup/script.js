@@ -583,18 +583,19 @@ document.addEventListener('DOMContentLoaded', () => {
         monthMap[ym][item.i].c += item.c;
       }
     }
-    const mi = {};
+    // mi: Top items grouped by year-month (key format 'YYYY-M')
+    const monthlyItems = {};
     for (const [ym, map] of Object.entries(monthMap)) {
-      mi[ym] = Object.values(map)
+      monthlyItems[ym] = Object.values(map)
         .sort((a, b) => b.s - a.s)
         .slice(0, 20)
         .map(x => ({ n: compactItemName(x.n).substring(0, 40), s: Math.round(x.s), c: x.c, cat: x.cat }));
     }
 
-    // Build yearly stats
-    const yd = {};
+    // yd: Yearly breakdown stats (t: spent, o: orders, ip: items, s: saved, m: monthly spent)
+    const yearlyStats = {};
     for (const [yr, ydata] of Object.entries(data.yearlyStats || {})) {
-      yd[yr] = {
+      yearlyStats[yr] = {
         t: Math.round(ydata.total.totalSpent),
         o: ydata.total.orderCount,
         ip: ydata.total.itemCount,
@@ -605,30 +606,62 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
 
-    const ps = data.monthlyStats || {};
+    // Period spending stats (1 month, 3 months, 6 months, 1 year)
+    const rawPeriodStats = data.monthlyStats || {};
+
+    // 1. v: Schema/payload version (v3 uses Gzip format)
+    const payloadVersion = 3;
+
+    // 2. ev: Extension version (empty string if loaded directly outside extension context)
+    const extVersion = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest)
+      ? chrome.runtime.getManifest().version
+      : '';
+
+    // 3. t: Total spent (all-time, rounded to nearest VND integer)
+    const totalSpent = Math.round(data.totalSpent);
+
+    // 4. o: Total orders count (all-time)
+    const totalOrders = data.totalOrders;
+
+    // 5. s: Total saved amount (all-time, rounded to nearest VND integer)
+    const totalSaved = Math.round(Math.max(0, data.totalSaved));
+
+    // 6. ip: Total items count (number of individual item units purchased all-time)
+    const totalItems = data.totalItems;
+
+    // 7. ts: Scan creation timestamp in seconds (uses cache's creation time or falls back to current time)
+    const scanTimestamp = data.cachePayload?.fetchTime || data.cachePayload?.lastUpdated || Math.floor(Date.now() / 1000);
+
+    // 8. ps: Period spending breakdown (1m, 3m, 6m, 1y total spent relative to today)
+    const periodStats = {
+      '1m': Math.round((rawPeriodStats['1_month'] || {}).totalSpent || 0),
+      '3m': Math.round((rawPeriodStats['3_months'] || {}).totalSpent || 0),
+      '6m': Math.round((rawPeriodStats['6_months'] || {}).totalSpent || 0),
+      '1y': Math.round((rawPeriodStats['1_year'] || {}).totalSpent || 0)
+    };
+
+    // 9. ti: Top 150 items list (n: cleaned name, s: rounded spent, c: count, cat: category ID)
+    // Names are pre-cleaned to minimize payload size; category classification is completed by dashboard.
+    const topItemsList = (data.topItems || []).slice(0, 150).map(i => ({
+      n: compactItemName(i.name).substring(0, 45), // n: Cleaned item name
+      s: Math.round(i.spent), // s: Spent amount for this item
+      c: i.count, // c: Quantity purchased
+      cat: i.cat // cat: Category ID
+    }));
+
+    // Payload schema structure sent to the dashboard via URL hash
     const payload = {
-      v: 3, // Version 3 for Gzip format
-      ev: (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : '',
-      t: Math.round(data.totalSpent),
-      o: data.totalOrders,
-      s: Math.round(Math.max(0, data.totalSaved)),
-      ip: data.totalItems,
-      ts: data.cachePayload?.fetchTime || data.cachePayload?.lastUpdated || Math.floor(Date.now() / 1000),
-      yd,
-      mi,
-      ps: {
-        '1m': Math.round((ps['1_month'] || {}).totalSpent || 0),
-        '3m': Math.round((ps['3_months'] || {}).totalSpent || 0),
-        '6m': Math.round((ps['6_months'] || {}).totalSpent || 0),
-        '1y': Math.round((ps['1_year'] || {}).totalSpent || 0)
-      },
-      // Top 150 items — names pre-cleaned, dashboard classifies categories
-      ti: (data.topItems || []).slice(0, 150).map(i => ({
-        n: compactItemName(i.name).substring(0, 45),
-        s: Math.round(i.spent),
-        c: i.count,
-        cat: i.cat
-      }))
+      v: payloadVersion,
+      ev: extVersion,
+      t: totalSpent,
+      o: totalOrders,
+      s: totalSaved,
+      ip: totalItems,
+      ts: scanTimestamp,
+      yd: yearlyStats,
+      mi: monthlyItems,
+      ps: periodStats,
+      ti: topItemsList
     };
 
     const jsonStr = JSON.stringify(payload);
