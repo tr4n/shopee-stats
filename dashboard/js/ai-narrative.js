@@ -196,7 +196,7 @@ async function _executeAIInsight(cardId) {
       </svg>
       <div class="ai-loading-text">
         <div class="ai-loading-status">🤖 Chrome AI đang phân tích dữ liệu...</div>
-        <div class="ai-loading-note">Vì mô hình AI hoạt động ngoại tuyến (offline) ngay trên thiết bị của bạn để đảm bảo bảo mật tuyệt đối dữ liệu, tốc độ phân tích sẽ phụ thuộc vào cấu hình phần cứng của máy. Quá trình này có thể mất từ vài giây tới một phút, bạn vui lòng đợi chút nhé!</div>
+        <div class="ai-loading-note">AI chạy offline trực tiếp trên máy để bảo mật dữ liệu. Tốc độ tùy thuộc cấu hình thiết bị, bạn chờ xíu nhé!</div>
       </div>
     </div>
   `;
