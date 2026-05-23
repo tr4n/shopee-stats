@@ -13,8 +13,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# Chrome extension specific (if any pem files are generated)
+# Chrome extension specific (if any pem files or packages are generated)
 *.pem
+Archive.zip
+*.zip
 
 # Node modules (just in case they add them later)
 node_modules/
