@@ -510,6 +510,11 @@ function setupDashboardRatingCard(d) {
 
   // Show the card
   ratingCard.style.display = 'block';
+  if (typeof reveal === 'function') {
+    reveal(ratingCard);
+  } else {
+    ratingCard.classList.add('in');
+  }
 
   let selectedValue = 0;
 
