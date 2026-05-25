@@ -1013,6 +1013,24 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       // Load categories first so keyword classification is ready!
       await initializeCategories();
 
+      // Clean up item names from mathematical symbols, homoglyphs, and zero-width spaces for legacy/imported data
+      if (d.ti && d.ti.length) {
+        for (const item of d.ti) {
+          if (item.n) {
+            item.n = formatItemNameForDisplay(item.n);
+          }
+        }
+      }
+      if (d.mi) {
+        for (const key of Object.keys(d.mi)) {
+          for (const item of (d.mi[key] || [])) {
+            if (item.n) {
+              item.n = formatItemNameForDisplay(item.n);
+            }
+          }
+        }
+      }
+
       // Fallback: if ti is absent from the export, derive it by aggregating mi (monthly items)
       if (!d.ti || !d.ti.length) {
         const miMap = {};

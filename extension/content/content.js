@@ -225,8 +225,75 @@
   // Classification is done in the dashboard.
   // Content script only processes and structures raw order data.
 
+  const HOMOGLYPH_MAP = {
+    // Cyrillic
+    'а': 'a', 'А': 'A',
+    'в': 'v', 'В': 'B',
+    'е': 'e', 'Е': 'E',
+    'ѕ': 's', 'Ѕ': 'S',
+    'і': 'i', 'І': 'I',
+    'ј': 'j', 'Ј': 'J',
+    'к': 'k', 'К': 'K',
+    'м': 'm', 'М': 'M',
+    'н': 'h', 'Н': 'H',
+    'о': 'o', 'О': 'O',
+    'р': 'p', 'Р': 'P',
+    'с': 'c', 'С': 'C',
+    'т': 't', 'Т': 'T',
+    'у': 'y', 'У': 'Y',
+    'х': 'x', 'Х': 'X',
+    'ԁ': 'd',
+    'ш': 'w',
+    'ђ': 'đ', 'Ђ': 'Đ',
+
+    // Greek
+    'α': 'a', 'Α': 'A',
+    'β': 'b', 'Β': 'B',
+    'γ': 'y',
+    'ε': 'e', 'Ε': 'E',
+    'ζ': 'z', 'Ζ': 'Z',
+    'η': 'h', 'Η': 'H',
+    'ι': 'i', 'Ι': 'I',
+    'κ': 'k', 'Κ': 'K',
+    'μ': 'm', 'Μ': 'M',
+    'ν': 'v', 'Ν': 'N',
+    'ο': 'o', 'Ο': 'O',
+    'ρ': 'p', 'Ρ': 'P',
+    'σ': 's', 'ς': 's',
+    'τ': 't', 'Τ': 'T',
+    'υ': 'y', 'Υ': 'Y',
+    'χ': 'x', 'Χ': 'X',
+    'ω': 'w', 'Ω': 'O',
+
+    // Cherokee
+    'Ꭰ': 'A', 'Ꭱ': 'R', 'Ꭲ': 'I', 'Ꮇ': 'M', 'Ꮎ': 'H', 'Ꮜ': 'U',
+    'Ꮣ': 'D', 'Ꮤ': 'T', 'Ꮩ': 'V', 'Ꮹ': 'W', 'Ꮿ': 'Y', 'Ᏼ': 'B',
+    'Ꮋ': 'H', 'Ꭻ': 'J', 'Ꮶ': 'K', 'Ꮡ': 'S', 'Ꮞ': '4', 'Ꮠ': 'O',
+    'Ꮸ': 'V', 'Ꮺ': 'W'
+  };
+
+  function cleanHomoglyphsAndFonts(text) {
+    if (!text) return '';
+    // Step 1: Normalize using NFKD to decompose styled fonts (bold, italic, double-struck, fullwidth, etc.)
+    const decomp = text.normalize("NFKD");
+
+    // Step 2: Replace confusable homoglyphs from Cyrillic, Greek, Cherokee, etc.
+    let result = '';
+    for (const char of decomp) {
+      result += HOMOGLYPH_MAP[char] || char;
+    }
+
+    // Step 3: Strip zero-width and invisible characters
+    result = result.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u2060]/g, '');
+
+    // Step 4: Recompose characters and accents using NFC
+    return result.normalize("NFC");
+  }
+
   function formatItemNameForDisplay(name) {
     let s = String(name || '');
+    // Chuẩn hóa ký tự lách luật (Mathematical symbols & Homoglyphs)
+    s = cleanHomoglyphsAndFonts(s);
     // Loại bỏ các tag quảng cáo [ ] ( ) { }
     s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
     // Loại bỏ khoảng trắng thừa

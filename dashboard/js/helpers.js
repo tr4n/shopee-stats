@@ -178,3 +178,72 @@ async function createAISession(options) {
   }
   throw new Error('AI LanguageModel API not supported');
 }
+
+/* ── Normalization Utilities for Bypassed Item Names ── */
+const HOMOGLYPH_MAP = {
+  // Cyrillic
+  'а': 'a', 'А': 'A',
+  'в': 'v', 'В': 'B',
+  'е': 'e', 'Е': 'E',
+  'ѕ': 's', 'Ѕ': 'S',
+  'і': 'i', 'І': 'I',
+  'ј': 'j', 'Ј': 'J',
+  'к': 'k', 'К': 'K',
+  'м': 'm', 'М': 'M',
+  'н': 'h', 'Н': 'H',
+  'о': 'o', 'О': 'O',
+  'р': 'p', 'Р': 'P',
+  'с': 'c', 'С': 'C',
+  'т': 't', 'Т': 'T',
+  'у': 'y', 'У': 'Y',
+  'х': 'x', 'Х': 'X',
+  'ԁ': 'd',
+  'ш': 'w',
+  'ђ': 'đ', 'Ђ': 'Đ',
+
+  // Greek
+  'α': 'a', 'Α': 'A',
+  'β': 'b', 'Β': 'B',
+  'γ': 'y',
+  'ε': 'e', 'Ε': 'E',
+  'ζ': 'z', 'Ζ': 'Z',
+  'η': 'h', 'Η': 'H',
+  'ι': 'i', 'Ι': 'I',
+  'κ': 'k', 'Κ': 'K',
+  'μ': 'm', 'Μ': 'M',
+  'ν': 'v', 'Ν': 'N',
+  'ο': 'o', 'О': 'O',
+  'ρ': 'p', 'Ρ': 'P',
+  'σ': 's', 'ς': 's',
+  'τ': 't', 'Τ': 'T',
+  'υ': 'y', 'Υ': 'Y',
+  'χ': 'x', 'Χ': 'X',
+  'ω': 'w', 'Ω': 'O',
+
+  // Cherokee
+  'Ꭰ': 'A', 'Ꭱ': 'R', 'Ꭲ': 'I', 'Ꮇ': 'M', 'Ꮎ': 'H', 'Ꮜ': 'U',
+  'Ꮣ': 'D', 'Ꮤ': 'T', 'Ꮩ': 'V', 'Ꮹ': 'W', 'Ꮿ': 'Y', 'Ᏼ': 'B',
+  'Ꮋ': 'H', 'Ꭻ': 'J', 'Ꮶ': 'K', 'Ꮡ': 'S', 'Ꮞ': '4', 'Ꮠ': 'O',
+  'Ꮸ': 'V', 'Ꮺ': 'W'
+};
+
+function cleanHomoglyphsAndFonts(text) {
+  if (!text) return '';
+  const decomp = text.normalize("NFKD");
+
+  let result = '';
+  for (const char of decomp) {
+    result += HOMOGLYPH_MAP[char] || char;
+  }
+
+  result = result.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u2060]/g, '');
+
+  return result.normalize("NFC");
+}
+
+function formatItemNameForDisplay(name) {
+  let s = String(name || '');
+  s = cleanHomoglyphsAndFonts(s);
+  s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
+  return s.replace(/\s+/g, ' ').trim();
+}
