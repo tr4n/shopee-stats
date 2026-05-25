@@ -764,9 +764,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <span>Cần kết nối với Shopee.vn</span>
             </div>
             <div class="info-card-body">
-              Vui lòng truy cập <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> và <strong>đăng nhập</strong> tài khoản, sau đó quay lại đây bấm <strong>"Bắt đầu thống kê ngay"</strong>.
+              Vui lòng truy cập <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> và <strong>đăng nhập</strong> tài khoản, sau đó mở lại công cụ và bấm <strong>"Bắt đầu thống kê ngay"</strong>.
               <div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 6px; font-size: 11px; opacity: 0.9;">
-                * Muốn quét lại từ đầu? <a href="#" id="link-clear-cache-error" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Xóa cache cũ</a>
+                * Muốn quét lại từ đầu? <a href="#" id="link-clear-cache-error" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Xóa dữ liệu cũ</a>
               </div>
             </div>
           </div>
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.storage.local.remove(['shopee_cache'], () => {
               cacheData = null;
               cacheInfo.classList.add('hidden');
-              linkClearCache.outerHTML = '<span style="color: var(--green); font-weight: bold;">đã xóa cache thành công!</span>';
+              linkClearCache.outerHTML = '<span style="color: var(--green); font-weight: bold;">đã xóa dữ liệu thành công!</span>';
             });
           });
         }
