@@ -496,19 +496,13 @@ function setupDashboardRatingCard(d) {
   const ratingCard = document.getElementById('sidebar-rating-box');
   const starsContainer = document.getElementById('sidebar-stars');
   const stars = starsContainer ? starsContainer.querySelectorAll('.s-star') : [];
-  const closeBtn = document.getElementById('btn-sidebar-rating-close');
   const thankyouEl = document.getElementById('sidebar-rating-thankyou');
   const feedbackEl = document.getElementById('sidebar-rating-feedback');
+  const subtextEl = document.getElementById('sidebar-rating-subtext');
 
   if (!ratingCard) return;
 
-  // If rated or dismissed, don't show the card
-  if (localStorage.getItem('shopee_stats_rated_or_dismissed') === 'true') {
-    ratingCard.style.display = 'none';
-    return;
-  }
-
-  // Show the card
+  // Show the card permanently
   ratingCard.style.display = 'flex';
 
   let selectedValue = 0;
@@ -551,32 +545,29 @@ function setupDashboardRatingCard(d) {
       selectedValue = parseInt(star.getAttribute('data-value'));
       resetStars();
 
-      // Save rated or dismissed state in localStorage
-      localStorage.setItem('shopee_stats_rated_or_dismissed', 'true');
-
       if (selectedValue === 5) {
+        if (subtextEl) subtextEl.classList.add('hidden');
         if (thankyouEl) thankyouEl.classList.remove('hidden');
         if (feedbackEl) feedbackEl.classList.add('hidden');
 
         setTimeout(() => {
           window.open('https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm/reviews', '_blank');
+          
+          // Re-enable and reset widget after a short delay so it remains interactive and clean
           setTimeout(() => {
-            ratingCard.style.display = 'none';
-          }, 1500);
-        }, 1200);
+            if (subtextEl) subtextEl.classList.remove('hidden');
+            if (thankyouEl) thankyouEl.classList.add('hidden');
+            selectedValue = 0;
+            resetStars();
+          }, 2000);
+        }, 1000);
       } else {
+        if (subtextEl) subtextEl.classList.add('hidden');
         if (thankyouEl) thankyouEl.classList.add('hidden');
         if (feedbackEl) feedbackEl.classList.remove('hidden');
       }
     });
   });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      localStorage.setItem('shopee_stats_rated_or_dismissed', 'true');
-      ratingCard.style.display = 'none';
-    });
-  }
 }
 
 /* ── Boot ────────────────────────────────────── */

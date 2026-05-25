@@ -1425,95 +1425,30 @@ body {
 
 /* Sidebar Rating Box */
 .sidebar-rating {
-  margin: 20px 12px;
-  background: linear-gradient(135deg, rgba(238, 77, 45, 0.04) 0%, rgba(255, 138, 90, 0.08) 100%);
-  border: 1px solid rgba(238, 77, 45, 0.15);
-  border-radius: 14px;
-  padding: 14px 12px;
+  margin: 24px 20px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.03);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 6px;
   box-sizing: border-box;
-}
-
-.sidebar-rating:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(238, 77, 45, 0.08);
-  border-color: rgba(238, 77, 45, 0.25);
 }
 
 .sidebar-rating.hidden {
   display: none !important;
 }
 
-.sr-close-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 16px;
+.sr-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   color: var(--muted);
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px;
-  transition: color 0.2s;
-}
-
-.sr-close-btn:hover {
-  color: var(--primary);
-}
-
-.sr-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  text-align: left;
-}
-
-.sr-heart {
-  font-size: 20px;
-  line-height: 1;
-  animation: sr-heartbeat 2s ease-in-out infinite;
-  display: inline-block;
-}
-
-@keyframes sr-heartbeat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
-
-.sr-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding-right: 10px; /* Leave space for close button */
-}
-
-.sr-title {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--text);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.sr-desc {
-  font-size: 10.5px;
-  color: var(--muted);
-  font-weight: 500;
-  line-height: 1.35;
-  margin: 0;
+  margin-bottom: 2px;
 }
 
 .sr-stars {
   display: flex;
   gap: 6px;
-  justify-content: center;
-  margin-top: 4px;
+  justify-content: flex-start;
 }
 
 .sr-stars .s-star {
@@ -1527,9 +1462,9 @@ body {
 }
 
 .sr-stars .s-star-svg {
-  width: 22px;
-  height: 22px;
-  color: rgba(30, 41, 59, 0.12); /* Subtle gray color for empty stars */
+  width: 20px;
+  height: 20px;
+  color: rgba(30, 41, 59, 0.12);
   transition: color 0.15s ease;
 }
 
@@ -1539,20 +1474,23 @@ body {
   color: #ffb800 !important;
 }
 
+.sr-subtext {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 .sr-thankyou {
   font-size: 11px;
   font-weight: 700;
   color: var(--green);
-  text-align: center;
-  margin-top: 4px;
   line-height: 1.4;
   animation: dashboard-bounce 0.6s ease;
 }
 
 .sr-feedback {
   font-size: 11px;
-  text-align: center;
-  margin-top: 4px;
   line-height: 1.4;
 }
 
@@ -1570,7 +1508,8 @@ body {
 }
 
 .sr-thankyou.hidden,
-.sr-feedback.hidden {
+.sr-feedback.hidden,
+.sr-subtext.hidden {
   display: none !important;
 }
 
