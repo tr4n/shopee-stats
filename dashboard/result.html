@@ -43,6 +43,28 @@
       </button>
     </div>
 
+    <!-- Sidebar Rating Box -->
+    <div class="sidebar-rating" id="sidebar-rating-box" style="display: none;">
+      <div class="sr-header">
+        <span>⭐ Đánh Giá Tiện Ích</span>
+        <button id="btn-sidebar-rating-close" class="sr-close-btn" title="Ẩn">&times;</button>
+      </div>
+      <p class="sr-text">Ủng hộ 5★ trên Chrome Store nhé!</p>
+      <div class="sr-stars" id="sidebar-stars">
+        <span class="s-star" data-value="1">★</span>
+        <span class="s-star" data-value="2">★</span>
+        <span class="s-star" data-value="3">★</span>
+        <span class="s-star" data-value="4">★</span>
+        <span class="s-star" data-value="5">★</span>
+      </div>
+      <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
+        🎉 Cảm ơn bạn! Đang mở...
+      </div>
+      <div id="sidebar-rating-feedback" class="sr-feedback hidden">
+        <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank">Gửi email góp ý ✉️</a>
+      </div>
+    </div>
+
     <div class="sidebar-footer">
       <p>Dữ liệu tại:<br><span id="data-date">—</span></p>
       <p style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;" id="dashboard-author-info">
@@ -100,34 +122,7 @@
         </div>
       </div>
 
-      <!-- Rating Card on Dashboard -->
-      <div class="card" id="card-dashboard-rating" style="margin-top: 24px; display: none;">
-        <div class="dashboard-rating-wrapper">
-          <div class="dashboard-rating-main">
-            <span class="dashboard-rating-emoji">💖</span>
-            <div>
-              <h3>Tiện ích này có ích với bạn?</h3>
-              <p>Hãy tặng 5 sao trên Chrome Store để ủng hộ tác giả nhé!</p>
-            </div>
-          </div>
-          <div class="dashboard-rating-stars-container">
-            <div class="dashboard-rating-stars" id="dashboard-stars">
-              <span class="d-star" data-value="1">★</span>
-              <span class="d-star" data-value="2">★</span>
-              <span class="d-star" data-value="3">★</span>
-              <span class="d-star" data-value="4">★</span>
-              <span class="d-star" data-value="5">★</span>
-            </div>
-            <button id="btn-dashboard-rating-close" class="dashboard-rating-close" title="Ẩn">✕ Không hiển thị lại</button>
-          </div>
-        </div>
-        <div id="dashboard-rating-thankyou" class="dashboard-rating-thankyou-msg" style="display: none;">
-          🎉 Cảm ơn bạn rất nhiều! Đang mở liên kết đánh giá trên Chrome Web Store...
-        </div>
-        <div id="dashboard-rating-feedback" class="dashboard-rating-feedback-msg" style="display: none;">
-          Cảm ơn đóng góp của bạn! Bạn có thể gửi ý kiến trực tiếp qua email: <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank">quanghuytran.hust@gmail.com ✉️</a>
-        </div>
-      </div>
+
     </div>
 
     <!-- Monthly -->

@@ -493,12 +493,12 @@ function setupShareButtons(d) {
 
 /* ── Dashboard Rating Card ────────────────────── */
 function setupDashboardRatingCard(d) {
-  const ratingCard = document.getElementById('card-dashboard-rating');
-  const starsContainer = document.getElementById('dashboard-stars');
-  const stars = starsContainer ? starsContainer.querySelectorAll('.d-star') : [];
-  const closeBtn = document.getElementById('btn-dashboard-rating-close');
-  const thankyouEl = document.getElementById('dashboard-rating-thankyou');
-  const feedbackEl = document.getElementById('dashboard-rating-feedback');
+  const ratingCard = document.getElementById('sidebar-rating-box');
+  const starsContainer = document.getElementById('sidebar-stars');
+  const stars = starsContainer ? starsContainer.querySelectorAll('.s-star') : [];
+  const closeBtn = document.getElementById('btn-sidebar-rating-close');
+  const thankyouEl = document.getElementById('sidebar-rating-thankyou');
+  const feedbackEl = document.getElementById('sidebar-rating-feedback');
 
   if (!ratingCard) return;
 
@@ -509,12 +509,7 @@ function setupDashboardRatingCard(d) {
   }
 
   // Show the card
-  ratingCard.style.display = 'block';
-  if (typeof reveal === 'function') {
-    reveal(ratingCard);
-  } else {
-    ratingCard.classList.add('in');
-  }
+  ratingCard.style.display = 'flex';
 
   let selectedValue = 0;
 
@@ -560,8 +555,8 @@ function setupDashboardRatingCard(d) {
       localStorage.setItem('shopee_stats_rated_or_dismissed', 'true');
 
       if (selectedValue === 5) {
-        if (thankyouEl) thankyouEl.style.display = 'block';
-        if (feedbackEl) feedbackEl.style.display = 'none';
+        if (thankyouEl) thankyouEl.classList.remove('hidden');
+        if (feedbackEl) feedbackEl.classList.add('hidden');
 
         setTimeout(() => {
           window.open('https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm/reviews', '_blank');
@@ -570,8 +565,8 @@ function setupDashboardRatingCard(d) {
           }, 1500);
         }, 1200);
       } else {
-        if (thankyouEl) thankyouEl.style.display = 'none';
-        if (feedbackEl) feedbackEl.style.display = 'block';
+        if (thankyouEl) thankyouEl.classList.add('hidden');
+        if (feedbackEl) feedbackEl.classList.remove('hidden');
       }
     });
   });
