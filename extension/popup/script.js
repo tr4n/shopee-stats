@@ -435,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
-    }, 8888); // Rotates every 8s (7.7s visible + 300ms transition)
+    }, 10000); // Rotates every 8s (7.7s visible + 300ms transition)
   }
 
   function stopTipsRotation() {
@@ -757,12 +757,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!tab.url || !tab.url.includes('shopee.vn')) {
         showState(stateInitial);
-        errorMessage.innerHTML = '❌ Bạn cần truy cập vào trang <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> để thống kê lại / cập nhật dữ liệu mới.';
+        errorMessage.innerHTML = `
+          <div class="info-card">
+            <div class="info-card-title" style="display: flex; align-items: center; gap: 6px;">
+              <span>💡</span>
+              <span>Cần kết nối với Shopee.vn</span>
+            </div>
+            <div class="info-card-body">
+              Vui lòng truy cập <a href="#" id="link-go-to-shopee" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Shopee.vn</a> và <strong>đăng nhập</strong> tài khoản, sau đó quay lại đây bấm <strong>"Bắt đầu thống kê ngay"</strong>.
+              <div style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 6px; font-size: 11px; opacity: 0.9;">
+                * Muốn quét lại từ đầu? <a href="#" id="link-clear-cache-error" style="color: var(--primary); text-decoration: underline; font-weight: bold; cursor: pointer;">Xóa cache cũ</a>
+              </div>
+            </div>
+          </div>
+        `;
         const link = document.getElementById('link-go-to-shopee');
         if (link) {
           link.addEventListener('click', (e) => {
             e.preventDefault();
             chrome.tabs.create({ url: 'https://shopee.vn' });
+          });
+        }
+        const linkClearCache = document.getElementById('link-clear-cache-error');
+        if (linkClearCache) {
+          linkClearCache.addEventListener('click', (e) => {
+            e.preventDefault();
+            chrome.storage.local.remove(['shopee_cache'], () => {
+              cacheData = null;
+              cacheInfo.classList.add('hidden');
+              linkClearCache.outerHTML = '<span style="color: var(--green); font-weight: bold;">đã xóa cache thành công!</span>';
+            });
           });
         }
         return;
