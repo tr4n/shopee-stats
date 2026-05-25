@@ -534,16 +534,21 @@ document.addEventListener('DOMContentLoaded', () => {
     'auth', 'real', 'fake', 'grab', 'ship', 'mới nhất', 'new', 'cũ', 'trend', 'hot', 'deal', 'sale', 'mới'
   ].sort((a, b) => b.length - a.length);
 
+  // Pre-compile noise words regexes for maximum performance (case-insensitive & Unicode-boundary aware)
+  const NOISE_REGEXP_LIST = NOISE_WORDS.map(w => {
+    const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('(?<![\\p{L}\\p{N}])' + esc + '(?![\\p{L}\\p{N}])', 'giu');
+  });
+
   function compactItemName(name) {
     let s = String(name || '');
     // Strip bracket content (promotional tags)
     s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
-    // Strip special chars / emoji, keep letters + numbers
-    s = s.replace(/[^\p{L}\p{N}\s]/gu, ' ').toLowerCase();
-    // Remove noise words (longest first to avoid partial clashes)
-    for (const w of NOISE_WORDS) {
-      const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      s = s.replace(new RegExp('\\b' + esc + '\\b', 'g'), ' ');
+    // Strip special chars / emoji, keep letters + numbers, preserve case!
+    s = s.replace(/[^\p{L}\p{N}\s]/gu, ' ');
+    // Remove noise words (longest first) using pre-compiled regexes case-insensitively
+    for (const re of NOISE_REGEXP_LIST) {
+      s = s.replace(re, ' ');
     }
     s = s.replace(/\s+/g, ' ').trim();
     // Drop single-char tokens
