@@ -169,10 +169,18 @@ async function loadCategories() {
 
 async function initializeCategories() {
   const data = await loadCategories();
-  DASH_SCORING_CATS = data.categories.map(cat => ({
-    name: cat.name,
-    words: cat.keywords.sort((a, b) => b.length - a.length)
-  }));
+  DASH_SCORING_CATS = data.categories.map(cat => {
+    const sortedWords = cat.keywords.sort((a, b) => b.length - a.length);
+    const escapedWords = sortedWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    // Use lookbehind (?<= ) and lookahead (?= ) to match space boundaries without consuming them.
+    // This allows overlapping spaces to match adjacent words correctly.
+    const pattern = '(?<= )(' + escapedWords.join('|') + ')(?= )';
+    const regex = new RegExp(pattern, 'g'); // Already lowercased, case-insensitive is not needed if input is lowercased
+    return {
+      name: cat.name,
+      regex: regex
+    };
+  });
   return DASH_SCORING_CATS;
 }
 
@@ -183,17 +191,18 @@ function _scoreByKeywords(name) {
   let maxScore = 0;
   for (const cat of DASH_SCORING_CATS) {
     let score = 0;
-    let temp = paddedN;
-    for (const w of cat.words) {
-      const target = ' ' + w + ' ';
-      let idx = temp.indexOf(target);
-      while (idx !== -1) {
-        score += w.length;
-        temp = temp.substring(0, idx) + ' ' + temp.substring(idx + target.length - 1);
-        idx = temp.indexOf(target);
+    cat.regex.lastIndex = 0;
+    let match;
+    while ((match = cat.regex.exec(paddedN)) !== null) {
+      score += match[0].length;
+      if (match.index === cat.regex.lastIndex) {
+        cat.regex.lastIndex++;
       }
     }
-    if (score > maxScore) { maxScore = score; bestCat = cat.name; }
+    if (score > maxScore) {
+      maxScore = score;
+      bestCat = cat.name;
+    }
   }
   return maxScore >= MIN_DASH_SCORE ? bestCat : '🏷️ Khác';
 }

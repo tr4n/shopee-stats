@@ -272,8 +272,19 @@
     'Ꮸ': 'V', 'Ꮺ': 'W'
   };
 
+  // Pre-compile regex for fast detection of homoglyphs, zero-width spaces, math script, fullwidth characters, etc.
+  const SPECIAL_CHAR_REGEX = /[\u0370-\u03FF\u0400-\u04FF\u13A0-\u13FF\u200B-\u200D\uFEFF\u200E\u200F\u2060\u2100-\u214F\uFF00-\uFFEF]|\ud835[\udc00-\udfff]/;
+
   function cleanHomoglyphsAndFonts(text) {
     if (!text) return '';
+    
+    // Fast path: if the text doesn't contain any target bypass characters, skip normalization & translation entirely.
+    // This is a major optimization for Vietnamese text because normalize("NFKD") decomposes accents,
+    // which takes significant CPU time when done on thousands of items.
+    if (!SPECIAL_CHAR_REGEX.test(text)) {
+      return text;
+    }
+
     // Step 1: Normalize using NFKD to decompose styled fonts (bold, italic, double-struck, fullwidth, etc.)
     const decomp = text.normalize("NFKD");
 
