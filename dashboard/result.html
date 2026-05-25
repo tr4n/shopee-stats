@@ -45,20 +45,43 @@
 
     <!-- Sidebar Rating Box -->
     <div class="sidebar-rating" id="sidebar-rating-box" style="display: none;">
-      <div class="sr-header">
-        <span>⭐ Đánh Giá Tiện Ích</span>
-        <button id="btn-sidebar-rating-close" class="sr-close-btn" title="Ẩn">&times;</button>
+      <button id="btn-sidebar-rating-close" class="sr-close-btn" title="Ẩn">&times;</button>
+      <div class="sr-body">
+        <span class="sr-heart">💝</span>
+        <div class="sr-info">
+          <h4 class="sr-title">Yêu thích tiện ích?</h4>
+          <p class="sr-desc">Tặng 5 sao tiếp thêm động lực cho tác giả nhé!</p>
+        </div>
       </div>
-      <p class="sr-text">Ủng hộ 5★ trên Chrome Store nhé!</p>
       <div class="sr-stars" id="sidebar-stars">
-        <span class="s-star" data-value="1">★</span>
-        <span class="s-star" data-value="2">★</span>
-        <span class="s-star" data-value="3">★</span>
-        <span class="s-star" data-value="4">★</span>
-        <span class="s-star" data-value="5">★</span>
+        <span class="s-star" data-value="1">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        <span class="s-star" data-value="2">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        <span class="s-star" data-value="3">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        <span class="s-star" data-value="4">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
+        <span class="s-star" data-value="5">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+          </svg>
+        </span>
       </div>
       <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
-        🎉 Cảm ơn bạn! Đang mở...
+        🎉 Cảm ơn bạn rất nhiều! Đang mở...
       </div>
       <div id="sidebar-rating-feedback" class="sr-feedback hidden">
         <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank">Gửi email góp ý ✉️</a>
