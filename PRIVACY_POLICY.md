@@ -1,8 +1,8 @@
-# Privacy Policy - Shopee Analytics Pro
+# Privacy Policy - Shopee Analytics
 
 **Last Updated:** May 19, 2026
 
-Welcome to **Shopee Analytics Pro** ("the Extension"). We respect your privacy and are committed to protecting it. This Privacy Policy describes how the Extension handles data.
+Welcome to **Shopee Analytics** ("the Extension"). We respect your privacy and are committed to protecting it. This Privacy Policy describes how the Extension handles data.
 
 ---
 

@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Shopee Analytics Pro - Thống Kê Chi Tiêu",
-  "short_name": "Shopee Analytics",
+  "name": "Thống Kê Chi Tiêu Shopee - Shopee Analytics",
+  "short_name": "Shopee Stats",
   "version": "2.2.4",
-  "description": "Tiện ích phân tích và thống kê chi tiết số tiền bạn đã mua sắm trên Shopee theo từng tháng và năm. Trải nghiệm ngay!",
+  "description": "Tính tổng tiền và thống kê chi tiết chi tiêu Shopee theo tháng/năm. Tích hợp AI phân loại thông minh, bảo mật 100% offline.",
   "minimum_chrome_version": "95",
   "permissions": [
     "activeTab",
@@ -17,7 +17,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "🔍 Mở Shopee Analytics Pro"
+    "default_title": "🔍 Mở Thống Kê Chi Tiêu Shopee"
   },
   "icons": {
     "16": "icons/icon16.png",

@@ -17,7 +17,7 @@ function renderNoData() {
           <div style="background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
           <div>
             <h4 style="margin: 0 0 4px 0; font-weight: 700; color: var(--text);">Cài đặt tiện ích</h4>
-            <p style="margin: 0; font-size: 14px; color: var(--muted);">Thêm Shopee Analytics Pro vào trình duyệt Chrome của bạn.</p>
+            <p style="margin: 0; font-size: 14px; color: var(--muted);">Thêm Shopee Analytics vào trình duyệt Chrome của bạn.</p>
           </div>
         </div>
         <div style="display: flex; align-items: flex-start; gap: 16px; background: var(--surface); padding: 16px; border-radius: 16px;">

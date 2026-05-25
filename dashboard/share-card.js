@@ -347,7 +347,7 @@
     ctx.fillStyle = footerDivGrad;
     ctx.fillRect(PAD, footerY - 40, W - PAD * 2, 2);
 
-    txt('SHOPEE ANALYTICS PRO', W / 2, footerY, 24, '800', tColors.textFaint, 'center');
+    txt('SHOPEE ANALYTICS', W / 2, footerY, 24, '800', tColors.textFaint, 'center');
 
     if (cardType === 'overview') {
       const summary = `${fmtNum(d.o)} đơn hàng  •  ${fmtNum(d.ip)} sản phẩm`;
