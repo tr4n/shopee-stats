@@ -485,7 +485,8 @@
       }
 
       const topItems = Object.values(allItemAggr)
-        .sort((a, b) => b.spent - a.spent);
+        .sort((a, b) => b.spent - a.spent)
+        .slice(0, 500);
 
       const newLastUpdated = newMiniOrders.length > 0
         ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)

@@ -40,6 +40,49 @@ function saveDataToStorage(d) {
 }
 window.saveDataToStorage = saveDataToStorage;
 
+function cleanupStorage(currentId) {
+  try {
+    const dashDataKeys = [];
+    const cacheKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith(DASH_DATA_PREFIX)) {
+        const idStr = key.substring(DASH_DATA_PREFIX.length);
+        const ts = parseInt(idStr, 10);
+        if (!isNaN(ts)) dashDataKeys.push({ key, ts });
+      } else if (key.startsWith('shopee_insight_cache_')) {
+        const tsStr = key.substring('shopee_insight_cache_'.length);
+        const ts = parseInt(tsStr, 10);
+        if (!isNaN(ts)) cacheKeys.push({ key, ts });
+      }
+    }
+    dashDataKeys.sort((a, b) => b.ts - a.ts);
+    const activeTs = currentId ? parseInt(currentId, 10) : null;
+    const keptTimestamps = [];
+    for (const item of dashDataKeys) {
+      if (item.ts === activeTs) {
+        keptTimestamps.push(item.ts);
+      } else if (keptTimestamps.length < 2) {
+        keptTimestamps.push(item.ts);
+      } else {
+        localStorage.removeItem(item.key);
+        console.log(`[Dashboard] Cleaned up old dashboard data: ${item.key}`);
+      }
+    }
+    for (const item of cacheKeys) {
+      const tsMs = item.ts * 1000;
+      const isKept = keptTimestamps.some(k => Math.abs(k - tsMs) < 2000);
+      if (!isKept) {
+        localStorage.removeItem(item.key);
+        console.log(`[Dashboard] Cleaned up old insight cache: ${item.key}`);
+      }
+    }
+  } catch (e) {
+    console.warn('[Dashboard] Storage cleanup failed:', e.message);
+  }
+}
+
 
 /* ── Parse / load data ───────────────────────── */
 function parseData() {
@@ -580,6 +623,7 @@ function setupDashboardRatingCard(d) {
     console.warn('[Dashboard] No data or invalid data, showing no-data view');
     renderNoData();
   } else {
+    cleanupStorage(getSessionId());
     _dashCache = loadDashCache(d.ts);
 
     let _categorizationFinished = false;
@@ -1122,8 +1166,12 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       if (!alreadyCategorized) {
         try {
           let hasUpdates = false;
+          let count = 0;
           for (const item of tiItems) {
             if (isInvalidCat(item.cat)) {
+              if (count++ % 50 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 0)); // Yield to main thread
+              }
               const newCat = await classifyByNameDash(item.n);
               if (newCat !== '🏷️ Khác') {
                 item.cat = newCat;
