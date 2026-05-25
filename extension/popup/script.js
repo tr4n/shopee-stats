@@ -959,6 +959,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTrendBadges(data.yearlyStats);
     renderPercentile(data.yearlyStats);
 
+    // Show/hide rating card based on storage status
+    chrome.storage.local.get(['rated_or_dismissed'], (res) => {
+      const ratingCard = document.getElementById('rating-card');
+      if (ratingCard) {
+        if (res.rated_or_dismissed) {
+          ratingCard.classList.add('hidden');
+        } else {
+          ratingCard.classList.remove('hidden');
+        }
+      }
+    });
+
     showState(stateResult);
   }
 
@@ -1010,4 +1022,88 @@ document.addEventListener('DOMContentLoaded', () => {
       percentileRowEl.classList.add('hidden');
     }
   }
+
+  // === Setup Rating Card ===
+  function setupRatingCard() {
+    const ratingCard = document.getElementById('rating-card');
+    const starsContainer = document.getElementById('rating-stars');
+    const stars = starsContainer ? starsContainer.querySelectorAll('.star') : [];
+    const closeBtn = document.getElementById('btn-rating-close');
+    const thankyouEl = document.getElementById('rating-thankyou');
+    const feedbackEl = document.getElementById('rating-feedback');
+
+    if (!ratingCard) return;
+
+    let selectedValue = 0;
+
+    const highlightStars = (val) => {
+      stars.forEach(star => {
+        const v = parseInt(star.getAttribute('data-value'));
+        if (v <= val) {
+          star.classList.add('hovered');
+        } else {
+          star.classList.remove('hovered');
+        }
+      });
+    };
+
+    const resetStars = () => {
+      stars.forEach(star => {
+        const v = parseInt(star.getAttribute('data-value'));
+        star.classList.remove('hovered');
+        if (v <= selectedValue) {
+          star.classList.add('selected');
+        } else {
+          star.classList.remove('selected');
+        }
+      });
+    };
+
+    stars.forEach(star => {
+      star.addEventListener('mouseenter', () => {
+        starsContainer.classList.add('has-hovered');
+        highlightStars(parseInt(star.getAttribute('data-value')));
+      });
+
+      star.addEventListener('mouseleave', () => {
+        starsContainer.classList.remove('has-hovered');
+        resetStars();
+      });
+
+      star.addEventListener('click', () => {
+        selectedValue = parseInt(star.getAttribute('data-value'));
+        resetStars();
+
+        // Save rating/dismiss state
+        chrome.storage.local.set({ rated_or_dismissed: true });
+
+        if (selectedValue === 5) {
+          thankyouEl.classList.remove('hidden');
+          feedbackEl.classList.add('hidden');
+          
+          setTimeout(() => {
+            chrome.tabs.create({
+              url: 'https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm/reviews'
+            });
+            // Hide rating card after opening review page
+            setTimeout(() => {
+              ratingCard.classList.add('hidden');
+            }, 1000);
+          }, 1200);
+        } else {
+          thankyouEl.classList.add('hidden');
+          feedbackEl.classList.remove('hidden');
+        }
+      });
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        chrome.storage.local.set({ rated_or_dismissed: true });
+        ratingCard.classList.add('hidden');
+      });
+    }
+  }
+
+  setupRatingCard();
 });

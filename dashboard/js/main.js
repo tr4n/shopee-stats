@@ -491,6 +491,94 @@ function setupShareButtons(d) {
   });
 }
 
+/* ── Dashboard Rating Card ────────────────────── */
+function setupDashboardRatingCard(d) {
+  const ratingCard = document.getElementById('card-dashboard-rating');
+  const starsContainer = document.getElementById('dashboard-stars');
+  const stars = starsContainer ? starsContainer.querySelectorAll('.d-star') : [];
+  const closeBtn = document.getElementById('btn-dashboard-rating-close');
+  const thankyouEl = document.getElementById('dashboard-rating-thankyou');
+  const feedbackEl = document.getElementById('dashboard-rating-feedback');
+
+  if (!ratingCard) return;
+
+  // If rated or dismissed, don't show the card
+  if (localStorage.getItem('shopee_stats_rated_or_dismissed') === 'true') {
+    ratingCard.style.display = 'none';
+    return;
+  }
+
+  // Show the card
+  ratingCard.style.display = 'block';
+
+  let selectedValue = 0;
+
+  const highlightStars = (val) => {
+    stars.forEach(star => {
+      const v = parseInt(star.getAttribute('data-value'));
+      if (v <= val) {
+        star.classList.add('hovered');
+      } else {
+        star.classList.remove('hovered');
+      }
+    });
+  };
+
+  const resetStars = () => {
+    stars.forEach(star => {
+      const v = parseInt(star.getAttribute('data-value'));
+      star.classList.remove('hovered');
+      if (v <= selectedValue) {
+        star.classList.add('selected');
+      } else {
+        star.classList.remove('selected');
+      }
+    });
+  };
+
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      starsContainer.classList.add('has-hovered');
+      highlightStars(parseInt(star.getAttribute('data-value')));
+    });
+
+    star.addEventListener('mouseleave', () => {
+      starsContainer.classList.remove('has-hovered');
+      resetStars();
+    });
+
+    star.addEventListener('click', () => {
+      selectedValue = parseInt(star.getAttribute('data-value'));
+      resetStars();
+
+      // Save rated or dismissed state in localStorage
+      localStorage.setItem('shopee_stats_rated_or_dismissed', 'true');
+
+      if (selectedValue === 5) {
+        if (thankyouEl) thankyouEl.style.display = 'block';
+        if (feedbackEl) feedbackEl.style.display = 'none';
+
+        setTimeout(() => {
+          window.open('https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm/reviews', '_blank');
+          setTimeout(() => {
+            ratingCard.style.display = 'none';
+          }, 1500);
+        }, 1200);
+      } else {
+        if (thankyouEl) thankyouEl.style.display = 'none';
+        if (feedbackEl) feedbackEl.style.display = 'block';
+      }
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      localStorage.setItem('shopee_stats_rated_or_dismissed', 'true');
+      ratingCard.style.display = 'none';
+    });
+  }
+}
+
 /* ── Boot ────────────────────────────────────── */
 (async function () {
   const hasRaw = await checkAndHandleUrlData();
@@ -1018,6 +1106,7 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
 
       setupShareButtons(d);
       setupSupportButton(d);
+      setupDashboardRatingCard(d);
 
       // 5. Run async keyword classification (background)
       const alreadyCategorized = tiItems.every(item => !isInvalidCat(item.cat));
