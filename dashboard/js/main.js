@@ -970,14 +970,27 @@ function setupDashboardRatingCard(d) {
         .sort((a, b) => Number(a[0]) - Number(b[0]))
         .filter(([, v]) => v > 0);
 
+      const MONTH_NAMES_EN = [
+        "",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       const monthBreakdown = monthEntries
         .map(
-          ([m, v]) => `Tháng ${m}: ${fmtVND(v)}`,
+          ([m, v]) => `${MONTH_NAMES_EN[m] || "Month " + m}: ${fmtVNDEng(v)}`,
         )
         .join(", ");
       const activeMonths = monthEntries.length;
-      const avgPerMonth =
-        activeMonths > 0 ? Math.round((yearData.t || 0) / activeMonths) : 0;
 
       // Tính tháng chi nhiều tiền nhất trực tiếp bằng JS
       let maxMonth = null;
@@ -988,18 +1001,20 @@ function setupDashboardRatingCard(d) {
           maxMonth = m;
         }
       }
+      const maxMonthName = MONTH_NAMES_EN[maxMonth] || `Month ${maxMonth}`;
 
       const contextLines = [
-        `Năm ${yr}: tổng chi ${fmtVND(yearData.t || 0)}, ${fmtNum(yearData.o || 0)} đơn hàng, trung bình ${fmtVND(avgPerOrder)}/đơn.`,
-        `Chi tiết tháng: ${monthBreakdown || "không có dữ liệu"}.`,
-        `Tháng cao nhất: Tháng ${maxMonth} (${fmtVND(maxMonthVal)}).`,
+        `Year ${yr}: total spend ${fmtVNDEng(yearData.t || 0)} across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVNDEng(avgPerOrder)} per order.`,
+        `Monthly breakdown: ${monthBreakdown || "no data"}.`,
+        `Peak spend month: ${maxMonthName} (${fmtVNDEng(maxMonthVal)}).`,
       ];
 
-      const specificPrompt = `Dữ liệu chi tiêu Shopee năm ${yr}:
-      - Tổng chi tiêu: ${fmtVND(yearData.t || 0)}
-      - Số đơn hàng: ${fmtNum(yearData.o || 0)}
-      - Tháng chi nhiều nhất: Tháng ${maxMonth} (${fmtVND(maxMonthVal)})
-      Hãy 'gieo quẻ' nhận xét hài hước bằng tiếng Việt về số mệnh chi tiêu, cá tính hoặc yếu tố tâm linh (sao Thủy nghịch hành, vũ trụ gửi tín hiệu) của bạn trong năm ${yr}, đặc biệt là độ 'chịu chơi' của tháng ${maxMonth}. Không khuyên tiết kiệm.`;
+      const specificPrompt = `Shopee spending data for Year ${yr}:
+      - Total spending: ${fmtVNDEng(yearData.t || 0)}
+      - Total orders: ${fmtNum(yearData.o || 0)}
+      - Peak spending month: ${maxMonthName} (${fmtVNDEng(maxMonthVal)})
+      Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's shopping destiny, personality, and shopping vibes during Year ${yr}, especially commenting on their massive peak in ${maxMonthName}.
+      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang (like overthink, suy, vô tri, chữa lành, sao Thủy nghịch hành, vũ trụ gửi tín hiệu, kiếp nạn, bay màu, bất ổn, cảm lạnh). Do not give financial advice.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1020,10 +1035,28 @@ function setupDashboardRatingCard(d) {
         0,
       );
 
-      const context = `Tháng ${monthStr}/${year}: tổng chi ${fmtVND(monthTotal)} với ${totalItemsCount} đơn hàng.`;
+      const MONTH_NAMES_EN = [
+        "",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const enMonth = MONTH_NAMES_EN[Number(monthStr)] || `Month ${monthStr}`;
 
-      const specificPrompt = `Dữ liệu mua sắm tháng ${monthStr}/${year}: Tổng chi ${fmtVND(monthTotal)} cho ${totalItemsCount} đơn hàng.
-      Hãy 'gieo quẻ' giải mã tâm lý và số mệnh chi tiêu của bạn vào tháng ${monthStr}/${year} dưới góc nhìn tâm linh hoặc tính cách tiêu dùng GenZ (mua sắm chữa lành, chốt đơn vô tri...). Không khuyên tiết kiệm.`;
+      const context = `Month ${enMonth}/${year}: total spend ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.`;
+
+      const specificPrompt = `Shopee shopping data for ${enMonth}/${year}: Total spend of ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.
+      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality and mood during ${enMonth}/${year} under a GenZ spiritual/personality lens (e.g. retail therapy/healing, buying vô tri items).
+      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget advice.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1040,14 +1073,14 @@ function setupDashboardRatingCard(d) {
       const totalSaved = d.s || 0;
       const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
 
-      const context = `Tổng chi tiêu Shopee tất cả thời gian: ${fmtVND(totalSpend)} với ${fmtNum(totalOrders)} đơn hàng. Đã tiết kiệm được ${fmtVND(totalSaved)} từ khuyến mãi (${savePct}%).`;
+      const context = `All-time Shopee spend overview: total spend of ${fmtVNDEng(totalSpend)} across ${fmtNum(totalOrders)} orders. Saved ${fmtVNDEng(totalSaved)} from coupons (${savePct}%).`;
 
-      const specificPrompt = `Dữ liệu tổng quan chi tiêu Shopee:
-      - Tổng chi tiêu: ${fmtVND(totalSpend)}
-      - Tổng đơn hàng: ${fmtNum(totalOrders)}
-      - Số tiền tiết kiệm được: ${fmtVND(totalSaved)} (${savePct}% giá gốc)
-      Hãy đóng vai một 'pháp sư Threads' kiêm 'thầy bói vũ trụ' viết một nhận xét siêu ngắn (2-3 câu), cực kỳ hài hước bằng tiếng Việt đọc vị số mệnh chi tiêu của chủ tài khoản này.
-      Sử dụng văn phong xéo sắc, hóm hỉnh và các trend cực hot trên Threads Việt như: 'overthink', 'suy', 'vô tri', 'chữa lành', 'sao Thủy nghịch hành', 'vũ trụ gửi tín hiệu', 'kiếp nạn', 'pressing', 'bay màu', 'phú quý giật lùi', '10 điểm không có nhưng'. Không khuyên tiết kiệm hay dạy đời.`;
+      const specificPrompt = `Shopee spending overview data:
+      - Total spend: ${fmtVNDEng(totalSpend)}
+      - Total orders: ${fmtNum(totalOrders)}
+      - Amount saved: ${fmtVNDEng(totalSaved)} (${savePct}% of original prices)
+      Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") and decode the user's lifetime shopping destiny, personality, and vibes under a GenZ spiritual lens.
+      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang (like overthink, suy, vô tri, chữa lành, sao Thủy nghịch hành, vũ trụ gửi tín hiệu, kiếp nạn, bay màu, phú quý giật lùi, 10 điểm không có nhưng, bất ổn, cảm lạnh) naturally to make the comment extremely funny and sassy. Do not give financial advice.`;
 
       enrichWithAI(
         "insight-yearly",
@@ -1135,7 +1168,7 @@ function setupDashboardRatingCard(d) {
     function triggerCategoryAIInsight(cs, ti, total, cacheKey, year) {
       const activeYear = year || "all";
       const periodText =
-        activeYear === "all" ? "tất cả thời gian" : `năm ${activeYear}`;
+        activeYear === "all" ? "all-time" : `year ${activeYear}`;
       const filteredCs = (cs || []).filter(
         (c) => c.name !== "🏷️ Khác" && c.name !== "Khác",
       );
@@ -1144,7 +1177,7 @@ function setupDashboardRatingCard(d) {
       const catLines = filteredCs
         .map((c) => {
           const pct = Math.round((c.s / analyzedTotal) * 100);
-          return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lần mua)`;
+          return `${c.name}: ${fmtVNDEng(c.s)} (${pct}%, ${c.c} purchases)`;
         })
         .join("; ");
 
@@ -1154,10 +1187,11 @@ function setupDashboardRatingCard(d) {
 
       enrichWithAI(
         "insight-categories",
-        `Cơ cấu chi tiêu (${periodText}): ${catLines}.`,
-        `Dữ liệu chi tiêu theo danh mục (${periodText}): ${catLines}.
-        Danh mục tiêu nhiều nhất: "${topCategory.name}" (${fmtVND(topCategory.s)}, chiếm ${topPct}%).
-        Hãy phán xét về tính cách tiêu dùng hoặc 'hệ tâm linh' mua sắm của bạn dựa trên cơ cấu danh mục này dưới góc nhìn hài hước GenZ. Không khuyên tiết kiệm.`,
+        `Category breakdown (${periodText}): ${catLines}.`,
+        `Spending category breakdown for ${periodText}: ${catLines}.
+        Highest spend category: "${topCategory.name}" (${fmtVNDEng(topCategory.s)}, occupying ${topPct}%).
+        Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's spending personality, lifestyle archetype, or 'spiritual system' ("hệ tâm linh") based on this breakdown.
+        Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give financial advice.`,
         cacheKey,
       );
     }
@@ -1181,14 +1215,15 @@ function setupDashboardRatingCard(d) {
 
       const overallText =
         overallTotal > 0
-          ? ` (chiếm ${Math.round((catTotal / overallTotal) * 100)}% tổng chi tiêu)`
+          ? ` (representing ${Math.round((catTotal / overallTotal) * 100)}% of overall spend)`
           : "";
-      const periodText = year === "all" ? "tất cả thời gian" : `năm ${year}`;
+      const periodText = year === "all" ? "all-time" : `year ${year}`;
 
-      const context = `Danh mục "${catName}" (${periodText}): đã chi ${fmtVND(catTotal)}${overallText} với ${catCount} lần mua.`;
+      const context = `Category "${catName}" (${periodText}): spent ${fmtVNDEng(catTotal)}${overallText} across ${catCount} purchases.`;
 
-      const specificPrompt = `Danh mục "${catName}" (${periodText}): tiêu ${fmtVND(catTotal)} cho ${catCount} đơn hàng.
-      Hãy xem bói tính cách tiêu dùng của bạn đối với nhóm sản phẩm "${catName}" này (ví dụ: mua để chữa lành, bị thế lực tâm linh dẫn đường...). Không khuyên tiết kiệm.`;
+      const specificPrompt = `Spending data for Category "${catName}" during ${periodText}: Spent ${fmtVNDEng(catTotal)} across ${catCount} purchases.
+      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality or 'trial' ("kiếp nạn") regarding this specific category "${catName}" (e.g., buying for healing, led by spiritual voices/vũ trụ gửi tín hiệu).
+      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget advice.`;
 
       enrichWithAI(
         "insight-categories",
@@ -1418,9 +1453,10 @@ function setupDashboardRatingCard(d) {
       const itemNames = top10.map((i) => `"${i.n}"`).join(", ");
       enrichWithAI(
         "insight-items",
-        `Sản phẩm mua nhiều nhất: ${itemNames}.`,
-        `Danh sách sản phẩm mua nhiều nhất: ${itemNames}.
-        Hãy đọc vị tính cách tiêu dùng hoặc 'kiếp nạn chi tiêu' của bạn qua đống đồ này dưới góc nhìn hài hước, tâm linh GenZ (mua sắm chữa lành, chốt đơn vô tri...). Không khuyên tiết kiệm.`,
+        `Most purchased items: ${itemNames}.`,
+        `List of your top purchased items: ${itemNames}.
+        Task: Perform a witty and funny spiritual fortune-telling reading ("gieo quẻ") and decode the user's spending personality or 'trial' ("kiếp nạn") driven by these purchased items under a GenZ spiritual lens.
+        Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget/saving advice.`,
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
