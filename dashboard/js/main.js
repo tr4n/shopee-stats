@@ -593,22 +593,12 @@ function setupSupportButton(d) {
           compressed = "d=" + btoa(bin);
         }
 
-        const ts = d.ts || Date.now();
-        const hashRaw = ts + "_" + deviceInfoStr;
-        let dataHash = 0;
-        for (let i = 0; i < hashRaw.length; i++) {
-          dataHash = (dataHash << 5) - dataHash + hashRaw.charCodeAt(i);
-          dataHash |= 0;
-        }
-        dataHash = Math.abs(dataHash).toString(16) + "-" + ts;
-
         const payload = {
           secret: "shopee_stats_anti_spam_secret_2026",
           time: new Date().toISOString(),
           device: deviceInfoStr,
           desc: desc,
-          data: compressed,
-          hash: dataHash,
+          data: compressed
         };
 
         const WEBAPP_URL =
