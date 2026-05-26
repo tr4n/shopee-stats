@@ -902,7 +902,6 @@ function setupDashboardRatingCard(d) {
       "🏠 Nhà cửa & Đời sống": "Home & Living",
       "💪 Thể thao & Du lịch": "Sports & Travel",
       "📚 Giải trí & Giáo dục": "Entertainment & Education",
-      "🍔 Bách hóa & Ẩm thực": "Grocery & Food/Beverage",
       "🏷️ Khác": "Others / Uncategorized",
     };
 
@@ -943,13 +942,6 @@ function setupDashboardRatingCard(d) {
         return "Entertainment & Education";
       if (textLower.includes("trẻ em") || textLower.includes("đồ chơi"))
         return "Kids & Toys";
-      if (
-        textLower.includes("bách hóa") ||
-        textLower.includes("ẩm thực") ||
-        textLower.includes("thực phẩm") ||
-        textLower.includes("đồ uống")
-      )
-        return "Grocery & Food/Beverage";
       if (textLower.includes("ô tô") || textLower.includes("xe máy"))
         return "Automotive";
       if (textLower.includes("đồng hồ")) return "Watches";
