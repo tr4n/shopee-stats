@@ -970,86 +970,36 @@ function setupDashboardRatingCard(d) {
         .sort((a, b) => Number(a[0]) - Number(b[0]))
         .filter(([, v]) => v > 0);
 
-      const MONTH_NAMES_EN = [
-        "",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
       const monthBreakdown = monthEntries
         .map(
-          ([m, v]) => `${MONTH_NAMES_EN[m] || "Month " + m}: ${fmtVNDEng(v)}`,
+          ([m, v]) => `Tháng ${m}: ${fmtVND(v)}`,
         )
         .join(", ");
       const activeMonths = monthEntries.length;
       const avgPerMonth =
         activeMonths > 0 ? Math.round((yearData.t || 0) / activeMonths) : 0;
 
-      const currentYear = new Date().getFullYear();
-      const yearNum = Number(yr);
-      const yearDiff = currentYear - yearNum;
-      const isCurrentYear = yearDiff === 0;
-      const isLastYear = yearDiff === 1;
-
-      const lastActiveMonth =
-        monthEntries.length > 0
-          ? Number(monthEntries[monthEntries.length - 1][0])
-          : null;
+      // Tính tháng chi nhiều tiền nhất trực tiếp bằng JS
+      let maxMonth = null;
+      let maxMonthVal = 0;
+      for (const [m, v] of monthEntries) {
+        if (v > maxMonthVal) {
+          maxMonthVal = v;
+          maxMonth = m;
+        }
+      }
 
       const contextLines = [
-        `Year ${yr}: total spend ${fmtVNDEng(yearData.t || 0)} across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVNDEng(avgPerOrder)} per order.`,
-        `Monthly breakdown: ${monthBreakdown || "no data"}.`,
-        `Average spend per month: ${fmtVNDEng(avgPerMonth)} (${activeMonths} active months).`,
+        `Năm ${yr}: tổng chi ${fmtVND(yearData.t || 0)}, ${fmtNum(yearData.o || 0)} đơn hàng, trung bình ${fmtVND(avgPerOrder)}/đơn.`,
+        `Chi tiết tháng: ${monthBreakdown || "không có dữ liệu"}.`,
+        `Tháng cao nhất: Tháng ${maxMonth} (${fmtVND(maxMonthVal)}).`,
       ];
 
-      if (isCurrentYear) {
-        const recent1m = fmtVNDEng(d.ps?.["1m"] || 0);
-        const recent3m = fmtVNDEng(d.ps?.["3m"] || 0);
-        contextLines.push(
-          `Recent spending: last 1 month: ${recent1m}, last 3 months: ${recent3m}.`,
-        );
-        if (lastActiveMonth) {
-          contextLines.push(
-            `Current year is ${currentYear}. Latest active month in data is Month ${lastActiveMonth}.`,
-          );
-        }
-      } else {
-        contextLines.push(
-          `Note: This is historical data from ${yr} (${yearDiff} years ago, current year is ${currentYear}).`,
-        );
-        if (lastActiveMonth) {
-          contextLines.push(
-            `Last active month in year ${yr} was Month ${lastActiveMonth}.`,
-          );
-        }
-      }
-
-      let specificPrompt;
-      if (isCurrentYear) {
-        specificPrompt = `This is your spend data for THIS current year (${yr}):
-1. Identify your exact month with the highest total spend. Predict your shopping mood, consumer psychology, or what emotional/lifestyle factor might have triggered this spending peak during that specific time of the year.
-2. Characterize your spending personality based on this peak. Do NOT give budget/saving advice.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific year/period (e.g., "Trong năm ${yr}...", "Trong giai đoạn này...") in your response. Use **bold** for the month name and key personality traits.`;
-      } else if (isLastYear) {
-        specificPrompt = `This is your spend data for LAST year (${yr}):
-1. Identify your month with the highest total spend. Predict your consumer mindset and lifestyle state during that peak month last year.
-2. Highlight a pattern of how your emotional shopping habits have evolved or carried over to this year. Do NOT give saving/budgeting tips.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific year/period (e.g., "Trong năm ${yr}...", "Trong giai đoạn này...") in your response. Use **bold** for the month name and main psychology remarks.`;
-      } else {
-        specificPrompt = `This is your spend data from ${yearDiff} years ago (${yr}):
-1. Identify your month with the highest spend and predict what kind of shopping mood or lifestyle phase you were in during that period.
-2. Reflect on the seasonal changes or nostalgia of your consumer personality back then. Do NOT give saving/budgeting advice.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific year/period (e.g., "Trong năm ${yr}...", "Trong giai đoạn này...") in your response. Use **bold** for the month name and psychological observations.`;
-      }
+      const specificPrompt = `Dữ liệu chi tiêu Shopee năm ${yr}:
+      - Tổng chi tiêu: ${fmtVND(yearData.t || 0)}
+      - Số đơn hàng: ${fmtNum(yearData.o || 0)}
+      - Tháng chi nhiều nhất: Tháng ${maxMonth} (${fmtVND(maxMonthVal)})
+      Hãy 'gieo quẻ' nhận xét hài hước bằng tiếng Việt về số mệnh chi tiêu, cá tính hoặc yếu tố tâm linh (sao Thủy nghịch hành, vũ trụ gửi tín hiệu) của bạn trong năm ${yr}, đặc biệt là độ 'chịu chơi' của tháng ${maxMonth}. Không khuyên tiết kiệm.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1070,29 +1020,10 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
         0,
       );
 
-      const MONTH_NAMES_EN = [
-        "",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-      const enMonth = MONTH_NAMES_EN[Number(monthStr)] || `Month ${monthStr}`;
+      const context = `Tháng ${monthStr}/${year}: tổng chi ${fmtVND(monthTotal)} với ${totalItemsCount} đơn hàng.`;
 
-      const context = `Month ${enMonth}/${year}: total spend ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.`;
-
-      const specificPrompt = `This is your Shopee spend data for ${enMonth} of Year ${year}:
-1. Analyze your total spend of ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.
-2. Predict your shopping mood, mental state, or lifestyle priorities that drove your shopping behavior during this specific month and year. Do NOT give saving or spending control advice.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific month/year/period (e.g., "Vào tháng ${monthStr}/${year}...", "Trong giai đoạn này...") in your response. Use **bold** for the month/year and key psychological findings.`;
+      const specificPrompt = `Dữ liệu mua sắm tháng ${monthStr}/${year}: Tổng chi ${fmtVND(monthTotal)} cho ${totalItemsCount} đơn hàng.
+      Hãy 'gieo quẻ' giải mã tâm lý và số mệnh chi tiêu của bạn vào tháng ${monthStr}/${year} dưới góc nhìn tâm linh hoặc tính cách tiêu dùng GenZ (mua sắm chữa lành, chốt đơn vô tri...). Không khuyên tiết kiệm.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1180,7 +1111,7 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
     function triggerCategoryAIInsight(cs, ti, total, cacheKey, year) {
       const activeYear = year || "all";
       const periodText =
-        activeYear === "all" ? "all-time" : `year ${activeYear}`;
+        activeYear === "all" ? "tất cả thời gian" : `năm ${activeYear}`;
       const filteredCs = (cs || []).filter(
         (c) => c.name !== "🏷️ Khác" && c.name !== "Khác",
       );
@@ -1189,18 +1120,20 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       const catLines = filteredCs
         .map((c) => {
           const pct = Math.round((c.s / analyzedTotal) * 100);
-          const enCatName = translateCategoryToEnglish(c.name);
-          return `${enCatName}: ${fmtVNDEng(c.s)} (${pct}%, ${c.c} purchases)`;
+          return `${c.name}: ${fmtVND(c.s)} (${pct}%, ${c.c} lần mua)`;
         })
         .join("; ");
 
+      // Xác định danh mục chi tiêu nhiều nhất bằng JS
+      const topCategory = filteredCs[0];
+      const topPct = Math.round((topCategory.s / analyzedTotal) * 100);
+
       enrichWithAI(
         "insight-categories",
-        `Spending breakdown by category for the period (${periodText}): ${catLines}.`,
-        `This is the spend data for the period (${periodText}). Ignore the category 'Others / Uncategorized' entirely:
-1. Find the category with your highest percentage (%) of total spend. Label this category and explain what it reveals about your dominant consumer personality, lifestyle priority, or psychological desires.
-2. Explain how this category distribution defines your lifestyle archetype (e.g., tech-enthusiast, self-care addict, homebody). Do NOT give financial advice or brake rules.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific period (e.g., "Trong giai đoạn này...", "Trong năm ${activeYear}...") in your response. Use **bold** for category names and their lifestyle archetype.`,
+        `Cơ cấu chi tiêu (${periodText}): ${catLines}.`,
+        `Dữ liệu chi tiêu theo danh mục (${periodText}): ${catLines}.
+        Danh mục tiêu nhiều nhất: "${topCategory.name}" (${fmtVND(topCategory.s)}, chiếm ${topPct}%).
+        Hãy phán xét về tính cách tiêu dùng hoặc 'hệ tâm linh' mua sắm của bạn dựa trên cơ cấu danh mục này dưới góc nhìn hài hước GenZ. Không khuyên tiết kiệm.`,
         cacheKey,
       );
     }
@@ -1222,19 +1155,16 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       const catTotal = categoryStats.s;
       const catCount = categoryStats.c;
 
-      const enCat = translateCategoryToEnglish(catName);
       const overallText =
         overallTotal > 0
-          ? ` (which is ${Math.round((catTotal / overallTotal) * 100)}% of total period spend of ${fmtVNDEng(overallTotal)})`
+          ? ` (chiếm ${Math.round((catTotal / overallTotal) * 100)}% tổng chi tiêu)`
           : "";
-      const periodText = year === "all" ? "all-time" : `year ${year}`;
+      const periodText = year === "all" ? "tất cả thời gian" : `năm ${year}`;
 
-      const context = `Category "${enCat}" (${periodText}): total spent ${fmtVNDEng(catTotal)}${overallText} across ${catCount} item purchases.`;
+      const context = `Danh mục "${catName}" (${periodText}): đã chi ${fmtVND(catTotal)}${overallText} với ${catCount} lần mua.`;
 
-      const specificPrompt = `This is your Shopee spend data for the category "${enCat}" in ${periodText}:
-1. You spent a total of ${fmtVNDEng(catTotal)} across ${catCount} purchases in this category.
-2. Provide a humorous, honest diagnostic of your shopping psychology or personality traits driven by this specific category (e.g., appearance-obsessed, retail therapist, shiny object syndrome). Do NOT give saving or personal finance advice.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). You MUST explicitly mention the specific period (e.g., "Trong giai đoạn này...", "Trong năm ${year}...") in your response. Use **bold** for the category name and key consumer personality trait.`;
+      const specificPrompt = `Danh mục "${catName}" (${periodText}): tiêu ${fmtVND(catTotal)} cho ${catCount} đơn hàng.
+      Hãy xem bói tính cách tiêu dùng của bạn đối với nhóm sản phẩm "${catName}" này (ví dụ: mua để chữa lành, bị thế lực tâm linh dẫn đường...). Không khuyên tiết kiệm.`;
 
       enrichWithAI(
         "insight-categories",
@@ -1461,10 +1391,9 @@ Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences tota
       const itemNames = top10.map((i) => `"${i.n}"`).join(", ");
       enrichWithAI(
         "insight-items",
-        `Top purchased products: ${itemNames}.`,
-        `Review the list of your top purchased product names: ${itemNames}.
-Based solely on these product names, predict your consumer personality, lifestyle archetype, hobbies, or mood. Provide a humorous, friendly psychological analysis. Do NOT give saving suggestions or financial advice.
-Requirements: Output in VIETNAMESE. Keep it concise (maximum of 3 sentences total). Use **bold** for product names and key personality traits.`,
+        `Sản phẩm mua nhiều nhất: ${itemNames}.`,
+        `Danh sách sản phẩm mua nhiều nhất: ${itemNames}.
+        Hãy đọc vị tính cách tiêu dùng hoặc 'kiếp nạn chi tiêu' của bạn qua đống đồ này dưới góc nhìn hài hước, tâm linh GenZ (mua sắm chữa lành, chốt đơn vô tri...). Không khuyên tiết kiệm.`,
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
