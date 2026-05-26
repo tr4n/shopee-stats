@@ -1034,6 +1034,30 @@ function setupDashboardRatingCard(d) {
     }
     window.triggerSingleMonthAIInsight = triggerSingleMonthAIInsight;
 
+    function triggerYearlyAIInsight(d) {
+      const totalSpend = d.t || 0;
+      const totalOrders = d.o || 0;
+      const totalSaved = d.s || 0;
+      const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
+
+      const context = `Tổng chi tiêu Shopee tất cả thời gian: ${fmtVND(totalSpend)} với ${fmtNum(totalOrders)} đơn hàng. Đã tiết kiệm được ${fmtVND(totalSaved)} từ khuyến mãi (${savePct}%).`;
+
+      const specificPrompt = `Dữ liệu tổng quan chi tiêu Shopee:
+      - Tổng chi tiêu: ${fmtVND(totalSpend)}
+      - Tổng đơn hàng: ${fmtNum(totalOrders)}
+      - Số tiền tiết kiệm được: ${fmtVND(totalSaved)} (${savePct}% giá gốc)
+      Hãy đóng vai một 'pháp sư Threads' kiêm 'thầy bói vũ trụ' viết một nhận xét siêu ngắn (2-3 câu), cực kỳ hài hước bằng tiếng Việt đọc vị số mệnh chi tiêu của chủ tài khoản này.
+      Sử dụng văn phong xéo sắc, hóm hỉnh và các trend cực hot trên Threads Việt như: 'overthink', 'suy', 'vô tri', 'chữa lành', 'sao Thủy nghịch hành', 'vũ trụ gửi tín hiệu', 'kiếp nạn', 'pressing', 'bay màu', 'phú quý giật lùi', '10 điểm không có nhưng'. Không khuyên tiết kiệm hay dạy đời.`;
+
+      enrichWithAI(
+        "insight-yearly",
+        context,
+        specificPrompt,
+        "insight-yearly-all"
+      );
+    }
+    window.triggerYearlyAIInsight = triggerYearlyAIInsight;
+
     function getItemsForYear(mi, year, tiItems) {
       const prefix = year + "-";
 
@@ -1385,6 +1409,9 @@ function setupDashboardRatingCard(d) {
         );
         yoyLine = `Year ${curYear} ${pct >= 0 ? "increased" : "decreased"} by ${Math.abs(pct)}% compared to year ${prevYear}.`;
       }
+
+      // 1. Yearly Overview AI insight
+      triggerYearlyAIInsight(d);
 
       // 2. Items AI insight
       const top10 = (d.ti || []).slice(0, 10);
