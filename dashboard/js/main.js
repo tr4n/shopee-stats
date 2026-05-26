@@ -486,16 +486,16 @@ function setupSupportButton(d) {
       const activeTypeBtn = modal.querySelector(".support-type-btn.active");
       const type = activeTypeBtn ? activeTypeBtn.getAttribute("data-type") : "bug";
       const typeLabels = {
-        bug: "🐛 Báo lỗi",
-        suggestion: "💡 Góp ý",
-        other: "💬 Khác"
+        bug: "🐛 Bug",
+        suggestion: "💡 Suggestion",
+        other: "💬 Other"
       };
-      const typeLabel = typeLabels[type] || "Góp ý";
+      const typeLabel = typeLabels[type] || "Suggestion";
       const contactVal = contactEl ? contactEl.value.trim() : "";
 
-      // Gộp phân loại + thông tin liên hệ vào trường desc
-      const desc = `[Loại: ${typeLabel}]` + 
-                   (contactVal ? `\n[Liên hệ: ${contactVal}]` : "") + 
+      // Combine type + contact info + body text into desc field
+      const desc = `[Type: ${typeLabel}]` + 
+                   (contactVal ? `\n[Contact: ${contactVal}]` : "") + 
                    `\n\n${bodyText}`;
 
       const info = (() => {
@@ -521,31 +521,42 @@ function setupSupportButton(d) {
           screen: `${window.screen.width}x${window.screen.height}`,
           dpr: window.devicePixelRatio || 1,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
-          dataDate:
-            d && d.ts ? new Date(d.ts).toLocaleString("vi-VN") : "Unknown",
+          dataDate: (() => {
+            if (!d || !d.ts) return "Unknown";
+            let ts = d.ts;
+            if (ts < 10000000000) ts = ts * 1000;
+            return new Date(ts).toLocaleString("en-US");
+          })(),
           summary:
-            d && d.summary
-              ? `${d.summary.total_orders} đơn - ${d.summary.total_spend}đ`
+            d && d.t !== undefined && d.o !== undefined
+              ? `${d.o} orders - ${d.t.toLocaleString("en-US")} VND`
               : "Unknown",
-          chromeAI: typeof chromeAISupportStatus !== "undefined" ? chromeAISupportStatus : "Không rõ",
-          extVersion:
-            typeof chrome !== "undefined" &&
-            chrome.runtime &&
-            chrome.runtime.getManifest
-              ? chrome.runtime.getManifest().version
-              : "Unknown",
+          chromeAI: (() => {
+            const status = typeof chromeAISupportStatus !== "undefined" ? chromeAISupportStatus : "";
+            if (status.includes("Sẵn sàng")) return "Supported (Ready)";
+            if (status.includes("tải thêm")) return "Supported (Need model download)";
+            if (status.includes("Đang tải")) return "Supported (Downloading model)";
+            if (status.includes("Không hỗ trợ")) return "Not supported";
+            return status || "Unknown";
+          })(),
+          extVersion: (() => {
+            if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) {
+              return chrome.runtime.getManifest().version;
+            }
+            return d && d.ev ? d.ev : "Unknown";
+          })(),
         };
       })();
 
       const deviceInfoStr = [
-        `Trình duyệt : ${info.browser}`,
-        `Hệ điều hành: ${info.os}`,
-        `Màn hình    : ${info.screen} (DPR ${info.dpr})`,
+        `Browser     : ${info.browser}`,
+        `OS          : ${info.os}`,
+        `Screen      : ${info.screen} (DPR ${info.dpr})`,
         `Viewport    : ${info.viewport}`,
-        `Dữ liệu tại : ${info.dataDate}`,
-        `Tóm tắt     : ${info.summary}`,
+        `Data Date   : ${info.dataDate}`,
+        `Summary     : ${info.summary}`,
         `Chrome AI   : ${info.chromeAI}`,
-        `Phiên bản Ext: ${info.extVersion}`,
+        `Ext Version : ${info.extVersion}`,
       ].join("\n");
 
       // Set loading state
