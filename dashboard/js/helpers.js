@@ -45,13 +45,15 @@ function parseBold(raw) {
 }
 
 function renderAIInsight(text, cardId) {
-  const paragraphs = text
+  // Split by newlines first, then split each paragraph into individual sentences.
+  const sentences = text
     .split(/\n+/)
-    .map(p => p.trim())
-    .filter(p => p.length > 0);
+    .flatMap(p => p.split(/(?<=[.!?])\s+/))
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
   const bullets = ['💡', '⚡', '🎯', '💰', '📌'];
-  const items = paragraphs.map((p, i) =>
-    `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
+  const items = sentences.map((s, i) =>
+    `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(s)}</span></div>`
   ).join('');
   const refreshBtn = cardId
     ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Xin quẻ mới" style="display: none">
