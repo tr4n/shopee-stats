@@ -40,19 +40,17 @@
           <span class="ni">🏷️</span> Danh mục
         </button>
         <div class="nav-support-divider"></div>
-        <button class="nav-item nav-item--support" id="btn-support">
-          <span class="ni">💬</span> Hỗ trợ
-        </button>
+
         <button
           class="nav-item nav-item--support"
-          id="btn-support-direct"
+          id="btn-support"
           style="
             margin-top: 5px;
             background: rgba(38, 170, 153, 0.1);
             color: var(--primary);
           "
         >
-          <span class="ni">🚀</span> Hỗ trợ (Thử nghiệm)
+          <span class="ni">🚀</span> Góp ý & Báo lỗi
         </button>
       </div>
 
@@ -405,83 +403,8 @@
       <div id="support-modal" class="modal-overlay">
         <div class="modal-content modal-support-content">
           <div class="modal-header">
-            <h2>💬 Hỗ Trợ Kỹ Thuật</h2>
-            <button id="btn-close-support" class="btn-close">&times;</button>
-          </div>
-          <div class="support-body">
-            <div class="support-intro">
-              Chào bạn, rất tiếc vì sự cố ngoài ý muốn này khiến bạn gặp bất
-              tiện! Cảm ơn bạn đã phản hồi lỗi, hãy thực hiện hai bước đơn giản
-              dưới đây để chúng mình sớm kiểm tra và hỗ trợ khắc phục nhé:
-            </div>
-
-            <!-- Description field -->
-            <div class="support-field">
-              <label class="support-label">
-                📝 Mô tả lỗi bạn gặp phải
-                <span class="support-hint">(không bắt buộc)</span>
-              </label>
-              <textarea
-                id="support-desc"
-                class="support-textarea"
-                placeholder="Nhập mô tả lỗi tại đây để kỹ thuật viên hiểu rõ hơn vấn đề bạn đang gặp phải..."
-              ></textarea>
-            </div>
-
-            <!-- Flattened Steps Layout -->
-            <div class="support-steps-container">
-              <!-- Step 1 Card -->
-              <div class="support-step-card step-1">
-                <div class="support-step-header">
-                  <span class="support-step-badge badge-1">1</span>
-                  <span class="support-step-title"
-                    >Tải về file hỗ trợ kỹ thuật</span
-                  >
-                </div>
-                <p class="support-step-desc">
-                  File này chứa thông tin cần thiết giúp kỹ thuật viên dễ dàng
-                  mô phỏng và tái hiện lỗi.
-                </p>
-                <div class="support-step-action">
-                  <button id="btn-download-raw" class="support-action-btn">
-                    <span>💾 Tải file kỹ thuật (.txt)</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Step 2 Card -->
-              <div class="support-step-card step-2">
-                <div class="support-step-header">
-                  <span class="support-step-badge badge-2">2</span>
-                  <span class="support-step-title"
-                    >Gửi báo cáo lỗi qua Google Form</span
-                  >
-                </div>
-                <p class="support-step-desc">
-                  Nhấn nút dưới để mở Google Form, gửi kèm mô tả lỗi và đính kèm
-                  file hỗ trợ (.txt) vừa tải ở Bước 1.
-                </p>
-                <div class="support-step-action">
-                  <button id="btn-send-support" class="support-send-btn">
-                    <span>📝 Mở Google Form...</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div id="support-status"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Experimental Direct Support Modal -->
-      <div id="support-direct-modal" class="modal-overlay">
-        <div class="modal-content modal-support-content">
-          <div class="modal-header">
             <h2>🚀 Hỗ Trợ Nhanh (Thử Nghiệm)</h2>
-            <button id="btn-close-support-direct" class="btn-close">
-              &times;
-            </button>
+            <button id="btn-close-support" class="btn-close">&times;</button>
           </div>
           <div class="support-body">
             <div class="support-intro">
@@ -497,7 +420,7 @@
                 <span class="support-hint">(không bắt buộc)</span>
               </label>
               <textarea
-                id="support-direct-desc"
+                id="support-desc"
                 class="support-textarea"
                 placeholder="Nhập mô tả lỗi chi tiết để chúng mình hiểu rõ hơn vấn đề..."
               ></textarea>
@@ -519,7 +442,7 @@
                 </p>
                 <div class="support-step-action">
                   <button
-                    id="btn-send-support-direct"
+                    id="btn-send-support"
                     class="support-send-btn"
                     style="width: 100%; justify-content: center"
                   >
@@ -529,7 +452,7 @@
               </div>
             </div>
 
-            <div id="support-direct-status"></div>
+            <div id="support-status"></div>
           </div>
         </div>
       </div>

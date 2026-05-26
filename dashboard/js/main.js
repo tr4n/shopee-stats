@@ -322,228 +322,37 @@ function setupSupportButton(d) {
   const closeBtn = document.getElementById("btn-close-support");
   const sendBtn = document.getElementById("btn-send-support");
 
-  if (!btn || !modal) return;
-
-  function getDeviceInfo() {
-    const ua = navigator.userAgent;
-    let browser = "Unknown",
-      bVersion = "";
-
-    const matchers = [
-      [/Edg\/([\d.]+)/, "Edge"],
-      [/OPR\/([\d.]+)/, "Opera"],
-      [/Chrome\/([\d.]+)/, "Chrome"],
-      [/Firefox\/([\d.]+)/, "Firefox"],
-      [/Version\/([\d.]+).*Safari/, "Safari"],
-    ];
-    for (const [re, name] of matchers) {
-      const m = ua.match(re);
-      if (m) {
-        browser = name;
-        bVersion = m[1];
-        break;
-      }
-    }
-
-    let os = "Unknown";
-    if (/Windows NT 10|Windows NT 11/.test(ua)) os = "Windows 10/11";
-    else if (/Windows/.test(ua)) os = "Windows";
-    else if (/Mac OS X ([\d_]+)/.test(ua))
-      os = "macOS " + ua.match(/Mac OS X ([\d_]+)/)[1].replace(/_/g, ".");
-    else if (/Android ([\d.]+)/.test(ua))
-      os = "Android " + ua.match(/Android ([\d.]+)/)[1];
-    else if (/iPhone OS ([\d_]+)/.test(ua))
-      os = "iOS " + ua.match(/iPhone OS ([\d_]+)/)[1].replace(/_/g, ".");
-    else if (/Linux/.test(ua)) os = "Linux";
-
-    let extVersion = "Không rõ (Chạy trực tiếp)";
-    try {
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.runtime &&
-        chrome.runtime.getManifest
-      ) {
-        extVersion = chrome.runtime.getManifest().version;
-      }
-    } catch (e) {
-      /* noop */
-    }
-    if ((extVersion.includes("Không rõ") || !extVersion) && d && d.ev) {
-      extVersion = d.ev;
-    }
-
-    return {
-      browser: `${browser} ${bVersion}`.trim(),
-      os,
-      screen: `${screen.width}×${screen.height}`,
-      dpr: window.devicePixelRatio || 1,
-      viewport: `${window.innerWidth}×${window.innerHeight}`,
-      dataDate: d?.ts ? fmtDate(d.ts) : "—",
-      summary: d ? `${fmtVND(d.t)} · ${fmtNum(d.o)} đơn` : "—",
-      chromeAI: chromeAISupportStatus,
-      extVersion: extVersion,
-    };
-  }
-
-  const downloadRawBtn = document.getElementById("btn-download-raw");
-  if (downloadRawBtn) {
-    downloadRawBtn.addEventListener("click", async () => {
-      if (!d)
-        return alert(
-          "Không tìm thấy thông tin kỹ thuật hỗ trợ. Vui lòng tải lại trang và thử lại!",
-        );
-      const origText = downloadRawBtn.innerHTML;
-      downloadRawBtn.innerHTML = "<span>⏳ Đang tạo file hỗ trợ...</span>";
-      try {
-        const jsonStr = JSON.stringify(d);
-        let compressed = "";
-
-        // Try Gzip compression (prefix with 'gz=')
-        try {
-          if (typeof CompressionStream !== "undefined") {
-            const stream = new Blob([jsonStr])
-              .stream()
-              .pipeThrough(new CompressionStream("gzip"));
-            const buffer = await new Response(stream).arrayBuffer();
-            let binary = "";
-            const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < bytes.length; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            compressed =
-              "gz=" +
-              btoa(binary)
-                .replace(/\+/g, "-")
-                .replace(/\//g, "_")
-                .replace(/=+$/, ""); // URI Safe Base64
-          }
-        } catch (e) {
-          console.warn(
-            "[Dashboard] Gzip compression for support file failed, falling back:",
-            e,
-          );
-        }
-
-        // Fallback 1: LZString compression (prefix with 'lz=')
-        if (!compressed) {
-          try {
-            if (typeof LZString !== "undefined") {
-              compressed =
-                "lz=" + LZString.compressToEncodedURIComponent(jsonStr);
-            }
-          } catch (e) {
-            console.warn(
-              "[Dashboard] LZString compression for support file failed:",
-              e,
-            );
-          }
-        }
-
-        // Fallback 2: Base64 (prefix with 'd=')
-        if (!compressed) {
-          const bytes = new TextEncoder().encode(jsonStr);
-          let bin = "";
-          for (let i = 0; i < bytes.length; i++)
-            bin += String.fromCharCode(bytes[i]);
-          compressed = "d=" + btoa(bin);
-        }
-
-        const blob = new Blob([compressed], {
-          type: "text/plain;charset=utf-8",
-        });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `shopee-analytics-support-${d.ts || Date.now()}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        downloadRawBtn.innerHTML = "<span>✓ Đã lưu file thành công!</span>";
-      } catch (e) {
-        alert("Đã xảy ra lỗi khi tạo file: " + e.message);
-        downloadRawBtn.innerHTML = "<span>❌ Đã xảy ra lỗi</span>";
-      } finally {
-        setTimeout(() => {
-          downloadRawBtn.innerHTML = origText;
-        }, 2000);
-      }
-    });
-  }
-
-  btn.addEventListener("click", () => {
-    modal.classList.add("active");
-  });
-
-  closeBtn.addEventListener("click", () => modal.classList.remove("active"));
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.classList.remove("active");
-  });
-
-  sendBtn.addEventListener("click", () => {
-    const statusEl = document.getElementById("support-status");
-    if (!statusEl) return;
-
-    const descEl = document.getElementById("support-desc");
-    const desc = descEl ? descEl.value.trim() : "";
-
-    const info = getDeviceInfo();
-    const deviceInfoStr = [
-      `Trình duyệt : ${info.browser}`,
-      `Hệ điều hành: ${info.os}`,
-      `Màn hình    : ${info.screen} (DPR ${info.dpr})`,
-      `Viewport    : ${info.viewport}`,
-      `Dữ liệu tại : ${info.dataDate}`,
-      `Tóm tắt     : ${info.summary}`,
-      `Chrome AI   : ${info.chromeAI}`,
-      `Phiên bản Ext: ${info.extVersion}`,
-    ].join("\n");
-
-    const baseUrl =
-      "https://docs.google.com/forms/d/e/1FAIpQLSdtNnWUN7NV-gee7IkKGine8YbfeIuNtaV3MP8c8uL4em0OtA/viewform?usp=pp_url";
-    const formUrlEmpty = `${baseUrl}&entry.1848321568=${encodeURIComponent(desc)}&entry.322741036=${encodeURIComponent(deviceInfoStr)}`;
-
-    statusEl.innerHTML =
-      '<span style="color: var(--green); font-weight: 600;">📋 Đang mở Google Form hỗ trợ...</span>';
-    window.open(formUrlEmpty, "_blank");
-
-    if (descEl) descEl.value = "";
-
-    setTimeout(() => {
-      statusEl.innerHTML = "";
-      modal.classList.remove("active");
-    }, 1500);
-  });
-
-  // --- Experimental Direct Support ---
-  const btnDirect = document.getElementById("btn-support-direct");
-  const modalDirect = document.getElementById("support-direct-modal");
-  const closeBtnDirect = document.getElementById("btn-close-support-direct");
-  const sendBtnDirect = document.getElementById("btn-send-support-direct");
-
-  if (btnDirect && modalDirect) {
-    btnDirect.addEventListener("click", () => {
-      modalDirect.classList.add("active");
+  if (btn && modal) {
+    btn.addEventListener("click", () => {
+      modal.classList.add("active");
     });
 
-    closeBtnDirect.addEventListener("click", () =>
-      modalDirect.classList.remove("active"),
-    );
-    modalDirect.addEventListener("click", (e) => {
-      if (e.target === modalDirect) modalDirect.classList.remove("active");
+    closeBtn.addEventListener("click", () => modal.classList.remove("active"));
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("active");
     });
 
-    sendBtnDirect.addEventListener("click", async () => {
-      const statusEl = document.getElementById("support-direct-status");
+    sendBtn.addEventListener("click", async () => {
+      const statusEl = document.getElementById("support-status");
       if (!statusEl) return;
+
+      const lastSentStr = localStorage.getItem("shopee_support_last_sent");
+      if (lastSentStr) {
+        const lastSent = parseInt(lastSentStr, 10);
+        if (Date.now() - lastSent < 60000) {
+          const waitTime = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
+          statusEl.innerHTML = `<span style="color: var(--orange); font-weight: 600;">⏳ Bạn thao tác quá nhanh. Vui lòng thử lại sau ${waitTime} giây!</span>`;
+          return;
+        }
+      }
 
       if (!d) {
         statusEl.innerHTML =
-          '<span style="color: var(--red); font-weight: 600;">❌ Lỗi: Không tìm thấy dữ liệu kỹ thuật!</span>';
+          '<span style="color: var(--red); font-weight: 600;">❌ Lỗi: Không tìm thấy dữ liệu!</span>';
         return;
       }
 
-      const descEl = document.getElementById("support-direct-desc");
+      const descEl = document.getElementById("support-desc");
       const desc = descEl ? descEl.value.trim() : "";
 
       const info = getDeviceInfo();
@@ -558,9 +367,9 @@ function setupSupportButton(d) {
         `Phiên bản Ext: ${info.extVersion}`,
       ].join("\n");
 
-      const origText = sendBtnDirect.innerHTML;
-      sendBtnDirect.disabled = true;
-      sendBtnDirect.innerHTML = "<span>⏳ Đang đóng gói dữ liệu...</span>";
+      const origText = sendBtn.innerHTML;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = "<span>⏳ Đang đóng gói dữ liệu...</span>";
       statusEl.innerHTML =
         '<span style="color: var(--primary); font-weight: 600;">Đang xử lý dữ liệu để gửi đi...</span>';
 
@@ -568,7 +377,6 @@ function setupSupportButton(d) {
         const jsonStr = JSON.stringify(d);
         let compressed = "";
 
-        // Try Gzip compression
         try {
           if (typeof CompressionStream !== "undefined") {
             const stream = new Blob([jsonStr])
@@ -591,7 +399,6 @@ function setupSupportButton(d) {
           console.warn("[Dashboard] Gzip compression failed:", e);
         }
 
-        // Fallback 1: LZString
         if (!compressed) {
           try {
             if (typeof LZString !== "undefined") {
@@ -603,7 +410,6 @@ function setupSupportButton(d) {
           }
         }
 
-        // Fallback 2: Base64
         if (!compressed) {
           const bytes = new TextEncoder().encode(jsonStr);
           let bin = "";
@@ -612,15 +418,24 @@ function setupSupportButton(d) {
           compressed = "d=" + btoa(bin);
         }
 
+        const hashRaw = (d.ts || Date.now()) + "_" + deviceInfoStr;
+        let dataHash = 0;
+        for (let i = 0; i < hashRaw.length; i++) {
+          dataHash = (dataHash << 5) - dataHash + hashRaw.charCodeAt(i);
+          dataHash |= 0;
+        }
+        dataHash = Math.abs(dataHash).toString(16) + (d.ts || "0").toString(16);
+
         statusEl.innerHTML =
-          '<span style="color: var(--primary); font-weight: 600;">🚀 Đang gửi báo cáo lên hệ thống...</span>';
+          '<span style="color: var(--primary); font-weight: 600;">🚀 Đang gửi dữ liệu lên hệ thống...</span>';
 
         const payload = {
           secret: "shopee_stats_anti_spam_secret_2026",
           time: new Date().toISOString(),
           device: deviceInfoStr,
           desc: desc,
-          data: compressed
+          data: compressed,
+          hash: dataHash,
         };
 
         const WEBAPP_URL =
@@ -637,24 +452,25 @@ function setupSupportButton(d) {
         const resText = await response.text();
 
         if (resText === "success") {
+          localStorage.setItem("shopee_support_last_sent", Date.now());
           statusEl.innerHTML =
-            '<span style="color: var(--green); font-weight: 600;">✅ Báo cáo đã được gửi thành công! Cảm ơn bạn.</span>';
+            '<span style="color: var(--green); font-weight: 600;">✅ Phản hồi đã được gửi thành công! Cảm ơn bạn.</span>';
           if (descEl) descEl.value = "";
           setTimeout(() => {
-            modalDirect.classList.remove("active");
+            modal.classList.remove("active");
             statusEl.innerHTML = "";
           }, 3000);
         } else if (resText === "duplicate") {
           statusEl.innerHTML =
-            '<span style="color: var(--orange); font-weight: 600;">⚠️ Báo cáo này đã được gửi trước đó.</span>';
+            '<span style="color: var(--orange); font-weight: 600;">⚠️ Phản hồi này đã được ghi nhận trước đó.</span>';
         } else {
           throw new Error(resText || "Lỗi không xác định từ server.");
         }
       } catch (e) {
         statusEl.innerHTML = `<span style="color: var(--red); font-weight: 600;">❌ Gửi thất bại: ${e.message}</span>`;
       } finally {
-        sendBtnDirect.disabled = false;
-        sendBtnDirect.innerHTML = origText;
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = origText;
       }
     });
   }
