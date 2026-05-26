@@ -612,13 +612,6 @@ function setupSupportButton(d) {
           compressed = "d=" + btoa(bin);
         }
 
-        let dataHash = 0;
-        for (let i = 0; i < compressed.length; i++) {
-          dataHash = (dataHash << 5) - dataHash + compressed.charCodeAt(i);
-          dataHash |= 0;
-        }
-        dataHash = Math.abs(dataHash).toString(16) + (d.ts || "0").toString(16);
-
         statusEl.innerHTML =
           '<span style="color: var(--primary); font-weight: 600;">🚀 Đang gửi báo cáo lên hệ thống...</span>';
 
@@ -627,8 +620,7 @@ function setupSupportButton(d) {
           time: new Date().toISOString(),
           device: deviceInfoStr,
           desc: desc,
-          data: compressed,
-          hash: dataHash,
+          data: compressed
         };
 
         const WEBAPP_URL =
