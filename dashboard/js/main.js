@@ -353,9 +353,28 @@ function setupSupportButton(d) {
       }
 
       const descEl = document.getElementById("support-desc");
-      const desc = descEl ? descEl.value.trim() : "";
+      const desc = descEl ? descEl.value.trim().substring(0, 500) : "";
 
-      const info = getDeviceInfo();
+      const info = (() => {
+        const ua = navigator.userAgent;
+        let browser = "Unknown";
+        if (ua.includes("Edg")) browser = "Edge";
+        else if (ua.includes("Chrome")) browser = "Chrome";
+        else if (ua.includes("Firefox")) browser = "Firefox";
+        else if (ua.includes("Safari")) browser = "Safari";
+        
+        return {
+          browser: browser,
+          os: navigator.platform || "Unknown",
+          screen: `${window.screen.width}x${window.screen.height}`,
+          dpr: window.devicePixelRatio || 1,
+          viewport: `${window.innerWidth}x${window.innerHeight}`,
+          dataDate: d && d.ts ? new Date(d.ts).toLocaleString("vi-VN") : "Unknown",
+          summary: d && d.summary ? `${d.summary.total_orders} đơn - ${d.summary.total_spend}đ` : "Unknown",
+          chromeAI: typeof window.ai !== "undefined" ? "Yes" : "No",
+          extVersion: (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : "Unknown"
+        };
+      })();
       const deviceInfoStr = [
         `Trình duyệt : ${info.browser}`,
         `Hệ điều hành: ${info.os}`,

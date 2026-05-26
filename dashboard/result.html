@@ -1,475 +1,394 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shopee Analytics — Dashboard</title>
-    <link rel="icon" type="image/png" href="../extension/icons/icon128.png" />
-    <!-- Using system Arial font for fast offline loading and perfect Vietnamese support -->
-    <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  </head>
 
-  <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <img
-          src="../extension/icons/icon128.png"
-          style="width: 32px; height: 32px; border-radius: 8px"
-          alt="Logo"
-        />
-        <div>
-          <h2>Analytics</h2>
-          <span>Shopee Statistics</span>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopee Analytics — Dashboard</title>
+  <link rel="icon" type="image/png" href="../extension/icons/icon128.png" />
+  <!-- Using system Arial font for fast offline loading and perfect Vietnamese support -->
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="../extension/icons/icon128.png" style="width: 32px; height: 32px; border-radius: 8px" alt="Logo" />
+      <div>
+        <h2>Analytics</h2>
+        <span>Shopee Statistics</span>
       </div>
+    </div>
 
-      <div class="nav-section">
-        <div class="nav-label">Báo cáo</div>
-        <button class="nav-item active" data-view="overview">
-          <span class="ni">📊</span> Tổng quan
-        </button>
-        <button class="nav-item" data-view="monthly">
-          <span class="ni">📅</span> Theo tháng
-        </button>
-        <button class="nav-item" data-view="items">
-          <span class="ni">🛒</span> Top Sản phẩm
-        </button>
-        <button class="nav-item" data-view="categories">
-          <span class="ni">🏷️</span> Danh mục
-        </button>
-        <div class="nav-support-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Báo cáo</div>
+      <button class="nav-item active" data-view="overview">
+        <span class="ni">📊</span> Tổng quan
+      </button>
+      <button class="nav-item" data-view="monthly">
+        <span class="ni">📅</span> Theo tháng
+      </button>
+      <button class="nav-item" data-view="items">
+        <span class="ni">🛒</span> Top Sản phẩm
+      </button>
+      <button class="nav-item" data-view="categories">
+        <span class="ni">🏷️</span> Danh mục
+      </button>
+      <div class="nav-support-divider"></div>
 
-        <button
-          class="nav-item nav-item--support"
-          id="btn-support"
-          style="
+      <button class="nav-item nav-item--support" id="btn-support" style="
             margin-top: 5px;
             background: rgba(38, 170, 153, 0.1);
             color: var(--primary);
-          "
-        >
-          <span class="ni">🚀</span> Góp ý & Báo lỗi
-        </button>
-      </div>
+          ">
+        <span class="ni">🚀</span> Góp ý & Báo lỗi
+      </button>
+    </div>
 
-      <!-- Sidebar Rating Box -->
-      <div class="sidebar-rating" id="sidebar-rating-box">
-        <div class="sr-label">Hữu ích với bạn?</div>
-        <div class="sr-stars" id="sidebar-stars">
-          <span class="s-star" data-value="1">
-            <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              />
-            </svg>
-          </span>
-          <span class="s-star" data-value="2">
-            <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              />
-            </svg>
-          </span>
-          <span class="s-star" data-value="3">
-            <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              />
-            </svg>
-          </span>
-          <span class="s-star" data-value="4">
-            <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              />
-            </svg>
-          </span>
-          <span class="s-star" data-value="5">
-            <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-              />
-            </svg>
-          </span>
-        </div>
-        <div class="sr-subtext" id="sidebar-rating-subtext">
-          Ủng hộ mình 5★ nhé! 🥰
-        </div>
-        <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
-          🎉 Cảm ơn bạn rất nhiều! Đang mở...
-        </div>
-        <div id="sidebar-rating-feedback" class="sr-feedback hidden">
-          <a
-            href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics"
-            target="_blank"
-            >Gửi email góp ý ✉️</a
-          >
-        </div>
+    <!-- Sidebar Rating Box -->
+    <div class="sidebar-rating" id="sidebar-rating-box">
+      <div class="sr-label">Hữu ích với bạn?</div>
+      <div class="sr-stars" id="sidebar-stars">
+        <span class="s-star" data-value="1">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </span>
+        <span class="s-star" data-value="2">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </span>
+        <span class="s-star" data-value="3">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </span>
+        <span class="s-star" data-value="4">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </span>
+        <span class="s-star" data-value="5">
+          <svg class="s-star-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        </span>
       </div>
+      <div class="sr-subtext" id="sidebar-rating-subtext">
+        Ủng hộ mình 5★ nhé! 🥰
+      </div>
+      <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
+        🎉 Cảm ơn bạn rất nhiều! Đang mở...
+      </div>
+      <div id="sidebar-rating-feedback" class="sr-feedback hidden">
+        <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank">Gửi email góp ý
+          ✉️</a>
+      </div>
+    </div>
 
-      <div class="sidebar-footer">
-        <p>Dữ liệu tại:<br /><span id="data-date">—</span></p>
-        <p
-          style="
+    <div class="sidebar-footer">
+      <p>Dữ liệu tại:<br /><span id="data-date">—</span></p>
+      <p style="
             margin-top: 12px;
             border-top: 1px solid var(--border);
             padding-top: 12px;
-          "
-          id="dashboard-author-info"
-        ></p>
-      </div>
-    </aside>
+          " id="dashboard-author-info"></p>
+    </div>
+  </aside>
 
-    <!-- Main content -->
-    <main class="main">
-      <!-- Overview -->
-      <div id="view-overview" class="view active">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
-            <p class="page-subtitle" id="subtitle-overview">Shopee Analytics</p>
-          </div>
-          <div
-            style="
+  <!-- Main content -->
+  <main class="main">
+    <!-- Overview -->
+    <div id="view-overview" class="view active">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tổng Quan Chi Tiêu</h1>
+          <p class="page-subtitle" id="subtitle-overview">Shopee Analytics</p>
+        </div>
+        <div style="
               display: flex;
               gap: 10px;
               flex-wrap: wrap;
               justify-content: flex-end;
-            "
-          >
-            <button class="btn-share btn-share-trigger" data-type="overview">
-              ✨ Chia sẻ
-            </button>
-          </div>
+            ">
+          <button class="btn-share btn-share-trigger" data-type="overview">
+            ✨ Chia sẻ
+          </button>
         </div>
+      </div>
 
-        <div class="kpi-row" id="kpi-row"></div>
+      <div class="kpi-row" id="kpi-row"></div>
 
-        <div class="grid-2">
-          <div class="card" id="card-yearly">
-            <div class="card-title">
-              📈 Chi Tiêu Theo Năm
-              <span
-                style="
+      <div class="grid-2">
+        <div class="card" id="card-yearly">
+          <div class="card-title">
+            📈 Chi Tiêu Theo Năm
+            <span style="
                   font-size: 13px;
                   font-weight: normal;
                   color: var(--muted);
                   float: right;
-                "
-                >(Click vào cột)</span
-              >
-            </div>
-            <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
+                ">(Click vào cột)</span>
           </div>
-          <div class="card" id="card-period">
-            <div class="card-title">⏱ Thống Kê Gần Đây</div>
-            <div class="period-grid" id="period-grid"></div>
-          </div>
+          <div class="chart-wrap"><canvas id="chart-yearly"></canvas></div>
         </div>
-
-        <div class="insight-card" id="insight-yearly" style="display: none">
-          <div class="insight-title">💡 Nhận xét</div>
-          <ul class="insight-list" id="insight-yearly-list"></ul>
-        </div>
-
-        <div
-          class="card"
-          id="card-yearly-items"
-          style="display: none; margin-top: 24px"
-        >
-          <div class="card-title" id="yearly-items-title">
-            🛒 Top Sản Phẩm Năm
-          </div>
-          <div class="table-wrap">
-            <table class="table" id="yearly-items-table">
-              <thead>
-                <tr>
-                  <th>Sản Phẩm</th>
-                  <th style="text-align: right">Số Tiền</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
+        <div class="card" id="card-period">
+          <div class="card-title">⏱ Thống Kê Gần Đây</div>
+          <div class="period-grid" id="period-grid"></div>
         </div>
       </div>
 
-      <!-- Monthly -->
-      <div id="view-monthly" class="view">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
-            <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
-          </div>
-          <div style="display: flex; justify-content: flex-end">
-            <button class="btn-share btn-share-trigger" data-type="monthly">
-              ✨ Chia Sẻ Tháng
-            </button>
-          </div>
-        </div>
-        <div class="pill-row" id="year-pills"></div>
-        <div class="card" id="card-monthly">
-          <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
-          <div class="chart-wrap tall">
-            <canvas id="chart-monthly"></canvas>
-          </div>
-        </div>
-        <div class="insight-card" id="insight-monthly" style="display: none">
-          <div class="insight-title">💡 Nhận xét</div>
-          <ul class="insight-list" id="insight-monthly-list"></ul>
-          <p
-            class="insight-ai"
-            id="insight-monthly-ai"
-            style="display: none"
-          ></p>
-        </div>
+      <div class="insight-card" id="insight-yearly" style="display: none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-yearly-list"></ul>
+      </div>
 
-        <div
-          class="card"
-          id="card-monthly-items"
-          style="display: none; margin-top: 20px"
-        >
-          <div
-            class="card-title"
-            style="
+      <div class="card" id="card-yearly-items" style="display: none; margin-top: 24px">
+        <div class="card-title" id="yearly-items-title">
+          🛒 Top Sản Phẩm Năm
+        </div>
+        <div class="table-wrap">
+          <table class="table" id="yearly-items-table">
+            <thead>
+              <tr>
+                <th>Sản Phẩm</th>
+                <th style="text-align: right">Số Tiền</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly -->
+    <div id="view-monthly" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
+          <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
+        </div>
+        <div style="display: flex; justify-content: flex-end">
+          <button class="btn-share btn-share-trigger" data-type="monthly">
+            ✨ Chia Sẻ Tháng
+          </button>
+        </div>
+      </div>
+      <div class="pill-row" id="year-pills"></div>
+      <div class="card" id="card-monthly">
+        <div class="card-title" id="monthly-chart-title">Biểu đồ tháng</div>
+        <div class="chart-wrap tall">
+          <canvas id="chart-monthly"></canvas>
+        </div>
+      </div>
+      <div class="insight-card" id="insight-monthly" style="display: none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-monthly-list"></ul>
+        <p class="insight-ai" id="insight-monthly-ai" style="display: none"></p>
+      </div>
+
+      <div class="card" id="card-monthly-items" style="display: none; margin-top: 20px">
+        <div class="card-title" style="
               display: flex;
               justify-content: space-between;
               align-items: center;
-            "
-          >
-            <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
-            <select id="monthly-limit-select" class="limit-select">
-              <option value="10">Top 10</option>
-              <option value="20" selected>Top 20</option>
-              <option value="50">Top 50</option>
-            </select>
-          </div>
-          <div class="top-list" id="monthly-items-list"></div>
+            ">
+          <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
+          <select id="monthly-limit-select" class="limit-select">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="top-list" id="monthly-items-list"></div>
+      </div>
+    </div>
+
+    <!-- Top Items -->
+    <div id="view-items" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
+          <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
+        </div>
+        <div style="display: flex; justify-content: flex-end">
+          <button class="btn-share btn-share-trigger" data-type="items">
+            ✨ Chia Sẻ Top SP
+          </button>
         </div>
       </div>
+      <div class="insight-card" id="insight-items" style="display: none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-items-list"></ul>
+        <p class="insight-ai" id="insight-items-ai" style="display: none"></p>
+      </div>
 
-      <!-- Top Items -->
-      <div id="view-items" class="view">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
-            <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
-          </div>
-          <div style="display: flex; justify-content: flex-end">
-            <button class="btn-share btn-share-trigger" data-type="items">
-              ✨ Chia Sẻ Top SP
-            </button>
-          </div>
-        </div>
-        <div class="insight-card" id="insight-items" style="display: none">
-          <div class="insight-title">💡 Nhận xét</div>
-          <ul class="insight-list" id="insight-items-list"></ul>
-          <p class="insight-ai" id="insight-items-ai" style="display: none"></p>
-        </div>
-
-        <div class="card" id="card-items">
-          <div
-            class="card-title"
-            style="
+      <div class="card" id="card-items">
+        <div class="card-title" style="
               display: flex;
               justify-content: space-between;
               align-items: center;
-            "
-          >
-            <span>🏆 Bảng Xếp Hạng</span>
-            <select id="items-limit-select" class="limit-select">
-              <option value="10">Top 10</option>
-              <option value="20" selected>Top 20</option>
-              <option value="50">Top 50</option>
-            </select>
+            ">
+          <span>🏆 Bảng Xếp Hạng</span>
+          <select id="items-limit-select" class="limit-select">
+            <option value="10">Top 10</option>
+            <option value="20" selected>Top 20</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="top-list" id="items-list"></div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div id="view-categories" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
+          <p class="page-subtitle" id="cat-subtitle">
+            Phân bổ chi tiêu theo từng danh mục Shopee
+          </p>
+        </div>
+        <div class="pill-row" id="cat-year-pills" style="margin-bottom: 0; align-items: flex-end; flex-shrink: 0"></div>
+      </div>
+      <div class="grid-2">
+        <div class="card" id="card-cat-pie">
+          <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
+          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+        </div>
+        <div class="card" id="card-cat-bars">
+          <div class="card-title">
+            📊 So Sánh Danh Mục
+            <small style="font-weight: 400; font-size: 12px; opacity: 0.6">— Click để xem sản phẩm</small>
           </div>
-          <div class="top-list" id="items-list"></div>
+          <div id="cat-bars"></div>
         </div>
       </div>
 
-      <!-- Categories -->
-      <div id="view-categories" class="view">
-        <div class="page-header">
-          <div>
-            <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
-            <p class="page-subtitle" id="cat-subtitle">
-              Phân bổ chi tiêu theo từng danh mục Shopee
-            </p>
-          </div>
-          <div
-            class="pill-row"
-            id="cat-year-pills"
-            style="margin-bottom: 0; align-items: flex-end; flex-shrink: 0"
-          ></div>
-        </div>
-        <div class="grid-2">
-          <div class="card" id="card-cat-pie">
-            <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
-            <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
-          </div>
-          <div class="card" id="card-cat-bars">
-            <div class="card-title">
-              📊 So Sánh Danh Mục
-              <small style="font-weight: 400; font-size: 12px; opacity: 0.6"
-                >— Click để xem sản phẩm</small
-              >
-            </div>
-            <div id="cat-bars"></div>
-          </div>
-        </div>
-
-        <div class="insight-card" id="insight-categories" style="display: none">
-          <div class="insight-title">💡 Nhận xét</div>
-          <ul class="insight-list" id="insight-categories-list"></ul>
-          <p
-            class="insight-ai"
-            id="insight-categories-ai"
-            style="display: none"
-          ></p>
-        </div>
-        <div class="card" id="card-cat-items" style="display: none">
-          <div class="card-title" id="cat-items-title">
-            🏷️ Sản Phẩm Danh Mục
-          </div>
-          <div id="cat-items-list"></div>
-        </div>
+      <div class="insight-card" id="insight-categories" style="display: none">
+        <div class="insight-title">💡 Nhận xét</div>
+        <ul class="insight-list" id="insight-categories-list"></ul>
+        <p class="insight-ai" id="insight-categories-ai" style="display: none"></p>
       </div>
+      <div class="card" id="card-cat-items" style="display: none">
+        <div class="card-title" id="cat-items-title">
+          🏷️ Sản Phẩm Danh Mục
+        </div>
+        <div id="cat-items-list"></div>
+      </div>
+    </div>
 
-      <!-- Share Modal -->
-      <div id="share-modal" class="modal-overlay">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>✨ Chia sẻ</h2>
-            <button id="btn-close-modal" class="btn-close">&times;</button>
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>✨ Chia sẻ</h2>
+          <button id="btn-close-modal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-preview">
+            <img id="share-preview-img" src="" alt="Đang tạo ảnh..." />
           </div>
-          <div class="modal-body">
-            <div class="modal-preview">
-              <img id="share-preview-img" src="" alt="Đang tạo ảnh..." />
+          <div class="modal-controls">
+            <div class="control-group">
+              <label>Giao diện (Theme)</label>
+              <select id="share-theme-select" class="limit-select" style="padding: 8px; font-size: 14px">
+                <option value="light">Trắng Sáng (Nổi Bật)</option>
+                <option value="minimal">Tối Giản</option>
+                <option value="orange">Shopee Cam</option>
+                <option value="dark">Đêm Huyền Bí</option>
+              </select>
             </div>
-            <div class="modal-controls">
-              <div class="control-group">
-                <label>Giao diện (Theme)</label>
-                <select
-                  id="share-theme-select"
-                  class="limit-select"
-                  style="padding: 8px; font-size: 14px"
-                >
-                  <option value="light">Trắng Sáng (Nổi Bật)</option>
-                  <option value="minimal">Tối Giản</option>
-                  <option value="orange">Shopee Cam</option>
-                  <option value="dark">Đêm Huyền Bí</option>
-                </select>
-              </div>
-              <div class="control-group" style="margin-top: 10px">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="share-hide-amount" />
-                  Ẩn số tiền chi tiết
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" id="share-hide-names" />
-                  Ẩn tên sản phẩm
-                </label>
-              </div>
-              <div class="control-actions">
-                <button
-                  id="btn-modal-copy"
-                  class="pill"
-                  style="
+            <div class="control-group" style="margin-top: 10px">
+              <label class="checkbox-label">
+                <input type="checkbox" id="share-hide-amount" />
+                Ẩn số tiền chi tiết
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="share-hide-names" />
+                Ẩn tên sản phẩm
+              </label>
+            </div>
+            <div class="control-actions">
+              <button id="btn-modal-copy" class="pill" style="
                     border-color: var(--primary);
                     color: var(--primary);
                     flex: 1;
                     margin: 0;
                     padding: 10px;
-                  "
-                >
-                  📋 Copy
-                </button>
-                <button
-                  id="btn-modal-download"
-                  class="pill active"
-                  style="flex: 1; margin: 0; padding: 10px"
-                >
-                  📸 Tải Về
-                </button>
-              </div>
+                  ">
+                📋 Copy
+              </button>
+              <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px">
+                📸 Tải Về
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Support Modal -->
-      <div id="support-modal" class="modal-overlay">
-        <div class="modal-content modal-support-content">
-          <div class="modal-header">
-            <h2>🚀 Hỗ Trợ Nhanh (Thử Nghiệm)</h2>
-            <button id="btn-close-support" class="btn-close">&times;</button>
+    <!-- Support Modal -->
+    <div id="support-modal" class="modal-overlay">
+      <div class="modal-content modal-support-content" style="max-width: 480px; padding: 24px; border-radius: 12px;">
+        <div class="modal-header"
+          style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
+          <h2
+            style="font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">💌</span> Góp ý & Báo lỗi
+          </h2>
+          <button id="btn-close-support" class="btn-close"
+            style="font-size: 1.5rem; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0;">&times;</button>
+        </div>
+        <div class="support-body">
+          <p class="support-intro"
+            style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
+            Chào bạn, nếu bạn gặp lỗi hay có góp ý gì để công cụ tốt hơn, hãy chia sẻ với chúng mình nhé.
+          </p>
+
+          <div class="support-field" style="margin-bottom: 24px;">
+            <label class="support-label"
+              style="display: block; font-weight: 500; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">
+              Nội dung góp ý
+              <span class="support-hint"
+                style="color: var(--muted); font-size: 0.85rem; font-weight: normal; margin-left: 4px;">(không bắt
+                buộc)</span>
+            </label>
+            <textarea id="support-desc" class="support-textarea" maxlength="500"
+              style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; line-height: 1.5; resize: vertical; box-sizing: border-box;"
+              placeholder="Hãy chia sẻ suy nghĩ của bạn hoặc mô tả sự cố bạn đang gặp phải... (tối đa 500 ký tự)"></textarea>
           </div>
-          <div class="support-body">
-            <div class="support-intro">
-              Gửi báo cáo sự cố trực tiếp qua hệ thống tự động. Dữ liệu lỗi và
-              thông số hệ thống sẽ được mã hoá và đẩy thẳng lên server mà không
-              cần qua Google Form.
-            </div>
 
-            <!-- Description field -->
-            <div class="support-field">
-              <label class="support-label">
-                📝 Mô tả lỗi bạn gặp phải
-                <span class="support-hint">(không bắt buộc)</span>
-              </label>
-              <textarea
-                id="support-desc"
-                class="support-textarea"
-                placeholder="Nhập mô tả lỗi chi tiết để chúng mình hiểu rõ hơn vấn đề..."
-              ></textarea>
-            </div>
+          <div class="support-step-action" style="margin-bottom: 16px;">
+            <button id="btn-send-support" class="support-send-btn"
+              style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--primary); color: white; border: none; font-size: 1rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s;">
+              <span>Gửi phản hồi</span>
+            </button>
+          </div>
 
-            <div class="support-steps-container">
-              <div
-                class="support-step-card step-1"
-                style="border-left-color: var(--primary)"
-              >
-                <div class="support-step-header">
-                  <span class="support-step-title"
-                    >Gửi Dữ Liệu Hỗ Trợ Trực Tiếp</span
-                  >
-                </div>
-                <p class="support-step-desc">
-                  Hệ thống sẽ tự động đính kèm thông tin kỹ thuật ẩn danh về cấu
-                  hình và dữ liệu hiện tại để dễ dàng tái hiện lỗi.
-                </p>
-                <div class="support-step-action">
-                  <button
-                    id="btn-send-support"
-                    class="support-send-btn"
-                    style="width: 100%; justify-content: center"
-                  >
-                    <span>🚀 Gửi Báo Cáo Lỗi Ngay</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div id="support-status"></div>
+          <div id="support-status" style="margin-top: 16px; text-align: center; font-size: 0.95rem; min-height: 20px;">
           </div>
         </div>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <script src="../extension/config.js"></script>
-    <script src="share-card.js"></script>
-    <script src="js/helpers.js"></script>
-    <script src="js/cache.js"></script>
-    <script src="js/insights.js"></script>
-    <script src="js/classification.js"></script>
-    <script src="js/ai-narrative.js"></script>
-    <script src="js/render/overview.js"></script>
-    <script src="js/render/monthly.js"></script>
-    <script src="js/render/items.js"></script>
-    <script src="js/render/categories.js"></script>
-    <script src="js/lz-string.js"></script>
-    <script src="js/main.js"></script>
-  </body>
+  <script src="../extension/config.js"></script>
+  <script src="share-card.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/cache.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/classification.js"></script>
+  <script src="js/ai-narrative.js"></script>
+  <script src="js/render/overview.js"></script>
+  <script src="js/render/monthly.js"></script>
+  <script src="js/render/items.js"></script>
+  <script src="js/render/categories.js"></script>
+  <script src="js/lz-string.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
 </html>
