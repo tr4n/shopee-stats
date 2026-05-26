@@ -611,7 +611,7 @@ function setupSupportButton(d) {
         };
 
         const WEBAPP_URL =
-          "https://script.google.com/macros/s/AKfycbxrqYToXuJ7Csiifp78-Kf8-wrMhugbpl3tPN_BhMh3PtxhPYOrxlePhj_6T1LUunMC/exec";
+          "https://script.google.com/macros/s/AKfycbzr4mbH-klsidPofxeTYKup6TJ4CEVDeqvvbkAv6XTzCZFX0YGDCw0iY5ktro_5HGOt/exec";
 
         const response = await fetch(WEBAPP_URL, {
           method: "POST",
@@ -643,7 +643,20 @@ function setupSupportButton(d) {
           if (contactEl) contactEl.disabled = false;
           typeButtons.forEach(b => b.disabled = false);
         } else {
-          throw new Error(resText || "Lỗi không xác định từ server.");
+          const errMsgs = {
+            "error_missing_payload": "Dữ liệu gửi lên bị thiếu.",
+            "error_invalid_json": "Gói dữ liệu không đúng định dạng.",
+            "error_unauthorized": "Mã xác thực không hợp lệ.",
+            "error_invalid_timestamp": "Thời gian gửi lệch quá mức (có thể đồng hồ máy bạn bị sai).",
+            "error_invalid_signature": "Xác thực chữ ký gói tin thất bại.",
+            "error_replay_detected": "Yêu cầu gửi lặp lại bị chặn (Replay Attack).",
+            "error_invalid_data_structure": "Dữ liệu Shopee Stats gửi lên bị giả mạo hoặc sai định dạng.",
+            "rate_limit_exceeded": "Bạn đã gửi quá nhanh (tối đa 20 phản hồi / 10 phút). Vui lòng thử lại sau.",
+            "error_payload_too_large": "Nội dung phản hồi vượt quá 1000 ký tự.",
+            "error_data_too_large": "Dữ liệu nén vượt quá kích thước cho phép."
+          };
+          const friendlyMsg = errMsgs[resText] || resText || "Lỗi không xác định từ server.";
+          throw new Error(friendlyMsg);
         }
       } catch (e) {
         showSupportStatus(`Gửi thất bại: ${e.message}`, true);
