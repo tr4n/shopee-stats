@@ -987,7 +987,7 @@ function setupDashboardRatingCard(d) {
       ];
       const monthBreakdown = monthEntries
         .map(
-          ([m, v]) => `${MONTH_NAMES_EN[m] || "Month " + m}: ${fmtVNDEng(v)}`,
+          ([m, v]) => `${MONTH_NAMES_EN[m] || "Month " + m}: ${fmtVND(v)} VND`,
         )
         .join(", ");
       const activeMonths = monthEntries.length;
@@ -1004,17 +1004,20 @@ function setupDashboardRatingCard(d) {
       const maxMonthName = MONTH_NAMES_EN[maxMonth] || `Month ${maxMonth}`;
 
       const contextLines = [
-        `Year ${yr}: total spend ${fmtVNDEng(yearData.t || 0)} across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVNDEng(avgPerOrder)} per order.`,
+        `Year ${yr}: total spend ${fmtVND(yearData.t || 0)} VND across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVND(avgPerOrder)} VND per order.`,
         `Monthly breakdown: ${monthBreakdown || "no data"}.`,
-        `Peak spend month: ${maxMonthName} (${fmtVNDEng(maxMonthVal)}).`,
+        `Peak spend month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND).`,
       ];
 
       const specificPrompt = `Shopee spending data for Year ${yr}:
-      - Total spending: ${fmtVNDEng(yearData.t || 0)}
+      - Total spending: ${fmtVND(yearData.t || 0)} VND
       - Total orders: ${fmtNum(yearData.o || 0)}
-      - Peak spending month: ${maxMonthName} (${fmtVNDEng(maxMonthVal)})
+      - Peak spending month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND)
       Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's shopping destiny, personality, and shopping vibes during Year ${yr}, especially commenting on their massive peak in ${maxMonthName}.
-      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang (like overthink, suy, vô tri, chữa lành, sao Thủy nghịch hành, vũ trụ gửi tín hiệu, kiếp nạn, bay màu, bất ổn, cảm lạnh). Do not give financial advice.`;
+      Rules:
+      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+      2. Copy all currency values EXACTLY as provided (e.g., if you see "155.6tr VND", write "155.6tr" or "155.6 triệu", do NOT convert "tr/million" into "tỷ/billion").
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1052,11 +1055,14 @@ function setupDashboardRatingCard(d) {
       ];
       const enMonth = MONTH_NAMES_EN[Number(monthStr)] || `Month ${monthStr}`;
 
-      const context = `Month ${enMonth}/${year}: total spend ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.`;
+      const context = `Month ${enMonth}/${year}: total spend ${fmtVND(monthTotal)} VND across ${totalItemsCount} purchases.`;
 
-      const specificPrompt = `Shopee shopping data for ${enMonth}/${year}: Total spend of ${fmtVNDEng(monthTotal)} across ${totalItemsCount} purchases.
-      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality and mood during ${enMonth}/${year} under a GenZ spiritual/personality lens (e.g. retail therapy/healing, buying vô tri items).
-      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget advice.`;
+      const specificPrompt = `Shopee shopping data for ${enMonth}/${year}: Total spend of ${fmtVND(monthTotal)} VND across ${totalItemsCount} purchases.
+      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality and mood during ${enMonth}/${year} under a GenZ spiritual/personality lens.
+      Rules:
+      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+      2. Copy all currency values EXACTLY as provided (e.g., "155.6tr VND" remains "155.6tr" or "155.6 triệu", do NOT change units).
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1073,14 +1079,17 @@ function setupDashboardRatingCard(d) {
       const totalSaved = d.s || 0;
       const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
 
-      const context = `All-time Shopee spend overview: total spend of ${fmtVNDEng(totalSpend)} across ${fmtNum(totalOrders)} orders. Saved ${fmtVNDEng(totalSaved)} from coupons (${savePct}%).`;
+      const context = `All-time Shopee spend overview: total spend of ${fmtVND(totalSpend)} VND across ${fmtNum(totalOrders)} orders. Saved ${fmtVND(totalSaved)} VND from coupons (${savePct}%).`;
 
       const specificPrompt = `Shopee spending overview data:
-      - Total spend: ${fmtVNDEng(totalSpend)}
+      - Total spend: ${fmtVND(totalSpend)} VND
       - Total orders: ${fmtNum(totalOrders)}
-      - Amount saved: ${fmtVNDEng(totalSaved)} (${savePct}% of original prices)
+      - Amount saved: ${fmtVND(totalSaved)} VND (${savePct}% of original prices)
       Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") and decode the user's lifetime shopping destiny, personality, and vibes under a GenZ spiritual lens.
-      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang (like overthink, suy, vô tri, chữa lành, sao Thủy nghịch hành, vũ trụ gửi tín hiệu, kiếp nạn, bay màu, phú quý giật lùi, 10 điểm không có nhưng, bất ổn, cảm lạnh) naturally to make the comment extremely funny and sassy. Do not give financial advice.`;
+      Rules:
+      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+      2. Copy all currency values EXACTLY as provided (e.g., if you see "155.6tr VND", write "155.6tr" or "155.6 triệu", do NOT convert "tr/million" into "tỷ/billion").
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.`;
 
       enrichWithAI(
         "insight-yearly",
