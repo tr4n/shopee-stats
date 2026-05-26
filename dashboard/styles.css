@@ -1201,12 +1201,7 @@ body {
 }
 
 .nav-item--support {
-  color: #4a90d9;
-}
-
-.nav-item--support:hover {
-  background: rgba(74, 144, 217, 0.1);
-  color: #3472bc;
+  margin-top: 5px;
 }
 
 /* ── Support modal ───────────────────────────── */
