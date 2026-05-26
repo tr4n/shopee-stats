@@ -34,9 +34,9 @@ function renderAnalyzeButton(cardId) {
         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
         <path d="M12 8v4l3 3"></path>
       </svg>
-      Phân tích
+      Xem AI "phán" 🔮
     </button>
-    <span class="ai-analyze-hint">Nhấn để phân tích bằng Chrome AI</span>
+    <span class="ai-analyze-hint">Xem Chrome AI bóc phốt ví tiền của bạn</span>
   </div>`;
 }
 
@@ -54,15 +54,15 @@ function renderAIInsight(text, cardId) {
     `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(p)}</span></div>`
   ).join('');
   const refreshBtn = cardId
-    ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Phân tích lại" style="display: none">
+    ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Xin quẻ mới" style="display: none">
         <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
-        <span>Phân tích lại</span>
+        <span>Xin quẻ mới</span>
        </button>`
     : '';
-  return `<div class="insight-ai-header"><span class="insight-ai-badge">🤖 AI Insight</span><span class="insight-ai-title">Phân tích bởi Chrome AI</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
+  return `<div class="insight-ai-header"><span class="insight-ai-badge">🕵️‍♂️ AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
 }
 
 // Legacy category name map for backward compatibility with old dashboard URLs (format: { id, s, c })

@@ -12,7 +12,7 @@ const AI_INSIGHT_SYSTEM = [
   '(3) Mention at least one specific product name or category in the analysis.',
   '(4) Focus on predicting consumer psychology, spending habits, lifestyle, personality, or mood. DO NOT provide saving, budgeting, or cost-cutting advice.',
   '(5) Keep the response concise, maximum of 3 sentences. DO NOT use markdown lists or bullet points. DO NOT repeat boring statistics.',
-  '(6) Tone: candid, slightly humorous, insightful, like an honest friend who reads your mind through your shopping history.',
+  '(6) Tone: candid, highly humorous, witty, slightly teasing, friendly, like an honest friend who is reading your mind through your shopping history. Use trendy, natural Vietnamese internet slang where appropriate (e.g., "chốt đơn", "đau ví", "hệ tâm linh", "nghiện mua sắm", "vô tri", "ét ô ét", "bay màu", "cứu rỗi tâm hồn").',
   '(7) If there are items bought repeatedly, comment on what that says about their lifestyle or psychological needs.',
   '(8) When analyzing data for a specific year, month, or period (e.g., Year 2024, Month 5/2023, or a specific category/timeframe), you MUST explicitly mention that specific time period or timeframe in the analysis text (for example: "Trong năm 2024...", "Vào tháng 5/2023...", "Trong giai đoạn này...", etc.) so the user clearly knows the context.',
   '(9) Pronoun rules: You MUST address the user directly as "bạn" (you) and refer to yourself as "tôi" (I). The spending data belongs directly to the user (e.g., "dữ liệu của bạn", "bạn đã mua...", "bạn là..."). Never speak about the user in the third person (do NOT use words like "người dùng", "họ", "chủ tài khoản").'
@@ -194,6 +194,15 @@ async function _executeAIInsight(cardId) {
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
+  const loadingStatuses = [
+    "🔮 Pháp sư Chrome AI đang gieo quẻ xem bói chi tiêu...",
+    "🕵️‍♂️ Chrome AI đang hóng hớt xem bạn đã mua những gì...",
+    "🧠 Chrome AI đang 'săm soi' ví tiền và đọc vị bạn...",
+    "💸 Đang chờ AI tính toán xem ví của bạn đã 'bay màu' thế nào...",
+    "🍿 Đợi tí, Chrome AI đang chuẩn bị bóc phốt thói quen chốt đơn..."
+  ];
+  const randomStatus = loadingStatuses[Math.floor(Math.random() * loadingStatuses.length)];
+
   aiEl.innerHTML = `
     <div class="ai-loading-container">
       <svg class="ai-loading-icon spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -207,8 +216,8 @@ async function _executeAIInsight(cardId) {
         <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
       </svg>
       <div class="ai-loading-text">
-        <div class="ai-loading-status">🤖 Chrome AI đang phân tích dữ liệu...</div>
-        <div class="ai-loading-note">AI chạy offline trực tiếp trên máy để bảo mật dữ liệu. Tốc độ tùy thuộc cấu hình thiết bị, bạn chờ xíu nhé!</div>
+        <div class="ai-loading-status">${randomStatus}</div>
+        <div class="ai-loading-note">Yên tâm nha, AI tự kỷ chạy offline ngay trên máy bạn nên không ai biết đống đồ "vô tri" bạn mua đâu. Chờ xíu nhé!</div>
       </div>
     </div>
   `;
@@ -279,7 +288,7 @@ window.rerunAIInsight = async function (cardId) {
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
-        <span>Đang phân tích...</span>
+        <span>Đang gieo quẻ mới...</span>
       `;
     }
   }
