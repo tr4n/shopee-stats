@@ -333,44 +333,65 @@
 
     <!-- Support Modal -->
     <div id="support-modal" class="modal-overlay">
-      <div class="modal-content modal-support-content" style="max-width: 480px; padding: 24px; border-radius: 12px;">
-        <div class="modal-header"
-          style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;">
-          <h2
-            style="font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 1.2rem;">💌</span> Góp ý & Báo lỗi
+      <div class="modal-content modal-support-content">
+        <div class="modal-header">
+          <h2>
+            <span>💌</span> Góp ý & Báo lỗi
           </h2>
-          <button id="btn-close-support" class="btn-close"
-            style="font-size: 1.5rem; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0;">&times;</button>
+          <button id="btn-close-support" class="btn-close">&times;</button>
         </div>
         <div class="support-body">
-          <p class="support-intro"
-            style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
+          <p class="support-intro">
             Chào bạn, nếu bạn gặp lỗi hay có góp ý gì để công cụ tốt hơn, hãy chia sẻ với chúng mình nhé.
           </p>
 
-          <div class="support-field" style="margin-bottom: 24px;">
-            <label class="support-label"
-              style="display: block; font-weight: 500; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">
-              Nội dung góp ý
-              <span class="support-hint"
-                style="color: var(--muted); font-size: 0.85rem; font-weight: normal; margin-left: 4px;">(không bắt
-                buộc)</span>
-            </label>
-            <textarea id="support-desc" class="support-textarea" maxlength="500"
-              style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; line-height: 1.5; resize: vertical; box-sizing: border-box;"
-              placeholder="Hãy chia sẻ suy nghĩ của bạn hoặc mô tả sự cố bạn đang gặp phải... (tối đa 500 ký tự)"></textarea>
+          <!-- Feedback Type Selector -->
+          <div class="support-field">
+            <label class="support-label">Phân loại phản hồi</label>
+            <div class="support-type-selector">
+              <button type="button" class="support-type-btn active" data-type="bug">
+                <span>🐛</span> Báo lỗi
+              </button>
+              <button type="button" class="support-type-btn" data-type="suggestion">
+                <span>💡</span> Góp ý
+              </button>
+              <button type="button" class="support-type-btn" data-type="other">
+                <span>💬</span> Khác
+              </button>
+            </div>
           </div>
 
-          <div class="support-step-action" style="margin-bottom: 16px;">
-            <button id="btn-send-support" class="support-send-btn"
-              style="width: 100%; padding: 12px; border-radius: 8px; background-color: var(--primary); color: white; border: none; font-size: 1rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s;">
-              <span>Gửi phản hồi</span>
+          <!-- Description Box -->
+          <div class="support-field">
+            <label class="support-label">Nội dung mô tả</label>
+            <div class="support-textarea-wrapper">
+              <textarea id="support-desc" class="support-textarea" maxlength="500" rows="10"
+                placeholder="Hãy chia sẻ suy nghĩ của bạn hoặc mô tả sự cố bạn đang gặp phải... (tối đa 500 ký tự và 10 dòng)"></textarea>
+              <div class="support-counter-container">
+                <span id="support-line-counter">0/10 dòng</span>
+                <span id="support-char-counter">0/500 ký tự</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Field -->
+          <div class="support-field">
+            <label class="support-label">
+              Thông tin liên hệ <span class="support-hint">(Không bắt buộc)</span>
+            </label>
+            <input type="text" id="support-contact" class="support-input" maxlength="100"
+              placeholder="Email, Telegram hoặc SĐT của bạn...">
+          </div>
+
+          <!-- Send Action Button -->
+          <div class="support-action-container">
+            <button id="btn-send-support" class="support-send-btn">
+              <span class="btn-spinner hidden"></span>
+              <span class="btn-text">Gửi phản hồi</span>
             </button>
           </div>
 
-          <div id="support-status" style="margin-top: 16px; text-align: center; font-size: 0.95rem; min-height: 20px;">
-          </div>
+          <div id="support-status" class="hidden"></div>
         </div>
       </div>
     </div>

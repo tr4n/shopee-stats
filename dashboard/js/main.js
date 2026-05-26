@@ -345,7 +345,112 @@ function setupSupportButton(d) {
   const sendBtn = document.getElementById("btn-send-support");
 
   if (btn && modal) {
+    const descEl = document.getElementById("support-desc");
+    const contactEl = document.getElementById("support-contact");
+    const statusEl = document.getElementById("support-status");
+    const lineCounterEl = document.getElementById("support-line-counter");
+    const charCounterEl = document.getElementById("support-char-counter");
+    const typeButtons = modal.querySelectorAll(".support-type-btn");
+    const spinnerEl = sendBtn.querySelector(".btn-spinner");
+    const btnTextEl = sendBtn.querySelector(".btn-text");
+
+    const updateCounters = () => {
+      if (!descEl) return;
+      let text = descEl.value;
+      
+      // Limit to 10 lines
+      let lines = text.split('\n');
+      if (lines.length > 10) {
+        lines = lines.slice(0, 10);
+        descEl.value = lines.join('\n');
+        
+        if (lineCounterEl) {
+          lineCounterEl.classList.add("support-counter-warning");
+          setTimeout(() => lineCounterEl.classList.remove("support-counter-warning"), 300);
+        }
+      }
+      
+      const currentLines = descEl.value.split('\n').length;
+      const currentChars = descEl.value.length;
+      
+      if (lineCounterEl) {
+        lineCounterEl.textContent = `${currentLines}/10 dòng`;
+        if (currentLines >= 10) {
+          lineCounterEl.classList.add("support-counter-warning");
+        } else {
+          lineCounterEl.classList.remove("support-counter-warning");
+        }
+      }
+      
+      if (charCounterEl) {
+        charCounterEl.textContent = `${currentChars}/500 ký tự`;
+        if (currentChars >= 500) {
+          charCounterEl.classList.add("support-counter-warning");
+        } else {
+          charCounterEl.classList.remove("support-counter-warning");
+        }
+      }
+    };
+
+    if (descEl) {
+      descEl.addEventListener("input", updateCounters);
+      descEl.addEventListener("paste", () => {
+        setTimeout(updateCounters, 10);
+      });
+      
+      descEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const lines = descEl.value.split('\n');
+          if (lines.length >= 10) {
+            e.preventDefault();
+            if (lineCounterEl) {
+              lineCounterEl.classList.add("support-counter-warning");
+              setTimeout(() => lineCounterEl.classList.remove("support-counter-warning"), 300);
+            }
+          }
+        }
+      });
+    }
+
+    typeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        typeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    const showSupportStatus = (msg, isError = false) => {
+      if (!statusEl) return;
+      statusEl.className = isError ? "status-error" : "status-success";
+      statusEl.innerHTML = isError ? `<span>⚠️</span> ${msg}` : `<span>🎉</span> ${msg}`;
+    };
+
+    const resetForm = () => {
+      if (descEl) {
+        descEl.value = "";
+        descEl.disabled = false;
+      }
+      if (contactEl) {
+        contactEl.value = "";
+        contactEl.disabled = false;
+      }
+      typeButtons.forEach((b, idx) => {
+        b.disabled = false;
+        if (idx === 0) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+      if (statusEl) {
+        statusEl.className = "hidden";
+        statusEl.textContent = "";
+      }
+      if (spinnerEl) spinnerEl.classList.add("hidden");
+      if (btnTextEl) btnTextEl.textContent = "Gửi phản hồi";
+      sendBtn.disabled = false;
+      updateCounters();
+    };
+
     btn.addEventListener("click", () => {
+      resetForm();
       modal.classList.add("active");
     });
 
@@ -360,21 +465,38 @@ function setupSupportButton(d) {
         const lastSent = parseInt(lastSentStr, 10);
         if (Date.now() - lastSent < 60000) {
           const waitTime = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
-          showSupportToast(
-            `⏳ Bạn thao tác quá nhanh. Vui lòng thử lại sau ${waitTime} giây!`,
-            true,
-          );
+          showSupportStatus(`Bạn thao tác quá nhanh. Vui lòng thử lại sau ${waitTime} giây!`, true);
           return;
         }
       }
 
       if (!d) {
-        showSupportToast("❌ Lỗi: Không tìm thấy dữ liệu!", true);
+        showSupportStatus("Lỗi: Không tìm thấy dữ liệu để đính kèm!", true);
         return;
       }
 
-      const descEl = document.getElementById("support-desc");
-      const desc = descEl ? descEl.value.trim().substring(0, 500) : "";
+      const bodyText = descEl ? descEl.value.trim() : "";
+      if (!bodyText) {
+        showSupportStatus("Vui lòng nhập nội dung mô tả phản hồi!", true);
+        if (descEl) descEl.focus();
+        return;
+      }
+
+      // Collect type and contact
+      const activeTypeBtn = modal.querySelector(".support-type-btn.active");
+      const type = activeTypeBtn ? activeTypeBtn.getAttribute("data-type") : "bug";
+      const typeLabels = {
+        bug: "🐛 Báo lỗi",
+        suggestion: "💡 Góp ý",
+        other: "💬 Khác"
+      };
+      const typeLabel = typeLabels[type] || "Góp ý";
+      const contactVal = contactEl ? contactEl.value.trim() : "";
+
+      // Gộp phân loại + thông tin liên hệ vào trường desc
+      const desc = `[Loại: ${typeLabel}]` + 
+                   (contactVal ? `\n[Liên hệ: ${contactVal}]` : "") + 
+                   `\n\n${bodyText}`;
 
       const info = (() => {
         const ua = navigator.userAgent;
@@ -405,6 +527,7 @@ function setupSupportButton(d) {
               : "Unknown",
         };
       })();
+
       const deviceInfoStr = [
         `Trình duyệt : ${info.browser}`,
         `Hệ điều hành: ${info.os}`,
@@ -416,8 +539,14 @@ function setupSupportButton(d) {
         `Phiên bản Ext: ${info.extVersion}`,
       ].join("\n");
 
+      // Set loading state
       sendBtn.disabled = true;
-      sendBtn.style.opacity = "0.7";
+      if (spinnerEl) spinnerEl.classList.remove("hidden");
+      if (btnTextEl) btnTextEl.textContent = "Đang gửi...";
+      if (descEl) descEl.disabled = true;
+      if (contactEl) contactEl.disabled = true;
+      typeButtons.forEach(b => b.disabled = true);
+      if (statusEl) statusEl.className = "hidden";
 
       try {
         const jsonStr = JSON.stringify(d);
@@ -496,20 +625,35 @@ function setupSupportButton(d) {
 
         if (resText === "success") {
           localStorage.setItem("shopee_support_last_sent", Date.now());
-          if (descEl) descEl.value = "";
-          modal.classList.remove("active");
-          showSupportToast("🎉 Cảm ơn bạn! Phản hồi đã được gửi thành công.");
+          showSupportStatus("Gửi phản hồi thành công! Cảm ơn bạn rất nhiều.");
+          if (spinnerEl) spinnerEl.classList.add("hidden");
+          if (btnTextEl) btnTextEl.textContent = "✓ Đã gửi thành công";
+          
+          setTimeout(() => {
+            modal.classList.remove("active");
+            resetForm();
+          }, 2000);
         } else if (resText === "duplicate") {
-          modal.classList.remove("active");
-          showSupportToast("⚠️ Phản hồi này đã được ghi nhận trước đó.", true);
+          showSupportStatus("Phản hồi này đã được ghi nhận trước đó.", true);
+          // re-enable
+          sendBtn.disabled = false;
+          if (spinnerEl) spinnerEl.classList.add("hidden");
+          if (btnTextEl) btnTextEl.textContent = "Gửi phản hồi";
+          if (descEl) descEl.disabled = false;
+          if (contactEl) contactEl.disabled = false;
+          typeButtons.forEach(b => b.disabled = false);
         } else {
           throw new Error(resText || "Lỗi không xác định từ server.");
         }
       } catch (e) {
-        showSupportToast(`❌ Gửi thất bại: ${e.message}`, true);
-      } finally {
+        showSupportStatus(`Gửi thất bại: ${e.message}`, true);
+        // re-enable
         sendBtn.disabled = false;
-        sendBtn.style.opacity = "1";
+        if (spinnerEl) spinnerEl.classList.add("hidden");
+        if (btnTextEl) btnTextEl.textContent = "Gửi phản hồi";
+        if (descEl) descEl.disabled = false;
+        if (contactEl) contactEl.disabled = false;
+        typeButtons.forEach(b => b.disabled = false);
       }
     });
   }
