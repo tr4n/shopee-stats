@@ -79,10 +79,10 @@ async function getAIInsightSession() {
     _aiInsightSession = await createAISession({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
       expectedInputs: [
-        { type: "text", languages: ["vi", "en"] }
+        { type: "text", languages: ["en"] }
       ],
       expectedOutputs: [
-        { type: "text", languages: ["vi", "en"] }
+        { type: "text", languages: ["en"] }
       ]
     });
     return _aiInsightSession;
