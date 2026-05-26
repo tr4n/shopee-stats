@@ -1013,11 +1013,11 @@ function setupDashboardRatingCard(d) {
       - Total spending: ${fmtVND(yearData.t || 0)} VND
       - Total orders: ${fmtNum(yearData.o || 0)}
       - Peak spending month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND)
-      Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's shopping destiny, personality, and shopping vibes during Year ${yr}, especially commenting on their massive peak in ${maxMonthName}.
+      Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") regarding the user's shopping destiny, personality, and shopping vibes during Year ${yr}, especially commenting on their massive peak in ${maxMonthName}.
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. Copy all currency values EXACTLY as provided (e.g., if you see "155.6tr VND", write "155.6tr" or "155.6 triệu", do NOT convert "tr/million" into "tỷ/billion").
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.`;
+      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on the emotional profile, vibe, and consumer personality of the user during Year ${yr} (e.g. why they had a peak in ${maxMonthName}).
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1061,7 +1061,7 @@ function setupDashboardRatingCard(d) {
       Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality and mood during ${enMonth}/${year} under a GenZ spiritual/personality lens.
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. Copy all currency values EXACTLY as provided (e.g., "155.6tr VND" remains "155.6tr" or "155.6 triệu", do NOT change units).
+      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional state, lifestyle, and consumer personality traits.
       3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
 
       enrichWithAI(
@@ -1088,7 +1088,7 @@ function setupDashboardRatingCard(d) {
       Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") and decode the user's lifetime shopping destiny, personality, and vibes under a GenZ spiritual lens.
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. Copy all currency values EXACTLY as provided (e.g., if you see "155.6tr VND", write "155.6tr" or "155.6 triệu", do NOT convert "tr/million" into "tỷ/billion").
+      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional profile, shopping destiny, and lifestyle vibe.
       3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.`;
 
       enrichWithAI(
@@ -1186,7 +1186,7 @@ function setupDashboardRatingCard(d) {
       const catLines = filteredCs
         .map((c) => {
           const pct = Math.round((c.s / analyzedTotal) * 100);
-          return `${c.name}: ${fmtVNDEng(c.s)} (${pct}%, ${c.c} purchases)`;
+          return `${c.name}: ${fmtVND(c.s)} VND (${pct}%, ${c.c} purchases)`;
         })
         .join("; ");
 
@@ -1198,9 +1198,12 @@ function setupDashboardRatingCard(d) {
         "insight-categories",
         `Category breakdown (${periodText}): ${catLines}.`,
         `Spending category breakdown for ${periodText}: ${catLines}.
-        Highest spend category: "${topCategory.name}" (${fmtVNDEng(topCategory.s)}, occupying ${topPct}%).
+        Highest spend category: "${topCategory.name}" (${fmtVND(topCategory.s)} VND, occupying ${topPct}%).
         Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's spending personality, lifestyle archetype, or 'spiritual system' ("hệ tâm linh") based on this breakdown.
-        Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give financial advice.`,
+        Rules:
+        1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+        2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on their lifestyle archetype, spending personality, and vibes.
+        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`,
         cacheKey,
       );
     }
@@ -1228,11 +1231,14 @@ function setupDashboardRatingCard(d) {
           : "";
       const periodText = year === "all" ? "all-time" : `year ${year}`;
 
-      const context = `Category "${catName}" (${periodText}): spent ${fmtVNDEng(catTotal)}${overallText} across ${catCount} purchases.`;
+      const context = `Category "${catName}" (${periodText}): spent ${fmtVND(catTotal)} VND${overallText} across ${catCount} purchases.`;
 
-      const specificPrompt = `Spending data for Category "${catName}" during ${periodText}: Spent ${fmtVNDEng(catTotal)} across ${catCount} purchases.
+      const specificPrompt = `Spending data for Category "${catName}" during ${periodText}: Spent ${fmtVND(catTotal)} VND across ${catCount} purchases.
       Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality or 'trial' ("kiếp nạn") regarding this specific category "${catName}" (e.g., buying for healing, led by spiritual voices/vũ trụ gửi tín hiệu).
-      Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget advice.`;
+      Rules:
+      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional connection, vibes, and consumer habits.
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
 
       enrichWithAI(
         "insight-categories",
@@ -1465,7 +1471,10 @@ function setupDashboardRatingCard(d) {
         `Most purchased items: ${itemNames}.`,
         `List of your top purchased items: ${itemNames}.
         Task: Perform a witty and funny spiritual fortune-telling reading ("gieo quẻ") and decode the user's spending personality or 'trial' ("kiếp nạn") driven by these purchased items under a GenZ spiritual lens.
-        Requirements: Write the response in VIETNAMESE. Keep it concise (maximum 2-3 sentences). Use trendy Vietnamese GenZ slang naturally. Do not give budget/saving advice.`,
+        Rules:
+        1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
+        2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on decoding their lifestyle, hobbies, consumer soul, and personality traits.
+        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`,
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
