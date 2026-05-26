@@ -1,0 +1,2460 @@
+{
+  "t": 78606000,
+  "o": 400,
+  "s": 11030085,
+  "ts": 1779782383,
+  "yd": {
+    "2024": {
+      "t": 17444000,
+      "o": 100,
+      "s": 2377287,
+      "m": {
+        "1": 2787000,
+        "2": 1653000,
+        "3": 877000,
+        "4": 1048000,
+        "5": 286000,
+        "6": 487000,
+        "7": 2236000,
+        "8": 310000,
+        "9": 1939000,
+        "10": 847000,
+        "11": 3642000,
+        "12": 1332000
+      }
+    },
+    "2025": {
+      "t": 37906000,
+      "o": 180,
+      "s": 5256680,
+      "m": {
+        "1": 2024000,
+        "2": 4952000,
+        "3": 3974000,
+        "4": 6155000,
+        "5": 3933000,
+        "6": 1078000,
+        "7": 3804000,
+        "8": 1266000,
+        "9": 3986000,
+        "10": 1625000,
+        "11": 2528000,
+        "12": 2581000
+      }
+    },
+    "2026": {
+      "t": 23256000,
+      "o": 120,
+      "s": 3396118,
+      "m": {
+        "1": 2661000,
+        "2": 4387000,
+        "3": 6409000,
+        "4": 5909000,
+        "5": 3890000
+      }
+    }
+  },
+  "ti": [
+    {
+      "n": "Mực khô câu Vân Đồn loại 1 dày mình túi 500g",
+      "s": 2250000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Budweiser King of Beers thùng 24 lon 330ml",
+      "s": 2175000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Yến sào chưng đông trùng hạ thảo collagen đẹp da hũ",
+      "s": 2100000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô trâu gác bếp Sơn La chuẩn vị Tây Bắc túi 500g",
+      "s": 2100000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Sapporo Premium vị êm nhẹ thùng 24 lon 330ml",
+      "s": 2075000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu mơ Choya Kishu Nhật Bản chai thủy tinh có quả 720ml",
+      "s": 1825000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột sữa dê hữu cơ dinh dưỡng dồi dào hộp 400g",
+      "s": 1400000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cao hồng sâm 6 năm tuổi cô đặc 240g Hàn Quốc hũ",
+      "s": 1300000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Larue vị êm đằm sảng khoái thùng 24 lon 330ml",
+      "s": 1225000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà sâm ngọc linh hòa tan bồi bổ sức khỏe hộp 20 gói",
+      "s": 1200000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Tiger bạc Crystal thùng 24 lon 330ml đặc biệt",
+      "s": 1185000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước mắm sá sùng Quan Lạn Quảng Ninh chai thủy tinh 500ml",
+      "s": 1100000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thùng 24 lon Nước ngọt Coca-Cola vị nguyên bản 320ml",
+      "s": 1075000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà sen Tây Hồ Hà Nội ướp xổi bông tươi hộp 10 bông",
+      "s": 1050000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột Matcha trà xanh nguyên chất Uji Nhật Bản gói 100g",
+      "s": 925000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tỏi cô đơn Lý Sơn chính hiệu túi lưới 500g",
+      "s": 925000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cao linh chi đỏ Hàn Quốc thượng hạng hộp gỗ 5 lọ",
+      "s": 900000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu sake Nhật Bản truyền thống đóng chai thủy tinh 720ml",
+      "s": 885000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Dầu ô liu Extra Virgin Borges nguyên chất chai 500ml",
+      "s": 875000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu sim Phú Quốc vang sim hảo hạng chai 750ml",
+      "s": 825000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thùng 24 lon Bia Tiger Crystal lon cao 330ml",
+      "s": 770000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tảo xoắn Spirulina Nhật Bản hộp 2200 viên dinh dưỡng",
+      "s": 770000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Saffron nhụy hoa nghệ tây Iran dòng Super Negin lọ 1g",
+      "s": 750000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai Rượu vang đỏ Đà Lạt Premium thượng hạng 750ml",
+      "s": 725000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt sen khô Tịnh Tâm Huế loại 1 dẻo bùi túi 500g",
+      "s": 725000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh quy Danisa hạt điều bơ sữa hộp thiếc 454g",
+      "s": 675000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hồ đào tách vỏ rang tự nhiên Mỹ hũ 250g",
+      "s": 675000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu vang chile đỏ Cabernet Sauvignon chai 750ml",
+      "s": 660000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ca cao nhân sâm linh chi lon thiếc thơm ngậy 300g",
+      "s": 625000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chà là sấy khô nguyên cành Tunisia hộp 500g",
+      "s": 625000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ngũ cốc dinh dưỡng 25 loại hạt Beta Glucan lon 800g",
+      "s": 590000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt macca rang củi nguyên vị nứt vỏ Tây Nguyên hũ 500g",
+      "s": 575000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa óc chó hạnh nhân hạt dẻ hàn quốc hộp 190ml lốc 24",
+      "s": 560000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mật ong rừng tràm U Minh nguyên chất chai 500ml",
+      "s": 540000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia 333 vị truyền thống đậm đà thùng 24 lon 330ml",
+      "s": 530000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cà phê phin giấy Robusta & Arabica đậm đà hộp 10 gói",
+      "s": 490000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giò me Nghệ An giòn ngọt thơm tiêu đòn 1kg",
+      "s": 440000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ca cao nguyên chất Đăk Lăk túi zip 500g",
+      "s": 425000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hành tím cô đơn Lý Sơn thơm nồng túi 1kg",
+      "s": 425000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hộp Hồng sâm lát tẩm mật ong 6 năm tuổi Pocheon 200g",
+      "s": 420000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu mơ sương mù Yên Tử chai thủy tinh 500ml",
+      "s": 405000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hủ tiếu Nam Vang Nhịp Sống gói cay ngon lốc 10 gói",
+      "s": 390000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà atiso túi lọc Ladophar Đà Lạt hộp 100 túi",
+      "s": 375000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Phở gà ăn liền Đệ Nhất lốc 10 gói thơm lừng",
+      "s": 375000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ngũ cốc dinh dưỡng Quaker Oats yến mạch trái cây 800g",
+      "s": 375000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà sâm ngọc linh chưng sẵn mật ong rừng hũ 70ml",
+      "s": 375000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột cần tây mật ong sấy thăng hoa hộp 20 gói nhỏ",
+      "s": 375000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo thơm ST25 Sóc Trăng dẻo thơm túi 5kg",
+      "s": 370000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hồng sấy dẻo một nắng đà lạt hộp sang trọng 500g",
+      "s": 370000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thùng 48 hộp Sữa tươi tiệt trùng TH True Milk ít đường 180ml",
+      "s": 365000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nhân sâm tươi Hàn Quốc 6 năm tuổi củ to ngâm rượu",
+      "s": 350000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tỏi đen Lý Sơn cô đơn lên men tự nhiên hộp 250g",
+      "s": 350000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo tám thơm Điện Biên hạt nhỏ đều dẻo thơm túi 5kg",
+      "s": 345000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt óc chó dòng đỏ cao cấp tách vỏ hũ 250g",
+      "s": 345000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cơm tự sôi lẩu bò tê cay Trùng Khánh hộp",
+      "s": 340000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà đông trùng hạ thảo linh chi bồi bổ cơ thể hộp 30 gói",
+      "s": 330000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Măng khô rừng Tây Bắc phơi nắng tự nhiên túi 500g",
+      "s": 330000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ngũ cốc dinh dưỡng đậu nành mè đen túi 20 gói",
+      "s": 325000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột trà sữa thái béo ngậy pha trà sữa gói 500g",
+      "s": 325000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trái cây thập cẩm sấy giòn đà lạt gói lớn 500g",
+      "s": 325000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo nếp nương Điện Biên thơm dẻo nấu xôi cực ngon túi 2kg",
+      "s": 300000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì chay ăn liền hương vị lá bồ đề thanh tịnh thùng 30 gói",
+      "s": 294000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo nếp nương Điện Biên dẻo thơm túi 5kg",
+      "s": 290000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt điều vị phô mai giòn rụm hũ 200g ăn vặt cực ngon",
+      "s": 290000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh tét Trà Cuôn Trà Vinh nhân trứng muối đòn 800g",
+      "s": 285000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Hà Nội Bold premium lon cao 330ml thùng 24 lon",
+      "s": 285000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu táo mèo Tây Bắc ngâm ủ chum sành chai 1L",
+      "s": 285000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hộp đông trùng hạ thảo sấy thăng hoa nguyên con lọ 10g",
+      "s": 280000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chả quế chay chiên vàng thơm ngon đòn 500g",
+      "s": 275000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia bỉ Leffe Blonde vàng hương thơm trái cây chai 330ml",
+      "s": 275000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột sắn dây ướp hoa bưởi ta nguyên chất túi 1kg",
+      "s": 270000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Long nhãn Hưng Yên sấy khô ngọt đậm tự nhiên túi 500g",
+      "s": 270000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thùng 24 lon Nước dừa xiêm Đồng Xoài nguyên chất",
+      "s": 265000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước yến sào Khánh Hòa Sanest có đường hộp 6 hũ",
+      "s": 260000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt dẻ cười Mỹ rang muối tự nhiên hũ 300g",
+      "s": 256000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mơ má hồng Hương Sơn ngâm đường hũ thủy tinh 1kg",
+      "s": 255000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu nếp cẩm Tây Bắc thơm nồng chai 1L",
+      "s": 255000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Táo đỏ Tân Cương sấy khô quả to đều hạt túi 500g",
+      "s": 255000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt điều rang muối vỏ lụa Bình Phước hũ 500g",
+      "s": 250000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chả cá chay chiên sẵn đông lạnh khay 500g",
+      "s": 250000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt chia đen Úc organic bồi bổ sức khỏe túi zip 500g",
+      "s": 250000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hồng treo gió Đà Lạt nguyên trái túi hút chân không 250g",
+      "s": 250000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau má sấy lạnh nguyên chất thanh nhiệt hũ 100g",
+      "s": 240000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hồng treo gió Đà Lạt công nghệ Nhật Bản túi hút chân không 500g",
+      "s": 240000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau câu dẻo Jelly Hoàng Yến gói 10g lốc 12 gói",
+      "s": 240000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Lạp xưởng tươi cần đước long an thơm ngon túi 500g",
+      "s": 230000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai Sốt mè rang Kewpie thơm béo chai 210ml",
+      "s": 225000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Miến dong phên đặc sản Cao Bằng sợi dai túi 500g",
+      "s": 225000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo lứt huyết rồng dẻo Điện Biên túi 2kg",
+      "s": 225000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Miến dong phên đặc sản Bắc Kạn sợi dai túi 1kg",
+      "s": 225000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô bò miếng sấy lò Tây Nguyên thượng hạng túi 150g",
+      "s": 220000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nhụy hoa nghệ tây Saffron Iran cao cấp lọ 1g",
+      "s": 220000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt dẻ cười rang muối hảo hạng hũ nhựa 250g",
+      "s": 220000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt chia đen organic Nam Mỹ túi zip lớn 1kg",
+      "s": 215000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kim chi cải thảo cay giòn ngon Bibigo gói 500g",
+      "s": 210000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt dẻ cười làm nhân bánh trung thu túi 200g",
+      "s": 196000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt quả phỉ sấy khô rang chín nguyên vị hũ 200g",
+      "s": 196000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô gà lá chanh tỏi ớt cay cay túi zip 500g",
+      "s": 190000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hộp Trà túi lọc Lipton nhãn vàng thơm ngon 100 gói",
+      "s": 190000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tiêu đen xay Phú Quốc nguyên chất thơm nồng hũ 100g",
+      "s": 190000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cá kèo chay kho tiêu gừng ăn kèm cơm nóng hũ",
+      "s": 190000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt dưa đỏ rang tay truyền thống gói lớn 500g",
+      "s": 190000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô cá sặc bổi ba miền thơm ngon túi 500g",
+      "s": 185000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu cần Hòa Bình đặc sản bình gốm 5 lít",
+      "s": 185000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt thông Mỹ tách vỏ rang thơm bùi hũ 200g",
+      "s": 185000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giò nấm chay truyền thống gói lá chuối đòn 500g",
+      "s": 180000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước tăng lực Sting vàng nhân sâm lon 320ml lốc 6 lon",
+      "s": 180000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước uống hồng sâm linh chi nhung hươu Hàn Quốc hộp 10 chai",
+      "s": 180000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt óc chó Mỹ tách vỏ organic túi 250g",
+      "s": 178000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hủ tiếu sấy khô Sa Đéc chuẩn vị túi 1kg",
+      "s": 175000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nem chua Thanh Hóa chính hiệu tỏi ớt chục 10 chiếc",
+      "s": 175000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột cốt dừa khô dạng bột đóng lon tiện lợi 400g",
+      "s": 175000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh gạo Tokbokki Yopokki vị phô mai cốc 120g",
+      "s": 170000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt sen tươi Huế bóc vỏ tim sen đóng túi hút chân không",
+      "s": 170000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột yến mạch matcha sữa dừa ăn sáng tiện lợi gói 400g",
+      "s": 170000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cà phê hạt Robusta rang mộc nguyên chất túi 1kg",
+      "s": 165000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Củ kiệu chua ngọt ngâm sẵn giòn ngon hũ 400g",
+      "s": 165000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo nếp cái hoa vàng hạt tròn mẩy túi 2kg",
+      "s": 165000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà Shan Tuyết cổ thụ Hà Giang gói 200g",
+      "s": 165000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mực rim me Nha Trang hũ thủy tinh đặc sản 250g",
+      "s": 165000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa bột Ensure Gold vị vani hộp thiếc 850g",
+      "s": 164000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cà phê hòa tan G7 3in1 Trung Nguyên hộp 20 gói",
+      "s": 162000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì Omachi sườn hầm ngũ quả ly 75g lốc 6 ly",
+      "s": 162000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bún khô sợi nhỏ Sa Đéc dai dẻo túi 1kg",
+      "s": 160000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hướng dương vị caramel thơm ngọt gói lớn 250g",
+      "s": 160000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt nêm xương ống Aji-ngon vị heo ngọt tự nhiên gói 900g",
+      "s": 156000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa tươi hạt dẻ cười organic thơm ngậy hộp 1L",
+      "s": 156000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu vang trắng Đà Lạt nho Chardonnay chai 750ml",
+      "s": 155000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ngũ cốc giảm cân yến mạch ăn kiêng túi 500g",
+      "s": 150000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chè tân cương Thái Nguyên cánh búp móc câu gói 500g",
+      "s": 150000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu nếp đục thơm ngon chưng cất truyền thống chai 1L",
+      "s": 150000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hạnh nhân lát làm bánh quy ngói hũ 250g",
+      "s": 150000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ca cao làm bánh đắng ngọt tự nhiên túi zip 250g",
+      "s": 144000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mít sấy giòn xuất khẩu thơm phức gói lớn 250g",
+      "s": 144000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì xào tương đen Indomie vị đặc biệt lốc 5 gói",
+      "s": 140000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt ngô Mỹ hạt tròn làm bắp rang bơ túi zip 500g",
+      "s": 140000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đậu nành sấy giòn rụm thơm béo gói lớn 500g",
+      "s": 140000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh pía sầu riêng trứng muối Tân Huê Viên túi",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà hoa cúc khô nguyên bông sấy lạnh hũ 100g",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Lẩu bò tự sôi vị Tứ Xuyên siêu cay cay tê lưỡi",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt điều vị phô mai giòn rụm hũ 250g ăn vặt",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh pía Sóc Trăng lạp xưởng sầu riêng gói 4 bánh",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia 333 mát lạnh sảng khoái lốc 6 lon 330ml",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kỷ tử đỏ organic bồi bổ cơ thể lọ thủy tinh 200g",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt điều rang tỏi ớt lá chanh đậm đà thơm cay hũ 250g",
+      "s": 136000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Da heo chiên giòn cháy tỏi ớt hũ 250g",
+      "s": 135000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hồ đào sấy mật ong ngọt giòn Mỹ hũ 250g",
+      "s": 135000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa chua uống tiệt trùng Yomost vị dâu lốc 4 hộp",
+      "s": 130000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột cháo yến mạch ăn liền giàu dinh dưỡng hộp",
+      "s": 130000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh pía chay đậu xanh sầu riêng Tân Huê Viên túi 400g",
+      "s": 130000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột cần tây sấy thăng hoa mật ong giảm cân hộp 20 gói",
+      "s": 125000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mật sim Phú Quốc chai thủy tinh hảo hạng 750ml",
+      "s": 125000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kẹo mè xửng Huế Song Hỷ dẻo thơm gói 250g",
+      "s": 125000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà sâm dây Ngọc Linh Kon Tum gói 200g",
+      "s": 125000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ngọt Ajinomoto gói lớn 1kg tinh khiết",
+      "s": 124000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mơ sấy dẻo chua ngọt Thổ Nhĩ Kỳ hộp giấy 200g",
+      "s": 124000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai nước tăng lực Sting dâu đỏ 330ml lốc 6 chai",
+      "s": 120000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước uống chua men sống Yakult lốc 5 chai x 65ml",
+      "s": 120000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hộp Mật ong hoa nhãn nguyên chất Đăk Lăk chai 500ml",
+      "s": 120000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Dưa cải chua ngọt Sông Hương hũ 370g",
+      "s": 120000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thùng 30 gói Mì Hảo Hảo tôm chua cay 75g",
+      "s": 118000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Heineken 0.0 không cồn lon 330ml lốc 6 lon",
+      "s": 118000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước gạo rang Woongjin Hàn Quốc chai lớn 1.5L",
+      "s": 116000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt macca Đắk Lắk nứt vỏ kèm dụng cụ khui hũ 500g",
+      "s": 115000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Dầu ăn Simply hạt cải nguyên chất chai 2 lít",
+      "s": 115000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Yến sào chưng đường phèn nhãn nhục hũ 70ml",
+      "s": 114000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tổ yến chưng hạt sen đường phèn ngọt thanh hũ 70ml",
+      "s": 114000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia Heineken Silver bạc lon cao 330ml lốc 6 lon",
+      "s": 112000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ô mai mơ xào gừng chua ngọt Hồng Lam hộp 200g",
+      "s": 110000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường ăn kiêng Isomalt tự nhiên gói 50 gói nhỏ",
+      "s": 110000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chả lụa chay đóng gói thơm ngon ăn liền đòn 500g",
+      "s": 110000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bia thủ công Craft Beer vị lúa mì lon cao 500ml",
+      "s": 110000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột bánh bao pha sẵn Meizan gói 400g kèm men",
+      "s": 110000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà ô long Tea+ Plus chai 455ml lốc 6 chai",
+      "s": 108000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh đậu xanh rồng vàng Minh Ngọc hộp 250g",
+      "s": 105000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt nêm nấm đùi gà chay ngọt thanh gói 400g",
+      "s": 105000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh chè lam Đường Lâm dẻo thơm hương gừng hộp 400g",
+      "s": 105000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mận sấy dẻo không hạt chua ngọt túi 200g",
+      "s": 104000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nho khô vàng sấy khô tự nhiên Ninh Thuận túi 500g",
+      "s": 98000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa hạt Macca đậu đen Vinamilk hộp 180ml lốc 4 hộp",
+      "s": 96000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai Nước mắm Nam Ngư Đệ Nhị 900ml đậm đà",
+      "s": 96000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gói cốt gia vị lẩu Thái Haidilao cay ngọt gói 220g",
+      "s": 96000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ruốc nấm hương chay cô đặc đậm đà hũ 200g",
+      "s": 96000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô heo chay cháy tỏi ớt thơm ngon túi 150g",
+      "s": 96000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ruốc chân nấm đông cô hương vị gà cay hũ 200g",
+      "s": 96000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh đậu xanh Hải Dương rồng vàng hộp quà tặng",
+      "s": 96000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt trân châu đen dai giòn làm trà sữa gói 1kg",
+      "s": 96000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu nếp cái hoa vàng chưng cất thủ công chai 1L",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì Kokomi tôm chua cay dai giòn lốc 30 gói",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rượu nho Ninh Thuận nguyên chất chai thủy tinh 750ml",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà Kombucha sấy thăng hoa Teazen vị chanh hộp 10 gói",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nho khô đen sấy khô tự nhiên không hạt túi 500g",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt diêm mạch ba màu quinoa organic túi 500g",
+      "s": 95000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh xốp sô cô la KitKat lốc 6 thanh",
+      "s": 90000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nem chua chay từ vỏ bưởi đu đủ giòn sần sật chục 10 chiếc",
+      "s": 90000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hột vịt muối Đồng Tháp bùi ngậy lốc 10 quả",
+      "s": 90000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột làm bánh muffin sô cô la pha sẵn gói 400g",
+      "s": 90000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Táo đỏ thái lát sấy giòn pha trà dinh dưỡng hũ 150g",
+      "s": 90000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gói Trà sữa Thái đỏ tự pha truyền thống túi 1kg",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ớt cay Hàn Quốc làm kim chi túi 500g",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Miến sườn heo Phú Hương thanh mát gói lốc 10 gói",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt chia hữu cơ nhập khẩu Úc organic túi zip 250g",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chả ram tôm đất Bình Định giòn rụm túi 500g đông lạnh",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nấm hương rừng khô Sapa thơm ngát túi 200g",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà thảo mộc cung đình Huế gói lớn 30 túi lọc",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột kem béo thực vật Frima Hàn Quốc túi lớn 1kg",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Quả sung sấy khô tự nhiên Thổ Nhĩ Kỳ túi 250g",
+      "s": 85000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kẹo ngậm bạc hà mát lạnh không đường Frisk Neo hộp",
+      "s": 84000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt nêm Knorr thịt thăn xương ống tủy gói 900g",
+      "s": 84000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước mắm Chinsu cá hồi thượng hạng chai 500ml",
+      "s": 84000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hộp Thịt heo hầm Vissan đóng hộp ăn liền 150g",
+      "s": 84000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước mắm chay cốt khóm dứa Thanh Hà chai 500ml",
+      "s": 84000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Xúc xích chay ăn liền từ đạm lúa mì gói 5 cây",
+      "s": 84000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu đỏ khô nấu chè nhân bánh dẻo bùi gói 500g",
+      "s": 84000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Xoài cát sấy dẻo xuất khẩu gói zip 150g ngon ngọt",
+      "s": 84000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô mực hấp nước dừa xé sợi dai ngọt hũ 200g",
+      "s": 78000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kem sữa béo thực vật Whipping Cream Rich hộp 1L",
+      "s": 78000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đậu phộng tỏi ớt giòn rụm hũ 400g",
+      "s": 76000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tổ yến chưng đường phèn nhãn nhục tinh chế hũ 70ml",
+      "s": 76000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Yến mạch nguyên cám Hafer Flocken Đức túi 500g",
+      "s": 76000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sườn dê chay sấy khô dai ngọt túi 200g",
+      "s": 76000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường thốt nốt chảy dạng lỏng đặc sản An Giang hũ 500g",
+      "s": 76000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Phở bò ăn liền Đệ Nhất gói 65g lốc 10 gói",
+      "s": 75000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Lẩu tự sôi hải sản chua cay thập cẩm hộp",
+      "s": 75000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tương cự đà chay truyền thống thơm ngon chai 500ml",
+      "s": 75000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt tiêu chín đỏ Phú Quốc sấy khô thơm nồng hũ 100g",
+      "s": 75000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước dâu tằm ngâm đường Đà Lạt hũ ngọt thơm 1kg",
+      "s": 75000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hương sầu riêng thực phẩm tạo mùi làm bánh chai 30ml",
+      "s": 75000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột sương sáo đen giòn mát Thuận Phát gói 50g",
+      "s": 75000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt dẻ trùng khánh cao bằng luộc chín sấy khô túi 500g",
+      "s": 75000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sốt nướng thịt BBQ bơ tỏi Cholimex hũ 200g",
+      "s": 72000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt ý dĩ dinh dưỡng bồi bổ cơ thể gói 250g",
+      "s": 70000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô bò chay từ sườn non sốt sa tế thơm cay túi 150g",
+      "s": 70000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gelatin bột làm pudding rau câu gói 100g",
+      "s": 70000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đậu hũ ki cọng khô dai dẻo túi zip 250g",
+      "s": 68000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rong biển cuộn mè nướng giòn thơm ngon gói 40g",
+      "s": 66000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Pate gan heo Hạ Long thơm ngậy hộp thiếc 150g",
+      "s": 66000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đậu hũ chiên sả ớt đóng khay ăn liền tiện lợi",
+      "s": 66000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mực rim me Nha Trang chua cay hũ 300g",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thạch rau câu trái cây zai zai Đức Hạnh túi 1kg",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Pate cột đèn Hải Phòng béo ngậy hũ 300g",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gạo lứt đen Tây Bắc dẻo ngon giảm cân túi 2kg",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Lẩu thái chay đóng hộp tự sôi chua cay đậm vị",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước mơ ngâm đường mật thanh mát hũ 1kg",
+      "s": 65000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường thốt nốt An Giang dạng bánh thơm ngon túi 500g",
+      "s": 64000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kim chi cải thảo cắt lát Sông Hương hũ 390g",
+      "s": 64000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cá ngừ ngâm dầu đậu nành Hạ Long Can hộp 150g",
+      "s": 64000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa đậu nành nha đam thơm ngon Fami hộp 200ml lốc 6",
+      "s": 64000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai Rượu Soju Jinro Hàn Quốc vị nho xanh 360ml",
+      "s": 62000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột ngũ cốc chay dinh dưỡng hạt sen đậu đen túi 20 gói",
+      "s": 62000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khô heo cháy tỏi thơm ngon chuẩn vị túi 200g",
+      "s": 60000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh khảo nhân đậu xanh thơm dẻo đặc sản hộp",
+      "s": 60000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột chiên giòn Aji-Quick vị hành tỏi gói 150g",
+      "s": 60000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tinh dầu chuối thực phẩm làm chè bánh chai thủy tinh",
+      "s": 60000,
+      "c": 5,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước ngọt Pepsi không calo lon 320ml lốc 6 lon",
+      "s": 58000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước tương đậu nành Lee Kum Kee chai thủy tinh 500ml",
+      "s": 58000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Quả nam việt quất sấy dẻo chua ngọt gói zip 200g",
+      "s": 58000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh tráng phơi sương muối nhuyễn hành phi túi",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa đặc có đường Ông Thọ vỉ nhựa hộp 40g hộp 6 hộp",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa đậu nành Fami nguyên chất hộp 200ml lốc 6 hộp",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu xanh lòng xanh vỏ dẻo mát túi 500g",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu nành hữu cơ nảy mầm làm sữa túi 500g",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chao chùa béo ngậy thơm nồng đặc sản hũ 350g",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giấm gạo nếp đen lên men tự nhiên hảo hạng chai 500ml",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Men nở khô làm bánh mì Mauripan vỉ 5 gói x 10g",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột mì số 11 chuyên làm bánh mì Meizan gói 1kg",
+      "s": 56000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kẹo mút Chupa Chups hương dâu và cola gói 50 que",
+      "s": 55000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường đen Hàn Quốc làm trân châu đường đen túi 1kg",
+      "s": 55000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mận sấy dẻo Sơn La chua ngọt thơm ngon hũ 300g",
+      "s": 55000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt bí chà xanh tách vỏ rang giòn hũ 300g",
+      "s": 55000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kiwi xanh sấy dẻo chua ngọt tự nhiên hũ 250g",
+      "s": 55000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước đậu đen rang thanh lọc cơ thể đóng chai 500ml",
+      "s": 54000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu đỏ làm nhân bánh chè mát lành túi 500g",
+      "s": 52000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kẹo dẻo Haribo Goldbears vị trái cây gói 80g",
+      "s": 50000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột tỏi nguyên chất làm gia vị ướp thơm lừng hũ 100g",
+      "s": 50000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Măng chua tỏi ớt chay ngâm sẵn giòn ngon đặc sản hũ",
+      "s": 50000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Xoài sấy dẻo Cam Lâm chua ngọt tự nhiên gói 200g",
+      "s": 49000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh bông lan cuộn kem hương dâu Solite hộp 360g",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột mì đa dụng Meizan cao cấp túi 1kg",
+      "s": 48000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì cay Samyang gà cay phô mai gói 140g",
+      "s": 48000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì ly Modern lẩu thái tôm chua cay lốc 6 ly",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tôm chay đông lạnh dai giòn ngọt tự nhiên khay 250g",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột làm bánh xèo cốt dừa Hương Xưa gói 500g",
+      "s": 48000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột làm bánh pancake vị dâu tây pha sẵn Ajinomoto 200g",
+      "s": 48000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nho khô vàng sấy tự nhiên giòn ngọt Ninh Thuận túi 250g",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Vỏ bưởi sấy dẻo chua ngọt giảm cân hũ 200g",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau má sấy lạnh nguyên chất giữ nguyên màu sắc hũ",
+      "s": 48000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh tráng trộn sa tế tắc muối tôm siêu cay",
+      "s": 45000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh gấu nhân kem sữa thơm béo hũ 300g",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước yến sào nhân sâm không đường hũ 70ml",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Gói Cháo gà ăn liền Gấu Đỏ lốc 10 gói",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tokbokki bánh gạo truyền thống gói 500g kèm sốt cay",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Măng ớt đặc sản Lạng Sơn cay chua thơm giòn hũ 1kg",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Pate nấm đông cô chay béo ngậy hũ thủy tinh 150g",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh tráng phơi sương Trảng Bàng Tây Ninh túi 500g",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Kẹo cu đơ Hà Tĩnh đặc sản giòn bùi túi 5 bánh",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giấm táo mèo Mù Cang Chải Sơn La chai thủy tinh 500ml",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước uống nha đam đường phèn mát lạnh chai 500ml",
+      "s": 45000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chuối sứ sấy dẻo tự nhiên không đường túi zip 500g",
+      "s": 45000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đậu phộng da cá vị nước cốt dừa Poca gói 150g",
+      "s": 44000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh phồng tôm Sa Giang Đồng Tháp hộp đặc biệt 200g",
+      "s": 44000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tương cà Cholimex vị cà chua tự nhiên chai 270g",
+      "s": 42000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cá mòi sốt cà Sea Crown hộp thiếc 155g",
+      "s": 42000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước yến đông trùng thảo vị ngọt thanh hũ 70ml",
+      "s": 42000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước dừa tươi đóng hộp giấy vị tự nhiên Cocoxim hộp 1L",
+      "s": 42000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Me ngào đường muối ớt chua cay hũ 350g",
+      "s": 40000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bún bò huế chay đóng gói ăn liền sợi dai lốc 5 gói",
+      "s": 40000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh cáy Làng Nguyễn Thái Bình dẻo bùi giòn rụm hộp",
+      "s": 40000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cơm cháy siêu chà bông Sài Gòn túi 250g",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh quy bơ Cosy Kinh Đô gói 180g",
+      "s": 38000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mắm nêm pha sẵn Dì Cẩn Đà Nẵng chai thủy tinh 500ml",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Thịt bò hộp Vissan lát hầm gia vị ăn liền 150g",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tổ yến vụn chưng sẵn nguyên chất vị sâm hũ 70ml",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt nêm chay Knorr nấm hương thanh ngọt gói 400g",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hủ tiếu chay ăn liền khô nước đều ngon lốc 5 gói",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà dưỡng nhan tuyết yến lệ đào hũ chưng sẵn 200ml",
+      "s": 38000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột béo Tài Ký làm chè kem bánh gói 400g",
+      "s": 38000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bim bim phồng tôm Oishi gói 80g",
+      "s": 36000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột nếp lọc thơm dẻo gói 500g làm bánh",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bơ thực vật Tường An thơm béo hộp 200g",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cháo yến mạch đậu xanh thịt bằm Minh Trung lon 365g",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tảo biển cuộn gia vị ăn liền siêu giòn gói 30g",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước tương chay tỏi ớt tam thái tử chai 500ml",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột cốt dừa pha sẵn cốt dừa béo ngậy gói 50g",
+      "s": 36000,
+      "c": 3,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường bột làm bánh ngọt Biên Hòa gói 500g",
+      "s": 36000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà nhài thơm hương lài tự nhiên túi lọc hộp 25 gói",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giấm táo mèo Yên Bái thanh mát chai thủy tinh 500ml",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột nghệ vàng nguyên chất Điện Biên túi zip 150g",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì tôm Miliket hai tôm truyền thống gói giấy lốc 10",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mắm cá lóc chay từ đậu nành và thính hũ 250g",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rong biển cuộn cơm sushi chay lốc 10 lá",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai kombucha vị chanh leo gừng detox cơ thể 330ml",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hương thảo khô làm gia vị nướng thịt tây lọ 50g",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khoai lang vàng sấy giòn giòn ngọt gói lớn 250g",
+      "s": 35000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh gạo Tokbokki Yopokki vị phô mai cốc 120g",
+      "s": 34000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường thốt nốt dạng bánh viên mật thơm ngon túi 500g",
+      "s": 34000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Xúc xích ăn liền Ponnie thịt heo hầm gói 5 cây",
+      "s": 32000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà đào sấy khô Cozy túi lọc hộp 20 gói",
+      "s": 32000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa gạo lứt đậu nành organic TH True Milk lốc 4 hộp",
+      "s": 32000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột năng Tài Ký dẻo mịn tạo độ sánh gói 400g",
+      "s": 32000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mứt gừng sấy dẻo cay nồng ngày tết đặc sản hộp 200g",
+      "s": 32000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước khoáng thiên nhiên La Vie chai 500ml lốc 6 chai",
+      "s": 30000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột năng Meizan tạo độ sánh sệt gói 400g",
+      "s": 30000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mắm tôm Bắc Ninh thơm ngon chuẩn vị chai 250g",
+      "s": 30000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tả pớ chay ăn liền đặc sản thơm ngon gói 100g",
+      "s": 30000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chả chưng chay từ đậu phụ nấm mèo mộc nhĩ khay",
+      "s": 30000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa đậu nành hạt óc chó chay Fami lốc 6 hộp",
+      "s": 30000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh tráng nướng mắm ruốc Đà Lạt giòn cay bịch 5 cái",
+      "s": 30000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa tươi tiệt trùng TH True Milk vị dâu lốc 4 hộp",
+      "s": 30000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau câu giòn agar-agar con cá dẻo gói 25g",
+      "s": 30000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rong biển ăn liền vị truyền thống Hàn Quốc lốc 3 gói",
+      "s": 29000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh dừa nướng Quảng Nam đặc sản hộp 12 gói",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột quế thơm nguyên chất Yên Bái túi 100g",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường cát trắng tinh luyện Biên Hòa túi 1kg",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mắm ruốc Huế xào sả ớt hũ 250g thơm ngon",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Rong biển ăn liền vị truyền thống lốc 3 gói",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu đen xanh lòng hạt mẩy dẻo bùi túi 500g",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh phồng sữa Bến Tre vị sầu riêng túi 10 bánh",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột nổi nở bánh Baking Powder Alsa gói lớn 100g",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt điều rang tỏi ớt lá chanh gói nhỏ 100g",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt đậu đỏ sấy giòn tẩm gia vị ăn liền gói 200g",
+      "s": 28000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hạt hướng dương vị dừa thơm béo Chacha gói 130g",
+      "s": 26000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sốt mayonnaise ngọt béo Kewpie chai 130g",
+      "s": 26000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Trà sâm dứa Đà Nẵng thơm mát gói 350g",
+      "s": 25000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Muối tôm Tây Ninh hảo hạng chấm trái cây hũ 150g",
+      "s": 25000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh bao chay hương lá dứa gói 10 chiếc đông lạnh",
+      "s": 25000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hành tỏi băm sẵn ngâm dầu đặc sản Lý Sơn hũ",
+      "s": 25000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột mì làm bánh bông lan chuyên dụng Meizan gói 1kg",
+      "s": 25000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước tăng lực Redbull Thái Lan lon vàng 250ml",
+      "s": 24000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì trộn tương đen Samyang gà cay khô sốt sền sệt",
+      "s": 24000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sườn non chay Meizan từ đậu nành nguyên chất gói 150g",
+      "s": 24000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Khoai tây chiên Lay's vị tự nhiên gói 95g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Đường phèn Biên Hòa tinh khiết túi 500g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Dầu hào Maggi đậm đà chai thủy tinh 350g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Mì trộn tương đen Samyang Hàn Quốc gói 140g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Miến lươn ăn liền Nghệ An chuẩn vị gói",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh canh khô Huế dai dẻo túi 500g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Pate chay đóng hộp ăn liền Vissan hộp thiếc 150g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột bánh rán pha sẵn Ajinomoto vị truyền thống gói 200g",
+      "s": 22000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước khoáng có ga Vĩnh Hảo chanh muối chai 500ml",
+      "s": 18000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Hũ Sa tế tôm cay nồng Cholimex 150g",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Muối hảo hảo súp tôm cay chấm vắt mì cực đã hũ 120g",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cháo thịt bằm tươi ngon cháo sen Minh Trung lon",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Muối sả chay Tây Ninh hũ 150g chấm rau củ cực đã",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột làm bánh xèo chay nước cốt dừa Meizan gói 400g",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột làm bánh cuốn Meizan pha sẵn gói tiện lợi 400g",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Vụn dừa nướng thơm giòn béo ngậy gói 100g làm trà sữa",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột bánh lọt lá dứa thơm ngon dai dẻo gói 400g",
+      "s": 18000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Chai Nước tương Chinsu tỏi ớt đậm vị 250ml",
+      "s": 16000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Tương ớt Chinsu chai 250g cay ngon bùng vị",
+      "s": 15000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Cá nục sốt cà chua Ba Cô Gái hộp thiếc 155g",
+      "s": 15000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bánh mì chay kẹp pate nấm rau thơm nóng hổi",
+      "s": 15000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Nước sâm bí đao hạt chia giải nhiệt chai 500ml",
+      "s": 15000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau câu giòn xi măng làm thạch dai giòn gói 25g",
+      "s": 15000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột chiên xù Meizan giòn rụm gói 200g",
+      "s": 14000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Giấm gạo lên men Lisa chai 250ml chua thanh",
+      "s": 12000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ống vani thơm làm bánh ngọt chè ngọt vỉ 10 ống",
+      "s": 12000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Sữa tươi tiệt trùng Vinamilk 100% có đường bịch 220ml",
+      "s": 8000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Ngũ vị hương hiệu Con Nai nấu bò kho gói 5g",
+      "s": 8000,
+      "c": 2,
+      "cat": "🏷️ Khác"
+    },
+    {
+      "n": "Bột rau câu dẻo vị dừa pha sẵn gói 10g",
+      "s": 8000,
+      "c": 1,
+      "cat": "🏷️ Khác"
+    }
+  ]
+}

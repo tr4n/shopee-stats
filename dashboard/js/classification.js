@@ -251,7 +251,7 @@ async function getDashCatSession() {
     if (!isAvail) return null;
     await initializeCategories();
     const categoriesDesc = _categoriesData.categories.map(cat =>
-      `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚 ]/g, '')}`
+      `${cat.id}=${cat.name.replace(/[🎯💄👗💻🏠💪📚🍔 ]/g, '')}`
     ).join(', ');
     _dashCatSession = await createAISession({
       initialPrompts: [{

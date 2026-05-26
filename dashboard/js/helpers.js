@@ -74,7 +74,7 @@ const LEGACY_CAT_NAMES = {
   '11000004': '👗 Thời Trang Nữ',
   '11000006': '🏠 Nhà Cửa & Đời Sống',
   '11000007': '💊 Sức Khỏe & Làm Đẹp',
-  '11000010': '🍜 Thực Phẩm & Đồ Uống',
+  '11000010': '🍔 Bách hóa & Ẩm thực',
   '11000011': '📚 Sách & Văn Phòng',
   '11000008': '⚽ Thể Thao & Du Lịch',
   '11000005': '🧸 Đồ Trẻ Em & Đồ Chơi',
