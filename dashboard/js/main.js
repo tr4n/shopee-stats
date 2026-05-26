@@ -1017,7 +1017,8 @@ function setupDashboardRatingCard(d) {
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
       2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on the emotional profile, vibe, and consumer personality of the user during Year ${yr} (e.g. why they had a peak in ${maxMonthName}).
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
+      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1062,7 +1063,8 @@ function setupDashboardRatingCard(d) {
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
       2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional state, lifestyle, and consumer personality traits.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
+      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1089,7 +1091,8 @@ function setupDashboardRatingCard(d) {
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
       2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional profile, shopping destiny, and lifestyle vibe.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.`;
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.
+      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
 
       enrichWithAI(
         "insight-yearly",
@@ -1203,7 +1206,8 @@ function setupDashboardRatingCard(d) {
         Rules:
         1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
         2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on their lifestyle archetype, spending personality, and vibes.
-        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`,
+        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
+        4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`,
         cacheKey,
       );
     }
@@ -1238,7 +1242,8 @@ function setupDashboardRatingCard(d) {
       Rules:
       1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
       2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional connection, vibes, and consumer habits.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`;
+      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
+      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
 
       enrichWithAI(
         "insight-categories",
@@ -1474,7 +1479,8 @@ function setupDashboardRatingCard(d) {
         Rules:
         1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
         2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on decoding their lifestyle, hobbies, consumer soul, and personality traits.
-        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.`,
+        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
+        4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`,
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
