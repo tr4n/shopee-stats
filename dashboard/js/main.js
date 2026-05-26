@@ -501,14 +501,23 @@ function setupSupportButton(d) {
       const info = (() => {
         const ua = navigator.userAgent;
         let browser = "Unknown";
-        if (ua.includes("Edg")) browser = "Edge";
+        if (ua.includes("CocCoc")) browser = "Cốc Cốc";
+        else if (ua.includes("OPR") || ua.includes("Opera")) browser = "Opera";
+        else if (ua.includes("Edg")) browser = "Edge";
         else if (ua.includes("Chrome")) browser = "Chrome";
         else if (ua.includes("Firefox")) browser = "Firefox";
-        else if (ua.includes("Safari")) browser = "Safari";
+        else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+
+        let os = "Unknown";
+        if (ua.includes("Windows")) os = "Windows";
+        else if (ua.includes("Macintosh") || ua.includes("Mac OS X")) os = "macOS";
+        else if (ua.includes("Linux")) os = "Linux";
+        else if (ua.includes("Android")) os = "Android";
+        else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
 
         return {
           browser: browser,
-          os: navigator.platform || "Unknown",
+          os: os,
           screen: `${window.screen.width}x${window.screen.height}`,
           dpr: window.devicePixelRatio || 1,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
@@ -518,7 +527,7 @@ function setupSupportButton(d) {
             d && d.summary
               ? `${d.summary.total_orders} đơn - ${d.summary.total_spend}đ`
               : "Unknown",
-          chromeAI: typeof window.ai !== "undefined" ? "Yes" : "No",
+          chromeAI: typeof chromeAISupportStatus !== "undefined" ? chromeAISupportStatus : "Không rõ",
           extVersion:
             typeof chrome !== "undefined" &&
             chrome.runtime &&
