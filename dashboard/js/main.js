@@ -970,24 +970,24 @@ function setupDashboardRatingCard(d) {
         .sort((a, b) => Number(a[0]) - Number(b[0]))
         .filter(([, v]) => v > 0);
 
-      const MONTH_NAMES_EN = [
+      const MONTH_NAMES_VN = [
         "",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
       ];
       const monthBreakdown = monthEntries
         .map(
-          ([m, v]) => `${MONTH_NAMES_EN[m] || "Month " + m}: ${fmtVND(v)} VND`,
+          ([m, v]) => `${MONTH_NAMES_VN[m] || "Tháng " + m}: ${fmtVND(v)}`,
         )
         .join(", ");
       const activeMonths = monthEntries.length;
@@ -1001,12 +1001,12 @@ function setupDashboardRatingCard(d) {
           maxMonth = m;
         }
       }
-      const maxMonthName = MONTH_NAMES_EN[maxMonth] || `Month ${maxMonth}`;
+      const maxMonthName = MONTH_NAMES_VN[maxMonth] || `Tháng ${maxMonth}`;
 
       const contextLines = [
-        `Year ${yr}: total spend ${fmtVND(yearData.t || 0)} VND across ${fmtNum(yearData.o || 0)} orders, average of ${fmtVND(avgPerOrder)} VND per order.`,
-        `Monthly breakdown: ${monthBreakdown || "no data"}.`,
-        `Peak spend month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND).`,
+        `Năm ${yr}: tổng chi tiêu ${fmtVND(yearData.t || 0)} qua ${fmtNum(yearData.o || 0)} đơn hàng, trung bình mỗi đơn ${fmtVND(avgPerOrder)}.`,
+        `Biến động các tháng: ${monthBreakdown || "không có dữ liệu"}.`,
+        `Tháng đỉnh điểm: ${maxMonthName} (chi tiêu nhiều nhất: ${fmtVND(maxMonthVal)}).`,
       ];
 
       const specificPrompt = `Dữ liệu đầu vào:
@@ -1034,24 +1034,24 @@ function setupDashboardRatingCard(d) {
         0,
       );
 
-      const MONTH_NAMES_EN = [
+      const MONTH_NAMES_VN = [
         "",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
       ];
-      const enMonth = MONTH_NAMES_EN[Number(monthStr)] || `Month ${monthStr}`;
+      const vnMonthName = MONTH_NAMES_VN[Number(monthStr)] || `Tháng ${monthStr}`;
 
-      const context = `Month ${enMonth}/${year}: total spend ${fmtVND(monthTotal)} VND across ${totalItemsCount} purchases.`;
+      const context = `Chi tiêu trong ${vnMonthName} năm ${year}: tổng tiền ${fmtVND(monthTotal)} qua ${totalItemsCount} lần mua sản phẩm.`;
 
       const specificPrompt = `Dữ liệu đầu vào:
       - Thời gian: Tháng ${monthStr} năm ${year}.
@@ -1073,7 +1073,7 @@ function setupDashboardRatingCard(d) {
       const totalSaved = d.s || 0;
       const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
 
-      const context = `All-time Shopee spend overview: total spend of ${fmtVND(totalSpend)} VND across ${fmtNum(totalOrders)} orders. Saved ${fmtVND(totalSaved)} VND from coupons (${savePct}%).`;
+      const context = `Tổng quan chi tiêu Shopee trọn đời: tổng số tiền ${fmtVND(totalSpend)} qua ${fmtNum(totalOrders)} đơn hàng. Đã tiết kiệm được ${fmtVND(totalSaved)} nhờ áp dụng voucher giảm giá (${savePct}%).`;
 
       const specificPrompt = `Dữ liệu đầu vào:
       - Tổng quan: Chi tiêu trọn đời trên Shopee.
@@ -1166,7 +1166,7 @@ function setupDashboardRatingCard(d) {
     function triggerCategoryAIInsight(cs, ti, total, cacheKey, year) {
       const activeYear = year || "all";
       const periodText =
-        activeYear === "all" ? "all-time" : `year ${activeYear}`;
+        activeYear === "all" ? "toàn bộ thời gian" : `năm ${activeYear}`;
       const filteredCs = (cs || []).filter(
         (c) => c.name !== "🏷️ Khác" && c.name !== "Khác",
       );
@@ -1175,7 +1175,7 @@ function setupDashboardRatingCard(d) {
       const catLines = filteredCs
         .map((c) => {
           const pct = Math.round((c.s / analyzedTotal) * 100);
-          return `${c.name}: ${fmtVND(c.s)} VND (${pct}%, ${c.c} purchases)`;
+          return `${c.name}: chi ${fmtVND(c.s)} (${pct}%, mua ${c.c} lần)`;
         })
         .join("; ");
 
@@ -1185,7 +1185,7 @@ function setupDashboardRatingCard(d) {
 
       enrichWithAI(
         "insight-categories",
-        `Category breakdown (${periodText}): ${catLines}.`,
+        `Phân bổ chi tiêu theo danh mục (${periodText}): ${catLines}.`,
         `Dữ liệu đầu vào:
         - Danh mục chi tiêu nhiều nhất: "${topCategory.name}".
         
@@ -1213,11 +1213,11 @@ function setupDashboardRatingCard(d) {
 
       const overallText =
         overallTotal > 0
-          ? ` (representing ${Math.round((catTotal / overallTotal) * 100)}% of overall spend)`
+          ? ` (chiếm ${Math.round((catTotal / overallTotal) * 100)}% tổng chi tiêu)`
           : "";
-      const periodText = year === "all" ? "all-time" : `year ${year}`;
+      const periodText = year === "all" ? "toàn bộ thời gian" : `năm ${year}`;
 
-      const context = `Category "${catName}" (${periodText}): spent ${fmtVND(catTotal)} VND${overallText} across ${catCount} purchases.`;
+      const context = `Danh mục "${catName}" trong ${periodText}: đã chi ${fmtVND(catTotal)}${overallText} qua ${catCount} lần mua.`;
 
       const specificPrompt = `Dữ liệu đầu vào:
       - Danh mục cụ thể: "${catName}".
@@ -1452,7 +1452,7 @@ function setupDashboardRatingCard(d) {
       const itemNames = top10.map((i) => `"${i.n}"`).join(", ");
       enrichWithAI(
         "insight-items",
-        `Most purchased items: ${itemNames}.`,
+        `Sản phẩm mua nhiều nhất: ${itemNames}.`,
         `Dữ liệu đầu vào:
         - Danh sách sản phẩm mua nhiều nhất: ${itemNames}.
         
