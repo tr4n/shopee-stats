@@ -1009,16 +1009,11 @@ function setupDashboardRatingCard(d) {
         `Peak spend month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND).`,
       ];
 
-      const specificPrompt = `Shopee spending data for Year ${yr}:
-      - Total spending: ${fmtVND(yearData.t || 0)} VND
-      - Total orders: ${fmtNum(yearData.o || 0)}
-      - Peak spending month: ${maxMonthName} (${fmtVND(maxMonthVal)} VND)
-      Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") regarding the user's shopping destiny, personality, and shopping vibes during Year ${yr}, especially commenting on their massive peak in ${maxMonthName}.
-      Rules:
-      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on the emotional profile, vibe, and consumer personality of the user during Year ${yr} (e.g. why they had a peak in ${maxMonthName}).
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
-      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
+      const specificPrompt = `Dữ liệu đầu vào:
+      - Chi tiêu trong năm ${yr}.
+      - Tháng chi nhiều tiền nhất: ${maxMonthName}.
+      
+      Yêu cầu: Hãy phán một quẻ bói bóc phốt lý do tại sao khổ chủ lại chốt đơn điên cuồng vào ${maxMonthName}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1058,13 +1053,10 @@ function setupDashboardRatingCard(d) {
 
       const context = `Month ${enMonth}/${year}: total spend ${fmtVND(monthTotal)} VND across ${totalItemsCount} purchases.`;
 
-      const specificPrompt = `Shopee shopping data for ${enMonth}/${year}: Total spend of ${fmtVND(monthTotal)} VND across ${totalItemsCount} purchases.
-      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality and mood during ${enMonth}/${year} under a GenZ spiritual/personality lens.
-      Rules:
-      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional state, lifestyle, and consumer personality traits.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
-      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
+      const specificPrompt = `Dữ liệu đầu vào:
+      - Thời gian: Tháng ${monthStr} năm ${year}.
+      
+      Yêu cầu: Hãy phán một quẻ bói cực vui vẻ về tâm trạng mua sắm và bản tính tiêu tiền của khổ chủ trong Tháng ${monthStr}/${year}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
 
       enrichWithAI(
         "insight-monthly",
@@ -1083,16 +1075,10 @@ function setupDashboardRatingCard(d) {
 
       const context = `All-time Shopee spend overview: total spend of ${fmtVND(totalSpend)} VND across ${fmtNum(totalOrders)} orders. Saved ${fmtVND(totalSaved)} VND from coupons (${savePct}%).`;
 
-      const specificPrompt = `Shopee spending overview data:
-      - Total spend: ${fmtVND(totalSpend)} VND
-      - Total orders: ${fmtNum(totalOrders)}
-      - Amount saved: ${fmtVND(totalSaved)} VND (${savePct}% of original prices)
-      Task: Perform a witty, cosmic fortune-telling reading ("gieo quẻ") and decode the user's lifetime shopping destiny, personality, and vibes under a GenZ spiritual lens.
-      Rules:
-      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional profile, shopping destiny, and lifestyle vibe.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff too many trendy slang words; keep the sentence flow natural and smooth.
-      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
+      const specificPrompt = `Dữ liệu đầu vào:
+      - Tổng quan: Chi tiêu trọn đời trên Shopee.
+      
+      Yêu cầu: Gieo một quẻ bói cuộc đời (lifetime destiny) về duyên nợ chốt đơn của người dùng trên Shopee từ trước đến nay dưới góc nhìn bói toán vũ trụ. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
 
       enrichWithAI(
         "insight-yearly",
@@ -1200,14 +1186,10 @@ function setupDashboardRatingCard(d) {
       enrichWithAI(
         "insight-categories",
         `Category breakdown (${periodText}): ${catLines}.`,
-        `Spending category breakdown for ${periodText}: ${catLines}.
-        Highest spend category: "${topCategory.name}" (${fmtVND(topCategory.s)} VND, occupying ${topPct}%).
-        Task: Perform a witty, dramatic, and humorous spiritual fortune-telling reading ("gieo quẻ") regarding the user's spending personality, lifestyle archetype, or 'spiritual system' ("hệ tâm linh") based on this breakdown.
-        Rules:
-        1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-        2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on their lifestyle archetype, spending personality, and vibes.
-        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
-        4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`,
+        `Dữ liệu đầu vào:
+        - Danh mục chi tiêu nhiều nhất: "${topCategory.name}".
+        
+        Yêu cầu: Hãy phán xem hệ tâm linh ("hệ chữa lành", "hệ công nghệ", "hệ đẹp đẽ"...) của người dùng là gì dựa trên danh mục đầu bảng "${topCategory.name}" này. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`,
         cacheKey,
       );
     }
@@ -1237,13 +1219,10 @@ function setupDashboardRatingCard(d) {
 
       const context = `Category "${catName}" (${periodText}): spent ${fmtVND(catTotal)} VND${overallText} across ${catCount} purchases.`;
 
-      const specificPrompt = `Spending data for Category "${catName}" during ${periodText}: Spent ${fmtVND(catTotal)} VND across ${catCount} purchases.
-      Task: Perform a funny spiritual fortune-telling reading and decode the user's spending personality or 'trial' ("kiếp nạn") regarding this specific category "${catName}" (e.g., buying for healing, led by spiritual voices/vũ trụ gửi tín hiệu).
-      Rules:
-      1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-      2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Focus purely on decoding their emotional connection, vibes, and consumer habits.
-      3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
-      4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`;
+      const specificPrompt = `Dữ liệu đầu vào:
+      - Danh mục cụ thể: "${catName}".
+      
+      Yêu cầu: Gieo quẻ bói về "kiếp nạn" hoặc "duyên nợ" của người dùng đối với riêng danh mục "${catName}" này (ví dụ: mua để chữa lành, bị thế lực vô hình dẫn lối...). Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
 
       enrichWithAI(
         "insight-categories",
@@ -1474,13 +1453,10 @@ function setupDashboardRatingCard(d) {
       enrichWithAI(
         "insight-items",
         `Most purchased items: ${itemNames}.`,
-        `List of your top purchased items: ${itemNames}.
-        Task: Perform a witty and funny spiritual fortune-telling reading ("gieo quẻ") and decode the user's spending personality or 'trial' ("kiếp nạn") driven by these purchased items under a GenZ spiritual lens.
-        Rules:
-        1. Write the response in VIETNAMESE. Keep it concise (maximum 2 sentences).
-        2. CRITICAL: Do NOT mention or output any numbers, exact currency/VND values, or specific product names in the final response. Keep the focus entirely on decoding their lifestyle, hobbies, consumer soul, and personality traits.
-        3. Write in a very natural, casual, and witty tone. Do NOT overstuff slang.
-        4. CRITICAL: Do NOT use or mix English words (e.g. do NOT use "chill", "vibe", "simp", "save", "glow up", "good", etc.). Every word in the response must be in 100% natural, pure Vietnamese.`,
+        `Dữ liệu đầu vào:
+        - Danh sách sản phẩm mua nhiều nhất: ${itemNames}.
+        
+        Yêu cầu: Dựa vào những món đồ "ruột" này, hãy bóc phốt tính cách, lối sống và "kiếp nạn" mua sắm của khổ chủ dưới phong thái của một thầy bói vui tính. Tuyệt đối tuân thủ quy tắc không liệt kê lại tên sản phẩm hay con số cụ thể nào trong câu phán.`,
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear
