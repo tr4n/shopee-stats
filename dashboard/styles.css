@@ -178,6 +178,7 @@ body {
 /* ── Views ───────────────────────────────────── */
 .view {
   display: none;
+  padding-bottom: 48px;
 }
 
 .view.active {
