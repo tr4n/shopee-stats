@@ -1073,12 +1073,50 @@ function setupDashboardRatingCard(d) {
       const totalSaved = d.s || 0;
       const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
 
-      const context = `Tổng quan chi tiêu Shopee trọn đời: tổng số tiền ${fmtVND(totalSpend)} qua ${fmtNum(totalOrders)} đơn hàng. Đã tiết kiệm được ${fmtVND(totalSaved)} nhờ áp dụng voucher giảm giá (${savePct}%).`;
+      const yearEntries = Object.entries(d.yd || {})
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .filter(([, v]) => v.t > 0);
+
+      const yearlyBreakdown = yearEntries
+        .map(([y, v]) => `Năm ${y} chi ${fmtVND(v.t)}`)
+        .join(", ");
+
+      // Tìm năm chi nhiều tiền nhất và xu hướng
+      let maxYear = null;
+      let maxYearVal = 0;
+      for (const [y, v] of yearEntries) {
+        if (v.t > maxYearVal) {
+          maxYearVal = v.t;
+          maxYear = y;
+        }
+      }
+
+      let trendText = "";
+      if (yearEntries.length >= 2) {
+        const firstYear = yearEntries[0][0];
+        const lastYear = yearEntries[yearEntries.length - 1][0];
+        const firstVal = yearEntries[0][1].t;
+        const lastVal = yearEntries[yearEntries.length - 1][1].t;
+        if (lastVal > firstVal) {
+          trendText = `Xu hướng chi tiêu ngày càng tăng vọt qua các năm từ ${firstYear} đến ${lastYear} (bị Shopee thao túng tâm lý ngày càng nặng nề).`;
+        } else if (lastVal < firstVal) {
+          trendText = `Xu hướng chi tiêu giảm dần từ ${firstYear} đến ${lastYear} (ví tiền đang dần tìm lại sự bình yên, bắt đầu biết kiểm soát cảm xúc).`;
+        } else {
+          trendText = `Mức chi tiêu duy trì ổn định qua các năm.`;
+        }
+      }
+
+      const context = `Tổng quan chi tiêu trọn đời: tổng chi ${fmtVND(totalSpend)} qua ${fmtNum(totalOrders)} đơn.
+      Biến động qua các năm: ${yearlyBreakdown || "chưa có dữ liệu"}.
+      Năm đỉnh điểm phá ví: Năm ${maxYear || "chưa rõ"} (${fmtVND(maxYearVal)}).
+      ${trendText ? `Nhận định xu hướng: ${trendText}` : ""}`;
 
       const specificPrompt = `Dữ liệu đầu vào:
-      - Tổng quan: Chi tiêu trọn đời trên Shopee.
+      - Chi tiêu trọn đời và biến động qua các năm.
+      - Năm phá ví nhiều nhất: Năm ${maxYear}.
+      ${trendText ? `- Xu hướng chi tiêu: ${trendText}` : ""}
       
-      Yêu cầu: Gieo một quẻ bói cuộc đời (lifetime destiny) về duyên nợ chốt đơn của người dùng trên Shopee từ trước đến nay dưới góc nhìn bói toán vũ trụ. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
+      Yêu cầu: Hãy phán một quẻ bói cuộc đời về duyên nợ chốt đơn của người dùng. Hãy đọc vị và bình luận dí dỏm về xu hướng chi tiêu qua các năm của họ (ví dụ: ngày càng bị lún sâu và thao túng tâm lý bởi vòng xoáy chốt đơn, hay đã dần giác ngộ và tiết chế hơn), đồng thời chỉ ra "kiếp nạn phá ví" lớn nhất của họ ở Năm ${maxYear}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số cụ thể nào.`;
 
       enrichWithAI(
         "insight-yearly",
