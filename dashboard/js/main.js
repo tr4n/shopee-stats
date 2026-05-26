@@ -602,7 +602,7 @@ function setupSupportButton(d) {
         };
 
         const WEBAPP_URL =
-          "https://script.google.com/macros/s/AKfycbzr4mbH-klsidPofxeTYKup6TJ4CEVDeqvvbkAv6XTzCZFX0YGDCw0iY5ktro_5HGOt/exec";
+          "https://script.google.com/macros/s/AKfycbyy797dN68snuKJli45jVCaxjLGf7M8VIZk9M-lC6zmlG2BEMihvi1Qp92OuXm8uRhm/exec";
 
         const response = await fetch(WEBAPP_URL, {
           method: "POST",
