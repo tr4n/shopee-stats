@@ -316,6 +316,28 @@ let chromeAISupportStatus = "Đang kiểm tra...";
 })();
 
 /* ── Support Modal ───────────────────────────── */
+function showSupportToast(msg, isError = false) {
+  let toast = document.getElementById("support-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "support-toast";
+    toast.style.cssText =
+      "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:10000;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s, bottom 0.3s;opacity:0;pointer-events:none;font-weight:500;";
+    document.body.appendChild(toast);
+  }
+  toast.style.background = isError
+    ? "var(--red, #ef4444)"
+    : "var(--primary, #26aa99)";
+  toast.innerHTML = msg;
+  // Trigger reflow
+  void toast.offsetWidth;
+  toast.style.opacity = "1";
+  toast.style.bottom = "30px";
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.bottom = "20px";
+  }, 3000);
+}
 function setupSupportButton(d) {
   const btn = document.getElementById("btn-support");
   const modal = document.getElementById("support-modal");
@@ -333,22 +355,21 @@ function setupSupportButton(d) {
     });
 
     sendBtn.addEventListener("click", async () => {
-      const statusEl = document.getElementById("support-status");
-      if (!statusEl) return;
-
       const lastSentStr = localStorage.getItem("shopee_support_last_sent");
       if (lastSentStr) {
         const lastSent = parseInt(lastSentStr, 10);
         if (Date.now() - lastSent < 60000) {
           const waitTime = Math.ceil((60000 - (Date.now() - lastSent)) / 1000);
-          statusEl.innerHTML = `<span style="color: var(--orange); font-weight: 600;">⏳ Bạn thao tác quá nhanh. Vui lòng thử lại sau ${waitTime} giây!</span>`;
+          showSupportToast(
+            `⏳ Bạn thao tác quá nhanh. Vui lòng thử lại sau ${waitTime} giây!`,
+            true,
+          );
           return;
         }
       }
 
       if (!d) {
-        statusEl.innerHTML =
-          '<span style="color: var(--red); font-weight: 600;">❌ Lỗi: Không tìm thấy dữ liệu!</span>';
+        showSupportToast("❌ Lỗi: Không tìm thấy dữ liệu!", true);
         return;
       }
 
@@ -362,17 +383,26 @@ function setupSupportButton(d) {
         else if (ua.includes("Chrome")) browser = "Chrome";
         else if (ua.includes("Firefox")) browser = "Firefox";
         else if (ua.includes("Safari")) browser = "Safari";
-        
+
         return {
           browser: browser,
           os: navigator.platform || "Unknown",
           screen: `${window.screen.width}x${window.screen.height}`,
           dpr: window.devicePixelRatio || 1,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
-          dataDate: d && d.ts ? new Date(d.ts).toLocaleString("vi-VN") : "Unknown",
-          summary: d && d.summary ? `${d.summary.total_orders} đơn - ${d.summary.total_spend}đ` : "Unknown",
+          dataDate:
+            d && d.ts ? new Date(d.ts).toLocaleString("vi-VN") : "Unknown",
+          summary:
+            d && d.summary
+              ? `${d.summary.total_orders} đơn - ${d.summary.total_spend}đ`
+              : "Unknown",
           chromeAI: typeof window.ai !== "undefined" ? "Yes" : "No",
-          extVersion: (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().version : "Unknown"
+          extVersion:
+            typeof chrome !== "undefined" &&
+            chrome.runtime &&
+            chrome.runtime.getManifest
+              ? chrome.runtime.getManifest().version
+              : "Unknown",
         };
       })();
       const deviceInfoStr = [
@@ -386,11 +416,8 @@ function setupSupportButton(d) {
         `Phiên bản Ext: ${info.extVersion}`,
       ].join("\n");
 
-      const origText = sendBtn.innerHTML;
       sendBtn.disabled = true;
-      sendBtn.innerHTML = "<span>⏳ Đang đóng gói dữ liệu...</span>";
-      statusEl.innerHTML =
-        '<span style="color: var(--primary); font-weight: 600;">Đang xử lý dữ liệu để gửi đi...</span>';
+      sendBtn.style.opacity = "0.7";
 
       try {
         const jsonStr = JSON.stringify(d);
@@ -445,9 +472,6 @@ function setupSupportButton(d) {
         }
         dataHash = Math.abs(dataHash).toString(16) + (d.ts || "0").toString(16);
 
-        statusEl.innerHTML =
-          '<span style="color: var(--primary); font-weight: 600;">🚀 Đang gửi dữ liệu lên hệ thống...</span>';
-
         const payload = {
           secret: "shopee_stats_anti_spam_secret_2026",
           time: new Date().toISOString(),
@@ -472,24 +496,20 @@ function setupSupportButton(d) {
 
         if (resText === "success") {
           localStorage.setItem("shopee_support_last_sent", Date.now());
-          statusEl.innerHTML =
-            '<span style="color: var(--green); font-weight: 600;">✅ Phản hồi đã được gửi thành công! Cảm ơn bạn.</span>';
           if (descEl) descEl.value = "";
-          setTimeout(() => {
-            modal.classList.remove("active");
-            statusEl.innerHTML = "";
-          }, 3000);
+          modal.classList.remove("active");
+          showSupportToast("🎉 Cảm ơn bạn! Phản hồi đã được gửi thành công.");
         } else if (resText === "duplicate") {
-          statusEl.innerHTML =
-            '<span style="color: var(--orange); font-weight: 600;">⚠️ Phản hồi này đã được ghi nhận trước đó.</span>';
+          modal.classList.remove("active");
+          showSupportToast("⚠️ Phản hồi này đã được ghi nhận trước đó.", true);
         } else {
           throw new Error(resText || "Lỗi không xác định từ server.");
         }
       } catch (e) {
-        statusEl.innerHTML = `<span style="color: var(--red); font-weight: 600;">❌ Gửi thất bại: ${e.message}</span>`;
+        showSupportToast(`❌ Gửi thất bại: ${e.message}`, true);
       } finally {
         sendBtn.disabled = false;
-        sendBtn.innerHTML = origText;
+        sendBtn.style.opacity = "1";
       }
     });
   }
