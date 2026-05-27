@@ -40,20 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let tipsInterval = null;
 
   const LOADING_TIPS = [
-    "Shopper đêm muộn: Các nghiên cứu tâm lý chỉ ra rằng những hóa đơn phát sinh sau 23h thường mang tính cảm xúc cao, nhằm giải tỏa căng thẳng.",
-    "Sức mạnh chu kỳ: Việc mua sắm định kỳ vào những ngày cố định trong tháng chứng tỏ bạn có lối sống tổ chức và tính kỷ luật cao.",
-    "Đầu tư trải nghiệm: Chi tiêu cho sách, khóa học hay hoạt động thể chất cho thấy bạn luôn ưu tiên phát triển bản thân trong dài hạn.",
-    "Tư duy thực tế: Việc ưu tiên mua combo hoặc các sản phẩm dung tích lớn tiết lộ bộ óc logic và khả năng kiểm soát tài chính tốt.",
-    "Thợ săn ưu đãi: Kiên nhẫn thu thập đủ mã giảm giá thể hiện sự nhạy bén và mong muốn có được cảm giác 'chiến thắng' khi mua sắm.",
-    "Cái giá tiện lợi: Sẵn sàng trả cao hơn để nhận hàng nhanh chứng tỏ bạn quyết đoán, coi trọng thời gian và hiệu quả công việc.",
-    "Trung thành thương hiệu: Chỉ sử dụng sản phẩm từ một hãng cố định tiết lộ tính cách trân trọng sự an toàn và ổn định.",
-    "Đam mê đổi mới: Thích thử nghiệm những sản phẩm mới ra mắt cho thấy bạn có độ tò mò cao và luôn muốn tìm kiếm trải nghiệm mới.",
-    "Tư duy trả thẳng: Ưu tiên thanh toán ngay thay vì trả góp cho thấy bạn muốn chủ động kiểm soát dòng tiền và ngại các ràng buộc.",
-    "Ví trống ảo: Ví điện tử làm giảm 'nỗi đau chi tiền' (pain of paying) giúp chốt đơn nhanh, trong khi COD đề cao tính chắc chắn.",
-    "Điểm yếu đêm muộn: Ý chí tự kiểm soát của não bộ giảm dần về cuối ngày, khiến giỏ hàng đêm muộn luôn dễ đầy hơn ban ngày.",
-    "Hiệu ứng mỏ neo: Nhìn thấy mức giá cũ bị gạch đi bên cạnh giá sale làm bạn cảm giác món đồ rẻ hơn thực tế dù chưa rõ giá trị thực.",
-    "Nỗi sợ bỏ lỡ (FOMO): Đồng hồ đếm ngược hay cảnh báo giới hạn kích thích vùng khẩn cấp của não, thúc giục bạn chốt đơn nhanh hơn.",
-    "An toàn riêng tư: Phân tích dữ liệu hoàn toàn cục bộ trên trình duyệt của bạn, cam kết bảo mật thông tin và không gửi về máy chủ."
+    "Chòm sao hao tài: Chốt đơn lúc 0h chính là biểu hiện của việc bị 'sao Quả Tạ' đè nặng, tiêu tiền để giải tỏa áp lực.",
+    "Thông điệp vũ trụ: Giỏ hàng đầy mà không mua là từ chối lộc trời. Nhưng chốt xong ví trống là vũ trụ thử thách bạn.",
+    "Hệ tâm linh săn sale: Gom đủ mã giảm giá chứng tỏ bạn có luân xa kiên trì cực mạnh và nhân duyên sâu đậm với thần tài.",
+    "Quẻ bói đêm muộn: Đơn chốt sau 23h thường là 'đơn nghiệp chướng' – mua bằng cảm xúc, trả giá bằng chiếc ví rỗng.",
+    "Luân xa ăn uống: Chi nhiều tiền ăn vặt chứng tỏ bạn đang dùng calo để xoa dịu tâm hồn và lấp đầy khoảng trống cảm xúc.",
+    "Năng lượng hệ hỏa: Đam mê sắm quần áo lấp lánh chứng tỏ bạn mang năng lượng hệ hỏa, thích tỏa sáng bất chấp ví kêu cứu.",
+    "Hội chứng gom combo: Mua combo nhiều món dù chỉ dùng một là do bị thao túng tâm lý, khiến thần tài cũng lắc đầu chịu thua.",
+    "Nghiệp ship hỏa tốc: Sẵn sàng trả tiền ship đắt đỏ để nhận hàng ngay thể hiện sự nóng nảy vô tri, ngại chờ đợi.",
+    "Hộ mệnh shop quen: Chỉ mua đồ ở một shop quen tiết lộ năng lượng khép kín, ngại thay đổi và sợ trải nghiệm lạ.",
+    "Giải hạn COD: Chọn thanh toán khi nhận hàng chính là cách trì hoãn hóa đơn, giúp bạn có vài ngày chuẩn bị tâm lý.",
+    "Mỏ neo tâm linh: Thấy giá gốc gạch đi giảm sâu làm bạn tưởng mình có lộc, thực chất ví tiền đang chuẩn bị bay màu.",
+    "Sao Thủy nghịch hành: Cứ mỗi kỳ nghịch hành là ví tiền lại điêu đứng vì những quyết định chốt đơn nhân danh 'chữa lành'.",
+    "Bảo mật tuyệt đối: Tiện ích chạy offline 100%, bảo mật dữ liệu tuyệt đối ngay trên thiết bị của bạn. An tâm trải nghiệm!"
   ];
 
   // === Run Lock ===
