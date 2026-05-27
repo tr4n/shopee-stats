@@ -697,26 +697,45 @@ function setupShareButtons(d) {
   let currentDataUrl = "";
 
   const getBeat = (t) => {
-    if (t <= 1000000) return 10;
-    if (t <= 3000000) return 25;
-    if (t <= 8000000) return 45;
-    if (t <= 20000000) return 65;
-    if (t <= 50000000) return 82;
-    if (t <= 100000000) return 93;
+    // CẬP NHẬT ĐỊNH KỲ (Cứ mỗi 6 tháng - Lần cuối: Tháng 5/2026)
+    // Nguồn dữ liệu tham khảo: Báo cáo TMĐT Việt Nam năm 2025/2026 (Metric, VECOM)
+    // Chi tiêu trung bình TMĐT đầu người khoảng 10.5M VNĐ/năm, trung vị khoảng 6.5M - 7M VNĐ/năm.
+    const thresholds = [
+      { max: 1500000, beat: 15 },    // Nhóm mua sắm trải nghiệm / cực ít
+      { max: 4000000, beat: 35 },    // Nhóm mua sắm thỉnh thoảng
+      { max: 7000000, beat: 50 },    // Ngưỡng trung vị (Median Shopper)
+      { max: 15000000, beat: 65 },   // Bắt đầu chi tiêu nhiều (Beat ~65% Shopee VN)
+      { max: 35000000, beat: 80 },   // Tín đồ mua sắm thực thụ
+      { max: 70000000, beat: 90 },   // Siêu cấp chốt đơn
+      { max: 120000000, beat: 95 },  // Khách hàng VIP
+      { max: 250000000, beat: 98 },  // Siêu VIP
+      { max: Infinity, beat: 99 }    // Whale / Cổ Đông Chiến Lược
+    ];
+    for (const item of thresholds) {
+      if (t <= item.max) return item.beat;
+    }
     return 99;
   };
 
   async function updatePreview() {
     if (!window.generateDashboardShareCard) return;
     const curYear = new Date().getFullYear();
-    const yearlySpend = d.yd && d.yd[curYear] ? d.yd[curYear].t : d.t;
+    const targetYear = currentOptions.year || curYear;
+    let yearlySpend = d.yd && d.yd[targetYear] ? d.yd[targetYear].t : d.t;
+    
+    // Extrapolate current year spending to get a fair percentile ranking
+    if (targetYear === curYear && d.yd && d.yd[curYear]) {
+      const monthsElapsed = new Date().getMonth() + 1;
+      yearlySpend = yearlySpend * (12 / monthsElapsed);
+    }
+
     const opts = {
       ...currentOptions,
       theme: themeSelect.value,
       hideAmount: hideAmountCb.checked,
       hideNames: hideNamesCb.checked,
       beat: getBeat(yearlySpend),
-      year: currentOptions.year || curYear,
+      year: targetYear,
     };
     previewImg.style.opacity = "0.5";
     try {

@@ -149,19 +149,44 @@ document.addEventListener('DOMContentLoaded', () => {
     return 3;
   }
 
-  // === Percentile ===
+  // === Percentile Configuration ===
+  // CẬP NHẬT ĐỊNH KỲ (Cứ mỗi 6 tháng - Lần cuối: Tháng 5/2026)
+  // Nguồn dữ liệu tham khảo: Báo cáo TMĐT Việt Nam năm 2025/2026 (Metric, VECOM)
+  // Chi tiêu trung bình TMĐT đầu người khoảng 10.5M VNĐ/năm, trung vị khoảng 6.5M - 7M VNĐ/năm.
   const PERCENTILE_THRESHOLDS = [
-    { max: 1000000, beat: 10 },
-    { max: 3000000, beat: 25 },
-    { max: 8000000, beat: 45 },
-    { max: 20000000, beat: 65 },
-    { max: 50000000, beat: 82 },
-    { max: 100000000, beat: 93 },
-    { max: Infinity, beat: 99 }
+    { max: 1500000, beat: 15 },    // Nhóm mua sắm trải nghiệm / cực ít
+    { max: 4000000, beat: 35 },    // Nhóm mua sắm thỉnh thoảng
+    { max: 7000000, beat: 50 },    // Ngưỡng trung vị (Median Shopper)
+    { max: 15000000, beat: 65 },   // Bắt đầu chi tiêu nhiều (Beat ~65% Shopee VN)
+    { max: 35000000, beat: 80 },   // Tín đồ mua sắm thực thụ
+    { max: 70000000, beat: 90 },   // Siêu cấp chốt đơn
+    { max: 120000000, beat: 95 },  // Khách hàng VIP
+    { max: 250000000, beat: 98 },  // Siêu VIP
+    { max: Infinity, beat: 99 }    // Whale / Cổ Đông Chiến Lược
   ];
   function getSpendingPercentile(annualSpent) {
     for (const t of PERCENTILE_THRESHOLDS) {
       if (annualSpent <= t.max) return t.beat;
+    }
+    return 99;
+  }
+
+  // === Monthly Percentile Configuration ===
+  // Tương đương hằng số PERCENTILE_THRESHOLDS nhưng chia cho 12 tháng để ước tính theo tháng.
+  const MONTHLY_PERCENTILE_THRESHOLDS = [
+    { max: 125000, beat: 15 },     // Nhóm mua sắm trải nghiệm / cực ít
+    { max: 333000, beat: 35 },     // Nhóm mua sắm thỉnh thoảng
+    { max: 583000, beat: 50 },     // Ngưỡng trung vị (Median Shopper)
+    { max: 1250000, beat: 65 },    // Bắt đầu chi tiêu nhiều (Beat ~65% Shopee VN)
+    { max: 2920000, beat: 80 },    // Tín đồ mua sắm thực thụ
+    { max: 5830000, beat: 90 },    // Siêu cấp chốt đơn
+    { max: 10000000, beat: 95 },   // Khách hàng VIP
+    { max: 20800000, beat: 98 },   // Siêu VIP
+    { max: Infinity, beat: 99 }    // Whale / Cổ Đông Chiến Lược
+  ];
+  function getMonthlyPercentile(monthlySpent) {
+    for (const t of MONTHLY_PERCENTILE_THRESHOLDS) {
+      if (monthlySpent <= t.max) return t.beat;
     }
     return 99;
   }
@@ -1040,11 +1065,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === Percentile ===
   function renderPercentile(yearlyStats) {
-    const curYear = new Date().getFullYear();
+    const now = new Date();
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth() + 1; // 1-12
+    const curMonthStr = String(curMonth);
+
     const annualSpent = yearlyStats[curYear]?.total?.totalSpent || 0;
+    const monthlySpent = yearlyStats[curYear]?.months?.[curMonthStr]?.totalSpent || 0;
+
     if (annualSpent > 0) {
-      const beat = getSpendingPercentile(annualSpent);
-      percentileTextEl.textContent = `Chi tiêu nhiều hơn ~${beat}% người dùng Shopee VN (ước tính ${curYear})`;
+      // 1. Extrapolate annual spent (e.g. if we are in May, multiply by 12/5)
+      const monthsElapsed = now.getMonth() + 1;
+      const extrapolatedAnnualSpent = annualSpent * (12 / monthsElapsed);
+      const annualBeat = getSpendingPercentile(extrapolatedAnnualSpent);
+
+      // 2. Calculate monthly beat
+      const monthlyBeat = getMonthlyPercentile(monthlySpent);
+
+      // 3. Format interesting comments/remarks
+      let rankComment = '';
+      if (annualBeat >= 90) {
+        rankComment = '🔥 Bạn thuộc hàng cao thủ mua sắm của năm!';
+      } else if (annualBeat >= 65) {
+        rankComment = '⚡ Chi tiêu năng động, chốt đơn không ngừng nghỉ.';
+      } else {
+        rankComment = '🌱 Mua sắm tiết kiệm, chi tiêu rất có kế hoạch.';
+      }
+
+      // Security Compliance: Assigning HTML constructed from safe local values
+      percentileTextEl.innerHTML = `
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px; font-weight: 700;">Ước tính xếp hạng</div>
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; text-align: left; font-size: 12px; color: var(--text-main);">
+          <span>Dự kiến cả năm ${curYear}:</span>
+          <span style="font-weight: 700; color: var(--primary);">Hơn ~${annualBeat}% người dùng</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; text-align: left; font-size: 12px; color: var(--text-main);">
+          <span>Tháng này (T${curMonth}):</span>
+          <span style="font-weight: 700; color: var(--primary);">Hơn ~${monthlyBeat}% người dùng</span>
+        </div>
+        <div style="font-size: 11px; font-style: italic; color: var(--green); font-weight: 600; text-align: center; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;">
+          ${rankComment}
+        </div>
+      `;
       percentileRowEl.classList.remove('hidden');
     } else {
       percentileRowEl.classList.add('hidden');
