@@ -40,18 +40,30 @@ document.addEventListener('DOMContentLoaded', () => {
   let tipsInterval = null;
 
   const LOADING_TIPS = [
-    "Chòm sao hao tài: Chốt đơn lúc 0h chính là biểu hiện của việc bị 'sao Quả Tạ' đè nặng, tiêu tiền để giải tỏa áp lực.",
-    "Thông điệp vũ trụ: Giỏ hàng đầy mà không mua là từ chối lộc trời. Nhưng chốt xong ví trống là vũ trụ thử thách bạn.",
-    "Hệ tâm linh săn sale: Gom đủ mã giảm giá chứng tỏ bạn có luân xa kiên trì cực mạnh và nhân duyên sâu đậm với thần tài.",
-    "Quẻ bói đêm muộn: Đơn chốt sau 23h thường là 'đơn nghiệp chướng' – mua bằng cảm xúc, trả giá bằng chiếc ví rỗng.",
-    "Luân xa ăn uống: Chi nhiều tiền ăn vặt chứng tỏ bạn đang dùng calo để xoa dịu tâm hồn và lấp đầy khoảng trống cảm xúc.",
-    "Năng lượng hệ hỏa: Đam mê sắm quần áo lấp lánh chứng tỏ bạn mang năng lượng hệ hỏa, thích tỏa sáng bất chấp ví kêu cứu.",
-    "Hội chứng gom combo: Mua combo nhiều món dù chỉ dùng một là do bị thao túng tâm lý, khiến thần tài cũng lắc đầu chịu thua.",
-    "Nghiệp ship hỏa tốc: Sẵn sàng trả tiền ship đắt đỏ để nhận hàng ngay thể hiện sự nóng nảy vô tri, ngại chờ đợi.",
-    "Hộ mệnh shop quen: Chỉ mua đồ ở một shop quen tiết lộ năng lượng khép kín, ngại thay đổi và sợ trải nghiệm lạ.",
-    "Giải hạn COD: Chọn thanh toán khi nhận hàng chính là cách trì hoãn hóa đơn, giúp bạn có vài ngày chuẩn bị tâm lý.",
-    "Mỏ neo tâm linh: Thấy giá gốc gạch đi giảm sâu làm bạn tưởng mình có lộc, thực chất ví tiền đang chuẩn bị bay màu.",
-    "Sao Thủy nghịch hành: Cứ mỗi kỳ nghịch hành là ví tiền lại điêu đứng vì những quyết định chốt đơn nhân danh 'chữa lành'.",
+    "Tần số chốt đơn 0h: Việc tìm kiếm những món đồ lúc đêm muộn thường là cách bạn trò chuyện và xoa dịu phần nội tâm nhạy cảm sau một ngày dài.",
+    "Thông điệp vũ trụ: Giỏ hàng đầy ắp không chỉ là ý định mua sắm, mà là nơi bạn gửi gắm những hy vọng và kế hoạch cho một ngày mai tốt đẹp hơn.",
+    "Hệ tâm linh săn sale: Kiên nhẫn tích lũy từng ưu đãi thể hiện bản năng trân quý thành quả lao động và mong muốn tối ưu hóa mọi giá trị cuộc sống.",
+    "Tần số đơn đêm muộn: Bạn thường có xu hướng lo lắng cho người khác trước, và chốt đơn đêm muộn là lúc bạn tập trung chăm sóc chính mình.",
+    "Luân xa ăn uống: Đầu tư cho ẩm thực cho thấy bạn trân trọng sự kết nối của các giác quan và coi ăn ngon là liều thuốc chữa lành tinh tế nhất.",
+    "Năng lượng hệ hỏa: Thích trang phục cá tính tiết lộ khát vọng tự do, khao khát khẳng định cái tôi và không muốn bị đóng khung bởi định kiến.",
+    "Tư duy gom combo: Xu hướng mua combo cho thấy bạn coi trọng sự trọn vẹn, luôn tìm kiếm sự an tâm trong những giải pháp lâu dài và toàn diện.",
+    "Hệ ship hỏa tốc: Coi trọng tốc độ phản ánh phong cách sống quyết đoán, trân trọng thời gian và mong muốn nhìn thấy kết quả nỗ lực ngay lập tức.",
+    "Duyên phận shop quen: Chỉ mua đồ ở shop quen phản ánh tâm lý coi trọng sự tin cậy, ưu tiên chiều sâu và tính cam kết trong các mối quan hệ.",
+    "Phương pháp COD: Nhận hàng mới trả tiền phản ánh sự cẩn trọng của một người từng trải, luôn muốn kiểm chứng thực tế trước khi trao niềm tin.",
+    "Đam mê trải nghiệm mới: Thích thử sản phẩm độc lạ chứng tỏ bạn sở hữu tư duy mở, khao khát học hỏi và coi cuộc đời là những khám phá không giới hạn.",
+    "Sao Thủy nghịch hành: Những lúc dừng lại nhìn lại chi tiêu chính là thời điểm bạn nhìn lại chặng đường đã qua để thấu hiểu bản thân sâu sắc hơn.",
+    "Năng lượng hệ thổ: Thói quen đầu tư vào đồ trang trí nhà cửa phản ánh nhu cầu xây dựng một 'ốc đảo' an toàn để tái tạo năng lượng tinh thần.",
+    "Luân xa tri thức: Chi tiêu cho sách và học tập chứng tỏ bạn luôn hướng thượng, coi trọng sự phát triển trí tuệ và khát khao tự hoàn thiện bản thân.",
+    "Luân xa sức khỏe: Tìm mua đồ tập thể thao hay thực phẩm bổ dưỡng cho thấy bạn bắt đầu lắng nghe cơ thể, trân trọng sinh mệnh sau những bộn bề.",
+    "Hệ mua sắm tặng quà: Chọn quà cho người thân yêu chứng tỏ bạn có tâm hồn ấm áp, tìm thấy hạnh phúc lớn nhất khi mang lại niềm vui cho người khác.",
+    "Giải mã giỏ hàng: Chủ động lọc bớt các món đồ trong giỏ phản ánh tinh thần dũng cảm, biết buông bỏ những thứ không thực sự phù hợp với mình.",
+    "Năng lượng hệ thủy: Thích sản phẩm thư giãn như nến thơm, trà hoa tiết lộ tâm hồn nhạy cảm của bạn đang cần sự dịu dàng và cân bằng cảm xúc.",
+    "Tần số mua định kỳ: Mua sắm có kế hoạch cụ thể chứng tỏ bạn có kỷ luật tự giác cao, chủ động làm chủ cuộc sống và ít bị dao động bởi ngoại cảnh.",
+    "Tư duy tinh gọn: Thích tìm các dụng cụ thông minh thể hiện óc sáng tạo, muốn tối giản hóa cuộc sống để tập trung vào những giá trị cốt lõi.",
+    "Duyên phận hoài niệm: Tìm kiếm đồ cổ hay phong cách vintage cho thấy bạn là người giàu tình cảm, trân trọng những giá trị thời gian và lịch sử.",
+    "Năng lượng hệ khí: Thích sắm đồ du lịch hay dã ngoại tiết lộ bạn có tâm hồn tự do, khao khát kết nối với thiên nhiên và những chân trời mới.",
+    "Tư duy phản biện: Kiên nhẫn đọc kỹ các nhận xét từ người mua trước phản ánh sự tỉnh táo, không dễ bị lung lay bởi những lời hoa mỹ.",
+    "Tần số giờ vàng: Tận dụng ưu đãi ẩn giờ vàng chứng tỏ bạn có khả năng quan sát nhạy bén, biết cách phân bổ và tối ưu hóa nguồn lực cá nhân.",
     "Bảo mật tuyệt đối: Tiện ích chạy offline 100%, bảo mật dữ liệu tuyệt đối ngay trên thiết bị của bạn. An tâm trải nghiệm!"
   ];
 
@@ -434,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tipEl.innerHTML = formatTip(LOADING_TIPS[newIndex]);
         tipEl.classList.remove('fade-out');
       }, 300);
-    }, 10000); // Rotates every 8s (7.7s visible + 300ms transition)
+    }, 8888); // Rotates every 8s (7.7s visible + 300ms transition)
   }
 
   function stopTipsRotation() {
