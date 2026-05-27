@@ -312,11 +312,11 @@
   }
 
   async function startAnalysis() {
-    console.log('[ShopeeAnalytics] Bắt đầu quá trình phân tích dữ liệu...');
+    console.log('[ShopeeAnalytics] Bắt đầu quá trình khởi tạo báo cáo...');
     
     try {
       // Send initial message to indicate start
-      safeSend({ type: 'progress', message: 'Đang khởi tạo...', processed: 0, total: 0, pct: -1 });
+      safeSend({ type: 'progress', message: 'Đang kết nối...', processed: 0, total: 0, pct: -1 });
 
       let offsetIndex = 0;
       const LIMIT = 20;
@@ -506,7 +506,7 @@
         cachePayload
       };
 
-      console.log('[ShopeeAnalytics] Hoàn thành! Đang lưu cache và cập nhật lock...');
+      console.log('[ShopeeAnalytics] Hoàn thành! Đang áp dụng thiết lập...');
       // Save the aggregated purchase stats payload to chrome.storage.local cache.
       // This caches order history to allow instant future loads, reducing API queries next time.
       // The cache lives 100% on the user's hard drive and is never uploaded.

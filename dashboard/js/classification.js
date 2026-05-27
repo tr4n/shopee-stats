@@ -300,7 +300,7 @@ async function classifyKharItems(ti, d) {
   if (!session) return;
 
   _isClassifying = true;
-  showAIChatStatus('🧹 Chrome AI đang dọn dẹp và phân loại đống đồ của bạn (0%)...', 'info');
+  showAIChatStatus('🧹 Chrome AI đang tối ưu hóa hiển thị danh mục (0%)...', 'info');
 
   try {
     const BATCH_SIZE = 8; // Reduced to minimize AI memory usage
@@ -320,7 +320,7 @@ async function classifyKharItems(ti, d) {
         if (i > 0) await new Promise(resolve => setTimeout(resolve, 150));
 
         const progress = Math.round((i / toClassify.length) * 100);
-        showAIChatStatus(`🧹 Chrome AI đang dọn dẹp và phân loại đống đồ của bạn (${progress}%)...`, 'info');
+        showAIChatStatus(`🧹 Chrome AI đang tối ưu hóa hiển thị danh mục (${progress}%)...`, 'info');
 
         const batch = toClassify.slice(i, i + BATCH_SIZE);
         const names = batch.map(x => x.item.n).join('\n');
@@ -378,7 +378,7 @@ async function classifyKharItems(ti, d) {
       } catch (e) {
         console.warn(`[Dashboard] Batch ${Math.floor(i / BATCH_SIZE) + 1} classification failed:`, e);
         if (isAIFatalError(e)) {
-          showAIChatStatus('⚠️ Úi, Chrome AI dỗi không thèm dọn dẹp đống sản phẩm nữa rồi!', 'warning');
+          showAIChatStatus('⚠️ Gặp sự cố kết nối với Chrome AI!', 'warning');
           hideAIChatStatus(4000);
           _dashCatDisabled = true;
           _dashCatSession = null;
@@ -388,7 +388,7 @@ async function classifyKharItems(ti, d) {
     }
 
     if (totalPatched > 0) {
-      showAIChatStatus(`✨ Đã dọn dẹp xong xuôi! Chrome AI phân loại được ${totalPatched} món đồ rồi nhé!`, 'success');
+      showAIChatStatus(`✨ Đã tối ưu hóa danh mục hiển thị thành công!`, 'success');
       hideAIChatStatus(3000);
       console.log(`[Dashboard] AI classified ${totalPatched} items`);
     } else {

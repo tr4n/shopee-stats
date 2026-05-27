@@ -10,7 +10,7 @@ function renderNoData() {
     <div class="no-data" style="margin-top:10vh; max-width: 600px; margin-left: auto; margin-right: auto; padding: 40px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center;">
       <div style="font-size:64px;margin-bottom:16px; animation: float 3s ease-in-out infinite;">🛒</div>
       <h2 style="font-size:28px;font-weight:800;color:var(--text);margin-bottom:12px">Bắt đầu thống kê chi tiêu!</h2>
-      <p style="color:var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px;">Bạn chưa có dữ liệu nào được tải lên. Vui lòng làm theo các bước sau để lấy dữ liệu từ Shopee:</p>
+      <p style="color:var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 32px;">Chưa có dữ liệu thống kê. Vui lòng làm theo các bước sau để thiết lập báo cáo chi tiêu Shopee:</p>
       
       <div style="display: flex; flex-direction: column; gap: 16px; text-align: left; margin-bottom: 32px;">
         <div style="display: flex; align-items: flex-start; gap: 16px; background: var(--surface); padding: 16px; border-radius: 16px;">

@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
               _currentRunNonce = lock.nonce;
               _currentRunTabId = lock.tabId;
               resetProgress();
-              progressText.textContent = 'Đang phân tích ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
+              progressText.textContent = 'Đang chuẩn bị ở nền... (đã chạy ' + Math.round(age / 1000) + 'giây)';
               showState(stateLoading);
             }
           });
@@ -473,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset debug info
     if (debugTimerEl) debugTimerEl.textContent = '0s';
     if (debugUrl) debugUrl.textContent = '-';
-    if (debugStatus) debugStatus.textContent = 'Đang khởi tạo';
+    if (debugStatus) debugStatus.textContent = 'Đang kết nối';
   }
 
 
@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Start debug tracking
       analysisStartTime = Date.now();
       if (debugUrl) debugUrl.textContent = tab.url;
-      if (debugStatus) debugStatus.textContent = 'Khởi tạo extension';
+      if (debugStatus) debugStatus.textContent = 'Đang chuẩn bị tiện ích';
 
       // Update timer every second
       debugTimerInterval = setInterval(() => {
@@ -833,13 +833,13 @@ document.addEventListener('DOMContentLoaded', () => {
         itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
       };
 
-      if (debugStatus) debugStatus.textContent = 'Đang lưu cấu hình...';
+      if (debugStatus) debugStatus.textContent = 'Đang áp dụng thiết lập...';
       await new Promise((resolve) => {
         chrome.storage.local.set({ 'shopee_temp_config': configPayload }, resolve);
       });
 
       try {
-        if (debugStatus) debugStatus.textContent = 'Đang tải bridge script...';
+        if (debugStatus) debugStatus.textContent = 'Đang chuẩn bị kết nối...';
         // Security Compliance: Injecting our package-bundled bridge.js into the MAIN world
         // to enable same-origin fetches that Shopee's strict CSRF/CORS headers require.
         // No remote scripts are evaluated or injected; all files are local.
@@ -849,10 +849,10 @@ document.addEventListener('DOMContentLoaded', () => {
           world: 'MAIN'
         });
 
-        if (debugStatus) debugStatus.textContent = 'Đang tải content script...';
+        if (debugStatus) debugStatus.textContent = 'Đang đồng bộ tiện ích...';
         // Security Compliance: Injecting our package-bundled content.js script.
         await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
-        if (debugStatus) debugStatus.textContent = 'Đang chờ phản hồi từ content script...';
+        if (debugStatus) debugStatus.textContent = 'Đang chờ kết nối...';
 
       } catch (e) {
         console.error('[ShopeeAnalytics] Failed to load content script:', e);
@@ -898,10 +898,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (pct >= 0) {
         progressBarFill.classList.remove('indeterminate');
         progressBarFill.style.width = pct + '%';
-        label = `Đã xử lý ${processed.toLocaleString()}/${(message.total || 0).toLocaleString()} đơn (${pct}%)`;
+        label = `Đang chuẩn bị báo cáo: ${pct}%`;
       } else {
         progressBarFill.classList.add('indeterminate');
-        label = `Đã xử lý ${processed.toLocaleString()} đơn hàng...`;
+        label = `Đang chuẩn bị hiển thị...`;
       }
       progressText.textContent = label;
     } else if (message.type === 'error') {
@@ -944,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     showState(stateInitial);
 
-    const msg = errorMsg || 'Đã có lỗi khi tổng hợp dữ liệu.';
+    const msg = errorMsg || 'Đã có lỗi xảy ra.';
 
     if (msg.includes('đăng nhập')) {
       errorMessage.innerHTML = `<div class="error-card">

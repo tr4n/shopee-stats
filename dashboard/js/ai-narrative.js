@@ -217,10 +217,10 @@ async function _executeAIInsight(cardId) {
 
   const loadingStatuses = [
     "🔮 Pháp sư Chrome AI đang gieo quẻ xem bói chi tiêu...",
-    "🕵️‍♂️ Chrome AI đang hóng hớt xem bạn đã mua những gì...",
-    "🧠 Chrome AI đang 'săm soi' ví tiền và đọc vị bạn...",
-    "💸 Đang chờ AI tính toán xem ví của bạn đã 'bay màu' thế nào...",
-    "🍿 Đợi tí, Chrome AI đang chuẩn bị bóc phốt thói quen chốt đơn..."
+    "🕵️‍♂️ Chrome AI đang tối ưu hóa hiển thị...",
+    "🧠 Chrome AI đang chuẩn bị phân tích...",
+    "💸 Đang chờ AI chuẩn bị biểu đồ...",
+    "🍿 Đợi tí, Chrome AI đang kết nối..."
   ];
   const randomStatus = loadingStatuses[Math.floor(Math.random() * loadingStatuses.length)];
 
@@ -238,7 +238,7 @@ async function _executeAIInsight(cardId) {
       </svg>
       <div class="ai-loading-text">
         <div class="ai-loading-status">${randomStatus}</div>
-        <div class="ai-loading-note">Yên tâm nha, AI tự kỷ chạy offline ngay trên máy bạn nên không ai biết đống đồ "vô tri" bạn mua đâu. Chờ xíu nhé!</div>
+        <div class="ai-loading-note">Yên tâm nha, Chrome AI chạy offline 100% trên thiết bị của bạn, bảo mật dữ liệu tuyệt đối. Chờ xíu nhé!</div>
       </div>
     </div>
   `;

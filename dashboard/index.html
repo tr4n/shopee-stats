@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shopee Analytics — Đang tải...</title>
+  <title>Shopee Analytics — Đang chuẩn bị...</title>
   <link rel="icon" type="image/png" href="../extension/icons/icon128.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,8 +101,8 @@
     <img class="logo" src="../extension/icons/icon128.png" alt="Logo" onerror="this.style.display='none'">
     <div class="spinner" id="spinner"></div>
     <div class="error-icon" id="error-icon">⚠️</div>
-    <div class="title" id="title">Đang xử lý dữ liệu...</div>
-    <div class="sub" id="sub">Lưu dữ liệu Shopee vào bộ nhớ cục bộ</div>
+    <div class="title" id="title">Đang chuẩn bị trang...</div>
+    <div class="sub" id="sub">Đang thiết lập giao diện báo cáo chi tiêu</div>
     <div class="error-box" id="error-box"></div>
     <a class="btn" id="btn-reload" style="display:none" href="index.html">Thử lại</a>
   </div>
@@ -191,7 +191,7 @@
       function showError(msg) {
         document.getElementById('spinner').style.display = 'none';
         document.getElementById('error-icon').style.display = 'block';
-        document.getElementById('title').textContent = 'Không tải được dữ liệu';
+        document.getElementById('title').textContent = 'Không thể khởi tạo giao diện';
         document.getElementById('sub').textContent = '';
         document.getElementById('error-box').style.display = 'block';
         document.getElementById('error-box').textContent = msg;
@@ -230,13 +230,13 @@
       }
 
       if (!raw) {
-        showError('Không tìm thấy dữ liệu trong URL. Hãy mở lại từ extension Shopee Analytics.');
+        showError('Không nhận được thông tin cấu hình. Hãy mở lại từ tiện ích Shopee Analytics.');
         return;
       }
 
       const parsed = await tryParseAsync(raw, paramMode);
       if (!parsed || !parsed.t) {
-        showError('Dữ liệu không hợp lệ hoặc bị hỏng. Hãy xuất lại dữ liệu từ extension.');
+        showError('Giao diện không hợp lệ hoặc bị lỗi. Hãy thử mở lại từ tiện ích Shopee Analytics.');
         return;
       }
 
@@ -245,12 +245,12 @@
       try {
         localStorage.setItem(PREFIX + id, JSON.stringify(parsed));
       } catch (e) {
-        showError('Không thể lưu dữ liệu (bộ nhớ đầy?): ' + e.message);
+        showError('Không thể khởi tạo bộ nhớ đệm (bộ nhớ đầy?): ' + e.message);
         return;
       }
 
       // Update UI briefly then redirect
-      document.getElementById('sub').textContent = '✓ Đã lưu — đang chuyển sang dashboard...';
+      document.getElementById('sub').textContent = '✓ Sẵn sàng — đang mở dashboard...';
 
       setTimeout(() => {
         location.replace('result.html?id=' + id);
