@@ -690,11 +690,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
 
     // Build compact order history list for dashboard view
-    const orderHistoryList = (data.cachePayload?.miniOrders || []).map(o => ({
-      t: o.ts,
-      f: Math.round(o.finalCost),
-      r: Math.round(o.rawCost || o.finalCost)
-    }));
+    const orderHistoryList = (data.cachePayload?.miniOrders || []).map(o => {
+      let mainCat = '';
+      if (Array.isArray(o.il) && o.il.length > 0) {
+        let maxSpent = -1;
+        for (const item of o.il) {
+          const itemSpent = item.s || 0;
+          if (itemSpent > maxSpent && item.cat) {
+            maxSpent = itemSpent;
+            mainCat = item.cat;
+          }
+        }
+      }
+      return {
+        t: o.ts,
+        f: Math.round(o.finalCost),
+        r: Math.round(o.rawCost || o.finalCost),
+        c: mainCat
+      };
+    });
 
     // Payload schema structure sent to the dashboard via URL hash
     const payload = {

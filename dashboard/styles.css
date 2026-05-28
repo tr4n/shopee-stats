@@ -1094,8 +1094,13 @@ body {
 }
 
 @keyframes ai-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .insight-ai-badge {
@@ -1282,16 +1287,16 @@ body {
 }
 
 .support-type-btn[data-type="bug"]:hover {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
+  border-color: #f29797;
+  background: rgba(242, 151, 151, 0.08);
+  color: #f29797;
 }
 
 .support-type-btn[data-type="bug"].active {
-  border-color: #ef4444;
-  background: #ef4444;
+  border-color: #f29797;
+  background: #f29797;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 4px 12px rgba(242, 151, 151, 0.25);
 }
 
 .support-type-btn[data-type="suggestion"]:hover {
@@ -1372,9 +1377,19 @@ body {
 }
 
 @keyframes support-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 /* Inputs */
@@ -1459,7 +1474,9 @@ body {
 }
 
 @keyframes support-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Status Notifications */
@@ -1494,8 +1511,15 @@ body {
 }
 
 @keyframes support-bounce {
-  0% { transform: translateY(5px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(5px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Sidebar Rating Box */
@@ -1662,3 +1686,81 @@ body {
   transform: translateY(0);
 }
 
+/* ── Interactive KPI Card and Sales Stats Styling ────────────────────── */
+.kpi.interactive {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border);
+}
+
+.kpi.interactive:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.1);
+}
+
+.kpi.interactive.active {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+}
+
+.sales-adv-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sales-adv-item:last-child {
+  border-bottom: none;
+}
+
+.sales-adv-icon {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sales-adv-icon.green {
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.sales-adv-icon.blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.sales-adv-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sales-adv-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sales-adv-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.sales-adv-val {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}

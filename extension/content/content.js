@@ -132,12 +132,20 @@
   }
 
   function getRawTs(orderObj) {
-    return (
-      orderObj &&
+    if (!orderObj) return 0;
+    if (
       orderObj.shipping &&
       orderObj.shipping.tracking_info &&
       orderObj.shipping.tracking_info.ctime
-    ) || 0;
+    ) {
+      return orderObj.shipping.tracking_info.ctime;
+    }
+    if (orderObj.create_time) return orderObj.create_time;
+    if (orderObj.ctime) return orderObj.ctime;
+    if (orderObj.info_card && orderObj.info_card.create_time) {
+      return orderObj.info_card.create_time;
+    }
+    return 0;
   }
 
   function addToPeriod(periods, key, o) {

@@ -86,17 +86,23 @@ const LEGACY_CAT_NAMES = {
 };
 
 function resolveCatLabel(c) {
-  if (c.name) {
-    if (!isNaN(Number(c.name)) && LEGACY_CAT_NAMES[c.name]) {
-      return LEGACY_CAT_NAMES[c.name];
-    }
-    if (!isNaN(Number(c.name))) {
-      return 'Danh mục #' + c.name;
-    }
-    return c.name;
+  const nameOrId = c.name || c.id;
+  if (!nameOrId) return 'Khác';
+  
+  if (typeof getDashCatCodes === 'function') {
+    const codes = getDashCatCodes();
+    if (codes[nameOrId]) return codes[nameOrId];
   }
-  if (c.id) return LEGACY_CAT_NAMES[c.id] || 'Danh mục #' + c.id;
-  return 'Khác';
+  
+  if (LEGACY_CAT_NAMES[nameOrId]) {
+    return LEGACY_CAT_NAMES[nameOrId];
+  }
+  
+  if (!isNaN(Number(nameOrId))) {
+    return 'Danh mục #' + nameOrId;
+  }
+  
+  return nameOrId;
 }
 
 function isInvalidCat(cat) {

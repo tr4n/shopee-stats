@@ -37,7 +37,7 @@
         <span class="ni">🏷️</span> Danh mục
       </button>
       <button class="nav-item" data-view="orders">
-        <span class="ni">📜</span> Đơn Hàng
+        <span class="ni">🛍️</span> Thống Kê Sale
       </button>
       <div class="nav-support-divider"></div>
 
@@ -281,25 +281,66 @@
       </div>
     </div>
 
-    <!-- Order History -->
+    <!-- Sale Statistics (Replaces Order History) -->
     <div id="view-orders" class="view">
       <div class="page-header">
         <div>
-          <h1 class="page-title">Lịch Sử Đơn Hàng</h1>
-          <p class="page-subtitle" id="orders-subtitle">Danh sách các đơn hàng đã mua trên Shopee</p>
+          <h1 class="page-title">Thống Kê Ngày Sale</h1>
+          <p class="page-subtitle" id="orders-subtitle">Phân tích hành vi chi tiêu và hiệu quả săn sale của bạn</p>
         </div>
       </div>
       <div class="pill-row" id="orders-year-pills"></div>
+
+      <!-- KPI cards comparing the 4 sale types -->
+      <div class="kpi-row" id="sales-kpi-row">
+        <!-- Will contain 4 interactive cards: Ngày Đôi, Giữa Tháng, Cuối Tháng, Ngày Thường -->
+      </div>
+
+      <!-- Grid for charts -->
+      <div class="grid-2" id="sales-charts-grid" style="margin-bottom: 20px;">
+        <div class="card" id="card-sales-distribution">
+          <div class="card-title">🍩 Tỷ Lệ Phân Bổ Chi Tiêu</div>
+          <div class="chart-wrap"><canvas id="chart-sales-distribution"></canvas></div>
+        </div>
+        <div class="card" id="card-sales-spend-savings">
+          <div class="card-title">📊 Chi Tiêu & Tiết Kiệm</div>
+          <div class="chart-wrap"><canvas id="chart-sales-spend-savings"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Grid for advanced analysis (Golden Hour & Top Categories) -->
+      <div class="grid-2" id="sales-advanced-grid" style="margin-bottom: 20px;">
+        <div class="card" id="card-sales-hours">
+          <div class="card-title">⚡ Giờ Vàng Săn Sale (0h - 2h)</div>
+          <div id="sales-hours-container" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Golden hour stats will go here -->
+          </div>
+        </div>
+        <div class="card" id="card-sales-categories">
+          <div class="card-title">🏷️ Danh Mục Được Săn Nhiều Nhất</div>
+          <div id="sales-categories-container" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Top categories for sales will go here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- AI & Rule-based Insights -->
+      <div class="insight-card" id="insight-sales" style="display: none; margin-bottom: 20px;">
+        <div class="insight-title">💡 Phân tích thói quen săn sale</div>
+        <ul class="insight-list" id="insight-sales-list"></ul>
+        <p class="insight-ai" id="insight-sales-ai" style="display: none"></p>
+      </div>
+
+      <!-- Detailed Sale Day Table -->
       <div class="card" id="card-orders">
         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <span>📜 Danh sách đơn hàng</span>
+          <span id="sales-detail-title">📅 Chi Tiết Từng Đợt Sale</span>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="orders-search" placeholder="Lọc số tiền..." class="limit-select" style="width: 150px; padding: 6px 12px; height: 32px;" />
             <select id="orders-limit-select" class="limit-select" style="height: 32px;">
-              <option value="20" selected>Hiện 20</option>
-              <option value="50">Hiện 50</option>
-              <option value="100">Hiện 100</option>
-              <option value="500">Hiện 500</option>
+              <option value="10" selected>Hiện 10 ngày</option>
+              <option value="20">Hiện 20 ngày</option>
+              <option value="50">Hiện 50 ngày</option>
+              <option value="100">Hiện 100 ngày</option>
             </select>
           </div>
         </div>
@@ -307,10 +348,11 @@
           <table class="table" id="orders-table">
             <thead>
               <tr>
-                <th>Ngày Mua</th>
-                <th style="text-align: right">Giá Gốc</th>
-                <th style="text-align: right">Thực Trả</th>
+                <th>Ngày / Đợt Sale</th>
+                <th style="text-align: right">Số Đơn Hàng</th>
+                <th style="text-align: right">Thực Chi</th>
                 <th style="text-align: right; color: var(--green);">Tiết Kiệm</th>
+                <th style="text-align: right">Hiệu Quả</th>
               </tr>
             </thead>
             <tbody></tbody>

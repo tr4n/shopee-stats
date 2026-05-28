@@ -368,6 +368,9 @@ async function classifyKharItems(ti, d) {
             requestAnimationFrame(() => {
               renderTopItems(ti);
               renderCategories(d.cs, ti);
+              if (window.renderOrders) {
+                window.renderOrders(d.ol || []);
+              }
               if (window.runAIInsightsNarrative) {
                 window.runAIInsightsNarrative(d);
               }

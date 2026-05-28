@@ -1734,6 +1734,7 @@ function setupDashboardRatingCard(d) {
 
         // Re-render UI components
         renderTopItems(tiItems);
+        renderOrders(d.ol || []);
 
         // Re-render static rule-based cards with final categorized data
         renderInsightCard(

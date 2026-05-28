@@ -335,3 +335,38 @@ window.rerunAIInsight = async function (cardId) {
 
   await _executeAIInsight(cardId);
 };
+
+function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activeType) {
+  const doubleSpend = stats.double.spend;
+  const midSpend = stats.mid.spend;
+  const endSpend = stats.end.spend;
+  const regularSpend = stats.regular.spend;
+  
+  const doubleOrders = stats.double.orders;
+  const midOrders = stats.mid.orders;
+  const endOrders = stats.end.orders;
+  const regularOrders = stats.regular.orders;
+
+  const totalSaleSpend = doubleSpend + midSpend + endSpend;
+  const totalSaleOrders = doubleOrders + midOrders + endOrders;
+
+  const totalMidnightOrders = stats.double.midnightOrders + stats.mid.midnightOrders + stats.end.midnightOrders;
+
+  const context = `Phân bổ chi tiêu ngày sale: Ngày Đôi chi ${fmtVND(doubleSpend)}đ (${doubleOrders} đơn); Giữa Tháng chi ${fmtVND(midSpend)}đ (${midOrders} đơn); Lương Về chi ${fmtVND(endSpend)}đ (${endOrders} đơn); Ngày Thường chi ${fmtVND(regularSpend)}đ (${regularOrders} đơn). Tổng số đơn hàng săn ngày sale là ${totalSaleOrders} đơn, trong đó có ${totalMidnightOrders} đơn hàng chốt giờ vàng ban đêm (0h-2h).`;
+
+  const specificPrompt = `Dữ liệu đầu vào:
+  - Chi tiêu các ngày sale so với ngày thường.
+  - Tần suất chốt đơn giờ vàng nửa đêm ngày sale: ${totalMidnightOrders}/${totalSaleOrders} đơn.
+
+  Yêu cầu: Hãy phán một quẻ bói cực vui vẻ và châm biếm nhẹ nhàng về thói quen săn sale của người dùng (Ví dụ: Bạn là chiến thần săn sale thực thụ oanh tạc giỏ hàng nửa đêm, hay kẻ mua sắm tùy hứng chốt đơn ngày thường bất chấp túi tiền). Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số cụ thể nào hay số tiền nào trong quẻ phán.`;
+
+  const cacheKey = `insight-sales-${activeYear}-${activeType}`;
+
+  enrichWithAI(
+    'insight-sales',
+    context,
+    specificPrompt,
+    cacheKey
+  );
+}
+window.triggerSalesAIInsight = triggerSalesAIInsight;
