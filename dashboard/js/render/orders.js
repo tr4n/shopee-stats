@@ -1021,21 +1021,21 @@ function renderSaleDaysTable(filteredYearOrders) {
         </td>
         <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">${item.orders} đơn</td>
         <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(item.spend)}đ</td>
-        <td style="text-align:right;font-weight:500;font-variant-numeric:tabular-nums;">${saved > 0 ? fmtVND(saved) + 'đ' : '—'}</td>
+        <td style="text-align:right;font-weight:500;font-variant-numeric:tabular-nums;">${saved > 0 ? fmtVND(saved) + "đ" : "—"}</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">${efficiencyLabel}</td>
       </tr>
     `;
-  }).join('');
+  }).join("");
 
   renderOrdersTablePagination(pagination, totalPages, filteredYearOrders);
 }
 
 function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders) {
   if (!pagination) return;
-  if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+  if (totalPages <= 1) { pagination.innerHTML = ""; return; }
 
-  let pagesHtml = '';
-  pagesHtml += `<button class="pill${ordersCurrentPage === 1 ? ' disabled' : ''}" data-page="${ordersCurrentPage - 1}" ${ordersCurrentPage === 1 ? 'disabled' : ''}>← Trước</button>`;
+  let pagesHtml = "";
+  pagesHtml += `<button class="pill${ordersCurrentPage === 1 ? " disabled" : ""}" data-page="${ordersCurrentPage - 1}" ${ordersCurrentPage === 1 ? "disabled" : ""}>← Trước</button>`;
 
   const maxPagesToShow = 5;
   let startPage = Math.max(1, ordersCurrentPage - 2);
@@ -1047,204 +1047,21 @@ function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders)
     if (startPage > 2) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
   }
   for (let p = startPage; p <= endPage; p++) {
-    pagesHtml += `<button class="pill${p === ordersCurrentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+    pagesHtml += `<button class="pill${p === ordersCurrentPage ? " active" : ""}" data-page="${p}">${p}</button>`;
   }
   if (endPage < totalPages) {
     if (endPage < totalPages - 1) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
     pagesHtml += `<button class="pill" data-page="${totalPages}">${totalPages}</button>`;
   }
 
-  pagesHtml += `<button class="pill${ordersCurrentPage === totalPages ? ' disabled' : ''}" data-page="${ordersCurrentPage + 1}" ${ordersCurrentPage === totalPages ? 'disabled' : ''}>Sau →</button>`;
+  pagesHtml += `<button class="pill${ordersCurrentPage === totalPages ? " disabled" : ""}" data-page="${ordersCurrentPage + 1}" ${ordersCurrentPage === totalPages ? "disabled" : ""}>Sau →</button>`;
   pagination.innerHTML = pagesHtml;
 
-  pagination.querySelectorAll('button[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      ordersCurrentPage = parseInt(btn.getAttribute('data-page'), 10);
+  pagination.querySelectorAll("button[data-page]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      ordersCurrentPage = parseInt(btn.getAttribute("data-page"), 10);
       renderSaleDaysTable(filteredYearOrders);
-      document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      document.getElementById("card-orders")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
   });
-}
-
-  const tbody = document.querySelector('#orders-table tbody');
-  const pagination = document.getElementById('orders-pagination');
-  const limitSelect = document.getElementById('orders-limit-select');
-  const pageSize = parseInt(limitSelect?.value, 10) || 10;
-
-  if (!tbody) return;
-
-  if (filteredYearOrders.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align: center; padding: 40px;">Không có dữ liệu đơn hàng trong năm này</td></tr>`;
-    if (pagination) pagination.innerHTML = '';
-    return;
-  }
-
-  // Group orders by date (YYYY-MM-DD)
-  const dateGroups = {};
-  filteredYearOrders.forEach(o => {
-    if (!o.t || o.t <= 0) return;
-    const date = new Date(o.t * 1000);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-    const isBF = isDateBlackFriday(date);
-    let type = 'regular';
-    let label = `Ngày thường ${day}/${month}`;
-    if (day === month || isBF) {
-      type = 'double';
-      label = isBF ? `Black Friday ${day}/${month}` : `Ngày Đôi ${day}/${month}`;
-    } else if (day === 15) {
-      type = 'mid';
-      label = `Giữa Tháng 15/${month}`;
-    } else if (day >= 25) {
-      type = 'end';
-      label = `Lương Về ${day}/${month}`;
-    }
-
-    // Filter by KPI active type
-    if (ordersActiveType !== 'all' && type !== ordersActiveType) {
-      return;
-    }
-
-    if (!dateGroups[key]) {
-      dateGroups[key] = {
-        key,
-        label,
-        type,
-        isBlackFriday: isBF,
-        orders: 0,
-        spend: 0,
-        raw: 0,
-        t: o.t
-      };
-    }
-
-    dateGroups[key].orders += 1;
-    dateGroups[key].spend += o.f || 0;
-    dateGroups[key].raw += o.r || o.f || 0;
-  });
-
-  const saleDaysList = Object.values(dateGroups).sort((a, b) => b.t - a.t);
-
-  // Update detailed list header name based on active filter
-  const detailTitle = document.getElementById('sales-detail-title');
-  if (detailTitle) {
-    let filterName = 'Tất Cả Ngày';
-    if (ordersActiveType === 'double') filterName = 'Ngày Đôi';
-    else if (ordersActiveType === 'mid') filterName = 'Giữa Tháng';
-    else if (ordersActiveType === 'end') filterName = 'Lương Về';
-    else if (ordersActiveType === 'regular') filterName = 'Ngày Thường';
-    detailTitle.textContent = `📅 Chi Tiết Chi Tiêu: ${filterName}`;
-  }
-
-  if (saleDaysList.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align: center; padding: 40px;">Không tìm thấy đợt mua sắm phù hợp với bộ lọc</td></tr>`;
-    if (pagination) pagination.innerHTML = '';
-    return;
-  }
-
-  // Paginate
-  const totalItems = saleDaysList.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-
-  if (ordersCurrentPage > totalPages) ordersCurrentPage = totalPages;
-  if (ordersCurrentPage < 1) ordersCurrentPage = 1;
-
-  const startIdx = (ordersCurrentPage - 1) * pageSize;
-  const endIdx = Math.min(startIdx + pageSize, totalItems);
-  const pageItems = saleDaysList.slice(startIdx, endIdx);
-
-  tbody.innerHTML = pageItems.map(item => {
-    const date = new Date(item.t * 1000);
-    const dateFormatted = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-    const saved = Math.max(0, item.raw - item.spend);
-    const discountPct = item.raw > 0 ? Math.round((saved / item.raw) * 100) : 0;
-
-    let typeTag = '';
-    if (item.isBlackFriday) {
-      typeTag = `<span style="font-size:11px; font-weight:700; color:#ffffff; background:#1e293b; padding:2px 8px; border-radius:12px; margin-left:8px; border: 1px solid rgba(255,255,255,0.1);">Black Friday</span>`;
-    } else if (item.type === 'double') {
-      typeTag = `<span style="font-size:11px; font-weight:700; color:#ee4d2d; background:rgba(238,77,45,0.08); padding:2px 8px; border-radius:12px; margin-left:8px;">Ngày Đôi</span>`;
-    } else if (item.type === 'mid') {
-      typeTag = `<span style="font-size:11px; font-weight:700; color:#26aa99; background:var(--green-dim); padding:2px 8px; border-radius:12px; margin-left:8px;">Giữa Tháng</span>`;
-    } else if (item.type === 'end') {
-      typeTag = `<span style="font-size:11px; font-weight:700; color:#3b82f6; background:rgba(59,130,246,0.08); padding:2px 8px; border-radius:12px; margin-left:8px;">Lương Về</span>`;
-    }
-
-    const efficiencyLabel = saved > 0
-      ? `<span style="color:var(--green); font-weight:600;">-${discountPct}%</span>`
-      : `<span style="color:var(--muted);">—</span>`;
-
-    return `
-      <tr class="order-row-item">
-        <td>
-          <div style="font-weight: 600; color: var(--text);">${dateFormatted}${typeTag}</div>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${item.label}</div>
-        </td>
-        <td style="text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;">
-          ${item.orders} đơn
-        </td>
-        <td style="text-align: right; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums;">
-          ${fmtVND(item.spend)}đ
-        </td>
-        <td style="text-align: right; font-weight: 500; font-variant-numeric: tabular-nums;">
-          ${saved > 0 ? `${fmtVND(saved)}đ` : '—'}
-        </td>
-        <td style="text-align: right; font-variant-numeric: tabular-nums;">
-          ${efficiencyLabel}
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  // Render Pagination
-  if (pagination) {
-    if (totalPages <= 1) {
-      pagination.innerHTML = '';
-    } else {
-      let pagesHtml = '';
-      
-      // Prev Button
-      pagesHtml += `<button class="pill${ordersCurrentPage === 1 ? ' disabled' : ''}" data-page="${ordersCurrentPage - 1}" ${ordersCurrentPage === 1 ? 'disabled' : ''}>← Trước</button>`;
-
-      // Page numbers
-      const maxPagesToShow = 5;
-      let startPage = Math.max(1, ordersCurrentPage - 2);
-      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-      
-      if (endPage - startPage + 1 < maxPagesToShow) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-      }
-
-      if (startPage > 1) {
-        pagesHtml += `<button class="pill" data-page="1">1</button>`;
-        if (startPage > 2) pagesHtml += `<span style="color:var(--muted); align-self:center;">...</span>`;
-      }
-
-      for (let p = startPage; p <= endPage; p++) {
-        pagesHtml += `<button class="pill${p === ordersCurrentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
-      }
-
-      if (endPage < totalPages) {
-        if (endPage < totalPages - 1) pagesHtml += `<span style="color:var(--muted); align-self:center;">...</span>`;
-        pagesHtml += `<button class="pill" data-page="${totalPages}">${totalPages}</button>`;
-      }
-
-      // Next Button
-      pagesHtml += `<button class="pill${ordersCurrentPage === totalPages ? ' disabled' : ''}" data-page="${ordersCurrentPage + 1}" ${ordersCurrentPage === totalPages ? 'disabled' : ''}>Sau →</button>`;
-
-      pagination.innerHTML = pagesHtml;
-
-      // Add click listeners to pagination buttons
-      pagination.querySelectorAll('button[data-page]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          ordersCurrentPage = parseInt(btn.getAttribute('data-page'), 10);
-          renderSaleDaysTable(filteredYearOrders);
-          document.getElementById('card-orders').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        });
-      });
-    }
-  }
 }
