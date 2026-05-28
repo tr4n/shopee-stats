@@ -239,6 +239,16 @@ function getDashCatCodes() {
   return codes;
 }
 
+function getCatIdByName(catName) {
+  if (_categoriesData && _categoriesData.categories) {
+    const cleanName = catName.trim().toLowerCase();
+    const cat = _categoriesData.categories.find(c => c.name.trim().toLowerCase() === cleanName);
+    if (cat) return cat.id;
+  }
+  return null;
+}
+window.getCatIdByName = getCatIdByName;
+
 let _dashCatSession = null;
 let _dashCatDisabled = false;
 

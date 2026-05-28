@@ -36,23 +36,41 @@ function parseCategoryName(catName) {
 }
 
 function getCategoryColor(catName) {
+  let catId = null;
+  if (typeof getCatIdByName === 'function') {
+    catId = getCatIdByName(catName);
+  }
+  
+  if (catId) {
+    if (catId === 'tech') return { bg: 'rgba(59, 130, 246, 0.12)', fg: '#3b82f6' };
+    if (catId === 'fashion') return { bg: 'rgba(238, 77, 45, 0.12)', fg: '#ee4d2d' };
+    if (catId === 'beauty_health') return { bg: 'rgba(236, 72, 153, 0.12)', fg: '#ec4899' };
+    if (catId === 'home') return { bg: 'rgba(16, 185, 129, 0.12)', fg: '#10b981' };
+    if (catId === 'edu') return { bg: 'rgba(20, 184, 166, 0.12)', fg: '#14b8a6' };
+    if (catId === 'sport') return { bg: 'rgba(168, 85, 247, 0.12)', fg: '#a855f7' };
+  }
+  
+  // Fallback: substring matching for legacy or custom categories
   const nameLower = catName.toLowerCase();
-  if (nameLower.includes('điện thoại') || nameLower.includes('máy tính') || nameLower.includes('điện tử') || nameLower.includes('camera') || nameLower.includes('ảnh') || nameLower.includes('đồng hồ')) {
+  if (nameLower.includes('điện thoại') || nameLower.includes('máy tính') || nameLower.includes('điện tử') || nameLower.includes('camera') || nameLower.includes('ảnh') || nameLower.includes('đồng hồ') || nameLower.includes('tech')) {
     return { bg: 'rgba(59, 130, 246, 0.12)', fg: '#3b82f6' };
   }
-  if (nameLower.includes('thời trang') || nameLower.includes('quần áo') || nameLower.includes('giày') || nameLower.includes('túi')) {
+  if (nameLower.includes('thời trang') || nameLower.includes('quần áo') || nameLower.includes('giày') || nameLower.includes('túi') || nameLower.includes('fashion')) {
     return { bg: 'rgba(238, 77, 45, 0.12)', fg: '#ee4d2d' };
   }
-  if (nameLower.includes('sức khỏe') || nameLower.includes('làm đẹp') || nameLower.includes('mỹ phẩm') || nameLower.includes('skincare') || nameLower.includes('son')) {
+  if (nameLower.includes('sức khỏe') || nameLower.includes('làm đẹp') || nameLower.includes('mỹ phẩm') || nameLower.includes('skincare') || nameLower.includes('son') || nameLower.includes('beauty') || nameLower.includes('health')) {
     return { bg: 'rgba(236, 72, 153, 0.12)', fg: '#ec4899' };
   }
-  if (nameLower.includes('nhà cửa') || nameLower.includes('đời sống') || nameLower.includes('decor') || nameLower.includes('gia dụng')) {
+  if (nameLower.includes('nhà cửa') || nameLower.includes('đời sống') || nameLower.includes('decor') || nameLower.includes('gia dụng') || nameLower.includes('home') || nameLower.includes('living')) {
     return { bg: 'rgba(16, 185, 129, 0.12)', fg: '#10b981' };
   }
-  if (nameLower.includes('sách') || nameLower.includes('văn phòng') || nameLower.includes('học tập')) {
+  if (nameLower.includes('sách') || nameLower.includes('văn phòng') || nameLower.includes('học tập') || nameLower.includes('edu') || nameLower.includes('giáo dục')) {
     return { bg: 'rgba(20, 184, 166, 0.12)', fg: '#14b8a6' };
   }
-  if (nameLower.includes('thực phẩm') || nameLower.includes('ăn vặt') || nameLower.includes('bách hóa')) {
+  if (nameLower.includes('thể thao') || nameLower.includes('du lịch') || nameLower.includes('sport') || nameLower.includes('phượt')) {
+    return { bg: 'rgba(168, 85, 247, 0.12)', fg: '#a855f7' };
+  }
+  if (nameLower.includes('thực phẩm') || nameLower.includes('ăn vặt') || nameLower.includes('bách hóa') || nameLower.includes('food')) {
     return { bg: 'rgba(245, 158, 11, 0.12)', fg: '#f59e0b' };
   }
   return { bg: 'rgba(100, 116, 139, 0.12)', fg: '#64748b' };
