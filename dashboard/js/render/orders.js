@@ -9,6 +9,8 @@
 let currentOrders = [];
 let ordersActiveYear = 'all';
 let ordersActiveType = 'all'; // 'all', 'double', 'mid', 'end', 'regular'
+let ordersActiveHour = null;  // null | 'midnight'|'early'|'morning'|'noon'|'afternoon'|'night'
+let ordersActiveCat = null;   // null | category name string
 let ordersCurrentPage = 1;
 
 let salesDistributionChart = null;
@@ -104,6 +106,8 @@ function renderOrders(ol) {
   currentOrders = ol || [];
   ordersActiveYear = 'all';
   ordersActiveType = 'all';
+  ordersActiveHour = null;
+  ordersActiveCat = null;
   ordersCurrentPage = 1;
 
   // Setup Year Pills
@@ -153,6 +157,8 @@ function renderOrdersYearPills() {
       btn.classList.add('active');
       ordersActiveYear = btn.getAttribute('data-orderyear');
       ordersActiveType = 'all'; // Reset interactive card filter
+      ordersActiveHour = null;
+      ordersActiveCat = null;
       ordersCurrentPage = 1;
       applyFiltersAndRender();
     });
@@ -523,17 +529,20 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
     const maxOrders = Math.max(...Object.values(hours).map(h => h.count), 1);
     const displayTotalOrders = totalOrders || 1;
 
-    hoursContainer.innerHTML = Object.values(hours).map(h => {
+    hoursContainer.innerHTML = Object.entries(hours).map(([key, h]) => {
       const pct = Math.round((h.count / maxOrders) * 100);
       const sharePct = Math.round((h.count / displayTotalOrders) * 100);
+      const isActive = ordersActiveHour === key;
+      const activeTag = isActive ? `<span style="font-size:10px;background:${h.fg};color:#fff;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle;">Đang lọc</span>` : '';
+      const activeStyle = isActive ? `box-shadow:0 0 0 2px ${h.fg};border-radius:10px;background:${h.bg};` : '';
 
       return `
-        <div class="sales-adv-item">
-          <div class="sales-adv-icon" style="background: ${h.bg}; color: ${h.fg};">${h.emoji}</div>
+        <div class="sales-adv-item" data-hourkey="${key}" title="Click để xem đơn trong khung giờ này" style="cursor:pointer;transition:all 0.18s;${activeStyle}">
+          <div class="sales-adv-icon" style="background:${h.bg};color:${h.fg};">${h.emoji}</div>
           <div class="sales-adv-body">
-            <div class="sales-adv-title">${h.label}</div>
-            <div class="top-bar-wrap" style="width:100%; height:5px; margin-top:4px;">
-              <div class="top-bar-fill" style="width:${pct}%; height:100%; background:${h.bar}"></div>
+            <div class="sales-adv-title">${h.label} ${activeTag}</div>
+            <div class="top-bar-wrap" style="width:100%;height:5px;margin-top:4px;">
+              <div class="top-bar-fill" style="width:${pct}%;height:100%;background:${h.bar}"></div>
             </div>
             <div class="sales-adv-sub">${h.count} đơn (${sharePct}%)</div>
           </div>
@@ -541,6 +550,21 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
         </div>
       `;
     }).join('');
+
+    hoursContainer.querySelectorAll('[data-hourkey]').forEach(el => {
+      el.addEventListener('click', () => {
+        const key = el.getAttribute('data-hourkey');
+        if (ordersActiveHour === key) {
+          ordersActiveHour = null;
+        } else {
+          ordersActiveHour = key;
+          ordersActiveCat = null;
+        }
+        ordersCurrentPage = 1;
+        applyFiltersAndRender();
+        document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
     reveal(document.getElementById('card-sales-hours'));
   }
 
@@ -585,14 +609,17 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
         const pct = Math.round((c.spend / maxSpend) * 100);
         const { emoji, text } = parseCategoryName(c.name);
         const colors = getCategoryColor(c.name);
+        const isActive = ordersActiveCat === c.name;
+        const activeTag = isActive ? `<span style="font-size:10px;background:${colors.fg};color:#fff;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle;">Đang lọc</span>` : '';
+        const activeStyle = isActive ? `box-shadow:0 0 0 2px ${colors.fg};border-radius:10px;background:${colors.bg};` : '';
 
         return `
-          <div class="sales-adv-item">
-            <div class="sales-adv-icon" style="background: ${colors.bg}; color: ${colors.fg};">${emoji}</div>
+          <div class="sales-adv-item" data-catname="${escHtml(c.name)}" title="Click để xem đơn trong danh mục này" style="cursor:pointer;transition:all 0.18s;${activeStyle}">
+            <div class="sales-adv-icon" style="background:${colors.bg};color:${colors.fg};">${emoji}</div>
             <div class="sales-adv-body">
-              <div class="sales-adv-title">${escHtml(text)}</div>
-              <div class="top-bar-wrap" style="width:100%; height:5px; margin-top:4px;">
-                <div class="top-bar-fill" style="width:${pct}%; height:100%; background:${colors.fg}"></div>
+              <div class="sales-adv-title">${escHtml(text)} ${activeTag}</div>
+              <div class="top-bar-wrap" style="width:100%;height:5px;margin-top:4px;">
+                <div class="top-bar-fill" style="width:${pct}%;height:100%;background:${colors.fg}"></div>
               </div>
               <div class="sales-adv-sub">${c.count} lượt mua</div>
             </div>
@@ -600,6 +627,21 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
           </div>
         `;
       }).join('');
+
+      catsContainer.querySelectorAll('[data-catname]').forEach(el => {
+        el.addEventListener('click', () => {
+          const catName = el.getAttribute('data-catname');
+          if (ordersActiveCat === catName) {
+            ordersActiveCat = null;
+          } else {
+            ordersActiveCat = catName;
+            ordersActiveHour = null;
+          }
+          ordersCurrentPage = 1;
+          applyFiltersAndRender();
+          document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      });
     }
     reveal(document.getElementById('card-sales-categories'));
   }
@@ -693,7 +735,337 @@ function renderSalesInsights(stats) {
   }
 }
 
+
+function getHourKey(hr) {
+  if (hr >= 0 && hr < 2) return 'midnight';
+  if (hr >= 2 && hr < 8) return 'early';
+  if (hr >= 8 && hr < 12) return 'morning';
+  if (hr >= 12 && hr < 13) return 'noon';
+  if (hr >= 13 && hr < 18) return 'afternoon';
+  return 'night';
+}
+
+const HOUR_LABELS = {
+  midnight: 'Săn đêm (00h–02h)',
+  early: 'Sáng sớm (02h–08h)',
+  morning: 'Giờ sáng (08h–12h)',
+  noon: 'Nghỉ trưa (12h–13h)',
+  afternoon: 'Chiều làm (13h–18h)',
+  night: 'Tối muộn (18h–24h)'
+};
+
 function renderSaleDaysTable(filteredYearOrders) {
+  const tbody = document.querySelector('#orders-table tbody');
+  const thead = document.querySelector('#orders-table thead');
+  const pagination = document.getElementById('orders-pagination');
+  const limitSelect = document.getElementById('orders-limit-select');
+  const pageSize = parseInt(limitSelect?.value, 10) || 10;
+  const detailTitle = document.getElementById('sales-detail-title');
+
+  if (!tbody) return;
+
+  const isDetailMode = ordersActiveHour !== null || ordersActiveCat !== null;
+
+  // ── Build dynamic title with filter badges + clear button ──
+  if (detailTitle) {
+    let titleHtml = '📅 Chi Tiết Chi Tiêu';
+    const badges = [];
+
+    const typeInfo = { double: ['#ee4d2d','rgba(238,77,45,0.12)','Ngày Đôi'], mid: ['#26aa99','rgba(38,170,153,0.12)','Giữa Tháng'], end: ['#3b82f6','rgba(59,130,246,0.12)','Lương Về'], regular: ['#64748b','rgba(100,116,139,0.12)','Ngày Thường'] };
+    if (ordersActiveType !== 'all' && typeInfo[ordersActiveType]) {
+      const [fg, bg, label] = typeInfo[ordersActiveType];
+      badges.push(`<span class="filter-badge" style="background:${bg};color:${fg};font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">${label}</span>`);
+    }
+    if (ordersActiveHour) {
+      badges.push(`<span class="filter-badge" style="background:rgba(238,77,45,0.12);color:#ee4d2d;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">⚡ ${HOUR_LABELS[ordersActiveHour] || ordersActiveHour}</span>`);
+    }
+    if (ordersActiveCat) {
+      const colors = getCategoryColor(ordersActiveCat);
+      badges.push(`<span class="filter-badge" style="background:${colors.bg};color:${colors.fg};font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">🏷️ ${escHtml(ordersActiveCat)}</span>`);
+    }
+
+    if (badges.length > 0) {
+      titleHtml += ': ' + badges.join(' ');
+      titleHtml += ' <button id="btn-clear-orders-filter" style="font-size:11px;padding:2px 9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;margin-left:4px;vertical-align:middle;" title="Xóa tất cả bộ lọc">✕ Xóa lọc</button>';
+    }
+    detailTitle.innerHTML = titleHtml;
+
+    const clearBtn = document.getElementById('btn-clear-orders-filter');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        ordersActiveHour = null;
+        ordersActiveCat = null;
+        ordersActiveType = 'all';
+        ordersCurrentPage = 1;
+        applyFiltersAndRender();
+      });
+    }
+  }
+
+  // ── Update table headers for current mode ──
+  if (thead) {
+    if (isDetailMode) {
+      thead.innerHTML = `<tr>
+        <th>Thời Gian / Đợt Sale</th>
+        <th>Sản Phẩm &amp; Danh Mục</th>
+        <th style="text-align:right">Thực Chi</th>
+        <th style="text-align:right;color:var(--green);">Tiết Kiệm</th>
+        <th style="text-align:right">Hiệu Quả</th>
+      </tr>`;
+    } else {
+      thead.innerHTML = `<tr>
+        <th>Ngày / Đợt Sale</th>
+        <th style="text-align:right">Số Đơn Hàng</th>
+        <th style="text-align:right">Thực Chi</th>
+        <th style="text-align:right;color:var(--green);">Tiết Kiệm</th>
+        <th style="text-align:right">Hiệu Quả</th>
+      </tr>`;
+    }
+  }
+
+  if (filteredYearOrders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center;padding:40px;">Không có dữ liệu đơn hàng trong năm này</td></tr>`;
+    if (pagination) pagination.innerHTML = '';
+    return;
+  }
+
+  // ══════════════════════════════════════════
+  //  DETAIL MODE — individual orders
+  // ══════════════════════════════════════════
+  if (isDetailMode) {
+    const individualOrders = filteredYearOrders.filter(o => {
+      if (!o.t || o.t <= 0) return false;
+      const date = new Date(o.t * 1000);
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+
+      // Filter by sale type
+      if (ordersActiveType !== 'all') {
+        let type = 'regular';
+        if (day === month || isDateBlackFriday(date)) type = 'double';
+        else if (day === 15) type = 'mid';
+        else if (day >= 25) type = 'end';
+        if (type !== ordersActiveType) return false;
+      }
+
+      // Filter by hour slot
+      if (ordersActiveHour !== null) {
+        if (getHourKey(date.getHours()) !== ordersActiveHour) return false;
+      }
+
+      // Filter by category
+      if (ordersActiveCat !== null) {
+        const resolvedCat = resolveItemCategory(o.n, o.c);
+        if (resolvedCat !== ordersActiveCat) return false;
+      }
+
+      return true;
+    }).sort((a, b) => b.t - a.t);
+
+    if (individualOrders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center;padding:40px;">Không tìm thấy đơn hàng phù hợp với bộ lọc này</td></tr>`;
+      if (pagination) pagination.innerHTML = '';
+      return;
+    }
+
+    const totalItems = individualOrders.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (ordersCurrentPage > totalPages) ordersCurrentPage = totalPages;
+    if (ordersCurrentPage < 1) ordersCurrentPage = 1;
+
+    const startIdx = (ordersCurrentPage - 1) * pageSize;
+    const pageItems = individualOrders.slice(startIdx, startIdx + pageSize);
+
+    const TYPE_COLORS = { double: '#ee4d2d', mid: '#26aa99', end: '#3b82f6', regular: '#64748b' };
+
+    tbody.innerHTML = pageItems.map(o => {
+      const date = new Date(o.t * 1000);
+      const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      const dateStr = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+
+      const day = date.getDate(), month = date.getMonth() + 1;
+      const isBF = isDateBlackFriday(date);
+      let type = 'regular', typeLabel = '';
+      if (day === month || isBF) { type = 'double'; typeLabel = isBF ? 'Black Friday' : 'Ngày Đôi'; }
+      else if (day === 15)       { type = 'mid';    typeLabel = 'Giữa Tháng'; }
+      else if (day >= 25)        { type = 'end';    typeLabel = 'Lương Về'; }
+
+      const typeTag = typeLabel
+        ? `<span style="font-size:10px;font-weight:700;color:${TYPE_COLORS[type]};background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:7px;margin-left:4px;">${typeLabel}</span>`
+        : '';
+
+      const catName = resolveItemCategory(o.n, o.c);
+      const colors = getCategoryColor(catName);
+      const { emoji } = parseCategoryName(catName);
+      const catTag = catName
+        ? `<span style="display:inline-block;font-size:11px;padding:2px 7px;border-radius:8px;background:${colors.bg};color:${colors.fg};margin-top:3px;">${emoji} ${escHtml(catName)}</span>`
+        : '';
+
+      const spend = o.f || 0;
+      const raw   = o.r || o.f || 0;
+      const saved = Math.max(0, raw - spend);
+      const discountPct = raw > 0 ? Math.round((saved / raw) * 100) : 0;
+      const efficiencyLabel = saved > 0
+        ? `<span style="color:var(--green);font-weight:600;">-${discountPct}%</span>`
+        : `<span style="color:var(--muted);">—</span>`;
+
+      const rawName = o.n || '';
+      const itemName = rawName.length > 48
+        ? escHtml(rawName.substring(0, 48)) + '…'
+        : escHtml(rawName) || '<span style="color:var(--muted);">Không rõ</span>';
+
+      return `
+        <tr class="order-row-item">
+          <td style="white-space:nowrap;">
+            <div style="font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;">${timeStr} · ${dateStr}${typeTag}</div>
+          </td>
+          <td>
+            <div style="font-size:12.5px;color:var(--text);line-height:1.5;" title="${escHtml(rawName)}">${itemName}</div>
+            ${catTag}
+          </td>
+          <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;white-space:nowrap;">
+            ${fmtVND(spend)}đ
+          </td>
+          <td style="text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;">
+            ${saved > 0 ? fmtVND(saved) + 'đ' : '—'}
+          </td>
+          <td style="text-align:right;font-variant-numeric:tabular-nums;">
+            ${efficiencyLabel}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    renderOrdersTablePagination(pagination, totalPages, filteredYearOrders);
+    return;
+  }
+
+  // ══════════════════════════════════════════
+  //  SUMMARY MODE — grouped by date (default)
+  // ══════════════════════════════════════════
+  const dateGroups = {};
+  filteredYearOrders.forEach(o => {
+    if (!o.t || o.t <= 0) return;
+    const date = new Date(o.t * 1000);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+    const isBF = isDateBlackFriday(date);
+    let type = 'regular';
+    let label = `Ngày thường ${day}/${month}`;
+    if (day === month || isBF) {
+      type = 'double';
+      label = isBF ? `Black Friday ${day}/${month}` : `Ngày Đôi ${day}/${month}`;
+    } else if (day === 15) {
+      type = 'mid';
+      label = `Giữa Tháng 15/${month}`;
+    } else if (day >= 25) {
+      type = 'end';
+      label = `Lương Về ${day}/${month}`;
+    }
+
+    if (ordersActiveType !== 'all' && type !== ordersActiveType) return;
+
+    if (!dateGroups[key]) {
+      dateGroups[key] = { key, label, type, isBlackFriday: isBF, orders: 0, spend: 0, raw: 0, t: o.t };
+    }
+    dateGroups[key].orders += 1;
+    dateGroups[key].spend  += o.f || 0;
+    dateGroups[key].raw    += o.r || o.f || 0;
+  });
+
+  const saleDaysList = Object.values(dateGroups).sort((a, b) => b.t - a.t);
+
+  if (saleDaysList.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center;padding:40px;">Không tìm thấy đợt mua sắm phù hợp với bộ lọc</td></tr>`;
+    if (pagination) pagination.innerHTML = '';
+    return;
+  }
+
+  const totalItems = saleDaysList.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  if (ordersCurrentPage > totalPages) ordersCurrentPage = totalPages;
+  if (ordersCurrentPage < 1) ordersCurrentPage = 1;
+
+  const startIdx = (ordersCurrentPage - 1) * pageSize;
+  const pageItems = saleDaysList.slice(startIdx, startIdx + pageSize);
+
+  tbody.innerHTML = pageItems.map(item => {
+    const date = new Date(item.t * 1000);
+    const dateFormatted = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+    const saved = Math.max(0, item.raw - item.spend);
+    const discountPct = item.raw > 0 ? Math.round((saved / item.raw) * 100) : 0;
+
+    let typeTag = '';
+    if (item.isBlackFriday) {
+      typeTag = `<span style="font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;padding:2px 8px;border-radius:12px;margin-left:8px;border:1px solid rgba(255,255,255,0.1);">Black Friday</span>`;
+    } else if (item.type === 'double') {
+      typeTag = `<span style="font-size:11px;font-weight:700;color:#ee4d2d;background:rgba(238,77,45,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;">Ngày Đôi</span>`;
+    } else if (item.type === 'mid') {
+      typeTag = `<span style="font-size:11px;font-weight:700;color:#26aa99;background:var(--green-dim);padding:2px 8px;border-radius:12px;margin-left:8px;">Giữa Tháng</span>`;
+    } else if (item.type === 'end') {
+      typeTag = `<span style="font-size:11px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;">Lương Về</span>`;
+    }
+
+    const efficiencyLabel = saved > 0
+      ? `<span style="color:var(--green);font-weight:600;">-${discountPct}%</span>`
+      : `<span style="color:var(--muted);">—</span>`;
+
+    return `
+      <tr class="order-row-item">
+        <td>
+          <div style="font-weight:600;color:var(--text);">${dateFormatted}${typeTag}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">${item.label}</div>
+        </td>
+        <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">${item.orders} đơn</td>
+        <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(item.spend)}đ</td>
+        <td style="text-align:right;font-weight:500;font-variant-numeric:tabular-nums;">${saved > 0 ? fmtVND(saved) + 'đ' : '—'}</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums;">${efficiencyLabel}</td>
+      </tr>
+    `;
+  }).join('');
+
+  renderOrdersTablePagination(pagination, totalPages, filteredYearOrders);
+}
+
+function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders) {
+  if (!pagination) return;
+  if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+
+  let pagesHtml = '';
+  pagesHtml += `<button class="pill${ordersCurrentPage === 1 ? ' disabled' : ''}" data-page="${ordersCurrentPage - 1}" ${ordersCurrentPage === 1 ? 'disabled' : ''}>← Trước</button>`;
+
+  const maxPagesToShow = 5;
+  let startPage = Math.max(1, ordersCurrentPage - 2);
+  let endPage   = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage - maxPagesToShow + 1);
+
+  if (startPage > 1) {
+    pagesHtml += `<button class="pill" data-page="1">1</button>`;
+    if (startPage > 2) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
+  }
+  for (let p = startPage; p <= endPage; p++) {
+    pagesHtml += `<button class="pill${p === ordersCurrentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
+    pagesHtml += `<button class="pill" data-page="${totalPages}">${totalPages}</button>`;
+  }
+
+  pagesHtml += `<button class="pill${ordersCurrentPage === totalPages ? ' disabled' : ''}" data-page="${ordersCurrentPage + 1}" ${ordersCurrentPage === totalPages ? 'disabled' : ''}>Sau →</button>`;
+  pagination.innerHTML = pagesHtml;
+
+  pagination.querySelectorAll('button[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      ordersCurrentPage = parseInt(btn.getAttribute('data-page'), 10);
+      renderSaleDaysTable(filteredYearOrders);
+      document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+}
+
   const tbody = document.querySelector('#orders-table tbody');
   const pagination = document.getElementById('orders-pagination');
   const limitSelect = document.getElementById('orders-limit-select');
