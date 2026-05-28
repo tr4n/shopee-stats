@@ -242,7 +242,13 @@ function getDashCatCodes() {
 function getCatIdByName(catName) {
   if (_categoriesData && _categoriesData.categories) {
     const cleanName = catName.trim().toLowerCase();
-    const cat = _categoriesData.categories.find(c => c.name.trim().toLowerCase() === cleanName);
+    const cleanNoEmoji = cleanName.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]/gu, '');
+    const cat = _categoriesData.categories.find(c => {
+      const cName = c.name.trim().toLowerCase();
+      if (cName === cleanName) return true;
+      const cNoEmoji = cName.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]/gu, '');
+      return cNoEmoji === cleanNoEmoji;
+    });
     if (cat) return cat.id;
   }
   return null;

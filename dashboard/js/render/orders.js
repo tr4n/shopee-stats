@@ -76,6 +76,30 @@ function getCategoryColor(catName) {
   return { bg: 'rgba(100, 116, 139, 0.12)', fg: '#64748b' };
 }
 
+function resolveItemCategory(itemName, rawCatId) {
+  if (!itemName) {
+    return resolveCatLabel({ id: rawCatId, name: rawCatId });
+  }
+
+  const key = itemName.toLowerCase().substring(0, 120);
+  const key40 = itemName.toLowerCase().substring(0, 40);
+
+  // 1. Check cached classification (from previous sessions or AI)
+  if (window._dashCache && window._dashCache.cats) {
+    if (window._dashCache.cats[key]) return window._dashCache.cats[key];
+    if (window._dashCache.cats[key40]) return window._dashCache.cats[key40];
+  }
+
+  // 2. Try keyword classification
+  if (typeof classifyByNameSync === 'function') {
+    const kwCat = classifyByNameSync(itemName);
+    if (kwCat && kwCat !== '🏷️ Khác' && kwCat !== 'Khác') return kwCat;
+  }
+
+  // 3. Fall back to raw category ID label
+  return resolveCatLabel({ id: rawCatId, name: rawCatId });
+}
+
 function renderOrders(ol) {
   currentOrders = ol || [];
   ordersActiveYear = 'all';
@@ -192,9 +216,9 @@ function calculateSalesStats(orders) {
       stats[type].midnightOrders += 1;
     }
 
-    // Accumulate category spending (if extension provided category 'c')
-    if (o.c) {
-      const resolvedCat = resolveCatLabel({ name: o.c });
+    // Accumulate category spending (if extension provided category 'c' or item name 'n')
+    if (o.c || o.n) {
+      const resolvedCat = resolveItemCategory(o.n, o.c);
       if (!stats[type].categories[resolvedCat]) {
         stats[type].categories[resolvedCat] = { spend: 0, count: 0 };
       }
