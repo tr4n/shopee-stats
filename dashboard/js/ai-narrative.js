@@ -248,6 +248,7 @@ function generateFallbackInsight(triggers) {
 
 let _aiInsightSession = null;
 let _aiInsightDisabled = false;
+let _aiInsightRunning = false;
 // Stores call args per cardId so re-analysis can be triggered without re-running the full pipeline
 const _aiInsightCallArgs = {};
 
@@ -284,12 +285,7 @@ async function getAIInsightSession() {
     if (!isAvail) return null;
     _aiInsightSession = await createAISession({
       initialPrompts: [{ role: 'system', content: AI_INSIGHT_SYSTEM }],
-      expectedInputs: [
-        { type: "text", languages: ["en"] }
-      ],
-      expectedOutputs: [
-        { type: "text", languages: ["en"] }
-      ]
+      temperature: 0.9
     });
     return _aiInsightSession;
   } catch (e) {
@@ -312,14 +308,9 @@ async function checkAIAvailability() {
   try {
     const status = await getSystemAIAvailability();
     if (status === 'available' || status === 'readily') {
-      // Attempt to create a test session to guarantee local execution support
       const testSession = await createAISession().catch(() => null);
       if (testSession) {
-        if (typeof testSession.destroy === 'function') {
-          testSession.destroy();
-        } else if (typeof testSession.close === 'function') {
-          testSession.close();
-        }
+        await destroyAISession(testSession);
         _isAIAvailable = true;
         _aiAvailabilityResolve(true);
       } else {
@@ -416,10 +407,12 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
 // Internal AI runner — called by both runAIInsight and rerunAIInsight
 async function _executeAIInsight(cardId) {
   const args = _aiInsightCallArgs[cardId];
-  if (!args || _aiInsightDisabled) return;
+  if (!args || _aiInsightDisabled || _aiInsightRunning) return;
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
+
+  _aiInsightRunning = true;
 
   const loadingStatuses = [
     "🔮 Pháp sư Chrome AI đang gieo quẻ xem bói chi tiêu...",
@@ -454,6 +447,7 @@ async function _executeAIInsight(cardId) {
   if (!session || typeof session.prompt !== 'function') {
     aiEl.classList.remove('loading');
     aiEl.innerHTML = renderAnalyzeButton(cardId);
+    _aiInsightRunning = false;
     return;
   }
 
@@ -503,6 +497,7 @@ Hãy phán quẻ bói ngắn gọn (1-2 câu), tuyệt đối tuân thủ các q
     }
   } finally {
     aiEl.classList.remove('loading');
+    _aiInsightRunning = false;
   }
 }
 

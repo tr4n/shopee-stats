@@ -266,7 +266,7 @@ let chromeAISupportStatus = "Đang kiểm tra...";
 (async () => {
   try {
     if (typeof LanguageModel !== "undefined") {
-      const status = await LanguageModel.availability();
+      const status = await getSystemAIAvailability();
       if (status === "readily" || status === "available") {
         chromeAISupportStatus = "Có hỗ trợ (Sẵn sàng sử dụng)";
       } else if (status === "after-download" || status === "downloadable") {

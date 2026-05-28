@@ -217,10 +217,27 @@ const io = new IntersectionObserver(entries => {
 function reveal(el) { if (el) io.observe(el); }
 
 /* ── Unified AI API Utilities ────────────────── */
-async function getSystemAIAvailability() {
+// Chrome Prompt API only supports en/es/ja language codes — use "en" for API
+// attestation; system prompts still instruct Vietnamese output.
+const AI_LANGUAGE_MODEL_OPTIONS = {
+  expectedInputs: [{ type: 'text', languages: ['en'] }],
+  expectedOutputs: [{ type: 'text', languages: ['en'] }]
+};
+
+function mergeAISessionOptions(options = {}) {
+  return {
+    ...AI_LANGUAGE_MODEL_OPTIONS,
+    ...options,
+    expectedInputs: options.expectedInputs || AI_LANGUAGE_MODEL_OPTIONS.expectedInputs,
+    expectedOutputs: options.expectedOutputs || AI_LANGUAGE_MODEL_OPTIONS.expectedOutputs
+  };
+}
+
+async function getSystemAIAvailability(options = AI_LANGUAGE_MODEL_OPTIONS) {
+  const availOptions = mergeAISessionOptions(options);
   if (typeof LanguageModel !== 'undefined' && typeof LanguageModel.availability === 'function') {
     try {
-      return await LanguageModel.availability();
+      return await LanguageModel.availability(availOptions);
     } catch (e) {
       console.warn('[AI Helpers] LanguageModel.availability() failed:', e);
     }
@@ -236,14 +253,28 @@ async function getSystemAIAvailability() {
   return 'no';
 }
 
-async function createAISession(options) {
+async function createAISession(options = {}) {
+  const sessionOptions = mergeAISessionOptions(options);
   if (typeof LanguageModel !== 'undefined' && typeof LanguageModel.create === 'function') {
-    return await LanguageModel.create(options);
+    return await LanguageModel.create(sessionOptions);
   }
   if (typeof ai !== 'undefined' && ai.languageModel && typeof ai.languageModel.create === 'function') {
-    return await ai.languageModel.create(options);
+    return await ai.languageModel.create(sessionOptions);
   }
   throw new Error('AI LanguageModel API not supported');
+}
+
+async function destroyAISession(session) {
+  if (!session) return;
+  try {
+    if (typeof session.destroy === 'function') {
+      await session.destroy();
+    } else if (typeof session.close === 'function') {
+      await session.close();
+    }
+  } catch (e) {
+    console.warn('[AI Helpers] Failed to destroy AI session:', e);
+  }
 }
 
 /* ── Normalization Utilities for Bypassed Item Names ── */
