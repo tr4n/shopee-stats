@@ -180,14 +180,15 @@
       totalItemCount += o.itemCount;
 
       if (o.ts) {
-        const d = new Date(o.ts * 1000);
-        const yr = d.getFullYear();
-        const mo = String(d.getMonth() + 1);
+        const vn = VnTime.toVnParts(o.ts);
+        const yr = vn.year;
+        const mo = String(vn.month);
+        const orderDate = new Date(o.ts * 1000);
 
-        if (d >= ref1M) addToPeriod(periods, '1_month', o);
-        if (d >= ref3M) addToPeriod(periods, '3_months', o);
-        if (d >= ref6M) addToPeriod(periods, '6_months', o);
-        if (d >= ref1Y) addToPeriod(periods, '1_year', o);
+        if (orderDate >= ref1M) addToPeriod(periods, '1_month', o);
+        if (orderDate >= ref3M) addToPeriod(periods, '3_months', o);
+        if (orderDate >= ref6M) addToPeriod(periods, '6_months', o);
+        if (orderDate >= ref1Y) addToPeriod(periods, '1_year', o);
 
         if (!byYear[yr]) {
           byYear[yr] = {

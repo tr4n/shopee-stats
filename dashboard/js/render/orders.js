@@ -20,42 +20,27 @@ let salesSpendSavingsChart = null;
 let _statsCache = null;
 let _statsCacheYear = null;
 
-function isDateBlackFriday(date) {
-  const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  if (m !== 11) return false;
-  const firstOfNov = new Date(y, 10, 1);
-  const firstFridayDay = 1 + ((5 - firstOfNov.getDay() + 7) % 7);
-  return d === (firstFridayDay + 21);
+function isDateBlackFriday(tsSec) {
+  return isVnBlackFriday(tsSec);
 }
 
-// Returns 'double' | 'mid' | 'end' | 'regular' for a given date
-function getSaleType(date) {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  if (day === month || isDateBlackFriday(date)) return 'double';
-  if (day === 15) return 'mid';
-  if (day >= 25) return 'end';
-  return 'regular';
+function getSaleType(tsSec) {
+  return getSaleTypeFromTs(tsSec);
 }
 
-// Returns short tag label for a sale type + date (e.g. 'Black Friday', 'Ngày Đôi', '')
-function getSaleTypeLabel(type, date) {
+function getSaleTypeLabel(type, tsSec) {
   if (type === 'regular') return '';
   if (type === 'mid') return 'Giữa Tháng';
   if (type === 'end') return 'Lương Về';
-  return isDateBlackFriday(date) ? 'Black Friday' : 'Ngày Đôi';
+  return isVnBlackFriday(tsSec) ? 'Black Friday' : 'Ngày Đôi';
 }
 
-// Returns the full day label for summary table rows (e.g. 'Ngày Đôi 11/11', 'Lương Về 28/5')
-function getSaleDayLabel(type, date) {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  if (type === 'regular') return `Ngày thường ${day}/${month}`;
-  if (type === 'mid') return `Giữa Tháng 15/${month}`;
-  if (type === 'end') return `Lương Về ${day}/${month}`;
-  return isDateBlackFriday(date) ? `Black Friday ${day}/${month}` : `Ngày Đôi ${day}/${month}`;
+function getSaleDayLabel(type, tsSec) {
+  const p = toVnParts(tsSec);
+  if (type === 'regular') return `Ngày thường ${p.day}/${p.month}`;
+  if (type === 'mid') return `Giữa Tháng 15/${p.month}`;
+  if (type === 'end') return `Lương Về ${p.day}/${p.month}`;
+  return isVnBlackFriday(tsSec) ? `Black Friday ${p.day}/${p.month}` : `Ngày Đôi ${p.day}/${p.month}`;
 }
 
 function parseCategoryName(catName) {
@@ -152,13 +137,12 @@ function renderOrders(ol) {
       let minTs = Infinity, maxTs = -Infinity;
       currentOrders.forEach(o => {
         if (!o.t) return;
-        years.add(new Date(o.t * 1000).getFullYear());
+        years.add(getVnYear(o.t));
         if (o.t < minTs) minTs = o.t;
         if (o.t > maxTs) maxTs = o.t;
       });
       const fmtMonthYear = ts => {
-        const d = new Date(ts * 1000);
-        return `${d.getMonth() + 1}/${d.getFullYear()}`;
+        return `${toVnParts(ts).month}/${getVnYear(ts)}`;
       };
       const yearCount = years.size;
       const totalCount = window._totalOrderCount || 0;
@@ -214,7 +198,7 @@ function renderOrdersYearPills() {
   const yearsSet = new Set();
   currentOrders.forEach(o => {
     if (o.t) {
-      const yr = new Date(o.t * 1000).getFullYear();
+      const yr = getVnYear(o.t);
       yearsSet.add(String(yr));
     }
   });
@@ -244,7 +228,7 @@ function applyFiltersAndRender() {
   // 1. Filter orders by selected Year
   const filteredYearOrders = currentOrders.filter(o => {
     if (ordersActiveYear !== 'all' && o.t) {
-      const yr = String(new Date(o.t * 1000).getFullYear());
+      const yr = String(getVnYear(o.t));
       if (yr !== ordersActiveYear) return false;
     }
     return true;
@@ -296,8 +280,7 @@ function calculateSalesStats(orders) {
   // a recent-N subset. Spend/raw/orders numbers above override from oss when available.
   orders.forEach(o => {
     if (!o.t || o.t <= 0 || !(o.f > 0)) return;
-    const date = new Date(o.t * 1000);
-    const type = getSaleType(date);
+    const type = getSaleType(o.t);
     const spend = o.f;
 
     // When oss is NOT available (old extension payload), fall back to computing from ol[]
@@ -306,7 +289,7 @@ function calculateSalesStats(orders) {
       stats[type].spend          += spend;
       stats[type].raw            += raw;
       stats[type].orders         += 1;
-      if (date.getHours() < 2) stats[type].midnightOrders += 1;
+      if (toVnParts(o.t).hour < 2) stats[type].midnightOrders += 1;
     }
 
     // Always accumulate categories (used for pattern display, acceptable with partial data)
@@ -599,11 +582,10 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
       if (!o.t || o.t <= 0) return;
 
       // Filter by active KPI card type
-      const date = new Date(o.t * 1000);
-      if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return;
+      if (ordersActiveType !== 'all' && getSaleType(o.t) !== ordersActiveType) return;
 
       totalOrders++;
-      const hr = date.getHours();
+      const hr = toVnParts(o.t).hour;
       const s = o.f || 0;
       if (hr >= 0 && hr < 2) { hours.midnight.count++, hours.midnight.spend += s; }
       else if (hr >= 2 && hr < 8) { hours.early.count++, hours.early.spend += s; }
@@ -743,11 +725,9 @@ function scrollToSalesDetail() {
 function getFilteredSaleOrders(filteredYearOrders) {
   return filteredYearOrders.filter(o => {
     if (!o.t || o.t <= 0 || !(o.f > 0)) return false;
-    const date = new Date(o.t * 1000);
+    if (ordersActiveType !== 'all' && getSaleType(o.t) !== ordersActiveType) return false;
 
-    if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return false;
-
-    if (ordersActiveHour !== null && getHourKey(date.getHours()) !== ordersActiveHour) return false;
+    if (ordersActiveHour !== null && getHourKey(toVnParts(o.t).hour) !== ordersActiveHour) return false;
 
     if (ordersActiveCat !== null) {
       const resolvedCat = resolveItemCategory(o.n, o.c);
@@ -1075,12 +1055,12 @@ function renderSaleDaysTable(filteredYearOrders) {
     const TYPE_COLORS = { double: '#ee4d2d', mid: '#26aa99', end: '#3b82f6', regular: '#64748b' };
 
     tbody.innerHTML = pageItems.map(o => {
-      const date = new Date(o.t * 1000);
-      const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-      const dateStr = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+      const vn = toVnParts(o.t);
+      const timeStr = fmtVnTime(o.t);
+      const dateStr = fmtVnDate(o.t);
 
-      const type = getSaleType(date);
-      const typeLabel = getSaleTypeLabel(type, date);
+      const type = getSaleType(o.t);
+      const typeLabel = getSaleTypeLabel(type, o.t);
 
       const typeTag = typeLabel
         ? `<span style="font-size:10px;font-weight:700;color:${TYPE_COLORS[type]};background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:7px;margin-left:4px;">${typeLabel}</span>`
@@ -1138,15 +1118,12 @@ function renderSaleDaysTable(filteredYearOrders) {
   const dateGroups = {};
   filteredYearOrders.forEach(o => {
     if (!o.t || o.t <= 0 || !(o.f > 0)) return;
-    const date = new Date(o.t * 1000);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const vn = toVnParts(o.t);
+    const key = `${vn.year}-${String(vn.month).padStart(2, '0')}-${String(vn.day).padStart(2, '0')}`;
 
-    const type = getSaleType(date);
-    const label = getSaleDayLabel(type, date);
-    const isBlackFriday = type === 'double' && isDateBlackFriday(date);
+    const type = getSaleType(o.t);
+    const label = getSaleDayLabel(type, o.t);
+    const isBlackFriday = type === 'double' && isDateBlackFriday(o.t);
 
     if (ordersActiveType !== 'all' && type !== ordersActiveType) return;
 
@@ -1175,8 +1152,7 @@ function renderSaleDaysTable(filteredYearOrders) {
   const pageItems = saleDaysList.slice(startIdx, startIdx + pageSize);
 
   tbody.innerHTML = pageItems.map(item => {
-    const date = new Date(item.t * 1000);
-    const dateFormatted = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+    const dateFormatted = fmtVnDate(item.t);
     const saved = Math.max(0, item.raw - item.spend);
     const discountPct = item.raw > 0 ? Math.round((saved / item.raw) * 100) : 0;
 

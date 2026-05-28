@@ -227,14 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
       totalItemCount += o.itemCount;
 
       if (o.ts) {
-        const d = new Date(o.ts * 1000);
-        const yr = d.getFullYear();
-        const mo = String(d.getMonth() + 1);
+        const vn = VnTime.toVnParts(o.ts);
+        const yr = vn.year;
+        const mo = String(vn.month);
+        const orderDate = new Date(o.ts * 1000);
 
-        if (d >= ref1M) addToPeriod(periods, '1_month', o);
-        if (d >= ref3M) addToPeriod(periods, '3_months', o);
-        if (d >= ref6M) addToPeriod(periods, '6_months', o);
-        if (d >= ref1Y) addToPeriod(periods, '1_year', o);
+        if (orderDate >= ref1M) addToPeriod(periods, '1_month', o);
+        if (orderDate >= ref3M) addToPeriod(periods, '3_months', o);
+        if (orderDate >= ref6M) addToPeriod(periods, '6_months', o);
+        if (orderDate >= ref1Y) addToPeriod(periods, '1_year', o);
 
         if (!byYear[yr]) {
           byYear[yr] = {
@@ -609,8 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthMap = {};
     for (const order of (data.cachePayload?.miniOrders || [])) {
       if (!order.ts) continue;
-      const d = new Date(order.ts * 1000);
-      const ym = `${d.getFullYear()}-${d.getMonth() + 1}`;
+      const ym = `${VnTime.getVnYear(order.ts)}-${VnTime.getVnMonth(order.ts)}`;
       if (!monthMap[ym]) monthMap[ym] = {};
       for (const item of (order.il || [])) {
         if (!item.i) continue;
@@ -711,29 +711,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // dashboard are always 100% accurate regardless of how many ol[] detail entries we include.
     // Structure: { "YYYY": { "double"|"mid"|"end"|"regular": [spend, raw, orders, midnightOrders] } }
     const ossMap = {};
-    const isBlackFridayTs = (ts) => {
-      const d = new Date(ts * 1000);
-      if (d.getMonth() !== 10) return false;
-      const firstOfNov = new Date(d.getFullYear(), 10, 1);
-      return d.getDate() === (1 + ((5 - firstOfNov.getDay() + 7) % 7) + 21);
-    };
     for (const o of allMiniOrders) {
       if (!o.ts || !(o.finalCost > 0)) continue;
-      const date = new Date(o.ts * 1000);
-      const yr = String(date.getFullYear());
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      let type = 'regular';
-      if (day === month || isBlackFridayTs(o.ts)) type = 'double';
-      else if (day === 15) type = 'mid';
-      else if (day >= 25) type = 'end';
+      const yr = String(VnTime.getVnYear(o.ts));
+      const type = VnTime.getSaleTypeFromTs(o.ts);
       if (!ossMap[yr]) ossMap[yr] = {};
       if (!ossMap[yr][type]) ossMap[yr][type] = [0, 0, 0, 0];
       const e = ossMap[yr][type];
       e[0] += Math.round(o.finalCost);
       e[1] += Math.round(o.rawCost > 0 ? o.rawCost : o.finalCost);
       e[2] += 1;
-      if (date.getHours() < 2) e[3] += 1;
+      if (VnTime.getVnHour(o.ts) < 2) e[3] += 1;
     }
     const orderStatsSummary = Object.keys(ossMap).length > 0 ? ossMap : undefined;
 
@@ -975,7 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (debugStatus) debugStatus.textContent = 'Đang đồng bộ tiện ích...';
         // Security Compliance: Injecting our package-bundled content.js script.
-        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content/content.js'] });
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['vn-time.js', 'content/content.js'] });
         if (debugStatus) debugStatus.textContent = 'Đang chờ kết nối...';
 
       } catch (e) {
