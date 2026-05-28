@@ -753,60 +753,193 @@ function renderSalesInsights(stats) {
   const endOrders = stats.end.orders;
   const regularOrders = stats.regular.orders;
   const totalOrders = doubleOrders + midOrders + endOrders + regularOrders;
+  const totalSaleOrders = doubleOrders + midOrders + endOrders;
 
-  // 1. Tỷ lệ oanh tạc ngày sale
-  if (totalSpend > 0) {
-    const salePct = Math.round((totalSaleSpend / totalSpend) * 100);
-    if (salePct >= 50) {
-      items.push({
-        icon: '🏆',
-        text: `Bạn chi **${salePct}%** tổng số tiền vào ngày sale (**${fmtVND(totalSaleSpend)}đ**). Bạn thuộc hệ **Chiến thần săn sale** chính hiệu, biết kiềm chế tiêu dùng ngày thường.`
-      });
-    } else {
-      items.push({
-        icon: '🛒',
-        text: `Bạn tiêu **${Math.round((regularSpend / totalSpend) * 100)}%** vào ngày thường (**${fmtVND(regularSpend)}đ**). Bạn là **Người mua sắm ngẫu hứng**, cứ thích là chốt đơn chứ không đợi ngày sale!`
-      });
-    }
+  if (totalSpend <= 0 || totalOrders <= 0) {
+    list.innerHTML = '<li style="color:var(--muted);text-align:center;padding:20px;">Chưa có đủ dữ liệu để phân tích</li>';
+    card.style.display = '';
+    return;
   }
 
-  // 2. Ngày sale hời nhất
-  const rates = [
-    { label: 'Ngày Đôi', spend: doubleSpend, raw: stats.double.raw },
-    { label: 'Giữa Tháng', spend: midSpend, raw: stats.mid.raw },
-    { label: 'Lương Về', spend: endSpend, raw: stats.end.raw },
-    { label: 'Ngày Thường', spend: regularSpend, raw: stats.regular.raw }
-  ].map(x => ({
-    ...x,
-    rate: x.raw > 0 ? Math.round(((x.raw - x.spend) / x.raw) * 100) : 0
-  })).filter(x => x.spend > 0);
+  // ═══ 1. PHÂN TÍCH TỶ LỆ OANH TẠC NGÀY SALE ═══
+  const salePct = Math.round((totalSaleSpend / totalSpend) * 100);
+  const regularPct = Math.round((regularSpend / totalSpend) * 100);
+  
+  if (salePct >= 70) {
+    items.push({
+      icon: '🏆',
+      text: `**Chiến thần săn sale hạng SSS**: ${salePct}% tổng chi tiêu (**${fmtVND(totalSaleSpend)}đ**) tập trung vào ngày sale. Bạn có kỷ luật tài chính xuất sắc, biết kiềm chế mua sắm thường ngày để tối đa hóa lợi ích từ khuyến mãi.`
+    });
+  } else if (salePct >= 50) {
+    items.push({
+      icon: '🎯',
+      text: `**Chiến thần săn sale**: ${salePct}% chi tiêu vào ngày sale (**${fmtVND(totalSaleSpend)}đ**). Bạn hiểu rõ giá trị của việc chờ đợi thời điểm thích hợp, tuy vẫn có ${regularPct}% chi tiêu ngẫu hứng (**${fmtVND(regularSpend)}đ**).`
+    });
+  } else if (salePct >= 30) {
+    items.push({
+      icon: '🛒',
+      text: `**Người mua sắm cân bằng**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}đ**), ${salePct}% ngày sale. Bạn không quá phụ thuộc khuyến mãi nhưng vẫn biết tận dụng cơ hội tốt.`
+    });
+  } else {
+    items.push({
+      icon: '💨',
+      text: `**Tay chơi mua sắm tự do**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}đ**). Bạn ưu tiên sự tiện lợi và nhu cầu tức thời hơn việc chờ đợi khuyến mãi.`
+    });
+  }
 
-  if (rates.length > 0) {
-    const topRate = rates.reduce((a, b) => a.rate >= b.rate ? a : b);
-    if (topRate.rate > 0) {
+  // ═══ 2. PHÂN TÍCH HIỆU QUẢ CHIẾN DỊCH SALE ═══
+  const campaigns = [
+    { key: 'double', label: 'Ngày Đôi', spend: doubleSpend, raw: stats.double.raw, orders: doubleOrders },
+    { key: 'mid', label: 'Giữa Tháng (15)', spend: midSpend, raw: stats.mid.raw, orders: midOrders },
+    { key: 'end', label: 'Lương Về (25-31)', spend: endSpend, raw: stats.end.raw, orders: endOrders },
+    { key: 'regular', label: 'Ngày Thường', spend: regularSpend, raw: stats.regular.raw, orders: regularOrders }
+  ]
+  .map(x => ({ ...x, rate: x.raw > 0 ? Math.round(((x.raw - x.spend) / x.raw) * 100) : 0, saved: Math.max(0, x.raw - x.spend) }))
+  .filter(x => x.spend > 0)
+  .sort((a, b) => b.rate - a.rate);
+
+  if (campaigns.length >= 2) {
+    const best = campaigns[0];
+    const worst = campaigns[campaigns.length - 1];
+    
+    if (best.rate > 0 && best.rate >= worst.rate + 5) {
       items.push({
         icon: '🔥',
-        text: `Chiến dịch chiết khấu hiệu quả nhất của bạn là **${topRate.label}** với tỷ lệ giảm giá trung bình lên tới **${topRate.rate}%**.`
+        text: `**${best.label}** là chiến dịch hiệu quả nhất với **${best.rate}%** chiết khấu trung bình (tiết kiệm **${fmtVND(best.saved)}đ**/${best.orders} đơn). **${worst.label}** chỉ được **${worst.rate}%** - chênh lệch **${best.rate - worst.rate}** điểm %.`
       });
+    } else if (best.rate > 0) {
+      items.push({
+        icon: '📊',
+        text: `Các chiến dịch có tỷ lệ chiết khấu đồng đều: **${campaigns.map(c => `${c.label} ${c.rate}%`).join(', ')}**. Bạn biết tận dụng mọi cơ hội giảm giá một cách nhất quán.`
+      });
+    }
+    
+    // Phân tích AOV (Average Order Value)
+    const aovs = campaigns.map(c => ({ ...c, aov: c.orders > 0 ? Math.round(c.spend / c.orders) : 0 })).filter(c => c.aov > 0);
+    if (aovs.length >= 2) {
+      aovs.sort((a, b) => b.aov - a.aov);
+      const highAov = aovs[0];
+      const lowAov = aovs[aovs.length - 1];
+      if (highAov.aov >= lowAov.aov * 1.5) {
+        items.push({
+          icon: '💳',
+          text: `**Chiến lược giá trị đơn hàng**: ${highAov.label} có AOV cao nhất **${fmtVND(highAov.aov)}đ**/đơn, gấp **${(highAov.aov / lowAov.aov).toFixed(1)}** lần ${lowAov.label} (**${fmtVND(lowAov.aov)}đ**). Bạn có xu hướng "gom hàng" tốt hơn trong những dịp đặc biệt.`
+        });
+      }
     }
   }
 
-  // 3. Phân tích săn đêm 0h-2h
+  // ═══ 3. PHÂN TÍCH KHUNG GIỜ & MIDNIGHT SHOPPING ═══
   const totalMidnightOrders = stats.double.midnightOrders + stats.mid.midnightOrders + stats.end.midnightOrders;
-  const totalSaleOrders = doubleOrders + midOrders + endOrders;
+  const regularMidnight = stats.regular.midnightOrders || 0;
+  const allMidnightOrders = totalMidnightOrders + regularMidnight;
+  
   if (totalSaleOrders > 0) {
-    const midnightPct = Math.round((totalMidnightOrders / totalSaleOrders) * 100);
-    if (midnightPct >= 20) {
+    const saleMidnightPct = Math.round((totalMidnightOrders / totalSaleOrders) * 100);
+    const allMidnightPct = totalOrders > 0 ? Math.round((allMidnightOrders / totalOrders) * 100) : 0;
+    
+    if (saleMidnightPct >= 30) {
       items.push({
         icon: '🦉',
-        text: `Có **${totalMidnightOrders} đơn** chốt lúc nửa đêm (**${midnightPct}%** số đơn ngày sale). Bạn cực kỳ chịu khó **canh giờ vàng 0h** để giật voucher giảm giá.`
+        text: `**Chiến binh đêm**: ${saleMidnightPct}% đơn ngày sale (**${totalMidnightOrders}/${totalSaleOrders} đơn**) được chốt lúc **0h-2h sáng**. Bạn thuộc top 5% người dùng chịu thức đêm để giành voucher flash sale đầu tiên.`
+      });
+    } else if (saleMidnightPct >= 15) {
+      items.push({
+        icon: '🌙',
+        text: `**Săn sale đêm muộn**: ${saleMidnightPct}% đơn sale (**${totalMidnightOrders} đơn**) chốt lúc nửa đêm. Bạn biết cân bằng giữa việc canh giờ vàng và giấc ngủ.`
       });
     } else if (totalMidnightOrders > 0) {
       items.push({
         icon: '☕',
-        text: `Bạn chốt **${totalMidnightOrders} đơn** lúc nửa đêm. Bạn thường săn sale thong thả vào ban ngày hoặc tối hơn là thức đêm oanh tạc.`
+        text: `**Mua sắm ban ngày**: Chỉ ${saleMidnightPct}% đơn sale chốt lúc nửa đêm (**${totalMidnightOrders} đơn**). Bạn ưu tiên thời gian nghỉ ngơi hơn việc tranh giành voucher flash sale.`
       });
     }
+    
+    // So sánh midnight shopping vs regular shopping
+    if (allMidnightOrders > 0 && totalOrders > totalMidnightOrders) {
+      const midnightVsRegularRatio = totalMidnightOrders > 0 && regularMidnight > 0 
+        ? (totalMidnightOrders / regularMidnight).toFixed(1) 
+        : null;
+      
+      if (midnightVsRegularRatio && midnightVsRegularRatio > 3) {
+        items.push({
+          icon: '📊',
+          text: `**Định hướng mua sắm rõ ràng**: Bạn thức khuya mua sắm chủ yếu trong các ngày sale (gấp **${midnightVsRegularRatio}** lần ngày thường). Thể hiện sự kế hoạch và kỷ luật tài chính tốt.`
+        });
+      }
+    }
+  }
+
+  // ═══ 4. PHÂN TÍCH DANH MỤC MUA SẮM ═══
+  const allCategories = {};
+  ['double', 'mid', 'end', 'regular'].forEach(type => {
+    Object.entries(stats[type].categories || {}).forEach(([cat, data]) => {
+      if (!allCategories[cat]) allCategories[cat] = { spend: 0, count: 0, saleSpend: 0, regularSpend: 0 };
+      allCategories[cat].spend += data.spend;
+      allCategories[cat].count += data.count;
+      if (type === 'regular') allCategories[cat].regularSpend += data.spend;
+      else allCategories[cat].saleSpend += data.spend;
+    });
+  });
+
+  const topCategories = Object.entries(allCategories)
+    .map(([name, data]) => ({
+      name,
+      ...data,
+      salePct: data.spend > 0 ? Math.round((data.saleSpend / data.spend) * 100) : 0
+    }))
+    .filter(c => c.spend > 0)
+    .sort((a, b) => b.spend - a.spend)
+    .slice(0, 5);
+
+  if (topCategories.length > 0) {
+    const topCat = topCategories[0];
+    const topCatShare = totalSpend > 0 ? Math.round((topCat.spend / totalSpend) * 100) : 0;
+    
+    if (topCatShare >= 30) {
+      items.push({
+        icon: '🎯',
+        text: `**Chuyên gia ${topCat.name}**: Chiếm **${topCatShare}%** tổng chi tiêu (**${fmtVND(topCat.spend)}đ**, ${topCat.count} lượt mua). ${topCat.salePct}% trong số đó mua vào ngày sale, thể hiện sự am hiểu sâu về thị trường ngành hàng này.`
+      });
+    } else if (topCategories.length >= 3) {
+      const diversityIndex = topCategories.length >= 3 ? 
+        (1 - (topCategories[0].spend + topCategories[1].spend + topCategories[2].spend) / totalSpend) : 0;
+      
+      if (diversityIndex > 0.3) {
+        items.push({
+          icon: '🌟',
+          text: `**Người mua đa dạng**: Top 3 danh mục (**${topCategories.slice(0,3).map(c => c.name).join(', ')}**) chỉ chiếm **${Math.round((1-diversityIndex)*100)}%** tổng chi tiêu. Bạn có nhu cầu mua sắm phong phú và cân bằng.`
+        });
+      }
+    }
+  }
+
+  // ═══ 5. PHÂN TÍCH QUY MÔ MUA SẮM ═══
+  if (totalOrders >= 50) {
+    const avgOrderValue = Math.round(totalSpend / totalOrders);
+    const saleAvgOrder = totalSaleOrders > 0 ? Math.round(totalSaleSpend / totalSaleOrders) : 0;
+    const regularAvgOrder = regularOrders > 0 ? Math.round(regularSpend / regularOrders) : 0;
+    
+    if (avgOrderValue >= 500000) {
+      items.push({
+        icon: '💎',
+        text: `**Khách hàng cao cấp**: AOV trung bình **${fmtVND(avgOrderValue)}đ**/đơn qua **${totalOrders} đơn hàng**. ${saleAvgOrder > regularAvgOrder ? `Đơn ngày sale trung bình cao hơn (**${fmtVND(saleAvgOrder)}đ** vs **${fmtVND(regularAvgOrder)}đ**)` : 'Giá trị đơn hàng ổn định'}.`
+      });
+    } else if (avgOrderValue >= 200000) {
+      const efficiency = totalSpend > 0 ? Math.round(((totalSaleSpend + regularSpend - totalSpend) / totalSpend) * 100) : 0;
+      items.push({
+        icon: '💡',
+        text: `**Mua sắm thông minh**: **${totalOrders} đơn hàng**, AOV **${fmtVND(avgOrderValue)}đ**. ${efficiency > 0 ? `Tỷ lệ tiết kiệm **${efficiency}%** cho thấy khả năng tìm deal tốt.` : 'Cân bằng tốt giữa chất lượng và chi phí.'}`
+      });
+    }
+  }
+
+  // Display insights
+  if (items.length === 0) {
+    items.push({
+      icon: '📈',
+      text: 'Tiếp tục mua sắm để tích lũy thêm dữ liệu phân tích chi tiết hơn!'
+    });
   }
 
   list.innerHTML = items.map(item =>
@@ -815,7 +948,13 @@ function renderSalesInsights(stats) {
   card.style.display = '';
   reveal(card);
 
-  // 4. Trigger Chrome AI tarot reading if active
+  // 6. Cache categories for AI insights and trigger psychological analysis
+  if (allCategories && Object.keys(allCategories).length > 0) {
+    window._lastCategories = Object.entries(allCategories)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => b.spend - a.spend);
+  }
+  
   if (window.triggerSalesAIInsight) {
     window.triggerSalesAIInsight(stats, totalSpend, totalOrders, ordersActiveYear, ordersActiveType);
   }
