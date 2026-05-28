@@ -32,7 +32,7 @@ navBtns.forEach((btn) =>
 const DASH_DATA_PREFIX = "shopee_dash_data_";
 
 function getSessionId() {
-  return new URLSearchParams(location.search).get("local_session") || null;
+  return new URLSearchParams(location.search).get("id") || null;
 }
 
 function saveDataToStorage(d) {
@@ -94,8 +94,8 @@ function parseData() {
   try {
     const params = new URLSearchParams(location.search);
 
-    // Primary: load from storage by session ID (?local_session=MILLIS)
-    const id = params.get("local_session");
+    // Primary: load from storage by session ID (?id=MILLIS)
+    const id = params.get("id");
     if (id) {
       const raw = localStorage.getItem(DASH_DATA_PREFIX + id);
       return raw ? JSON.parse(raw) : null;
@@ -251,7 +251,7 @@ async function checkAndHandleUrlData() {
   if (parsed?.t) {
     const id = parsed.ts ? parsed.ts * 1000 : Date.now();
     localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
-    location.replace("result.html?local_session=" + id);
+    location.replace("result.html?id=" + id);
     return true;
   }
 
