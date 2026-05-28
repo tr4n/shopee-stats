@@ -367,12 +367,12 @@ function renderSalesKPIs(stats) {
           <span style="font-size:16px; margin-right:4px;">${cardIcon}</span>
           ${s.label}
         </div>
-        <div class="kpi-value ${iconClass}">${fmtVND(s.spend)}đ</div>
+        <div class="kpi-value ${iconClass}">${fmtVND(s.spend)}</div>
         <div class="kpi-sub">
           <strong>${s.orders}</strong> đơn (${sharePct}%) · AOV: <strong>${fmtVND(aov)}</strong>
         </div>
         <div class="kpi-sub" style="color:var(--green); font-weight:600; margin-top:4px;">
-          ✓ Tiết kiệm: ${fmtVND(saved)}đ (-${savingPct}%)
+          ✓ Tiết kiệm: ${fmtVND(saved)} (-${savingPct}%)
         </div>
         ${topCatHtml}
       </div>
@@ -483,7 +483,7 @@ function renderSalesCharts(stats) {
                 const spend = ctx.parsed;
                 const pct = totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0;
                 const orders = orderCounts[ctx.dataIndex] || 0;
-                return ['  ' + fmtVND(spend) + 'đ', '  ' + orders + ' đơn · ' + pct + '%'];
+                return ['  ' + fmtVND(spend), '  ' + orders + ' đơn · ' + pct + '%'];
               }
             }
             }
@@ -566,7 +566,7 @@ function renderSalesCharts(stats) {
             borderWidth: 1,
             titleColor: '#1e293b',
             bodyColor: 'rgba(30,41,59,0.8)',
-            callbacks: { label: ctx => '  ' + ctx.dataset.label + ': ' + fmtVND(ctx.parsed.y) + 'đ' }
+            callbacks: { label: ctx => '  ' + ctx.dataset.label + ': ' + fmtVND(ctx.parsed.y) }
           }
         },
         scales: {
@@ -632,7 +632,7 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
             </div>
             <div class="sales-adv-sub">${h.count} đơn (${sharePct}%)</div>
           </div>
-          <div class="sales-adv-val">${fmtVND(h.spend)}đ</div>
+          <div class="sales-adv-val">${fmtVND(h.spend)}</div>
         </div>
       `;
     }).join('');
@@ -708,7 +708,7 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
               </div>
               <div class="sales-adv-sub">${c.count} lượt mua</div>
             </div>
-            <div class="sales-adv-val">${fmtVND(c.spend)}đ</div>
+            <div class="sales-adv-val">${fmtVND(c.spend)}</div>
           </div>
         `;
       }).join('');
@@ -767,22 +767,22 @@ function renderSalesInsights(stats) {
   if (salePct >= 70) {
     items.push({
       icon: '🏆',
-      text: `**Chiến thần săn sale hạng SSS**: ${salePct}% tổng chi tiêu (**${fmtVND(totalSaleSpend)}đ**) tập trung vào ngày sale. Bạn có kỷ luật tài chính xuất sắc, biết kiềm chế mua sắm thường ngày để tối đa hóa lợi ích từ khuyến mãi.`
+      text: `**Chiến thần săn sale hạng SSS**: ${salePct}% tổng chi tiêu (**${fmtVND(totalSaleSpend)}**) tập trung vào ngày sale. Bạn có kỷ luật tài chính xuất sắc, biết kiềm chế mua sắm thường ngày để tối đa hóa lợi ích từ khuyến mãi.`
     });
   } else if (salePct >= 50) {
     items.push({
       icon: '🎯',
-      text: `**Chiến thần săn sale**: ${salePct}% chi tiêu vào ngày sale (**${fmtVND(totalSaleSpend)}đ**). Bạn hiểu rõ giá trị của việc chờ đợi thời điểm thích hợp, tuy vẫn có ${regularPct}% chi tiêu ngẫu hứng (**${fmtVND(regularSpend)}đ**).`
+      text: `**Chiến thần săn sale**: ${salePct}% chi tiêu vào ngày sale (**${fmtVND(totalSaleSpend)}**). Bạn hiểu rõ giá trị của việc chờ đợi thời điểm thích hợp, tuy vẫn có ${regularPct}% chi tiêu ngẫu hứng (**${fmtVND(regularSpend)}**).`
     });
   } else if (salePct >= 30) {
     items.push({
       icon: '🛒',
-      text: `**Người mua sắm cân bằng**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}đ**), ${salePct}% ngày sale. Bạn không quá phụ thuộc khuyến mãi nhưng vẫn biết tận dụng cơ hội tốt.`
+      text: `**Người mua sắm cân bằng**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}**), ${salePct}% ngày sale. Bạn không quá phụ thuộc khuyến mãi nhưng vẫn biết tận dụng cơ hội tốt.`
     });
   } else {
     items.push({
       icon: '💨',
-      text: `**Tay chơi mua sắm tự do**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}đ**). Bạn ưu tiên sự tiện lợi và nhu cầu tức thời hơn việc chờ đợi khuyến mãi.`
+      text: `**Tay chơi mua sắm tự do**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}**). Bạn ưu tiên sự tiện lợi và nhu cầu tức thời hơn việc chờ đợi khuyến mãi.`
     });
   }
 
@@ -804,7 +804,7 @@ function renderSalesInsights(stats) {
     if (best.rate > 0 && best.rate >= worst.rate + 5) {
       items.push({
         icon: '🔥',
-        text: `**${best.label}** là chiến dịch hiệu quả nhất với **${best.rate}%** chiết khấu trung bình (tiết kiệm **${fmtVND(best.saved)}đ**/${best.orders} đơn). **${worst.label}** chỉ được **${worst.rate}%** - chênh lệch **${best.rate - worst.rate}** điểm %.`
+        text: `**${best.label}** là chiến dịch hiệu quả nhất với **${best.rate}%** chiết khấu trung bình (tiết kiệm **${fmtVND(best.saved)}**/${best.orders} đơn). **${worst.label}** chỉ được **${worst.rate}%** - chênh lệch **${best.rate - worst.rate}** điểm %.`
       });
     } else if (best.rate > 0) {
       items.push({
@@ -822,7 +822,7 @@ function renderSalesInsights(stats) {
       if (highAov.aov >= lowAov.aov * 1.5) {
         items.push({
           icon: '💳',
-          text: `**Chiến lược giá trị đơn hàng**: ${highAov.label} có AOV cao nhất **${fmtVND(highAov.aov)}đ**/đơn, gấp **${(highAov.aov / lowAov.aov).toFixed(1)}** lần ${lowAov.label} (**${fmtVND(lowAov.aov)}đ**). Bạn có xu hướng "gom hàng" tốt hơn trong những dịp đặc biệt.`
+          text: `**Chiến lược giá trị đơn hàng**: ${highAov.label} có AOV cao nhất **${fmtVND(highAov.aov)}**/đơn, gấp **${(highAov.aov / lowAov.aov).toFixed(1)}** lần ${lowAov.label} (**${fmtVND(lowAov.aov)}**). Bạn có xu hướng "gom hàng" tốt hơn trong những dịp đặc biệt.`
         });
       }
     }
@@ -898,7 +898,7 @@ function renderSalesInsights(stats) {
     if (topCatShare >= 30) {
       items.push({
         icon: '🎯',
-        text: `**Chuyên gia ${topCat.name}**: Chiếm **${topCatShare}%** tổng chi tiêu (**${fmtVND(topCat.spend)}đ**, ${topCat.count} lượt mua). ${topCat.salePct}% trong số đó mua vào ngày sale, thể hiện sự am hiểu sâu về thị trường ngành hàng này.`
+        text: `**Chuyên gia ${topCat.name}**: Chiếm **${topCatShare}%** tổng chi tiêu (**${fmtVND(topCat.spend)}**, ${topCat.count} lượt mua). ${topCat.salePct}% trong số đó mua vào ngày sale, thể hiện sự am hiểu sâu về thị trường ngành hàng này.`
       });
     } else if (topCategories.length >= 3) {
       const diversityIndex = topCategories.length >= 3 ? 
@@ -922,13 +922,13 @@ function renderSalesInsights(stats) {
     if (avgOrderValue >= 500000) {
       items.push({
         icon: '💎',
-        text: `**Khách hàng cao cấp**: AOV trung bình **${fmtVND(avgOrderValue)}đ**/đơn qua **${totalOrders} đơn hàng**. ${saleAvgOrder > regularAvgOrder ? `Đơn ngày sale trung bình cao hơn (**${fmtVND(saleAvgOrder)}đ** vs **${fmtVND(regularAvgOrder)}đ**)` : 'Giá trị đơn hàng ổn định'}.`
+        text: `**Khách hàng cao cấp**: AOV trung bình **${fmtVND(avgOrderValue)}**/đơn qua **${totalOrders} đơn hàng**. ${saleAvgOrder > regularAvgOrder ? `Đơn ngày sale trung bình cao hơn (**${fmtVND(saleAvgOrder)}** vs **${fmtVND(regularAvgOrder)}**)` : 'Giá trị đơn hàng ổn định'}.`
       });
     } else if (avgOrderValue >= 200000) {
       const efficiency = totalSpend > 0 ? Math.round(((totalSaleSpend + regularSpend - totalSpend) / totalSpend) * 100) : 0;
       items.push({
         icon: '💡',
-        text: `**Mua sắm thông minh**: **${totalOrders} đơn hàng**, AOV **${fmtVND(avgOrderValue)}đ**. ${efficiency > 0 ? `Tỷ lệ tiết kiệm **${efficiency}%** cho thấy khả năng tìm deal tốt.` : 'Cân bằng tốt giữa chất lượng và chi phí.'}`
+        text: `**Mua sắm thông minh**: **${totalOrders} đơn hàng**, AOV **${fmtVND(avgOrderValue)}**. ${efficiency > 0 ? `Tỷ lệ tiết kiệm **${efficiency}%** cho thấy khả năng tìm deal tốt.` : 'Cân bằng tốt giữa chất lượng và chi phí.'}`
       });
     }
   }
@@ -1144,10 +1144,10 @@ function renderSaleDaysTable(filteredYearOrders) {
             ${catTag}
           </td>
           <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;white-space:nowrap;">
-            ${fmtVND(spend)}đ
+            ${fmtVND(spend)}
           </td>
           <td style="text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;">
-            ${saved > 0 ? fmtVND(saved) + 'đ' : '—'}
+            ${saved > 0 ? fmtVND(saved) : '—'}
           </td>
           <td style="text-align:right;font-variant-numeric:tabular-nums;">
             ${efficiencyLabel}
@@ -1230,8 +1230,8 @@ function renderSaleDaysTable(filteredYearOrders) {
           <div style="font-size:11px;color:var(--muted);margin-top:2px;">${item.label}</div>
         </td>
         <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">${item.orders} đơn</td>
-        <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(item.spend)}đ</td>
-        <td style="text-align:right;font-weight:500;font-variant-numeric:tabular-nums;">${saved > 0 ? fmtVND(saved) + "đ" : "—"}</td>
+        <td style="text-align:right;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(item.spend)}</td>
+        <td style="text-align:right;font-weight:500;font-variant-numeric:tabular-nums;">${saved > 0 ? fmtVND(saved) : "—"}</td>
         <td style="text-align:right;font-variant-numeric:tabular-nums;">${efficiencyLabel}</td>
       </tr>
     `;
@@ -1251,8 +1251,8 @@ function renderSaleDaysTable(filteredYearOrders) {
     tfoot.innerHTML = `<tr style="font-weight:700;border-top:2px solid var(--border);background:var(--surface-2,var(--surface));">
       <td style="padding:10px 12px;color:var(--text);">Tổng cộng <span style="font-weight:400;color:var(--muted);font-size:12px;">(${saleDaysList.length} ngày)</span></td>
       <td style="text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;">${sumOrders} đơn</td>
-      <td style="text-align:right;padding:10px 12px;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(sumSpend)}đ</td>
-      <td style="text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;">${sumSaved > 0 ? fmtVND(sumSaved) + 'đ' : '—'}</td>
+      <td style="text-align:right;padding:10px 12px;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(sumSpend)}</td>
+      <td style="text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;">${sumSaved > 0 ? fmtVND(sumSaved) : '—'}</td>
       <td style="text-align:right;padding:10px 12px;">${sumSaved > 0 ? '<span style="color:var(--green);">-' + sumDisPct + '%</span>' : '<span style="color:var(--muted);">—</span>'}</td>
     </tr>`;
     table.appendChild(tfoot);

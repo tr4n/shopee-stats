@@ -134,7 +134,7 @@ function renderYearlyChart(yd, d) {
           ...CHART_CFG.plugins.tooltip,
           callbacks: {
             title: ctx => 'Năm ' + ctx[0].label,
-            label: ctx => '  ' + fmtVND(ctx.parsed.y) + 'đ  (' + fmtNum(yd[ctx.label].o) + ' đơn)'
+            label: ctx => '  ' + fmtVND(ctx.parsed.y) + '  (' + fmtNum(yd[ctx.label].o) + ' đơn)'
           }
         }
       }
@@ -177,7 +177,7 @@ function showYearlyTopItems(year, d) {
     tbody.innerHTML = aggregatedItems.map(item => {
       const hasDiscount = item.op && item.dp && item.op > item.dp;
       const priceText = hasDiscount 
-        ? `<div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua · Giá mua: ${fmtVND(item.dp)}đ (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}đ</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}đ</span></div>`
+        ? `<div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua · Giá mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}</span></div>`
         : `<div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>`;
 
       return `

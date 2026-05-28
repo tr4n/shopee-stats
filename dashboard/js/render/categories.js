@@ -70,7 +70,7 @@ function showCatItems(catName, ti) {
     const pct = Math.round((item.s / maxS) * 100);
     const hasDiscount = item.op && item.dp && item.op > item.dp;
     const metaText = hasDiscount 
-      ? `${fmtNum(item.c)} lượt · Giá mua: ${fmtVND(item.dp)}đ (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}đ</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}đ</span>`
+      ? `${fmtNum(item.c)} lượt · Giá mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}</span>`
       : `${fmtNum(item.c)} lượt · ${fmtVND(item.s)}`;
 
     return `

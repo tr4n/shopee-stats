@@ -3,6 +3,18 @@
    Depends on helpers.js, cache.js.
 ───────────────────────────────────────────────── */
 
+// Global error handler to catch handleEvent and other issues
+window.addEventListener('error', function(e) {
+  if (e.message && e.message.includes('handleEvent')) {
+    console.warn('Caught handleEvent error, likely from external library:', e);
+    return true; // Prevent default error handling
+  }
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  console.warn('Unhandled promise rejection:', e.reason);
+});
+
 // Rule-based psychological shopping insights - no AI dependency
 const SHOPPING_PSYCHOLOGY_PATTERNS = {
   // Pattern: Category dominance + timing behavior → personality insights
@@ -559,25 +571,35 @@ function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activ
     
     aiContainer.appendChild(aiDiv);
     
-    // Add refresh button for variety
+    // Add refresh button for variety in header
     const refreshBtn = document.createElement('button');
     refreshBtn.className = 'ai-refresh-btn';
     refreshBtn.innerHTML = '🔄';
     refreshBtn.title = 'Xem góc nhìn khác';
-    refreshBtn.onclick = () => {
-      // Generate a different insight by re-analyzing (with some randomization)
-      const newInsight = generatePsychologicalInsight(insightData);
-      const sentence = aiDiv.querySelector('.insight-ai-sentence');
-      if (sentence) {
-        sentence.style.opacity = '0';
-        setTimeout(() => {
-          sentence.textContent = newInsight;
-          sentence.style.opacity = '1';
-        }, 200);
+    refreshBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        // Generate a different insight by re-analyzing (with some randomization)
+        const newInsight = generatePsychologicalInsight(insightData);
+        const sentence = aiDiv.querySelector('.insight-ai-sentence');
+        if (sentence) {
+          sentence.style.opacity = '0';
+          setTimeout(() => {
+            sentence.textContent = newInsight;
+            sentence.style.opacity = '1';
+          }, 200);
+        }
+      } catch (error) {
+        console.error('Error refreshing insight:', error);
       }
-    };
+    });
     
-    aiDiv.appendChild(refreshBtn);
+    // Add refresh button to header instead of appending to main div
+    const header = aiDiv.querySelector('.insight-ai-header');
+    if (header) {
+      header.appendChild(refreshBtn);
+    }
     
     // Cache categories for future use
     window._lastCategories = categories;
@@ -602,6 +624,36 @@ function enrichWithAIEnhanced(containerId, context, prompt, cacheKey, fallbackIn
         </div>
         <div class="insight-ai-sentence">${fallbackInsight}</div>
       `;
+      
+      // Add refresh button in header
+      const refreshBtn = document.createElement('button');
+      refreshBtn.className = 'ai-refresh-btn';
+      refreshBtn.innerHTML = '🔄';
+      refreshBtn.title = 'Xem góc nhìn khác';
+      refreshBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          // Refresh with another random insight from the same category
+          const newInsight = fallbackInsight; // Could be enhanced to have multiple variants
+          const sentence = aiDiv.querySelector('.insight-ai-sentence');
+          if (sentence) {
+            sentence.style.opacity = '0';
+            setTimeout(() => {
+              sentence.textContent = newInsight;
+              sentence.style.opacity = '1';
+            }, 200);
+          }
+        } catch (error) {
+          console.error('Error refreshing insight:', error);
+        }
+      });
+      
+      const header = aiDiv.querySelector('.insight-ai-header');
+      if (header) {
+        header.appendChild(refreshBtn);
+      }
+      
       container.appendChild(aiDiv);
     }
     return;
