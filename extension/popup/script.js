@@ -596,6 +596,15 @@ document.addEventListener('DOMContentLoaded', () => {
    *    sent over the network to external endpoints.
    */
   async function buildDashboardUrl(data) {
+    const shortCatMap = {
+      'beauty_health': 'b',
+      'fashion': 'f',
+      'tech': 't',
+      'home': 'h',
+      'sport': 's',
+      'edu': 'e'
+    };
+
     // Build monthly items aggregation
     const monthMap = {};
     for (const order of (data.cachePayload?.miniOrders || [])) {
@@ -615,19 +624,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     // mi: Top items grouped by year-month (key format 'YYYY-M')
+    // We serialize as compact arrays [n, s, c, cat, op, dp] to keep URL compact
     const monthlyItems = {};
     for (const [ym, map] of Object.entries(monthMap)) {
       monthlyItems[ym] = Object.values(map)
         .sort((a, b) => b.s - a.s)
         .slice(0, 20)
-        .map(x => ({ 
-          n: compactItemName(x.n).substring(0, 40), 
-          s: Math.round(x.s), 
-          c: x.c, 
-          cat: x.cat,
-          op: Math.round(x.op || 0),
-          dp: Math.round(x.dp || 0)
-        }));
+        .map(x => {
+          const catCode = shortCatMap[x.cat] || x.cat || '';
+          return [
+            compactItemName(x.n).substring(0, 40),
+            Math.round(x.s),
+            x.c,
+            catCode,
+            Math.round(x.op || 0),
+            Math.round(x.dp || 0)
+          ];
+        });
     }
 
     // yd: Yearly breakdown stats (t: spent, o: orders, ip: items, s: saved, m: monthly spent)
@@ -678,18 +691,20 @@ document.addEventListener('DOMContentLoaded', () => {
       '1y': Math.round((rawPeriodStats['1_year'] || {}).totalSpent || 0)
     };
 
-    // 9. ti: Top 150 items list (n: cleaned name, s: rounded spent, c: count, cat: category ID)
-    // Names are pre-cleaned to minimize payload size; category classification is completed by dashboard.
-    const topItemsList = (data.topItems || []).slice(0, 150).map(i => ({
-      n: compactItemName(i.name).substring(0, 45), // n: Cleaned item name
-      s: Math.round(i.spent), // s: Spent amount for this item
-      c: i.count, // c: Quantity purchased
-      cat: i.cat, // cat: Category ID
-      op: Math.round(i.op || 0), // op: Original unit price
-      dp: Math.round(i.dp || 0)  // dp: Discounted unit price
-    }));
+    // 9. ti: Top 150 items list: compact array [n, s, c, cat, op, dp] to keep URL compact
+    const topItemsList = (data.topItems || []).slice(0, 150).map(i => {
+      const catCode = shortCatMap[i.cat] || i.cat || '';
+      return [
+        compactItemName(i.name).substring(0, 45), // n
+        Math.round(i.spent), // s
+        i.count, // c
+        catCode, // cat
+        Math.round(i.op || 0), // op
+        Math.round(i.dp || 0)  // dp
+      ];
+    });
 
-    // Build compact order history list for dashboard view
+    // Build compact order history list for dashboard view: array format [ts, finalCost, rawCost, cat, name]
     const orderHistoryList = (data.cachePayload?.miniOrders || []).map(o => {
       let mainCat = '';
       let mainItemName = '';
@@ -704,13 +719,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-      return {
-        t: o.ts,
-        f: Math.round(o.finalCost),
-        r: Math.round(o.rawCost || o.finalCost),
-        c: mainCat,
-        n: mainItemName.substring(0, 40) // limit size to keep URL hash compact
-      };
+      const catCode = shortCatMap[mainCat] || mainCat;
+      return [
+        o.ts,
+        Math.round(o.finalCost),
+        Math.round(o.rawCost || o.finalCost),
+        catCode,
+        mainItemName.substring(0, 40)
+      ];
     });
 
     // Payload schema structure sent to the dashboard via URL hash

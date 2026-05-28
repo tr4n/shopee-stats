@@ -1551,6 +1551,55 @@ function setupDashboardRatingCard(d) {
 
     async function initDashboard() {
       window.currentDashData = d;
+
+      const reverseCatMap = {
+        'b': 'beauty_health',
+        'f': 'fashion',
+        't': 'tech',
+        'h': 'home',
+        's': 'sport',
+        'e': 'edu'
+      };
+
+      // Normalize `ti` if it is in array format [n, s, c, cat, op, dp]
+      if (d.ti && d.ti.length && Array.isArray(d.ti[0])) {
+        d.ti = d.ti.map(arr => ({
+          n: arr[0],
+          s: arr[1],
+          c: arr[2],
+          cat: reverseCatMap[arr[3]] || arr[3],
+          op: arr[4] || 0,
+          dp: arr[5] || 0
+        }));
+      }
+
+      // Normalize `ol` if it is in array format [t, f, r, c, n]
+      if (d.ol && d.ol.length && Array.isArray(d.ol[0])) {
+        d.ol = d.ol.map(arr => ({
+          t: arr[0],
+          f: arr[1],
+          r: arr[2],
+          c: reverseCatMap[arr[3]] || arr[3],
+          n: arr[4]
+        }));
+      }
+
+      // Normalize `mi` (monthly items) if it is in array format [n, s, c, cat, op, dp]
+      if (d.mi) {
+        for (const key of Object.keys(d.mi)) {
+          if (d.mi[key] && d.mi[key].length && Array.isArray(d.mi[key][0])) {
+            d.mi[key] = d.mi[key].map(arr => ({
+              n: arr[0],
+              s: arr[1],
+              c: arr[2],
+              cat: reverseCatMap[arr[3]] || arr[3],
+              op: arr[4] || 0,
+              dp: arr[5] || 0
+            }));
+          }
+        }
+      }
+
       // Load categories first so keyword classification is ready!
       await initializeCategories();
 
