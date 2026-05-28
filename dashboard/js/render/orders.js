@@ -59,7 +59,7 @@ function getCategoryColor(catName) {
   if (typeof getCatIdByName === 'function') {
     catId = getCatIdByName(catName);
   }
-  
+
   if (catId) {
     if (catId === 'tech') return { bg: 'rgba(59, 130, 246, 0.12)', fg: '#3b82f6' };
     if (catId === 'fashion') return { bg: 'rgba(238, 77, 45, 0.12)', fg: '#ee4d2d' };
@@ -68,7 +68,7 @@ function getCategoryColor(catName) {
     if (catId === 'edu') return { bg: 'rgba(20, 184, 166, 0.12)', fg: '#14b8a6' };
     if (catId === 'sport') return { bg: 'rgba(168, 85, 247, 0.12)', fg: '#a855f7' };
   }
-  
+
   // Fallback: substring matching for legacy or custom categories
   const nameLower = catName.toLowerCase();
   if (nameLower.includes('điện thoại') || nameLower.includes('máy tính') || nameLower.includes('điện tử') || nameLower.includes('camera') || nameLower.includes('ảnh') || nameLower.includes('đồng hồ') || nameLower.includes('tech')) {
@@ -254,9 +254,9 @@ function calculateSalesStats(orders) {
   if (_statsCache && _statsCacheYear === ordersActiveYear) return _statsCache;
 
   const stats = {
-    double:  { label: 'Ngày Đôi',    spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
-    mid:     { label: 'Giữa Tháng', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
-    end:     { label: 'Lương Về',    spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    double: { label: 'Ngày Đôi', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    mid: { label: 'Giữa Tháng', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    end: { label: 'Lương Về', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
     regular: { label: 'Ngày Thường', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} }
   };
 
@@ -270,9 +270,9 @@ function calculateSalesStats(orders) {
       for (const type of ['double', 'mid', 'end', 'regular']) {
         const e = window._oss[yr]?.[type];
         if (!e) continue;
-        stats[type].spend         += e[0] || 0;
-        stats[type].raw           += e[1] || 0;
-        stats[type].orders        += e[2] || 0;
+        stats[type].spend += e[0] || 0;
+        stats[type].raw += e[1] || 0;
+        stats[type].orders += e[2] || 0;
         stats[type].midnightOrders += e[3] || 0;
       }
     }
@@ -289,9 +289,9 @@ function calculateSalesStats(orders) {
     // When oss is NOT available (old extension payload), fall back to computing from ol[]
     if (!window._oss) {
       const raw = o.r > 0 ? o.r : o.f;
-      stats[type].spend          += spend;
-      stats[type].raw            += raw;
-      stats[type].orders         += 1;
+      stats[type].spend += spend;
+      stats[type].raw += raw;
+      stats[type].orders += 1;
       if (toVnParts(o.t).hour < 2) stats[type].midnightOrders += 1;
     }
 
@@ -327,7 +327,7 @@ function renderSalesKPIs(stats) {
     const isActive = ordersActiveType === k;
     let cardIcon = '📅';
     let iconClass = '';
-    
+
     if (k === 'double') { cardIcon = '🎁'; iconClass = 'orange'; }
     else if (k === 'mid') { cardIcon = '🌓'; iconClass = 'green'; }
     else if (k === 'end') { cardIcon = '💰'; iconClass = 'blue'; }
@@ -413,7 +413,7 @@ function renderSalesCharts(stats) {
   if (distCtx) {
     const ctx = distCtx.getContext('2d');
     if (salesDistributionChart) salesDistributionChart.destroy();
-    
+
     if (totalSpend === 0) {
       ctx.clearRect(0, 0, distCtx.width, distCtx.height);
     } else {
@@ -466,13 +466,13 @@ function renderSalesCharts(stats) {
               titleColor: '#1e293b',
               bodyColor: 'rgba(30,41,59,0.8)',
               callbacks: {
-              label: ctx => {
-                const spend = ctx.parsed;
-                const pct = totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0;
-                const orders = orderCounts[ctx.dataIndex] || 0;
-                return ['  ' + fmtVND(spend), '  ' + orders + ' đơn · ' + pct + '%'];
+                label: ctx => {
+                  const spend = ctx.parsed;
+                  const pct = totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0;
+                  const orders = orderCounts[ctx.dataIndex] || 0;
+                  return ['  ' + fmtVND(spend), '  ' + orders + ' đơn · ' + pct + '%'];
+                }
               }
-            }
             }
           }
         }
@@ -605,14 +605,13 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
       const pct = Math.round((h.count / maxOrders) * 100);
       const sharePct = Math.round((h.count / displayTotalOrders) * 100);
       const isActive = ordersActiveHour === key;
-      const activeTag = isActive ? `<span style="font-size:10px;background:${h.fg};color:#fff;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle;">Đang lọc</span>` : '';
       const activeStyle = isActive ? `box-shadow:0 0 0 2px ${h.fg};border-radius:10px;background:${h.bg};` : '';
 
       return `
         <div class="sales-adv-item" data-hourkey="${key}" title="Click để xem đơn trong khung giờ này" style="cursor:pointer;transition:all 0.18s;${activeStyle}">
           <div class="sales-adv-icon" style="background:${h.bg};color:${h.fg};">${h.emoji}</div>
           <div class="sales-adv-body">
-            <div class="sales-adv-title">${h.label} ${activeTag}</div>
+            <div class="sales-adv-title">${h.label}</div>
             <div class="top-bar-wrap" style="width:100%;height:5px;margin-top:4px;">
               <div class="top-bar-fill" style="width:${pct}%;height:100%;background:${h.bar}"></div>
             </div>
@@ -646,10 +645,10 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
     // Combine categories from Double, Mid, and End sale days
     const combinedCats = {};
     const saleKeys = ['double', 'mid', 'end'];
-    
+
     // If active KPI is set, only use that type's categories
-    const activeKeys = ordersActiveType === 'all' 
-      ? saleKeys 
+    const activeKeys = ordersActiveType === 'all'
+      ? saleKeys
       : (ordersActiveType === 'regular' ? ['regular'] : [ordersActiveType]);
 
     activeKeys.forEach(k => {
@@ -969,7 +968,7 @@ function renderSaleDaysTable(filteredYearOrders) {
     let titleHtml = '📅 Chi Tiết Chi Tiêu';
     const badges = [];
 
-    const typeInfo = { double: ['#ee4d2d','rgba(238,77,45,0.12)','Ngày Đôi'], mid: ['#26aa99','rgba(38,170,153,0.12)','Giữa Tháng'], end: ['#3b82f6','rgba(59,130,246,0.12)','Lương Về'], regular: ['#64748b','rgba(100,116,139,0.12)','Ngày Thường'] };
+    const typeInfo = { double: ['#ee4d2d', 'rgba(238,77,45,0.12)', 'Ngày Đôi'], mid: ['#26aa99', 'rgba(38,170,153,0.12)', 'Giữa Tháng'], end: ['#3b82f6', 'rgba(59,130,246,0.12)', 'Lương Về'], regular: ['#64748b', 'rgba(100,116,139,0.12)', 'Ngày Thường'] };
     if (ordersActiveType !== 'all' && typeInfo[ordersActiveType]) {
       const [fg, bg, label] = typeInfo[ordersActiveType];
       badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:${bg};color:${fg};font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">${label}</span>`);
@@ -1077,7 +1076,7 @@ function renderSaleDaysTable(filteredYearOrders) {
         : '';
 
       const spend = o.f || 0;
-      const raw   = o.r || o.f || 0;
+      const raw = o.r || o.f || 0;
       const saved = Math.max(0, raw - spend);
       const discountPct = raw > 0 ? Math.round((saved / raw) * 100) : 0;
       const efficiencyLabel = saved > 0
@@ -1134,8 +1133,8 @@ function renderSaleDaysTable(filteredYearOrders) {
       dateGroups[key] = { key, label, type, isBlackFriday, orders: 0, spend: 0, raw: 0, t: o.t };
     }
     dateGroups[key].orders += 1;
-    dateGroups[key].spend  += o.f || 0;
-    dateGroups[key].raw    += o.r > 0 ? o.r : (o.f || 0);
+    dateGroups[key].spend += o.f || 0;
+    dateGroups[key].raw += o.r > 0 ? o.r : (o.f || 0);
   });
 
   const saleDaysList = Object.values(dateGroups).sort((a, b) => b.t - a.t);
@@ -1190,9 +1189,9 @@ function renderSaleDaysTable(filteredYearOrders) {
 
   // Total row across all filtered data (not just current page)
   const sumOrders = saleDaysList.reduce((s, i) => s + i.orders, 0);
-  const sumSpend  = saleDaysList.reduce((s, i) => s + i.spend, 0);
-  const sumRaw    = saleDaysList.reduce((s, i) => s + i.raw, 0);
-  const sumSaved  = Math.max(0, sumRaw - sumSpend);
+  const sumSpend = saleDaysList.reduce((s, i) => s + i.spend, 0);
+  const sumRaw = saleDaysList.reduce((s, i) => s + i.raw, 0);
+  const sumSaved = Math.max(0, sumRaw - sumSpend);
   const sumDisPct = sumRaw > 0 ? Math.round((sumSaved / sumRaw) * 100) : 0;
   const table = document.getElementById('orders-table');
   if (table) {
@@ -1221,7 +1220,7 @@ function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders)
 
   const maxPagesToShow = 5;
   let startPage = Math.max(1, ordersCurrentPage - 2);
-  let endPage   = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
   if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage - maxPagesToShow + 1);
 
   if (startPage > 1) {
