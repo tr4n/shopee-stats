@@ -133,6 +133,25 @@
 
   function getRawTs(orderObj) {
     if (!orderObj) return 0;
+    // For other features, prioritize delivery completion time (ctime in tracking_info)
+    if (
+      orderObj.shipping &&
+      orderObj.shipping.tracking_info &&
+      orderObj.shipping.tracking_info.ctime
+    ) {
+      return orderObj.shipping.tracking_info.ctime;
+    }
+    if (orderObj.create_time) return orderObj.create_time;
+    if (orderObj.ctime) return orderObj.ctime;
+    if (orderObj.info_card && orderObj.info_card.create_time) {
+      return orderObj.info_card.create_time;
+    }
+    return 0;
+  }
+
+  function getOrderPlacementTs(orderObj) {
+    if (!orderObj) return 0;
+    // For sales statistics, prioritize order creation time (create_time) or derive from order ID
     if (orderObj.create_time) return orderObj.create_time;
     if (orderObj.ctime) return orderObj.ctime;
     if (orderObj.info_card && orderObj.info_card.create_time) {
@@ -477,7 +496,8 @@
             }
           }
 
-          newMiniOrders.push({ ts: rawTs, finalCost, rawCost, itemCount, il: orderItemList });
+          const ots = getOrderPlacementTs(order);
+          newMiniOrders.push({ ts: rawTs, ots, finalCost, rawCost, itemCount, il: orderItemList });
         }
 
         offsetIndex += LIMIT;

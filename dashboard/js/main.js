@@ -1559,14 +1559,15 @@ function setupDashboardRatingCard(d) {
         }));
       }
 
-      // Normalize `ol` if it is in array format [t, f, r, c, n]
+      // Normalize `ol` if it is in array format [t, f, r, c, n, ot]
       if (d.ol && d.ol.length && Array.isArray(d.ol[0])) {
         d.ol = d.ol.map(arr => ({
           t: arr[0],
           f: arr[1],
           r: arr[2],
           c: reverseCatMap[arr[3]] || arr[3],
-          n: arr[4]
+          n: arr[4],
+          ot: arr[5] || arr[0]
         }));
       }
       if (d.ol && d.ol.length) {

@@ -714,20 +714,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Structure: { "YYYY": { "double"|"mid"|"end"|"regular": [spend, raw, orders, midnightOrders] } }
     const ossMap = {};
     for (const o of allMiniOrders) {
-      if (!o.ts || !(o.finalCost > 0)) continue;
-      const yr = String(VnTime.getVnYear(o.ts));
-      const type = VnTime.getSaleTypeFromTs(o.ts);
+      const tUse = o.ots || o.ts;
+      if (!tUse || !(o.finalCost > 0)) continue;
+      const yr = String(VnTime.getVnYear(tUse));
+      const type = VnTime.getSaleTypeFromTs(tUse);
       if (!ossMap[yr]) ossMap[yr] = {};
       if (!ossMap[yr][type]) ossMap[yr][type] = [0, 0, 0, 0];
       const e = ossMap[yr][type];
       e[0] += Math.round(o.finalCost);
       e[1] += Math.round(o.rawCost > 0 ? o.rawCost : o.finalCost);
       e[2] += 1;
-      if (VnTime.getVnHour(o.ts) < 2) e[3] += 1;
+      if (VnTime.getVnHour(tUse) < 2) e[3] += 1;
     }
     const orderStatsSummary = Object.keys(ossMap).length > 0 ? ossMap : undefined;
 
-    // Build compact order history list for dashboard view: array format [ts, finalCost, rawCost, cat, name]
+    // Build compact order history list for dashboard view: array format [ts, finalCost, rawCost, cat, name, ots]
     // Excludes zero-value orders (voucher 100%, data errors) from the detail list.
     const orderHistoryList = allMiniOrders
       .filter(o => o.finalCost > 0)
@@ -751,7 +752,8 @@ document.addEventListener('DOMContentLoaded', () => {
           Math.round(o.finalCost),
           Math.round(o.rawCost > 0 ? o.rawCost : o.finalCost),
           catCode,
-          mainItemName.substring(0, 60)
+          mainItemName.substring(0, 60),
+          o.ots || o.ts
         ];
       });
 

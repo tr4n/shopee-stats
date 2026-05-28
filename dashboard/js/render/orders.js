@@ -120,7 +120,10 @@ function resolveItemCategory(itemName, rawCatId) {
 }
 
 function renderOrders(ol) {
-  currentOrders = ol || [];
+  currentOrders = (ol || []).map(o => ({
+    ...o,
+    t: o.ot || o.t
+  }));
   ordersActiveYear = 'all';
   ordersActiveType = 'all';
   ordersActiveHour = null;
