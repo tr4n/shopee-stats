@@ -16,6 +16,10 @@ let ordersCurrentPage = 1;
 let salesDistributionChart = null;
 let salesSpendSavingsChart = null;
 
+// Stats memoization — cleared on new data load, keyed by active year
+let _statsCache = null;
+let _statsCacheYear = null;
+
 function isDateBlackFriday(date) {
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
@@ -24,6 +28,34 @@ function isDateBlackFriday(date) {
   const firstOfNov = new Date(y, 10, 1);
   const firstFridayDay = 1 + ((5 - firstOfNov.getDay() + 7) % 7);
   return d === (firstFridayDay + 21);
+}
+
+// Returns 'double' | 'mid' | 'end' | 'regular' for a given date
+function getSaleType(date) {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  if (day === month || isDateBlackFriday(date)) return 'double';
+  if (day === 15) return 'mid';
+  if (day >= 25) return 'end';
+  return 'regular';
+}
+
+// Returns short tag label for a sale type + date (e.g. 'Black Friday', 'Ngày Đôi', '')
+function getSaleTypeLabel(type, date) {
+  if (type === 'regular') return '';
+  if (type === 'mid') return 'Giữa Tháng';
+  if (type === 'end') return 'Lương Về';
+  return isDateBlackFriday(date) ? 'Black Friday' : 'Ngày Đôi';
+}
+
+// Returns the full day label for summary table rows (e.g. 'Ngày Đôi 11/11', 'Lương Về 28/5')
+function getSaleDayLabel(type, date) {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  if (type === 'regular') return `Ngày thường ${day}/${month}`;
+  if (type === 'mid') return `Giữa Tháng 15/${month}`;
+  if (type === 'end') return `Lương Về ${day}/${month}`;
+  return isDateBlackFriday(date) ? `Black Friday ${day}/${month}` : `Ngày Đôi ${day}/${month}`;
 }
 
 function parseCategoryName(catName) {
@@ -87,9 +119,9 @@ function resolveItemCategory(itemName, rawCatId) {
   const key40 = itemName.toLowerCase().substring(0, 40);
 
   // 1. Check cached classification (from previous sessions or AI)
-  if (window._dashCache && window._dashCache.cats) {
-    if (window._dashCache.cats[key]) return window._dashCache.cats[key];
-    if (window._dashCache.cats[key40]) return window._dashCache.cats[key40];
+  if (_dashCache && _dashCache.cats) {
+    if (_dashCache.cats[key]) return _dashCache.cats[key];
+    if (_dashCache.cats[key40]) return _dashCache.cats[key40];
   }
 
   // 2. Try keyword classification
@@ -109,6 +141,49 @@ function renderOrders(ol) {
   ordersActiveHour = null;
   ordersActiveCat = null;
   ordersCurrentPage = 1;
+  _statsCache = null;
+  _statsCacheYear = null;
+
+  // Update subtitle with data summary
+  const subtitle = document.getElementById('orders-subtitle');
+  if (subtitle) {
+    if (currentOrders.length > 0) {
+      const years = new Set();
+      let minTs = Infinity, maxTs = -Infinity;
+      currentOrders.forEach(o => {
+        if (!o.t) return;
+        years.add(new Date(o.t * 1000).getFullYear());
+        if (o.t < minTs) minTs = o.t;
+        if (o.t > maxTs) maxTs = o.t;
+      });
+      const fmtMonthYear = ts => {
+        const d = new Date(ts * 1000);
+        return `${d.getMonth() + 1}/${d.getFullYear()}`;
+      };
+      const yearCount = years.size;
+      const totalCount = window._totalOrderCount || 0;
+      const loadedCount = currentOrders.length;
+      const isTruncated = totalCount > 0 && loadedCount < totalCount;
+
+      // Base info: date range + year count
+      let text = `${yearCount} năm dữ liệu · từ ${fmtMonthYear(minTs)} đến ${fmtMonthYear(maxTs)}`;
+
+      if (isTruncated) {
+        // Distinguish: stats are complete (from oss), detail list is partial
+        const hasOss = !!window._oss;
+        if (hasOss) {
+          text = `Thống kê từ ${totalCount} đơn (đầy đủ) · hiển thị ${loadedCount} đơn gần nhất · ${text}`;
+        } else {
+          text = `${loadedCount}/${totalCount} đơn · ${text}`;
+        }
+      } else {
+        text = `${loadedCount} đơn hàng · ${text}`;
+      }
+      subtitle.textContent = text;
+    } else {
+      subtitle.textContent = 'Phân tích hành vi chi tiêu và hiệu quả săn sale của bạn';
+    }
+  }
 
   // Setup Year Pills
   renderOrdersYearPills();
@@ -187,42 +262,53 @@ function applyFiltersAndRender() {
 }
 
 function calculateSalesStats(orders) {
+  // Return cached result when year filter hasn't changed (avoids re-iterating on every filter interaction)
+  if (_statsCache && _statsCacheYear === ordersActiveYear) return _statsCache;
+
   const stats = {
-    double: { label: 'Ngày Đôi', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
-    mid: { label: 'Giữa Tháng', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
-    end: { label: 'Lương Về', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    double:  { label: 'Ngày Đôi',    spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    mid:     { label: 'Giữa Tháng', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
+    end:     { label: 'Lương Về',    spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} },
     regular: { label: 'Ngày Thường', spend: 0, raw: 0, orders: 0, midnightOrders: 0, categories: {} }
   };
 
+  // ── Accurate numerical stats from pre-aggregated oss (complete, never truncated) ──
+  if (window._oss) {
+    const yearsToUse = ordersActiveYear === 'all'
+      ? Object.keys(window._oss)
+      : (window._oss[ordersActiveYear] ? [ordersActiveYear] : []);
+
+    for (const yr of yearsToUse) {
+      for (const type of ['double', 'mid', 'end', 'regular']) {
+        const e = window._oss[yr]?.[type];
+        if (!e) continue;
+        stats[type].spend         += e[0] || 0;
+        stats[type].raw           += e[1] || 0;
+        stats[type].orders        += e[2] || 0;
+        stats[type].midnightOrders += e[3] || 0;
+      }
+    }
+  }
+
+  // ── Directional category breakdown from available orders (may be partial subset) ──
+  // Categories are used for pattern-insight only; they come from ol[] which can be
+  // a recent-N subset. Spend/raw/orders numbers above override from oss when available.
   orders.forEach(o => {
-    if (!o.t || o.t <= 0) return;
+    if (!o.t || o.t <= 0 || !(o.f > 0)) return;
     const date = new Date(o.t * 1000);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const hour = date.getHours();
+    const type = getSaleType(date);
+    const spend = o.f;
 
-    let type = 'regular';
-    if (day === month || isDateBlackFriday(date)) {
-      type = 'double';
-    } else if (day === 15) {
-      type = 'mid';
-    } else if (day >= 25) {
-      type = 'end';
+    // When oss is NOT available (old extension payload), fall back to computing from ol[]
+    if (!window._oss) {
+      const raw = o.r > 0 ? o.r : o.f;
+      stats[type].spend          += spend;
+      stats[type].raw            += raw;
+      stats[type].orders         += 1;
+      if (date.getHours() < 2) stats[type].midnightOrders += 1;
     }
 
-    const spend = o.f || 0;
-    const raw = o.r || o.f || 0;
-
-    stats[type].spend += spend;
-    stats[type].raw += raw;
-    stats[type].orders += 1;
-
-    // Golden hour: 00:00 - 02:00
-    if (hour >= 0 && hour < 2) {
-      stats[type].midnightOrders += 1;
-    }
-
-    // Accumulate category spending (if extension provided category 'c' or item name 'n')
+    // Always accumulate categories (used for pattern display, acceptable with partial data)
     if (o.c || o.n) {
       const resolvedCat = resolveItemCategory(o.n, o.c);
       if (!stats[type].categories[resolvedCat]) {
@@ -233,6 +319,8 @@ function calculateSalesStats(orders) {
     }
   });
 
+  _statsCache = stats;
+  _statsCacheYear = ordersActiveYear;
   return stats;
 }
 
@@ -291,17 +379,21 @@ function renderSalesKPIs(stats) {
     `;
   }).join('');
 
-  // Add click listeners to cards
+  // Add click + keyboard listeners to cards
   row.querySelectorAll('.kpi.interactive').forEach(card => {
-    card.addEventListener('click', () => {
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+
+    const toggle = () => {
       const type = card.getAttribute('data-type');
-      if (ordersActiveType === type) {
-        ordersActiveType = 'all'; // toggle off
-      } else {
-        ordersActiveType = type;
-      }
+      ordersActiveType = ordersActiveType === type ? 'all' : type;
       ordersCurrentPage = 1;
       applyFiltersAndRender();
+    };
+
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
     });
   });
 
@@ -313,6 +405,7 @@ function renderSalesCharts(stats) {
 
   const labels = ['Ngày Đôi', 'Giữa Tháng', 'Lương Về', 'Ngày Thường'];
   const spendData = [stats.double.spend, stats.mid.spend, stats.end.spend, stats.regular.spend];
+  const orderCounts = [stats.double.orders, stats.mid.orders, stats.end.orders, stats.regular.orders];
   const savedData = [
     Math.max(0, stats.double.raw - stats.double.spend),
     Math.max(0, stats.mid.raw - stats.mid.spend),
@@ -385,7 +478,14 @@ function renderSalesCharts(stats) {
               borderWidth: 1,
               titleColor: '#1e293b',
               bodyColor: 'rgba(30,41,59,0.8)',
-              callbacks: { label: ctx => '  ' + fmtVND(ctx.parsed) + 'đ' }
+              callbacks: {
+              label: ctx => {
+                const spend = ctx.parsed;
+                const pct = totalSpend > 0 ? Math.round((spend / totalSpend) * 100) : 0;
+                const orders = orderCounts[ctx.dataIndex] || 0;
+                return ['  ' + fmtVND(spend) + 'đ', '  ' + orders + ' đơn · ' + pct + '%'];
+              }
+            }
             }
           }
         }
@@ -499,21 +599,7 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
 
       // Filter by active KPI card type
       const date = new Date(o.t * 1000);
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      
-      let type = 'regular';
-      if (day === month || isDateBlackFriday(date)) {
-        type = 'double';
-      } else if (day === 15) {
-        type = 'mid';
-      } else if (day >= 25) {
-        type = 'end';
-      }
-
-      if (ordersActiveType !== 'all' && type !== ordersActiveType) {
-        return;
-      }
+      if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return;
 
       totalOrders++;
       const hr = date.getHours();
@@ -829,24 +915,24 @@ function renderSaleDaysTable(filteredYearOrders) {
     return;
   }
 
+  // Update dropdown label to match current mode
+  if (limitSelect) {
+    const modeWord = isDetailMode ? 'đơn hàng' : 'ngày';
+    limitSelect.querySelectorAll('option').forEach(opt => {
+      opt.textContent = `Hiện ${opt.value} ${modeWord}`;
+    });
+  }
+
   // ══════════════════════════════════════════
   //  DETAIL MODE — individual orders
   // ══════════════════════════════════════════
   if (isDetailMode) {
     const individualOrders = filteredYearOrders.filter(o => {
-      if (!o.t || o.t <= 0) return false;
+      if (!o.t || o.t <= 0 || !(o.f > 0)) return false;
       const date = new Date(o.t * 1000);
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
 
       // Filter by sale type
-      if (ordersActiveType !== 'all') {
-        let type = 'regular';
-        if (day === month || isDateBlackFriday(date)) type = 'double';
-        else if (day === 15) type = 'mid';
-        else if (day >= 25) type = 'end';
-        if (type !== ordersActiveType) return false;
-      }
+      if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return false;
 
       // Filter by hour slot
       if (ordersActiveHour !== null) {
@@ -883,12 +969,8 @@ function renderSaleDaysTable(filteredYearOrders) {
       const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
       const dateStr = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
 
-      const day = date.getDate(), month = date.getMonth() + 1;
-      const isBF = isDateBlackFriday(date);
-      let type = 'regular', typeLabel = '';
-      if (day === month || isBF) { type = 'double'; typeLabel = isBF ? 'Black Friday' : 'Ngày Đôi'; }
-      else if (day === 15)       { type = 'mid';    typeLabel = 'Giữa Tháng'; }
-      else if (day >= 25)        { type = 'end';    typeLabel = 'Lương Về'; }
+      const type = getSaleType(date);
+      const typeLabel = getSaleTypeLabel(type, date);
 
       const typeTag = typeLabel
         ? `<span style="font-size:10px;font-weight:700;color:${TYPE_COLORS[type]};background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:7px;margin-left:4px;">${typeLabel}</span>`
@@ -945,35 +1027,25 @@ function renderSaleDaysTable(filteredYearOrders) {
   // ══════════════════════════════════════════
   const dateGroups = {};
   filteredYearOrders.forEach(o => {
-    if (!o.t || o.t <= 0) return;
+    if (!o.t || o.t <= 0 || !(o.f > 0)) return;
     const date = new Date(o.t * 1000);
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
-    const isBF = isDateBlackFriday(date);
-    let type = 'regular';
-    let label = `Ngày thường ${day}/${month}`;
-    if (day === month || isBF) {
-      type = 'double';
-      label = isBF ? `Black Friday ${day}/${month}` : `Ngày Đôi ${day}/${month}`;
-    } else if (day === 15) {
-      type = 'mid';
-      label = `Giữa Tháng 15/${month}`;
-    } else if (day >= 25) {
-      type = 'end';
-      label = `Lương Về ${day}/${month}`;
-    }
+    const type = getSaleType(date);
+    const label = getSaleDayLabel(type, date);
+    const isBlackFriday = type === 'double' && isDateBlackFriday(date);
 
     if (ordersActiveType !== 'all' && type !== ordersActiveType) return;
 
     if (!dateGroups[key]) {
-      dateGroups[key] = { key, label, type, isBlackFriday: isBF, orders: 0, spend: 0, raw: 0, t: o.t };
+      dateGroups[key] = { key, label, type, isBlackFriday, orders: 0, spend: 0, raw: 0, t: o.t };
     }
     dateGroups[key].orders += 1;
     dateGroups[key].spend  += o.f || 0;
-    dateGroups[key].raw    += o.r || o.f || 0;
+    dateGroups[key].raw    += o.r > 0 ? o.r : (o.f || 0);
   });
 
   const saleDaysList = Object.values(dateGroups).sort((a, b) => b.t - a.t);
@@ -1027,6 +1099,27 @@ function renderSaleDaysTable(filteredYearOrders) {
     `;
   }).join("");
 
+  // Total row across all filtered data (not just current page)
+  const sumOrders = saleDaysList.reduce((s, i) => s + i.orders, 0);
+  const sumSpend  = saleDaysList.reduce((s, i) => s + i.spend, 0);
+  const sumRaw    = saleDaysList.reduce((s, i) => s + i.raw, 0);
+  const sumSaved  = Math.max(0, sumRaw - sumSpend);
+  const sumDisPct = sumRaw > 0 ? Math.round((sumSaved / sumRaw) * 100) : 0;
+  const table = document.getElementById('orders-table');
+  if (table) {
+    const existingTfoot = table.querySelector('tfoot');
+    if (existingTfoot) existingTfoot.remove();
+    const tfoot = document.createElement('tfoot');
+    tfoot.innerHTML = `<tr style="font-weight:700;border-top:2px solid var(--border);background:var(--surface-2,var(--surface));">
+      <td style="padding:10px 12px;color:var(--text);">Tổng cộng <span style="font-weight:400;color:var(--muted);font-size:12px;">(${saleDaysList.length} ngày)</span></td>
+      <td style="text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;">${sumOrders} đơn</td>
+      <td style="text-align:right;padding:10px 12px;color:var(--primary);font-variant-numeric:tabular-nums;">${fmtVND(sumSpend)}đ</td>
+      <td style="text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;">${sumSaved > 0 ? fmtVND(sumSaved) + 'đ' : '—'}</td>
+      <td style="text-align:right;padding:10px 12px;">${sumSaved > 0 ? '<span style="color:var(--green);">-' + sumDisPct + '%</span>' : '<span style="color:var(--muted);">—</span>'}</td>
+    </tr>`;
+    table.appendChild(tfoot);
+  }
+
   renderOrdersTablePagination(pagination, totalPages, filteredYearOrders);
 }
 
@@ -1065,3 +1158,6 @@ function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders)
     });
   });
 }
+
+// Expose for classification.js fallback re-render path
+window.renderOrders = renderOrders;

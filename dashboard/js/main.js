@@ -1687,6 +1687,10 @@ function setupDashboardRatingCard(d) {
       renderTopItems(tiItems);
       renderCategories(d.cs, tiItems);
       renderCatYearPills(d, tiItems);
+
+      // Expose pre-aggregated order stats and total count for orders.js
+      window._oss = d.oss || null;
+      window._totalOrderCount = d.o || 0;
       renderOrders(d.ol || []);
 
       // Render static insight cards

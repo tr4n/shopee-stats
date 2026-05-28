@@ -704,30 +704,77 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
     });
 
+    const allMiniOrders = data.cachePayload?.miniOrders || [];
+
+    // Pre-aggregate COMPLETE order stats by year + sale type.
+    // This is computed from ALL orders (before any truncation) so KPI numbers in the
+    // dashboard are always 100% accurate regardless of how many ol[] detail entries we include.
+    // Structure: { "YYYY": { "double"|"mid"|"end"|"regular": [spend, raw, orders, midnightOrders] } }
+    const ossMap = {};
+    const isBlackFridayTs = (ts) => {
+      const d = new Date(ts * 1000);
+      if (d.getMonth() !== 10) return false;
+      const firstOfNov = new Date(d.getFullYear(), 10, 1);
+      return d.getDate() === (1 + ((5 - firstOfNov.getDay() + 7) % 7) + 21);
+    };
+    for (const o of allMiniOrders) {
+      if (!o.ts || !(o.finalCost > 0)) continue;
+      const date = new Date(o.ts * 1000);
+      const yr = String(date.getFullYear());
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      let type = 'regular';
+      if (day === month || isBlackFridayTs(o.ts)) type = 'double';
+      else if (day === 15) type = 'mid';
+      else if (day >= 25) type = 'end';
+      if (!ossMap[yr]) ossMap[yr] = {};
+      if (!ossMap[yr][type]) ossMap[yr][type] = [0, 0, 0, 0];
+      const e = ossMap[yr][type];
+      e[0] += Math.round(o.finalCost);
+      e[1] += Math.round(o.rawCost > 0 ? o.rawCost : o.finalCost);
+      e[2] += 1;
+      if (date.getHours() < 2) e[3] += 1;
+    }
+    const orderStatsSummary = Object.keys(ossMap).length > 0 ? ossMap : undefined;
+
     // Build compact order history list for dashboard view: array format [ts, finalCost, rawCost, cat, name]
-    const orderHistoryList = (data.cachePayload?.miniOrders || []).map(o => {
-      let mainCat = '';
-      let mainItemName = '';
-      if (Array.isArray(o.il) && o.il.length > 0) {
-        let maxSpent = -1;
-        for (const item of o.il) {
-          const itemSpent = item.s || 0;
-          if (itemSpent > maxSpent) {
-            maxSpent = itemSpent;
-            mainCat = item.cat || '';
-            mainItemName = item.n || '';
+    // Excludes zero-value orders (voucher 100%, data errors) from the detail list.
+    const orderHistoryList = allMiniOrders
+      .filter(o => o.finalCost > 0)
+      .map(o => {
+        let mainCat = '';
+        let mainItemName = '';
+        if (Array.isArray(o.il) && o.il.length > 0) {
+          let maxSpent = -1;
+          for (const item of o.il) {
+            const itemSpent = item.s || 0;
+            if (itemSpent > maxSpent) {
+              maxSpent = itemSpent;
+              mainCat = item.cat || '';
+              mainItemName = item.n || '';
+            }
           }
         }
-      }
-      const catCode = shortCatMap[mainCat] || mainCat;
-      return [
-        o.ts,
-        Math.round(o.finalCost),
-        Math.round(o.rawCost || o.finalCost),
-        catCode,
-        mainItemName.substring(0, 40)
-      ];
-    });
+        const catCode = shortCatMap[mainCat] || mainCat;
+        return [
+          o.ts,
+          Math.round(o.finalCost),
+          Math.round(o.rawCost > 0 ? o.rawCost : o.finalCost),
+          catCode,
+          mainItemName.substring(0, 60)
+        ];
+      });
+
+    // Sort by timestamp descending (most recent first) and cap for URL size budget.
+    // Payload size estimate: 2000 entries × ~100 bytes = ~200 KB uncompressed → ~30–50 KB gzipped
+    // → ~40–67 KB base64 URL chars — well within Chrome's effective ~2 MB URL hash limit.
+    // Stats accuracy is guaranteed by oss (above); ol[] is used for detail/category views only.
+    orderHistoryList.sort((a, b) => b[0] - a[0]);
+    const OL_MAX = 2000;
+    if (orderHistoryList.length > OL_MAX) {
+      console.warn(`[Popup] ol[] truncated from ${orderHistoryList.length} to ${OL_MAX} entries. KPI stats remain accurate via oss field.`);
+      orderHistoryList.splice(OL_MAX);
+    }
 
     // Payload schema structure sent to the dashboard via URL hash
     const payload = {
@@ -742,7 +789,8 @@ document.addEventListener('DOMContentLoaded', () => {
       mi: monthlyItems,
       ps: periodStats,
       ti: topItemsList,
-      ol: orderHistoryList
+      ol: orderHistoryList,
+      oss: orderStatsSummary  // complete aggregated stats for accurate KPIs
     };
 
     const jsonStr = JSON.stringify(payload);
