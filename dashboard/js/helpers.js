@@ -17,10 +17,7 @@ function fmtDate(ts) {
   return fmtVnDateTime(ts || Math.floor(Date.now() / 1000));
 }
 
-// Vietnam timezone helpers — order times always use Asia/Ho_Chi_Minh (UTC+7)
-const VN_TZ = 'Asia/Ho_Chi_Minh';
-const VN_WD_MAP = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-
+// Shopee buyer create_time stores VN wall-clock in UTC fields — read via getUTC*, not +7 offset.
 function toVnParts(tsSec) {
   if (typeof VnTime !== 'undefined') return VnTime.toVnParts(tsSec);
   const ts = Number(tsSec) || 0;
@@ -28,25 +25,14 @@ function toVnParts(tsSec) {
     return { year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, weekday: 0 };
   }
   const d = new Date(ts * 1000);
-  const parts = {};
-  new Intl.DateTimeFormat('en-GB', {
-    timeZone: VN_TZ,
-    year: 'numeric', month: 'numeric', day: 'numeric',
-    hour: 'numeric', minute: 'numeric', second: 'numeric',
-    hour12: false
-  }).formatToParts(d).forEach(p => {
-    if (p.type !== 'literal') parts[p.type] = parseInt(p.value, 10);
-  });
-  if (parts.hour === 24) parts.hour = 0;
-  const wdStr = new Intl.DateTimeFormat('en-US', { timeZone: VN_TZ, weekday: 'short' }).format(d);
   return {
-    year: parts.year,
-    month: parts.month,
-    day: parts.day,
-    hour: parts.hour,
-    minute: parts.minute,
-    second: parts.second,
-    weekday: VN_WD_MAP[wdStr] ?? 0
+    year: d.getUTCFullYear(),
+    month: d.getUTCMonth() + 1,
+    day: d.getUTCDate(),
+    hour: d.getUTCHours(),
+    minute: d.getUTCMinutes(),
+    second: d.getUTCSeconds(),
+    weekday: d.getUTCDay()
   };
 }
 
@@ -103,7 +89,7 @@ function capFirst(s) {
 
 function renderAnalyzeButton(cardId) {
   return `<div class="ai-analyze-wrap">
-    <button class="ai-analyze-btn" onclick="runAIInsight('${cardId}')">
+    <button type="button" class="ai-analyze-btn" data-ai-card="${escHtml(cardId)}">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
         <path d="M12 8v4l3 3"></path>
@@ -129,7 +115,7 @@ function renderAIInsight(text, cardId) {
     `<div class="insight-ai-sentence"><span class="ai-bullet">•</span><span>${parseBold(s)}</span></div>`
   ).join('');
   const refreshBtn = cardId
-    ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Xin quẻ mới" style="display: none">
+    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display: none">
         <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>

@@ -15,6 +15,16 @@ window.addEventListener('unhandledrejection', function(e) {
   console.warn('Unhandled promise rejection:', e.reason);
 });
 
+const AI_INSIGHT_SYSTEM = [
+  'Bạn là một "Thầy Bói Vũ Trụ" (Tarot Reader) hệ GenZ cực kỳ hài hước, xéo sắc, chuyên xem bói bài và đọc vị số mệnh chi tiêu của chúng sinh.',
+  'Nhiệm vụ của bạn là dựa vào dữ liệu mua sắm của người dùng để phán đoán tính cách, tâm lý, và "kiếp nạn" chốt đơn của họ một cách dí dỏm.',
+  'QUY TẮC BẮT BUỘC:',
+  '1. Chỉ trả lời ngắn gọn, súc tích (đúng từ 2 đến 3 câu), tập trung sâu sắc vào việc đọc vị tâm lý tiêu dùng của người dùng dưới phong thái bói toán vũ trụ. Khuyến khích sử dụng một cách hài hước các thuật ngữ tâm lý học mua sắm phổ biến như "thao túng tâm lý", "dopamine ngắn hạn", "hiệu ứng mỏ neo", "hội chứng FOMO/sợ bỏ lỡ", "mua sắm cảm xúc", "tự bào chữa", "tiêu dùng phòng thủ". Không viết dài dòng lê thê.',
+  '2. TUYỆT ĐỐI KHÔNG được ghi bất kỳ con số cụ thể nào, không ghi số tiền (như VND, đồng, triệu, tỷ, k), không ghi số đơn hàng, không ghi tên sản phẩm cụ thể của người dùng trong lời phán. Chỉ phán về tính cách, tâm lý thích chữa lành, thói quen cảm xúc, và lối sống của họ.',
+  '3. TUYỆT ĐỐI KHÔNG dùng tiếng Anh hoặc pha trộn từ tiếng Anh (ví dụ: không dùng "vibe", "chill", "glow up", "save", "good", "deal"). Viết bằng 100% tiếng Việt thuần việt, trôi chảy.',
+  '4. KHÔNG đưa ra lời khuyên tiết kiệm hay tài chính nghiêm túc. Hãy bóc phốt nhẹ nhàng, mang lại niềm vui cho người đọc.'
+].join(' ');
+
 // Rule-based psychological shopping insights - no AI dependency
 const SHOPPING_PSYCHOLOGY_PATTERNS = {
   // Pattern: Category dominance + timing behavior → personality insights
@@ -441,9 +451,9 @@ async function _executeAIInsight(cardId) {
   aiEl.classList.add('loading');
 
   const session = await getAIInsightSession();
-  if (!session) {
+  if (!session || typeof session.prompt !== 'function') {
     aiEl.classList.remove('loading');
-    aiEl.style.display = 'none';
+    aiEl.innerHTML = renderAnalyzeButton(cardId);
     return;
   }
 
@@ -531,6 +541,26 @@ window.rerunAIInsight = async function (cardId) {
 
   await _executeAIInsight(cardId);
 };
+
+document.addEventListener('click', (e) => {
+  const analyzeBtn = e.target.closest('.ai-analyze-btn[data-ai-card]');
+  if (analyzeBtn) {
+    e.preventDefault();
+    const cardId = analyzeBtn.getAttribute('data-ai-card');
+    if (cardId && typeof window.runAIInsight === 'function') {
+      window.runAIInsight(cardId);
+    }
+    return;
+  }
+  const refreshBtn = e.target.closest('.ai-refresh-btn[data-ai-card]');
+  if (refreshBtn) {
+    e.preventDefault();
+    const cardId = refreshBtn.getAttribute('data-ai-card');
+    if (cardId && typeof window.rerunAIInsight === 'function') {
+      window.rerunAIInsight(cardId);
+    }
+  }
+});
 
 function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activeType) {
   // Sales AI insight is handled via enrichWithAI in renderSalesInsights()

@@ -1,37 +1,23 @@
-/* Vietnam timezone (UTC+7) helpers for Shopee order unix timestamps (seconds). */
+/* Shopee buyer API time helpers for order unix timestamps (seconds).
+ *
+ * Shopee v4 buyer `create_time` encodes Vietnam wall-clock in UTC date fields
+ * (e.g. order at 00:30 VN is stored as ...T00:30:00Z, not true UTC).
+ * Use getUTC* to read hour/day — do NOT apply Asia/Ho_Chi_Minh (+7) again. */
 (function (root) {
-  const VN_TZ = 'Asia/Ho_Chi_Minh';
-  const WD_MAP = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-
   function toVnParts(tsSec) {
     const ts = Number(tsSec) || 0;
     if (ts <= 0) {
       return { year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, weekday: 0 };
     }
     const d = new Date(ts * 1000);
-    const parts = {};
-    new Intl.DateTimeFormat('en-GB', {
-      timeZone: VN_TZ,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false
-    }).formatToParts(d).forEach(p => {
-      if (p.type !== 'literal') parts[p.type] = parseInt(p.value, 10);
-    });
-    if (parts.hour === 24) parts.hour = 0;
-    const wdStr = new Intl.DateTimeFormat('en-US', { timeZone: VN_TZ, weekday: 'short' }).format(d);
     return {
-      year: parts.year,
-      month: parts.month,
-      day: parts.day,
-      hour: parts.hour,
-      minute: parts.minute,
-      second: parts.second,
-      weekday: WD_MAP[wdStr] ?? 0
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      day: d.getUTCDate(),
+      hour: d.getUTCHours(),
+      minute: d.getUTCMinutes(),
+      second: d.getUTCSeconds(),
+      weekday: d.getUTCDay()
     };
   }
 
@@ -81,7 +67,6 @@
   }
 
   root.VnTime = {
-    VN_TZ,
     toVnParts,
     isVnBlackFriday,
     getSaleTypeFromTs,
