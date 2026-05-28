@@ -301,8 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Cache Management ===
   function isCacheValid(cache) {
     if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
-    // Invalidate old caches that do not have the timezone/derived creation time fix (v2)
-    if (cache.v !== 2) return false;
+    // Invalidate old caches that do not have the order placement timestamp fix (v3)
+    if (cache.v !== 3) return false;
     // Cache is only valid for up to 24 hours (86400 seconds) to avoid version conflict and stale data
     const ageSec = Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated || 0);
     if (ageSec > 86400) return false;

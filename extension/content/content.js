@@ -540,8 +540,10 @@
         ? newMiniOrders.reduce((max, o) => (o.ts > max ? o.ts : max), 0)
         : LAST_UPDATED;
 
+      const extVersion = chrome.runtime?.getManifest?.()?.version || '';
       const cachePayload = {
-        v: 2,
+        v: 3,
+        ev: extVersion,
         fetchTime: Math.floor(Date.now() / 1000),
         lastUpdated: newLastUpdated || LAST_UPDATED,
         listType: LIST_TYPE,
