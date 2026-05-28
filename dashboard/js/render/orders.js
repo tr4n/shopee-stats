@@ -696,14 +696,13 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
         const { emoji, text } = parseCategoryName(c.name);
         const colors = getCategoryColor(c.name);
         const isActive = ordersActiveCat === c.name;
-        const activeTag = isActive ? `<span style="font-size:10px;background:${colors.fg};color:#fff;border-radius:8px;padding:1px 6px;margin-left:4px;vertical-align:middle;">Đang lọc</span>` : '';
         const activeStyle = isActive ? `box-shadow:0 0 0 2px ${colors.fg};border-radius:10px;background:${colors.bg};` : '';
 
         return `
           <div class="sales-adv-item" data-catname="${escHtml(c.name)}" title="Click để xem đơn trong danh mục này" style="cursor:pointer;transition:all 0.18s;${activeStyle}">
             <div class="sales-adv-icon" style="background:${colors.bg};color:${colors.fg};">${emoji}</div>
             <div class="sales-adv-body">
-              <div class="sales-adv-title">${escHtml(text)} ${activeTag}</div>
+              <div class="sales-adv-title">${escHtml(text)}</div>
               <div class="top-bar-wrap" style="width:100%;height:5px;margin-top:4px;">
                 <div class="top-bar-fill" style="width:${pct}%;height:100%;background:${colors.fg}"></div>
               </div>
@@ -989,7 +988,7 @@ function renderSaleDaysTable(filteredYearOrders) {
 
   if (!tbody) return;
 
-  const isDetailMode = ordersActiveHour !== null || ordersActiveCat !== null;
+  const isDetailMode = ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null;
 
   // ── Build dynamic title with filter badges + clear button ──
   if (detailTitle) {
