@@ -66,7 +66,13 @@ function cleanupStorage(currentId) {
     dashDataKeys.sort((a, b) => b.ts - a.ts);
     const activeTs = currentId ? parseInt(currentId, 10) : null;
     const keptTimestamps = [];
+    const now = Date.now();
     for (const item of dashDataKeys) {
+      if (now - item.ts > 24 * 3600 * 1000) {
+        localStorage.removeItem(item.key);
+        console.log(`[Dashboard] Cleaned up expired dashboard data: ${item.key}`);
+        continue;
+      }
       if (item.ts === activeTs) {
         keptTimestamps.push(item.ts);
       } else if (keptTimestamps.length < 2) {
@@ -97,6 +103,12 @@ function parseData() {
     // Primary: load from storage by session ID (?id=MILLIS)
     const id = params.get("id");
     if (id) {
+      const ts = parseInt(id, 10);
+      if (!isNaN(ts) && Date.now() - ts > 24 * 3600 * 1000) {
+        localStorage.removeItem(DASH_DATA_PREFIX + id);
+        console.log("[Dashboard] Removed expired dashboard data:", id);
+        return null;
+      }
       const raw = localStorage.getItem(DASH_DATA_PREFIX + id);
       return raw ? JSON.parse(raw) : null;
     }
