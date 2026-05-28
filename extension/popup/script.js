@@ -769,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // → ~40–67 KB base64 URL chars — well within Chrome's effective ~2 MB URL hash limit.
     // Stats accuracy is guaranteed by oss (above); ol[] is used for detail/category views only.
     orderHistoryList.sort((a, b) => b[0] - a[0]);
-    const OL_MAX = 2000;
+    const OL_MAX = 5000;
     if (orderHistoryList.length > OL_MAX) {
       console.warn(`[Popup] ol[] truncated from ${orderHistoryList.length} to ${OL_MAX} entries. KPI stats remain accurate via oss field.`);
       orderHistoryList.splice(OL_MAX);
