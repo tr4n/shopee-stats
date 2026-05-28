@@ -979,11 +979,13 @@ body {
   align-items: baseline;
 }
 
+.insight-list li .ins-bullet,
 .insight-list li .ins-icon {
   flex-shrink: 0;
-  font-size: 12px;
-  width: 14px;
-  text-align: center;
+  font-size: 14px;
+  width: 12px;
+  color: var(--primary);
+  line-height: 1.55;
 }
 
 .insight-ai {

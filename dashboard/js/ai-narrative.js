@@ -533,77 +533,7 @@ window.rerunAIInsight = async function (cardId) {
 };
 
 function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activeType) {
-  // Generate rule-based psychological insight instead of using AI
-  const categories = (window._lastCategories || []).slice(); // Use cached categories from last render
-  const totalSaved = (stats.double.raw - stats.double.spend) + 
-                     (stats.mid.raw - stats.mid.spend) + 
-                     (stats.end.raw - stats.end.spend) +
-                     (stats.regular.raw - stats.regular.spend);
-  
-  const insightData = {
-    stats,
-    categories,
-    totalSpend,
-    totalOrders,
-    totalSaved: Math.max(0, totalSaved)
-  };
-  
-  const psychInsight = generatePsychologicalInsight(insightData);
-  
-  // Display the insight immediately in the AI container
-  const aiContainer = document.getElementById('insight-sales');
-  if (aiContainer) {
-    const existingAI = aiContainer.querySelector('.insight-ai');
-    if (existingAI) {
-      existingAI.remove();
-    }
-    
-    const aiDiv = document.createElement('div');
-    aiDiv.className = 'insight-ai';
-    aiDiv.innerHTML = `
-      <div class="insight-ai-header">
-        <span class="insight-ai-icon">🔮</span>
-        <span class="insight-ai-title">Thầy Bói Vũ Trụ</span>
-        <span class="insight-ai-powered">Rule-based Psychology</span>
-      </div>
-      <div class="insight-ai-sentence">${psychInsight}</div>
-    `;
-    
-    aiContainer.appendChild(aiDiv);
-    
-    // Add refresh button for variety in header
-    const refreshBtn = document.createElement('button');
-    refreshBtn.className = 'ai-refresh-btn';
-    refreshBtn.innerHTML = '🔄';
-    refreshBtn.title = 'Xem góc nhìn khác';
-    refreshBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try {
-        // Generate a different insight by re-analyzing (with some randomization)
-        const newInsight = generatePsychologicalInsight(insightData);
-        const sentence = aiDiv.querySelector('.insight-ai-sentence');
-        if (sentence) {
-          sentence.style.opacity = '0';
-          setTimeout(() => {
-            sentence.textContent = newInsight;
-            sentence.style.opacity = '1';
-          }, 200);
-        }
-      } catch (error) {
-        console.error('Error refreshing insight:', error);
-      }
-    });
-    
-    // Add refresh button to header instead of appending to main div
-    const header = aiDiv.querySelector('.insight-ai-header');
-    if (header) {
-      header.appendChild(refreshBtn);
-    }
-    
-    // Cache categories for future use
-    window._lastCategories = categories;
-  }
+  // Sales AI insight is handled via enrichWithAI in renderSalesInsights()
 }
 // Enhanced enrichWithAI to use rule-based insights where possible
 function enrichWithAIEnhanced(containerId, context, prompt, cacheKey, fallbackInsight = null) {

@@ -1314,9 +1314,7 @@ function setupDashboardRatingCard(d) {
 
       const monthTotal =
         (d.yd[year] && d.yd[year].m && d.yd[year].m[monthStr]) || 0;
-      items.push({
-        icon: "📅",
-        text: `Tổng chi tiêu trong **Tháng ${monthStr}/${year}** là **${fmtVND(monthTotal)}**.`,
+      items.push({ text: `Tổng chi tiêu trong **Tháng ${monthStr}/${year}** là **${fmtVND(monthTotal)}**.`,
       });
 
       const yearData = d.yd[year] || {};
@@ -1327,14 +1325,10 @@ function setupDashboardRatingCard(d) {
         const avg = (yearData.t || 0) / monthEntries.length;
         const diffPct = Math.round(((monthTotal - avg) / avg) * 100);
         if (diffPct > 0) {
-          items.push({
-            icon: "🔥",
-            text: `Mức chi tiêu này **cao hơn ${diffPct}%** so với trung bình tháng của năm ${year} (**${fmtVND(Math.round(avg))}**).`,
+          items.push({ text: `Mức chi tiêu này **cao hơn ${diffPct}%** so với trung bình tháng của năm ${year} (**${fmtVND(Math.round(avg))}**).`,
           });
         } else if (diffPct < 0) {
-          items.push({
-            icon: "✓",
-            text: `Mức chi tiêu này **thấp hơn ${Math.abs(diffPct)}%** so với trung bình tháng của năm ${year} (**${fmtVND(Math.round(avg))}**).`,
+          items.push({ text: `Mức chi tiêu này **thấp hơn ${Math.abs(diffPct)}%** so với trung bình tháng của năm ${year} (**${fmtVND(Math.round(avg))}**).`,
           });
         }
       }
@@ -1342,19 +1336,15 @@ function setupDashboardRatingCard(d) {
       const topItem = monthItems[0];
       if (topItem) {
         const pct = Math.round((topItem.s / Math.max(monthTotal, 1)) * 100);
-        items.push({
-          icon: "★",
-          text: `Sản phẩm chi nhiều nhất: **"${topItem.n}"** — **${fmtVND(topItem.s)}** (chiếm **${pct}%** của tháng).`,
+        items.push({ text: `Sản phẩm chi nhiều nhất: **"${topItem.n}"** — **${fmtVND(topItem.s)}** (chiếm **${pct}%** của tháng).`,
         });
       }
 
       const totalLuot = monthItems.reduce((s, i) => s + (i.c || 1), 0);
-      items.push({
-        icon: "🛒",
-        text: `Tổng cộng bạn đã mua **${totalLuot} lượt sản phẩm** trong tháng này.`,
+      items.push({ text: `Tổng cộng bạn đã mua **${totalLuot} lượt sản phẩm** trong tháng này.`,
       });
 
-      return items;
+      return items.slice(0, 5);
     };
 
     window.computeSingleCategoryInsights = function (
@@ -1366,15 +1356,13 @@ function setupDashboardRatingCard(d) {
     ) {
       const items = [];
       items.push({
-        icon: "🏷️",
-        text: `Tổng chi tiêu cho danh mục **${catName}** là **${fmtVND(catTotal)}** (${catCount} lượt mua).`,
+        text: `Tổng chi tiêu danh mục **${catName}**: **${fmtVND(catTotal)}** (${catCount} lượt mua).`,
       });
 
       if (overallTotal > 0) {
         const pct = Math.round((catTotal / overallTotal) * 100);
         items.push({
-          icon: "📊",
-          text: `Danh mục này chiếm **${pct}%** tổng chi tiêu của bạn trong kỳ được chọn.`,
+          text: `Chiếm **${pct}%** tổng chi tiêu trong kỳ được chọn.`,
         });
       }
 
@@ -1382,15 +1370,13 @@ function setupDashboardRatingCard(d) {
         const top1 = catItems[0];
         const pctTop1 = Math.round((top1.s / Math.max(catTotal, 1)) * 100);
         items.push({
-          icon: "★",
-          text: `Sản phẩm chi nhiều nhất: **"${top1.n}"** — **${fmtVND(top1.s)}** (${pctTop1}% của danh mục).`,
+          text: `Sản phẩm chi nhiều nhất: **"${top1.n}"** — **${fmtVND(top1.s)}** (${pctTop1}% danh mục).`,
         });
       }
 
       const avgPrice = Math.round(catTotal / Math.max(catCount, 1));
       items.push({
-        icon: "💸",
-        text: `Giá trị trung bình mỗi lượt mua trong danh mục này là **${fmtVND(avgPrice)}/món**.`,
+        text: `Giá TB/lượt mua: **${fmtVND(avgPrice)}/món**.`,
       });
 
       return items;
@@ -1582,6 +1568,11 @@ function setupDashboardRatingCard(d) {
           c: reverseCatMap[arr[3]] || arr[3],
           n: arr[4]
         }));
+      }
+      if (d.ol && d.ol.length) {
+        for (const order of d.ol) {
+          if (order.n) order.n = formatItemNameForDisplay(order.n);
+        }
       }
 
       // Normalize `mi` (monthly items) if it is in array format [n, s, c, cat, op, dp]

@@ -258,6 +258,7 @@ function applyFiltersAndRender() {
   renderSalesCharts(stats);
   renderAdvancedAnalytics(filteredYearOrders, stats);
   renderSalesInsights(stats);
+  renderSalesProductList(filteredYearOrders);
   renderSaleDaysTable(filteredYearOrders);
 }
 
@@ -369,7 +370,7 @@ function renderSalesKPIs(stats) {
         </div>
         <div class="kpi-value ${iconClass}">${fmtVND(s.spend)}</div>
         <div class="kpi-sub">
-          <strong>${s.orders}</strong> đơn (${sharePct}%) · AOV: <strong>${fmtVND(aov)}</strong>
+          <strong>${s.orders}</strong> đơn (${sharePct}%) · TB/đơn: <strong>${fmtVND(aov)}</strong>
         </div>
         <div class="kpi-sub" style="color:var(--green); font-weight:600; margin-top:4px;">
           ✓ Tiết kiệm: ${fmtVND(saved)} (-${savingPct}%)
@@ -459,7 +460,7 @@ function renderSalesCharts(stats) {
               applyFiltersAndRender();
               const ordersCard = document.getElementById('card-orders');
               if (ordersCard) {
-                ordersCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                scrollToSalesDetail();
               }
             }
           },
@@ -547,7 +548,7 @@ function renderSalesCharts(stats) {
             applyFiltersAndRender();
             const ordersCard = document.getElementById('card-orders');
             if (ordersCard) {
-              ordersCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              scrollToSalesDetail();
             }
           }
         },
@@ -648,7 +649,7 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
         }
         ordersCurrentPage = 1;
         applyFiltersAndRender();
-        document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        scrollToSalesDetail();
       });
     });
     reveal(document.getElementById('card-sales-hours'));
@@ -724,7 +725,7 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
           }
           ordersCurrentPage = 1;
           applyFiltersAndRender();
-          document.getElementById('card-orders')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          scrollToSalesDetail();
         });
       });
     }
@@ -732,10 +733,103 @@ function renderAdvancedAnalytics(filteredOrders, stats) {
   }
 }
 
+function scrollToSalesDetail() {
+  const target = (ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null)
+    ? document.getElementById('card-sales-products')
+    : document.getElementById('card-orders');
+  target?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function getFilteredSaleOrders(filteredYearOrders) {
+  return filteredYearOrders.filter(o => {
+    if (!o.t || o.t <= 0 || !(o.f > 0)) return false;
+    const date = new Date(o.t * 1000);
+
+    if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return false;
+
+    if (ordersActiveHour !== null && getHourKey(date.getHours()) !== ordersActiveHour) return false;
+
+    if (ordersActiveCat !== null) {
+      const resolvedCat = resolveItemCategory(o.n, o.c);
+      if (resolvedCat !== ordersActiveCat) return false;
+    }
+
+    return true;
+  });
+}
+
+function aggregateSaleProducts(orders) {
+  const map = {};
+  orders.forEach(o => {
+    const rawName = (o.n || '').trim();
+    const key = rawName ? rawName.toLowerCase().substring(0, 120) : '__unknown__';
+    if (!map[key]) {
+      map[key] = { n: rawName || 'Không rõ tên sản phẩm', count: 0, spend: 0, raw: 0, cat: resolveItemCategory(o.n, o.c) };
+    }
+    map[key].count += 1;
+    map[key].spend += o.f || 0;
+    map[key].raw += o.r > 0 ? o.r : (o.f || 0);
+  });
+  return Object.values(map).sort((a, b) => b.spend - a.spend);
+}
+
+function renderSalesProductList(filteredYearOrders) {
+  const container = document.getElementById('sales-products-list');
+  const card = document.getElementById('card-sales-products');
+  if (!container || !card) return;
+
+  const isDetailMode = ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null;
+  if (!isDetailMode) {
+    card.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  const filtered = getFilteredSaleOrders(filteredYearOrders);
+  const products = aggregateSaleProducts(filtered).slice(0, 20);
+
+  card.style.display = 'block';
+  reveal(card);
+
+  const titleEl = document.getElementById('sales-products-title');
+  if (titleEl) {
+    const parts = ['Top Sản Phẩm Săn Sale'];
+    const typeLabels = { double: 'Ngày Đôi', mid: 'Giữa Tháng', end: 'Lương Về', regular: 'Ngày Thường' };
+    if (ordersActiveType !== 'all' && typeLabels[ordersActiveType]) parts.push(typeLabels[ordersActiveType]);
+    if (ordersActiveHour && HOUR_LABELS[ordersActiveHour]) parts.push(HOUR_LABELS[ordersActiveHour]);
+    if (ordersActiveCat) parts.push(ordersActiveCat);
+    titleEl.textContent = parts.join(' · ');
+  }
+
+  if (products.length === 0) {
+    container.innerHTML = '<div class="no-data" style="padding:20px;text-align:center;">Không có sản phẩm phù hợp với bộ lọc hiện tại</div>';
+    return;
+  }
+
+  const maxS = Math.max(...products.map(p => p.spend), 1);
+  container.innerHTML = products.map((item, idx) => {
+    const pct = Math.round((item.spend / maxS) * 100);
+    const saved = Math.max(0, item.raw - item.spend);
+    const metaText = saved > 0
+      ? `${fmtNum(item.count)} lần mua · Tiết kiệm: <span style="color:var(--green);font-weight:600;">${fmtVND(saved)}</span>`
+      : `${fmtNum(item.count)} lần mua`;
+
+    return `
+      <div class="top-row in">
+        <div class="top-num">${idx + 1}</div>
+        <div class="top-name-wrap">
+          <div class="top-name">${escHtml(capFirst(item.n))}</div>
+          <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
+          <div class="top-meta">${metaText}</div>
+        </div>
+        <div class="top-val">${fmtVND(item.spend)}</div>
+      </div>`;
+  }).join('');
+}
+
 function renderSalesInsights(stats) {
-  const list = document.getElementById('insight-sales-list');
   const card = document.getElementById('insight-sales');
-  if (!list || !card) return;
+  if (!card) return;
 
   const items = [];
 
@@ -755,210 +849,107 @@ function renderSalesInsights(stats) {
   const totalSaleOrders = doubleOrders + midOrders + endOrders;
 
   if (totalSpend <= 0 || totalOrders <= 0) {
-    list.innerHTML = '<li style="color:var(--muted);text-align:center;padding:20px;">Chưa có đủ dữ liệu để phân tích</li>';
+    const list = document.getElementById('insight-sales-list');
+    if (list) list.innerHTML = '<li style="color:var(--muted);text-align:center;padding:20px;">Chưa có đủ dữ liệu để phân tích</li>';
     card.style.display = '';
     return;
   }
 
-  // ═══ 1. PHÂN TÍCH TỶ LỆ OANH TẠC NGÀY SALE ═══
   const salePct = Math.round((totalSaleSpend / totalSpend) * 100);
   const regularPct = Math.round((regularSpend / totalSpend) * 100);
-  
-  if (salePct >= 70) {
-    items.push({
-      icon: '🏆',
-      text: `**Chiến thần săn sale hạng SSS**: ${salePct}% tổng chi tiêu (**${fmtVND(totalSaleSpend)}**) tập trung vào ngày sale. Bạn có kỷ luật tài chính xuất sắc, biết kiềm chế mua sắm thường ngày để tối đa hóa lợi ích từ khuyến mãi.`
-    });
-  } else if (salePct >= 50) {
-    items.push({
-      icon: '🎯',
-      text: `**Chiến thần săn sale**: ${salePct}% chi tiêu vào ngày sale (**${fmtVND(totalSaleSpend)}**). Bạn hiểu rõ giá trị của việc chờ đợi thời điểm thích hợp, tuy vẫn có ${regularPct}% chi tiêu ngẫu hứng (**${fmtVND(regularSpend)}**).`
-    });
+
+  if (salePct >= 60) {
+    items.push({ text: `**Chiến thần săn sale**: **${salePct}%** chi tiêu vào ngày sale (**${fmtVND(totalSaleSpend)}**), còn **${regularPct}%** ngày thường.` });
   } else if (salePct >= 30) {
-    items.push({
-      icon: '🛒',
-      text: `**Người mua sắm cân bằng**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}**), ${salePct}% ngày sale. Bạn không quá phụ thuộc khuyến mãi nhưng vẫn biết tận dụng cơ hội tốt.`
-    });
+    items.push({ text: `**Mua sắm cân bằng**: **${regularPct}%** ngày thường (**${fmtVND(regularSpend)}**), **${salePct}%** ngày sale.` });
   } else {
-    items.push({
-      icon: '💨',
-      text: `**Tay chơi mua sắm tự do**: ${regularPct}% chi tiêu thường ngày (**${fmtVND(regularSpend)}**). Bạn ưu tiên sự tiện lợi và nhu cầu tức thời hơn việc chờ đợi khuyến mãi.`
-    });
+    items.push({ text: `**Mua sắm tự do**: **${regularPct}%** chi tiêu ngày thường — ưu tiên tiện lợi hơn chờ khuyến mãi.` });
   }
 
-  // ═══ 2. PHÂN TÍCH HIỆU QUẢ CHIẾN DỊCH SALE ═══
   const campaigns = [
-    { key: 'double', label: 'Ngày Đôi', spend: doubleSpend, raw: stats.double.raw, orders: doubleOrders },
-    { key: 'mid', label: 'Giữa Tháng (15)', spend: midSpend, raw: stats.mid.raw, orders: midOrders },
-    { key: 'end', label: 'Lương Về (25-31)', spend: endSpend, raw: stats.end.raw, orders: endOrders },
-    { key: 'regular', label: 'Ngày Thường', spend: regularSpend, raw: stats.regular.raw, orders: regularOrders }
+    { label: 'Ngày Đôi', spend: doubleSpend, raw: stats.double.raw, orders: doubleOrders },
+    { label: 'Giữa Tháng', spend: midSpend, raw: stats.mid.raw, orders: midOrders },
+    { label: 'Lương Về', spend: endSpend, raw: stats.end.raw, orders: endOrders },
+    { label: 'Ngày Thường', spend: regularSpend, raw: stats.regular.raw, orders: regularOrders }
   ]
-  .map(x => ({ ...x, rate: x.raw > 0 ? Math.round(((x.raw - x.spend) / x.raw) * 100) : 0, saved: Math.max(0, x.raw - x.spend) }))
-  .filter(x => x.spend > 0)
-  .sort((a, b) => b.rate - a.rate);
+    .map(x => ({ ...x, rate: x.raw > 0 ? Math.round(((x.raw - x.spend) / x.raw) * 100) : 0, saved: Math.max(0, x.raw - x.spend) }))
+    .filter(x => x.spend > 0)
+    .sort((a, b) => b.rate - a.rate);
 
-  if (campaigns.length >= 2) {
+  if (campaigns.length >= 2 && campaigns[0].rate > 0) {
     const best = campaigns[0];
-    const worst = campaigns[campaigns.length - 1];
-    
-    if (best.rate > 0 && best.rate >= worst.rate + 5) {
-      items.push({
-        icon: '🔥',
-        text: `**${best.label}** là chiến dịch hiệu quả nhất với **${best.rate}%** chiết khấu trung bình (tiết kiệm **${fmtVND(best.saved)}**/${best.orders} đơn). **${worst.label}** chỉ được **${worst.rate}%** - chênh lệch **${best.rate - worst.rate}** điểm %.`
-      });
-    } else if (best.rate > 0) {
-      items.push({
-        icon: '📊',
-        text: `Các chiến dịch có tỷ lệ chiết khấu đồng đều: **${campaigns.map(c => `${c.label} ${c.rate}%`).join(', ')}**. Bạn biết tận dụng mọi cơ hội giảm giá một cách nhất quán.`
-      });
-    }
-    
-    // Phân tích AOV (Average Order Value)
-    const aovs = campaigns.map(c => ({ ...c, aov: c.orders > 0 ? Math.round(c.spend / c.orders) : 0 })).filter(c => c.aov > 0);
-    if (aovs.length >= 2) {
-      aovs.sort((a, b) => b.aov - a.aov);
-      const highAov = aovs[0];
-      const lowAov = aovs[aovs.length - 1];
-      if (highAov.aov >= lowAov.aov * 1.5) {
-        items.push({
-          icon: '💳',
-          text: `**Chiến lược giá trị đơn hàng**: ${highAov.label} có AOV cao nhất **${fmtVND(highAov.aov)}**/đơn, gấp **${(highAov.aov / lowAov.aov).toFixed(1)}** lần ${lowAov.label} (**${fmtVND(lowAov.aov)}**). Bạn có xu hướng "gom hàng" tốt hơn trong những dịp đặc biệt.`
-        });
+    items.push({ text: `**${best.label}** hiệu quả nhất: chiết khấu **${best.rate}%**, tiết kiệm **${fmtVND(best.saved)}** trên **${best.orders}** đơn.` });
+
+    const withAvg = campaigns.map(c => ({ ...c, avg: c.orders > 0 ? Math.round(c.spend / c.orders) : 0 })).filter(c => c.avg > 0);
+    if (withAvg.length >= 2) {
+      withAvg.sort((a, b) => b.avg - a.avg);
+      const high = withAvg[0];
+      const low = withAvg[withAvg.length - 1];
+      if (high.avg >= low.avg * 1.5) {
+        items.push({ text: `**Giá TB/đơn**: **${high.label}** cao nhất (**${fmtVND(high.avg)}/đơn**), gấp **${(high.avg / low.avg).toFixed(1)}** lần **${low.label}** (**${fmtVND(low.avg)}/đơn**).` });
       }
     }
   }
 
-  // ═══ 3. PHÂN TÍCH KHUNG GIỜ & MIDNIGHT SHOPPING ═══
   const totalMidnightOrders = stats.double.midnightOrders + stats.mid.midnightOrders + stats.end.midnightOrders;
-  const regularMidnight = stats.regular.midnightOrders || 0;
-  const allMidnightOrders = totalMidnightOrders + regularMidnight;
-  
-  if (totalSaleOrders > 0) {
+  if (totalSaleOrders > 0 && totalMidnightOrders > 0) {
     const saleMidnightPct = Math.round((totalMidnightOrders / totalSaleOrders) * 100);
-    const allMidnightPct = totalOrders > 0 ? Math.round((allMidnightOrders / totalOrders) * 100) : 0;
-    
-    if (saleMidnightPct >= 30) {
-      items.push({
-        icon: '🦉',
-        text: `**Chiến binh đêm**: ${saleMidnightPct}% đơn ngày sale (**${totalMidnightOrders}/${totalSaleOrders} đơn**) được chốt lúc **0h-2h sáng**. Bạn thuộc top 5% người dùng chịu thức đêm để giành voucher flash sale đầu tiên.`
-      });
-    } else if (saleMidnightPct >= 15) {
-      items.push({
-        icon: '🌙',
-        text: `**Săn sale đêm muộn**: ${saleMidnightPct}% đơn sale (**${totalMidnightOrders} đơn**) chốt lúc nửa đêm. Bạn biết cân bằng giữa việc canh giờ vàng và giấc ngủ.`
-      });
-    } else if (totalMidnightOrders > 0) {
-      items.push({
-        icon: '☕',
-        text: `**Mua sắm ban ngày**: Chỉ ${saleMidnightPct}% đơn sale chốt lúc nửa đêm (**${totalMidnightOrders} đơn**). Bạn ưu tiên thời gian nghỉ ngơi hơn việc tranh giành voucher flash sale.`
-      });
-    }
-    
-    // So sánh midnight shopping vs regular shopping
-    if (allMidnightOrders > 0 && totalOrders > totalMidnightOrders) {
-      const midnightVsRegularRatio = totalMidnightOrders > 0 && regularMidnight > 0 
-        ? (totalMidnightOrders / regularMidnight).toFixed(1) 
-        : null;
-      
-      if (midnightVsRegularRatio && midnightVsRegularRatio > 3) {
-        items.push({
-          icon: '📊',
-          text: `**Định hướng mua sắm rõ ràng**: Bạn thức khuya mua sắm chủ yếu trong các ngày sale (gấp **${midnightVsRegularRatio}** lần ngày thường). Thể hiện sự kế hoạch và kỷ luật tài chính tốt.`
-        });
-      }
+    if (saleMidnightPct >= 15) {
+      items.push({ text: `**Săn đêm**: **${saleMidnightPct}%** đơn ngày sale (**${totalMidnightOrders}** đơn) chốt lúc **0h–2h**.` });
     }
   }
 
-  // ═══ 4. PHÂN TÍCH DANH MỤC MUA SẮM ═══
   const allCategories = {};
   ['double', 'mid', 'end', 'regular'].forEach(type => {
     Object.entries(stats[type].categories || {}).forEach(([cat, data]) => {
-      if (!allCategories[cat]) allCategories[cat] = { spend: 0, count: 0, saleSpend: 0, regularSpend: 0 };
+      if (!allCategories[cat]) allCategories[cat] = { spend: 0, count: 0 };
       allCategories[cat].spend += data.spend;
       allCategories[cat].count += data.count;
-      if (type === 'regular') allCategories[cat].regularSpend += data.spend;
-      else allCategories[cat].saleSpend += data.spend;
     });
   });
 
   const topCategories = Object.entries(allCategories)
-    .map(([name, data]) => ({
-      name,
-      ...data,
-      salePct: data.spend > 0 ? Math.round((data.saleSpend / data.spend) * 100) : 0
-    }))
+    .map(([name, data]) => ({ name, ...data }))
     .filter(c => c.spend > 0)
-    .sort((a, b) => b.spend - a.spend)
-    .slice(0, 5);
+    .sort((a, b) => b.spend - a.spend);
 
   if (topCategories.length > 0) {
     const topCat = topCategories[0];
-    const topCatShare = totalSpend > 0 ? Math.round((topCat.spend / totalSpend) * 100) : 0;
-    
-    if (topCatShare >= 30) {
-      items.push({
-        icon: '🎯',
-        text: `**Chuyên gia ${topCat.name}**: Chiếm **${topCatShare}%** tổng chi tiêu (**${fmtVND(topCat.spend)}**, ${topCat.count} lượt mua). ${topCat.salePct}% trong số đó mua vào ngày sale, thể hiện sự am hiểu sâu về thị trường ngành hàng này.`
-      });
-    } else if (topCategories.length >= 3) {
-      const diversityIndex = topCategories.length >= 3 ? 
-        (1 - (topCategories[0].spend + topCategories[1].spend + topCategories[2].spend) / totalSpend) : 0;
-      
-      if (diversityIndex > 0.3) {
-        items.push({
-          icon: '🌟',
-          text: `**Người mua đa dạng**: Top 3 danh mục (**${topCategories.slice(0,3).map(c => c.name).join(', ')}**) chỉ chiếm **${Math.round((1-diversityIndex)*100)}%** tổng chi tiêu. Bạn có nhu cầu mua sắm phong phú và cân bằng.`
-        });
-      }
+    const topCatShare = Math.round((topCat.spend / totalSpend) * 100);
+    if (topCatShare >= 25) {
+      items.push({ text: `**Danh mục săn nhiều nhất**: **${topCat.name}** — **${topCatShare}%** tổng chi (**${fmtVND(topCat.spend)}**, **${topCat.count}** lượt).` });
     }
   }
 
-  // ═══ 5. PHÂN TÍCH QUY MÔ MUA SẮM ═══
-  if (totalOrders >= 50) {
+  if (totalOrders >= 20) {
     const avgOrderValue = Math.round(totalSpend / totalOrders);
-    const saleAvgOrder = totalSaleOrders > 0 ? Math.round(totalSaleSpend / totalSaleOrders) : 0;
-    const regularAvgOrder = regularOrders > 0 ? Math.round(regularSpend / regularOrders) : 0;
-    
-    if (avgOrderValue >= 500000) {
-      items.push({
-        icon: '💎',
-        text: `**Khách hàng cao cấp**: AOV trung bình **${fmtVND(avgOrderValue)}**/đơn qua **${totalOrders} đơn hàng**. ${saleAvgOrder > regularAvgOrder ? `Đơn ngày sale trung bình cao hơn (**${fmtVND(saleAvgOrder)}** vs **${fmtVND(regularAvgOrder)}**)` : 'Giá trị đơn hàng ổn định'}.`
-      });
-    } else if (avgOrderValue >= 200000) {
-      const efficiency = totalSpend > 0 ? Math.round(((totalSaleSpend + regularSpend - totalSpend) / totalSpend) * 100) : 0;
-      items.push({
-        icon: '💡',
-        text: `**Mua sắm thông minh**: **${totalOrders} đơn hàng**, AOV **${fmtVND(avgOrderValue)}**. ${efficiency > 0 ? `Tỷ lệ tiết kiệm **${efficiency}%** cho thấy khả năng tìm deal tốt.` : 'Cân bằng tốt giữa chất lượng và chi phí.'}`
-      });
-    }
+    items.push({ text: `**Quy mô mua sắm**: **${fmtNum(totalOrders)}** đơn, giá TB/đơn **${fmtVND(avgOrderValue)}**.` });
   }
 
-  // Display insights
-  if (items.length === 0) {
-    items.push({
-      icon: '📈',
-      text: 'Tiếp tục mua sắm để tích lũy thêm dữ liệu phân tích chi tiết hơn!'
-    });
-  }
+  renderInsightCard('insight-sales', items.slice(0, 5));
 
-  list.innerHTML = items.map(item =>
-    `<li><span class="ins-icon">${item.icon}</span><span>${parseBold(item.text)}</span></li>`
-  ).join('');
-  card.style.display = '';
-  reveal(card);
-
-  // 6. Cache categories for AI insights and trigger psychological analysis
   if (allCategories && Object.keys(allCategories).length > 0) {
-    window._lastCategories = Object.entries(allCategories)
-      .map(([name, data]) => ({ name, ...data }))
-      .sort((a, b) => b.spend - a.spend);
+    window._lastCategories = topCategories;
   }
-  
-  if (window.triggerSalesAIInsight) {
-    window.triggerSalesAIInsight(stats, totalSpend, totalOrders, ordersActiveYear, ordersActiveType);
+
+  if (typeof enrichWithAI === 'function') {
+    const saleTypeLabels = { double: 'Ngày Đôi', mid: 'Giữa Tháng', end: 'Lương Về', regular: 'Ngày Thường' };
+    const topCatName = topCategories[0]?.name || 'chưa rõ';
+    const context = `Thống kê săn sale: **${salePct}%** chi tiêu vào ngày sale, **${totalOrders}** đơn, danh mục săn nhiều nhất là "${topCatName}".`;
+    const specificPrompt = `Dữ liệu đầu vào:
+    - Hành vi săn sale và phân bổ chi tiêu theo đợt sale.
+    - Danh mục được săn nhiều nhất: "${topCatName}".
+
+    Yêu cầu: Phán một quẻ bói vui về "kiếp nạn" săn sale của khổ chủ — thói quen canh giờ, tâm lý FOMO, hay kỷ luật tài chính. Tuyệt đối không ghi số tiền hay con số cụ thể.`;
+
+    enrichWithAI(
+      'insight-sales',
+      context,
+      specificPrompt,
+      `insight-sales-${ordersActiveYear}`
+    );
   }
 }
-
 
 function getHourKey(hr) {
   if (hr >= 0 && hr < 2) return 'midnight';
@@ -1065,26 +1056,7 @@ function renderSaleDaysTable(filteredYearOrders) {
   //  DETAIL MODE — individual orders
   // ══════════════════════════════════════════
   if (isDetailMode) {
-    const individualOrders = filteredYearOrders.filter(o => {
-      if (!o.t || o.t <= 0 || !(o.f > 0)) return false;
-      const date = new Date(o.t * 1000);
-
-      // Filter by sale type
-      if (ordersActiveType !== 'all' && getSaleType(date) !== ordersActiveType) return false;
-
-      // Filter by hour slot
-      if (ordersActiveHour !== null) {
-        if (getHourKey(date.getHours()) !== ordersActiveHour) return false;
-      }
-
-      // Filter by category
-      if (ordersActiveCat !== null) {
-        const resolvedCat = resolveItemCategory(o.n, o.c);
-        if (resolvedCat !== ordersActiveCat) return false;
-      }
-
-      return true;
-    }).sort((a, b) => b.t - a.t);
+    const individualOrders = getFilteredSaleOrders(filteredYearOrders).sort((a, b) => b.t - a.t);
 
     if (individualOrders.length === 0) {
       tbody.innerHTML = `<tr><td colspan="5" class="no-data" style="text-align:center;padding:40px;">Không tìm thấy đơn hàng phù hợp với bộ lọc này</td></tr>`;

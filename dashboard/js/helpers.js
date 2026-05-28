@@ -51,9 +51,8 @@ function renderAIInsight(text, cardId) {
     .flatMap(p => p.split(/(?<=[.!?])\s+/))
     .map(s => s.trim())
     .filter(s => s.length > 0);
-  const bullets = ['💡', '⚡', '🎯', '💰', '📌'];
-  const items = sentences.map((s, i) =>
-    `<div class="insight-ai-sentence"><span class="ai-bullet">${bullets[i % bullets.length]}</span><span>${parseBold(s)}</span></div>`
+  const items = sentences.map(s =>
+    `<div class="insight-ai-sentence"><span class="ai-bullet">•</span><span>${parseBold(s)}</span></div>`
   ).join('');
   const refreshBtn = cardId
     ? `<button class="ai-refresh-btn" onclick="rerunAIInsight('${cardId}')" title="Xin quẻ mới" style="display: none">
@@ -64,7 +63,7 @@ function renderAIInsight(text, cardId) {
         <span>Xin quẻ mới</span>
        </button>`
     : '';
-  return `<div class="insight-ai-header"><span class="insight-ai-badge">🕵️‍♂️ AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
+  return `<div class="insight-ai-header"><span class="insight-ai-badge">AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
 }
 
 // Legacy category name map for backward compatibility with old dashboard URLs (format: { id, s, c })
