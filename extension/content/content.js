@@ -138,6 +138,16 @@
     if (orderObj.info_card && orderObj.info_card.create_time) {
       return orderObj.info_card.create_time;
     }
+    
+    // Derived timestamp from Shopee order ID (starts with year suffix since 2019-01-01)
+    const orderId = orderObj.order_id || (orderObj.info_card && orderObj.info_card.order_id);
+    if (orderId) {
+      const idNum = Number(orderId);
+      if (idNum > 10000000000000 && idNum < 999999999999999) {
+        return 1546300800 + Math.floor(idNum / 1000000);
+      }
+    }
+
     if (
       orderObj.shipping &&
       orderObj.shipping.tracking_info &&
@@ -511,6 +521,7 @@
         : LAST_UPDATED;
 
       const cachePayload = {
+        v: 2,
         fetchTime: Math.floor(Date.now() / 1000),
         lastUpdated: newLastUpdated || LAST_UPDATED,
         listType: LIST_TYPE,
