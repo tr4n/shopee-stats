@@ -937,7 +937,7 @@ function setupDashboardRatingCard(d) {
     setupSupportButton(null);
   } else {
     cleanupStorage(getSessionId());
-    _dashCache = loadDashCache(d.ts);
+    _dashCache = loadDashCache(d.ts, d.ev || '');
 
     let _categorizationFinished = false;
     let _activeYear = null;
