@@ -299,11 +299,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // === Cache Management ===
+  const CURRENT_EXT_VERSION = chrome.runtime?.getManifest?.()?.version || '';
+
   function isCacheValid(cache) {
     if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
-    // Invalidate old caches that do not have the order placement timestamp fix (v3)
-    if (cache.v !== 3) return false;
-    // Cache is only valid for up to 24 hours (86400 seconds) to avoid version conflict and stale data
+    // Invalidate cache schema v2 and below (missing ots field)
+    if ((cache.v || 0) < 3) return false;
+    // Invalidate caches built by an older version of the extension
+    if (CURRENT_EXT_VERSION && cache.ev !== CURRENT_EXT_VERSION) return false;
+    // Cache is only valid for up to 24 hours (86400 seconds) to avoid stale data
     const ageSec = Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated || 0);
     if (ageSec > 86400) return false;
     // Require il field (item list) on cached orders so period filter works without re-stat.
