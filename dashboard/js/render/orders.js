@@ -972,14 +972,14 @@ function renderSaleDaysTable(filteredYearOrders) {
     const typeInfo = { double: ['#ee4d2d','rgba(238,77,45,0.12)','Ngày Đôi'], mid: ['#26aa99','rgba(38,170,153,0.12)','Giữa Tháng'], end: ['#3b82f6','rgba(59,130,246,0.12)','Lương Về'], regular: ['#64748b','rgba(100,116,139,0.12)','Ngày Thường'] };
     if (ordersActiveType !== 'all' && typeInfo[ordersActiveType]) {
       const [fg, bg, label] = typeInfo[ordersActiveType];
-      badges.push(`<span class="filter-badge" style="background:${bg};color:${fg};font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">${label}</span>`);
+      badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:${bg};color:${fg};font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">${label}</span>`);
     }
     if (ordersActiveHour) {
-      badges.push(`<span class="filter-badge" style="background:rgba(238,77,45,0.12);color:#ee4d2d;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">⚡ ${HOUR_LABELS[ordersActiveHour] || ordersActiveHour}</span>`);
+      badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:rgba(238,77,45,0.12);color:#ee4d2d;font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">⚡ ${HOUR_LABELS[ordersActiveHour] || ordersActiveHour}</span>`);
     }
     if (ordersActiveCat) {
       const colors = getCategoryColor(ordersActiveCat);
-      badges.push(`<span class="filter-badge" style="background:${colors.bg};color:${colors.fg};font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">🏷️ ${escHtml(ordersActiveCat)}</span>`);
+      badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:${colors.bg};color:${colors.fg};font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">🏷️ ${escHtml(ordersActiveCat)}</span>`);
     }
 
     if (badges.length > 0) {
@@ -1066,14 +1066,14 @@ function renderSaleDaysTable(filteredYearOrders) {
       const typeLabel = getSaleTypeLabel(type, o.t);
 
       const typeTag = typeLabel
-        ? `<span style="font-size:10px;font-weight:700;color:${TYPE_COLORS[type]};background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:7px;margin-left:4px;">${typeLabel}</span>`
+        ? `<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:${TYPE_COLORS[type]};background:rgba(0,0,0,0.05);padding:2px 7px;border-radius:7px;margin-left:4px;line-height:1.4;vertical-align:middle;">${typeLabel}</span>`
         : '';
 
       const catName = resolveItemCategory(o.n, o.c);
       const colors = getCategoryColor(catName);
       const { emoji } = parseCategoryName(catName);
       const catTag = catName
-        ? `<span style="display:inline-block;font-size:11px;padding:2px 7px;border-radius:8px;background:${colors.bg};color:${colors.fg};margin-top:3px;">${emoji} ${escHtml(catName)}</span>`
+        ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 7px;border-radius:8px;background:${colors.bg};color:${colors.fg};margin-top:3px;line-height:1.4;">${emoji} ${escHtml(catName)}</span>`
         : '';
 
       const spend = o.f || 0;
@@ -1161,13 +1161,13 @@ function renderSaleDaysTable(filteredYearOrders) {
 
     let typeTag = '';
     if (item.isBlackFriday) {
-      typeTag = `<span style="font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;padding:2px 8px;border-radius:12px;margin-left:8px;border:1px solid rgba(255,255,255,0.1);">Black Friday</span>`;
+      typeTag = `<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#ffffff;background:#1e293b;padding:2px 8px;border-radius:12px;margin-left:8px;border:1px solid rgba(255,255,255,0.1);line-height:1.4;">Black Friday</span>`;
     } else if (item.type === 'double') {
-      typeTag = `<span style="font-size:11px;font-weight:700;color:#ee4d2d;background:rgba(238,77,45,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;">Ngày Đôi</span>`;
+      typeTag = `<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#ee4d2d;background:rgba(238,77,45,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;line-height:1.4;">Ngày Đôi</span>`;
     } else if (item.type === 'mid') {
-      typeTag = `<span style="font-size:11px;font-weight:700;color:#26aa99;background:var(--green-dim);padding:2px 8px;border-radius:12px;margin-left:8px;">Giữa Tháng</span>`;
+      typeTag = `<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#26aa99;background:var(--green-dim);padding:2px 8px;border-radius:12px;margin-left:8px;line-height:1.4;">Giữa Tháng</span>`;
     } else if (item.type === 'end') {
-      typeTag = `<span style="font-size:11px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;">Lương Về</span>`;
+      typeTag = `<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.08);padding:2px 8px;border-radius:12px;margin-left:8px;line-height:1.4;">Lương Về</span>`;
     }
 
     const efficiencyLabel = saved > 0

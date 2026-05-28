@@ -1050,6 +1050,7 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  flex-wrap: nowrap;
 }
 
 .insight-ai-icon {
@@ -1062,18 +1063,21 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
+  gap: 4px;
+  width: auto;
+  min-width: 28px;
   height: 28px;
   background: rgba(38, 170, 153, 0.06);
   border: 1px solid rgba(38, 170, 153, 0.15);
   border-radius: 20px;
-  padding: 0;
+  padding: 0 10px;
   font-size: 12px;
   font-weight: 600;
   color: rgba(38, 170, 153, 0.85);
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .ai-refresh-btn:hover {
@@ -1124,12 +1128,19 @@ body {
   font-style: normal;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .insight-ai-title {
   font-size: 11px;
   color: var(--muted);
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .insight-ai-powered {

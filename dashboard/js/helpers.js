@@ -91,8 +91,9 @@ function renderAnalyzeButton(cardId) {
   return `<div class="ai-analyze-wrap">
     <button type="button" class="ai-analyze-btn" data-ai-card="${escHtml(cardId)}">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
-        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
-        <path d="M12 8v4l3 3"></path>
+        <path d="M12 3 L13.5 8.5 L19 10 L13.5 11.5 L12 17 L10.5 11.5 L5 10 L10.5 8.5 Z"></path>
+        <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
+        <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
       </svg>
       Xem AI "phán" 🔮
     </button>
@@ -116,14 +117,19 @@ function renderAIInsight(text, cardId) {
   ).join('');
   const refreshBtn = cardId
     ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display: none">
-        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
-        <span>Xin quẻ mới</span>
+        <span style="white-space:nowrap">Xin quẻ mới</span>
        </button>`
     : '';
-  return `<div class="insight-ai-header"><span class="insight-ai-badge">AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
+  const aiIcon = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:4px">
+    <path d="M12 3 L13.5 8.5 L19 10 L13.5 11.5 L12 17 L10.5 11.5 L5 10 L10.5 8.5 Z"></path>
+    <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
+    <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
+  </svg>`;
+  return `<div class="insight-ai-header"><span class="insight-ai-badge">${aiIcon}AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
 }
 
 // Legacy category name map for backward compatibility with old dashboard URLs (format: { id, s, c })
