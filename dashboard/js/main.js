@@ -340,11 +340,13 @@ function showSupportToast(msg, isError = false) {
 }
 function setupSupportButton(d) {
   const btn = document.getElementById("btn-support");
+  const btnNoData = document.getElementById("btn-support-no-data");
+  const btnRating = document.getElementById("btn-rating-support-trigger");
   const modal = document.getElementById("support-modal");
   const closeBtn = document.getElementById("btn-close-support");
   const sendBtn = document.getElementById("btn-send-support");
 
-  if (btn && modal) {
+  if (modal) {
     const descEl = document.getElementById("support-desc");
     const contactEl = document.getElementById("support-contact");
     const statusEl = document.getElementById("support-status");
@@ -449,10 +451,27 @@ function setupSupportButton(d) {
       updateCounters();
     };
 
-    btn.addEventListener("click", () => {
-      resetForm();
-      modal.classList.add("active");
-    });
+    if (btn) {
+      btn.addEventListener("click", () => {
+        resetForm();
+        modal.classList.add("active");
+      });
+    }
+
+    if (btnNoData) {
+      btnNoData.addEventListener("click", () => {
+        resetForm();
+        modal.classList.add("active");
+      });
+    }
+
+    if (btnRating) {
+      btnRating.addEventListener("click", (e) => {
+        e.preventDefault();
+        resetForm();
+        modal.classList.add("active");
+      });
+    }
 
     closeBtn.addEventListener("click", () => modal.classList.remove("active"));
     modal.addEventListener("click", (e) => {
@@ -470,10 +489,7 @@ function setupSupportButton(d) {
         }
       }
 
-      if (!d) {
-        showSupportStatus("Lỗi: Không tìm thấy dữ liệu để đính kèm!", true);
-        return;
-      }
+
 
       const bodyText = descEl ? descEl.value.trim() : "";
       if (!bodyText) {
@@ -569,48 +585,49 @@ function setupSupportButton(d) {
       if (statusEl) statusEl.className = "hidden";
 
       try {
-        const jsonStr = JSON.stringify(d);
         let compressed = "";
-
-        try {
-          if (typeof CompressionStream !== "undefined") {
-            const stream = new Blob([jsonStr])
-              .stream()
-              .pipeThrough(new CompressionStream("gzip"));
-            const buffer = await new Response(stream).arrayBuffer();
-            let binary = "";
-            const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < bytes.length; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            compressed =
-              "gz=" +
-              btoa(binary)
-                .replace(/\+/g, "-")
-                .replace(/\//g, "_")
-                .replace(/=+$/, "");
-          }
-        } catch (e) {
-          console.warn("[Dashboard] Gzip compression failed:", e);
-        }
-
-        if (!compressed) {
+        if (d) {
+          const jsonStr = JSON.stringify(d);
           try {
-            if (typeof LZString !== "undefined") {
+            if (typeof CompressionStream !== "undefined") {
+              const stream = new Blob([jsonStr])
+                .stream()
+                .pipeThrough(new CompressionStream("gzip"));
+              const buffer = await new Response(stream).arrayBuffer();
+              let binary = "";
+              const bytes = new Uint8Array(buffer);
+              for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
               compressed =
-                "lz=" + LZString.compressToEncodedURIComponent(jsonStr);
+                "gz=" +
+                btoa(binary)
+                  .replace(/\+/g, "-")
+                  .replace(/\//g, "_")
+                  .replace(/=+$/, "");
             }
           } catch (e) {
-            console.warn("[Dashboard] LZString compression failed:", e);
+            console.warn("[Dashboard] Gzip compression failed:", e);
           }
-        }
 
-        if (!compressed) {
-          const bytes = new TextEncoder().encode(jsonStr);
-          let bin = "";
-          for (let i = 0; i < bytes.length; i++)
-            bin += String.fromCharCode(bytes[i]);
-          compressed = "d=" + btoa(bin);
+          if (!compressed) {
+            try {
+              if (typeof LZString !== "undefined") {
+                compressed =
+                  "lz=" + LZString.compressToEncodedURIComponent(jsonStr);
+              }
+            } catch (e) {
+              console.warn("[Dashboard] LZString compression failed:", e);
+            }
+          }
+
+          if (!compressed) {
+            const bytes = new TextEncoder().encode(jsonStr);
+            let bin = "";
+            for (let i = 0; i < bytes.length; i++)
+              bin += String.fromCharCode(bytes[i]);
+            compressed = "d=" + btoa(bin);
+          }
         }
 
         const payload = {
@@ -905,6 +922,7 @@ function setupDashboardRatingCard(d) {
   if (!d || !d.t) {
     console.warn("[Dashboard] No data or invalid data, showing no-data view");
     renderNoData();
+    setupSupportButton(null);
   } else {
     cleanupStorage(getSessionId());
     _dashCache = loadDashCache(d.ts);
@@ -1620,6 +1638,7 @@ function setupDashboardRatingCard(d) {
       renderTopItems(tiItems);
       renderCategories(d.cs, tiItems);
       renderCatYearPills(d, tiItems);
+      renderOrders(d.ol || []);
 
       // Render static insight cards
       renderInsightCard("insight-yearly", computeYearlyInsights(d.yd || {}, d));

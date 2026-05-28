@@ -25,13 +25,18 @@ function renderTopItemsList() {
   const maxS = Math.max(...items.map(i => i.s), 1);
   list.innerHTML = items.map((item, idx) => {
     const pct = Math.round((item.s / maxS) * 100);
+    const hasDiscount = item.op && item.dp && item.op > item.dp;
+    const metaText = hasDiscount 
+      ? `${fmtNum(item.c)} lượt · Giá mua: ${fmtVND(item.dp)}đ (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}đ</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}đ</span>`
+      : `${fmtNum(item.c)} lượt · ${fmtVND(item.s)}`;
+
     return `
       <div class="top-row" style="transition-delay:${idx * 0.06}s">
         <div class="top-num">${idx + 1}</div>
         <div class="top-name-wrap">
           <div class="top-name">${escHtml(capFirst(item.n))}</div>
           <div class="top-bar-wrap"><div class="top-bar-fill" data-pct="${pct}"></div></div>
-          <div class="top-meta">${fmtNum(item.c)} lượt · ${fmtVND(item.s)}</div>
+          <div class="top-meta">${metaText}</div>
         </div>
         <div class="top-val">${fmtVND(item.s)}</div>
       </div>`;

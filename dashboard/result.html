@@ -36,6 +36,9 @@
       <button class="nav-item" data-view="categories">
         <span class="ni">🏷️</span> Danh mục
       </button>
+      <button class="nav-item" data-view="orders">
+        <span class="ni">📜</span> Đơn Hàng
+      </button>
       <div class="nav-support-divider"></div>
 
       <button class="nav-item nav-item--support" id="btn-support">
@@ -79,9 +82,9 @@
       <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
         🎉 Cảm ơn bạn rất nhiều! Đang mở...
       </div>
-      <div id="sidebar-rating-feedback" class="sr-feedback hidden">
-        <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank">Gửi email góp ý
-          ✉️</a>
+      <div id="sidebar-rating-feedback" class="sr-feedback hidden" style="line-height: 1.5; font-size: 12px; margin-top: 8px;">
+        Có điều gì chưa tốt sao? 😢<br/>
+        Ghi nhận góp ý qua <a href="#" id="btn-rating-support-trigger" style="text-decoration: underline; color: var(--primary); font-weight: bold;">biểu mẫu</a> hoặc <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank" style="text-decoration: underline; color: var(--primary); font-weight: bold;">email</a> nhé!
       </div>
     </div>
 
@@ -278,6 +281,45 @@
       </div>
     </div>
 
+    <!-- Order History -->
+    <div id="view-orders" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Lịch Sử Đơn Hàng</h1>
+          <p class="page-subtitle" id="orders-subtitle">Danh sách các đơn hàng đã mua trên Shopee</p>
+        </div>
+      </div>
+      <div class="pill-row" id="orders-year-pills"></div>
+      <div class="card" id="card-orders">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <span>📜 Danh sách đơn hàng</span>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="orders-search" placeholder="Lọc số tiền..." class="limit-select" style="width: 150px; padding: 6px 12px; height: 32px;" />
+            <select id="orders-limit-select" class="limit-select" style="height: 32px;">
+              <option value="20" selected>Hiện 20</option>
+              <option value="50">Hiện 50</option>
+              <option value="100">Hiện 100</option>
+              <option value="500">Hiện 500</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap" id="orders-table-wrap">
+          <table class="table" id="orders-table">
+            <thead>
+              <tr>
+                <th>Ngày Mua</th>
+                <th style="text-align: right">Giá Gốc</th>
+                <th style="text-align: right">Thực Trả</th>
+                <th style="text-align: right; color: var(--green);">Tiết Kiệm</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="orders-pagination" class="orders-pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
+      </div>
+    </div>
+
     <!-- Share Modal -->
     <div id="share-modal" class="modal-overlay">
       <div class="modal-content">
@@ -405,6 +447,7 @@
   <script src="js/render/monthly.js"></script>
   <script src="js/render/items.js"></script>
   <script src="js/render/categories.js"></script>
+  <script src="js/render/orders.js"></script>
   <script src="js/lz-string.js"></script>
   <script src="js/main.js"></script>
 </body>

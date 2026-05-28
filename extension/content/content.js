@@ -414,9 +414,14 @@
               const items = grp.items || [];
 
               for (const it of items) {
-                const price = (it.order_price || 0) / 100000;
                 const qty = it.amount || 1;
-                rawCost += price;
+                const unitOriginalPrice = ((it.price_before_discount !== undefined && it.price_before_discount !== null && it.price_before_discount !== 0) ? it.price_before_discount : it.order_price || 0) / 100000;
+                const unitDiscountedPrice = (it.order_price || 0) / 100000;
+
+                const lineOriginalCost = unitOriginalPrice * qty;
+                const lineDiscountedCost = unitDiscountedPrice * qty;
+
+                rawCost += lineOriginalCost;
                 itemCount += qty;
 
                 const baseItemId = String(it.item_id || '');
@@ -436,16 +441,18 @@
                   if (!itemMap[uniqueItemId]) {
                     itemMap[uniqueItemId] = { name: itemName, spent: 0, count: 0, catId: itemCatId };
                   }
-                  itemMap[uniqueItemId].spent += price;
+                  itemMap[uniqueItemId].spent += lineDiscountedCost;
                   itemMap[uniqueItemId].count += qty;
                 }
 
                 orderItemList.push({
                   i: uniqueItemId,
                   n: itemName.substring(0, 100),
-                  s: price,
+                  s: lineDiscountedCost,
                   c: qty,
-                  cat: itemCatId
+                  cat: itemCatId,
+                  op: unitOriginalPrice,
+                  dp: unitDiscountedPrice
                 });
               }
             }
@@ -477,10 +484,12 @@
         for (const item of (order.il || [])) {
           const uId = item.i || item.n;
           if (!allItemAggr[uId]) {
-            allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat };
+            allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
           }
           allItemAggr[uId].spent += item.s;
           allItemAggr[uId].count += item.c;
+          allItemAggr[uId].op = allItemAggr[uId].op || item.op || 0;
+          allItemAggr[uId].dp = allItemAggr[uId].dp || item.dp || 0;
         }
       }
 

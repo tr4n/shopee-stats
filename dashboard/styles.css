@@ -1588,3 +1588,77 @@ body {
   display: none !important;
 }
 
+
+/* ── Order History Styling ────────────────────── */
+#view-orders .table th {
+  padding: 14px 12px;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+#view-orders .table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.order-row-item {
+  transition: background-color 0.15s ease;
+}
+
+.order-row-item:hover {
+  background-color: rgba(30, 41, 59, 0.02);
+}
+
+.orders-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 24px;
+}
+
+.orders-pagination button.pill.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+#orders-search::placeholder {
+  color: rgba(30, 41, 59, 0.4);
+}
+
+#orders-search:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+  outline: none;
+}
+
+#btn-support-no-data {
+  display: inline-block;
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 14px 28px;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+#btn-support-no-data:hover {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(38, 170, 153, 0.25);
+  transform: translateY(-2px);
+}
+
+#btn-support-no-data:active {
+  transform: translateY(0);
+}
+

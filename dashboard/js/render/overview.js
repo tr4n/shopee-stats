@@ -36,9 +36,14 @@ function renderNoData() {
         </div>
       </div>
       
-      <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(238, 77, 45, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
-        Thêm vào Chrome miễn phí ✨
-      </a>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" style="display: inline-block; background: var(--primary); color: white; padding: 14px 28px; border-radius: 30px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(238, 77, 45, 0.4); transition: transform 0.2s, box-shadow 0.2s;">
+          Thêm vào Chrome miễn phí ✨
+        </a>
+        <button id="btn-support-no-data">
+          💌 Góp ý & Báo lỗi
+        </button>
+      </div>
     </div>
     <style>
       @keyframes float {
@@ -150,9 +155,13 @@ function showYearlyTopItems(year, d) {
     if (ym.startsWith(year + '-')) {
       const items = d.mi[ym];
       for (const item of items) {
-        if (!itemMap[item.n]) itemMap[item.n] = { n: item.n, s: 0, c: 0 };
+        if (!itemMap[item.n]) {
+          itemMap[item.n] = { n: item.n, s: 0, c: 0, op: item.op || 0, dp: item.dp || 0 };
+        }
         itemMap[item.n].s += item.s;
         itemMap[item.n].c += (item.c || 1);
+        itemMap[item.n].op = itemMap[item.n].op || item.op || 0;
+        itemMap[item.n].dp = itemMap[item.n].dp || item.dp || 0;
       }
     }
   }
@@ -162,15 +171,22 @@ function showYearlyTopItems(year, d) {
   if (aggregatedItems.length === 0) {
     tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 20px;">Không có dữ liệu mua sắm cho năm ${year}.</td></tr>`;
   } else {
-    tbody.innerHTML = aggregatedItems.map(item => `
-      <tr>
-        <td>
-          <div style="font-weight: 600; margin-bottom: 4px;">${item.n}</div>
-          <div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>
-        </td>
-        <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = aggregatedItems.map(item => {
+      const hasDiscount = item.op && item.dp && item.op > item.dp;
+      const priceText = hasDiscount 
+        ? `<div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua · Giá mua: ${fmtVND(item.dp)}đ (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}đ</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}đ</span></div>`
+        : `<div style="font-size: 12px; color: var(--muted);">${fmtNum(item.c)} lần mua</div>`;
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight: 600; margin-bottom: 4px;">${escHtml(capFirst(item.n))}</div>
+            ${priceText}
+          </td>
+          <td style="text-align: right; font-weight: 600;">${fmtVND(item.s)}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   card.style.display = 'block';

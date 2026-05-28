@@ -276,10 +276,12 @@ document.addEventListener('DOMContentLoaded', () => {
       for (const item of (order.il || [])) {
         const uId = item.i || item.n;
         if (!allItemAggr[uId]) {
-          allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat };
+          allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
         }
         allItemAggr[uId].spent += item.s;
         allItemAggr[uId].count += item.c;
+        allItemAggr[uId].op = allItemAggr[uId].op || item.op || 0;
+        allItemAggr[uId].dp = allItemAggr[uId].dp || item.dp || 0;
       }
     }
     return Object.values(allItemAggr).sort((a, b) => b.spent - a.spent);
@@ -603,9 +605,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!monthMap[ym]) monthMap[ym] = {};
       for (const item of (order.il || [])) {
         if (!item.i) continue;
-        if (!monthMap[ym][item.i]) monthMap[ym][item.i] = { n: item.n, s: 0, c: 0, cat: item.cat };
+        if (!monthMap[ym][item.i]) {
+          monthMap[ym][item.i] = { n: item.n, s: 0, c: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
+        }
         monthMap[ym][item.i].s += item.s;
         monthMap[ym][item.i].c += item.c;
+        monthMap[ym][item.i].op = monthMap[ym][item.i].op || item.op || 0;
+        monthMap[ym][item.i].dp = monthMap[ym][item.i].dp || item.dp || 0;
       }
     }
     // mi: Top items grouped by year-month (key format 'YYYY-M')
@@ -614,7 +620,14 @@ document.addEventListener('DOMContentLoaded', () => {
       monthlyItems[ym] = Object.values(map)
         .sort((a, b) => b.s - a.s)
         .slice(0, 20)
-        .map(x => ({ n: compactItemName(x.n).substring(0, 40), s: Math.round(x.s), c: x.c, cat: x.cat }));
+        .map(x => ({ 
+          n: compactItemName(x.n).substring(0, 40), 
+          s: Math.round(x.s), 
+          c: x.c, 
+          cat: x.cat,
+          op: Math.round(x.op || 0),
+          dp: Math.round(x.dp || 0)
+        }));
     }
 
     // yd: Yearly breakdown stats (t: spent, o: orders, ip: items, s: saved, m: monthly spent)
@@ -671,7 +684,16 @@ document.addEventListener('DOMContentLoaded', () => {
       n: compactItemName(i.name).substring(0, 45), // n: Cleaned item name
       s: Math.round(i.spent), // s: Spent amount for this item
       c: i.count, // c: Quantity purchased
-      cat: i.cat // cat: Category ID
+      cat: i.cat, // cat: Category ID
+      op: Math.round(i.op || 0), // op: Original unit price
+      dp: Math.round(i.dp || 0)  // dp: Discounted unit price
+    }));
+
+    // Build compact order history list for dashboard view
+    const orderHistoryList = (data.cachePayload?.miniOrders || []).map(o => ({
+      t: o.ts,
+      f: Math.round(o.finalCost),
+      r: Math.round(o.rawCost || o.finalCost)
     }));
 
     // Payload schema structure sent to the dashboard via URL hash
@@ -686,7 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
       yd: yearlyStats,
       mi: monthlyItems,
       ps: periodStats,
-      ti: topItemsList
+      ti: topItemsList,
+      ol: orderHistoryList
     };
 
     const jsonStr = JSON.stringify(payload);
