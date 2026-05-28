@@ -315,7 +315,12 @@ function renderSalesCharts(stats) {
   ];
 
   // Colors: Shopee Orange, Green, Blue, Dark Gray
-  const PALETTE = ['#ee4d2d', '#26aa99', '#3b82f6', '#94a3b8'];
+  const basePalette = ['#ee4d2d', '#26aa99', '#3b82f6', '#94a3b8'];
+  const typeKeys = ['double', 'mid', 'end', 'regular'];
+  const activeIndex = typeKeys.indexOf(ordersActiveType);
+  const PALETTE = activeIndex === -1
+    ? basePalette
+    : basePalette.map((c, i) => i === activeIndex ? c : c + '40'); // Dim non-active segments (25% opacity)
 
   // 1. Doughnut Chart (Distribution)
   const distCtx = document.getElementById('chart-sales-distribution');
@@ -342,6 +347,26 @@ function renderSalesCharts(stats) {
           responsive: true,
           maintainAspectRatio: false,
           cutout: '62%',
+          onClick: (event, activeElements) => {
+            if (activeElements && activeElements.length > 0) {
+              const index = activeElements[0].index;
+              const clickedType = typeKeys[index];
+              if (ordersActiveType === clickedType) {
+                ordersActiveType = 'all';
+              } else {
+                ordersActiveType = clickedType;
+              }
+              ordersCurrentPage = 1;
+              applyFiltersAndRender();
+              const ordersCard = document.getElementById('card-orders');
+              if (ordersCard) {
+                ordersCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }
+            }
+          },
+          onHover: (event, activeElements) => {
+            event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+          },
           plugins: {
             legend: {
               display: true,
@@ -377,16 +402,24 @@ function renderSalesCharts(stats) {
           {
             label: 'Thực chi',
             data: spendData,
-            backgroundColor: 'rgba(238, 77, 45, 0.85)',
-            borderColor: '#ee4d2d',
+            backgroundColor: activeIndex === -1
+              ? 'rgba(238, 77, 45, 0.85)'
+              : typeKeys.map((k, i) => i === activeIndex ? 'rgba(238, 77, 45, 0.95)' : 'rgba(238, 77, 45, 0.15)'),
+            borderColor: activeIndex === -1
+              ? '#ee4d2d'
+              : typeKeys.map((k, i) => i === activeIndex ? '#ee4d2d' : 'rgba(238, 77, 45, 0.25)'),
             borderWidth: 1,
             borderRadius: 4
           },
           {
             label: 'Tiết kiệm',
             data: savedData,
-            backgroundColor: 'rgba(38, 170, 153, 0.85)',
-            borderColor: '#26aa99',
+            backgroundColor: activeIndex === -1
+              ? 'rgba(38, 170, 153, 0.85)'
+              : typeKeys.map((k, i) => i === activeIndex ? 'rgba(38, 170, 153, 0.95)' : 'rgba(38, 170, 153, 0.15)'),
+            borderColor: activeIndex === -1
+              ? '#26aa99'
+              : typeKeys.map((k, i) => i === activeIndex ? '#26aa99' : 'rgba(38, 170, 153, 0.25)'),
             borderWidth: 1,
             borderRadius: 4
           }
@@ -395,6 +428,26 @@ function renderSalesCharts(stats) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        onClick: (event, activeElements) => {
+          if (activeElements && activeElements.length > 0) {
+            const index = activeElements[0].index;
+            const clickedType = typeKeys[index];
+            if (ordersActiveType === clickedType) {
+              ordersActiveType = 'all';
+            } else {
+              ordersActiveType = clickedType;
+            }
+            ordersCurrentPage = 1;
+            applyFiltersAndRender();
+            const ordersCard = document.getElementById('card-orders');
+            if (ordersCard) {
+              ordersCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }
+        },
+        onHover: (event, activeElements) => {
+          event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+        },
         plugins: {
           legend: {
             display: true,

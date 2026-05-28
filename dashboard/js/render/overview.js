@@ -125,6 +125,9 @@ function renderYearlyChart(yd, d) {
           }
         }
       },
+      onHover: (event, activeElements) => {
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      },
       plugins: {
         ...CHART_CFG.plugins,
         tooltip: {

@@ -22,6 +22,15 @@ window.clearCategorySelection = function() {
       window.triggerCategoryAIInsight(currentCatData.cs, currentCatData.ti, currentCatData.total, cacheKey, currentCatData.year);
     }
   }
+  if (catChart && currentCatData && currentCatData.cs) {
+    const PALETTE = [
+      '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
+      '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
+      '#8b5cf6', '#06b6d4'
+    ];
+    catChart.data.datasets[0].backgroundColor = currentCatData.cs.map((c, i) => PALETTE[i % PALETTE.length]);
+    catChart.update();
+  }
 };
 
 function showCatItems(catName, ti) {
@@ -88,6 +97,20 @@ function showCatItems(catName, ti) {
     }
   }
 
+  if (catChart && currentCatData && currentCatData.cs) {
+    const PALETTE = [
+      '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
+      '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
+      '#8b5cf6', '#06b6d4'
+    ];
+    catChart.data.datasets[0].backgroundColor = currentCatData.cs.map((c, i) => {
+      const name = resolveCatLabel(c);
+      const baseColor = PALETTE[i % PALETTE.length];
+      return name === catName ? baseColor : baseColor + '40';
+    });
+    catChart.update();
+  }
+
   reveal(card);
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -150,7 +173,12 @@ function renderCategories(cs, ti, total, year) {
       labels: cs.map(c => resolveCatLabel(c)),
       datasets: [{
         data: cs.map(c => c.s),
-        backgroundColor: cs.map((_, i) => PALETTE[i % PALETTE.length]),
+        backgroundColor: cs.map((c, i) => {
+          const name = resolveCatLabel(c);
+          const baseColor = PALETTE[i % PALETTE.length];
+          if (!window.currentCategorySelection) return baseColor;
+          return name === window.currentCategorySelection ? baseColor : baseColor + '40';
+        }),
         borderWidth: 2,
         borderColor: '#ffffff',
         hoverOffset: 8
@@ -160,6 +188,21 @@ function renderCategories(cs, ti, total, year) {
       responsive: true,
       maintainAspectRatio: false,
       cutout: '62%',
+      onClick: (event, activeElements) => {
+        if (activeElements && activeElements.length > 0) {
+          const index = activeElements[0].index;
+          const catName = resolveCatLabel(cs[index]);
+          if (window.currentCategorySelection === catName) {
+            window.clearCategorySelection();
+          } else {
+            window.currentCategorySelection = catName;
+            showCatItems(catName, ti);
+          }
+        }
+      },
+      onHover: (event, activeElements) => {
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+      },
       plugins: {
         legend: {
           display: true, position: 'right',

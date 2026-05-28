@@ -55,6 +55,9 @@ function renderMonthly(yd, year, d) {
             showMonthlyItems(d, year, monthStr);
           }
         }
+      },
+      onHover: (event, activeElements) => {
+        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
       }
     }
   });
