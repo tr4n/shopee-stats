@@ -17,7 +17,7 @@ function fmtDate(ts) {
   return fmtVnDateTime(ts || Math.floor(Date.now() / 1000));
 }
 
-// Shopee buyer create_time stores VN wall-clock in UTC fields — read via getUTC*, not +7 offset.
+// Shopee buyer create_time stores standard Unix UTC timestamps — use local methods to read VN wall-clock.
 function toVnParts(tsSec) {
   if (typeof VnTime !== 'undefined') return VnTime.toVnParts(tsSec);
   const ts = Number(tsSec) || 0;
@@ -26,13 +26,13 @@ function toVnParts(tsSec) {
   }
   const d = new Date(ts * 1000);
   return {
-    year: d.getUTCFullYear(),
-    month: d.getUTCMonth() + 1,
-    day: d.getUTCDate(),
-    hour: d.getUTCHours(),
-    minute: d.getUTCMinutes(),
-    second: d.getUTCSeconds(),
-    weekday: d.getUTCDay()
+    year: d.getFullYear(),
+    month: d.getMonth() + 1,
+    day: d.getDate(),
+    hour: d.getHours(),
+    minute: d.getMinutes(),
+    second: d.getSeconds(),
+    weekday: d.getDay()
   };
 }
 

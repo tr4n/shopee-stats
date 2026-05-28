@@ -1,8 +1,8 @@
 /* Shopee buyer API time helpers for order unix timestamps (seconds).
  *
- * Shopee v4 buyer `create_time` encodes Vietnam wall-clock in UTC date fields
- * (e.g. order at 00:30 VN is stored as ...T00:30:00Z, not true UTC).
- * Use getUTC* to read hour/day — do NOT apply Asia/Ho_Chi_Minh (+7) again. */
+ * Shopee stores standard Unix timestamps (seconds in UTC).
+ * Using JavaScript Date local methods automatically formats and parses 
+ * timestamps according to the client browser's local timezone (Vietnam Time). */
 (function (root) {
   function toVnParts(tsSec) {
     const ts = Number(tsSec) || 0;
@@ -11,13 +11,13 @@
     }
     const d = new Date(ts * 1000);
     return {
-      year: d.getUTCFullYear(),
-      month: d.getUTCMonth() + 1,
-      day: d.getUTCDate(),
-      hour: d.getUTCHours(),
-      minute: d.getUTCMinutes(),
-      second: d.getUTCSeconds(),
-      weekday: d.getUTCDay()
+      year: d.getFullYear(),
+      month: d.getMonth() + 1,
+      day: d.getDate(),
+      hour: d.getHours(),
+      minute: d.getMinutes(),
+      second: d.getSeconds(),
+      weekday: d.getDay()
     };
   }
 
