@@ -97,7 +97,7 @@ function renderAnalyzeButton(cardId) {
       </svg>
       TÍNH CÁCH
     </button>
-    <span class="ai-analyze-hint">Khám phá tính cách mua sắm của bạn nhé!</span>
+    <span class="ai-analyze-hint">Khám phá tâm lý mua sắm của bạn nhé</span>
   </div>`;
 }
 
