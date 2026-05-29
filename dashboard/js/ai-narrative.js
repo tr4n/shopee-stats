@@ -34,58 +34,152 @@ const SHOPPING_PSYCHOLOGY_PATTERNS = {
   fashionLateNight: {
     triggers: ['fashion_dominant', 'late_night_shopping'],
     insights: [
-      'Quẻ bói chỉ ra bạn đang bị vũ trụ thao túng tâm lý rằng việc chốt đơn lúc nửa đêm sẽ giúp lấp đầy khoảng trống tâm hồn cô đơn. Bạn liên tục tự bào chữa rằng mua sắm để phục vụ cuộc sống, nhưng thực chất bộ não chỉ đang thèm khát một chút dopamine ngắn hạn trước khi chìm vào giấc ngủ.',
-      'Tinh tú chiếu mệnh cho thấy bạn sử dụng thời trang làm liệu pháp chữa lành tâm lý sau những ngày căng thẳng. Mỗi lần chốt đơn lúc khuya là một lần bạn tự thưởng cho bản thân, nhưng cái giá phải trả lại là sự mất cân bằng tài chính và đống quần áo ngày càng tràn ngập tủ.'
+      'Quẻ bói chỉ ra bạn đang chịu ảnh hưởng của tâm lý muốn mua sắm quần áo lúc nửa đêm để tự an ủi tâm hồn sau ngày dài căng thẳng. Bạn liên tục tự thuyết phục bản thân rằng mua sắm để đổi mới hình ảnh, nhưng thực chất chỉ đang tìm kiếm niềm vui ngắn hạn lúc đêm khuya. Tinh tú mách bảo hãy tắt điện thoại trước mười giờ tối nếu không muốn ví tiền liên tục rơi vào trạng thái cần được giải cứu.',
+      'Tinh tú chiếu mệnh cho thấy bạn dùng thời trang làm liệu pháp cân bằng cảm xúc sau những giờ làm việc mệt mỏi. Mỗi lần chốt đơn lúc khuya là một lần bạn tự thưởng cho mình một bộ trang phục mới, nhưng thực tế đống quần áo chưa mặc ngày càng nhiều lên trong tủ. Hãy cân nhắc xem bạn đang thực sự chăm sóc bản thân hay chỉ đang mua sắm trong vô thức khi lý trí ngủ quên.'
     ]
   },
   
   techUpgrade: {
     triggers: ['tech_dominant', 'high_avg_value'],
     insights: [
-      'Tinh tú chiếu mệnh cho thấy bạn bị rơi vào bẫy tâm lý "nâng cấp để tối ưu hiệu suất" mỗi khi nhìn thấy các gadget công nghệ lấp lánh. Đây thực chất là một liệu pháp tiêu dùng phòng thủ để trốn tránh áp lực công việc, tạo ra một phi thuyền làm việc lộng lẫy trong khi ngân sách lại mỏng manh vô cùng.',
-      'Vũ trụ nhìn thấu rằng bạn tin tưởng mù quáng vào việc công nghệ sẽ giải quyết mọi vấn đề hiệu suất, nhưng thực tế bộ não chỉ đang tìm cách thoát khỏi cảm giác bất an về năng lực bản thân qua từng lần nâng cấp thiết bị.'
+      'Vũ trụ nhìn thấu bạn dễ rơi vào ảo giác nâng cấp thiết bị để tối ưu hóa công việc mỗi khi nhìn thấy các sản phẩm công nghệ mới. Đây thực chất là một liệu pháp tiêu dùng để tạm thời trốn tránh những áp lực công việc hàng ngày. Tuy nhiên, năng suất làm việc thực tế không tăng lên tương ứng với số tiền bạn đã bỏ ra cho các đơn hàng đó.',
+      'Tinh tú chỉ điểm bạn luôn tin tưởng rằng một thiết bị công nghệ hiện đại hơn sẽ giúp giải quyết sự trì hoãn trong công việc của mình. Thực tế là bạn chỉ đang tìm cách thỏa mãn cảm giác bất an về hiệu quả công việc bằng việc sở hữu những món đồ công nghệ đắt tiền. Ngân sách dành cho công nghệ của bạn đang quá tải, trong khi thứ cần nâng cấp thực sự là khả năng tập trung.'
     ]
   },
 
   beautyTherapy: {
     triggers: ['beauty_dominant', 'frequent_small_orders'],
     insights: [
-      'Quẻ bói đọc vị bạn đang áp dụng liệu pháp mua sắm cảm xúc, dùng mỹ phẩm để tự thôi miên bản thân rằng mình đang yêu chiều cơ thể sau những ngày làm việc kiệt sức. Mỗi hũ kem dưỡng là một nỗ lực chữa lành tâm lý kiệt quệ, chỉ tiếc là số dư tài khoản cũng đang cần cấp cứu gấp.',
-      'Chòm sao hộ mệnh cho thấy bạn sử dụng việc chăm sóc nhan sắc như một nghi lễ tự yêu thương bản thân, nhưng đằng sau đó là cơ chế tự bào chữa rằng "đầu tư vào bản thân" để che giấu thói quen tiêu dùng cảm xúc không kiểm soát được.'
+      'Quẻ bói đọc vị bạn đang sử dụng mỹ phẩm như một liệu pháp phục hồi cảm xúc sau những ngày làm việc kiệt sức. Mỗi món đồ chăm sóc da hay làm đẹp nhỏ là một nỗ lực để tự thuyết phục rằng mình đang được yêu thương và chăm sóc tốt. Chỉ tiếc là trong khi làn da của bạn có thể đang rạng rỡ thì số dư tài khoản lại đang hao hụt nhanh chóng.',
+      'Chòm sao hộ mệnh cho thấy bạn có thói quen chốt các đơn hàng làm đẹp nhỏ lẻ liên tục để duy trì cảm giác vui vẻ ngắn hạn. Bạn tự bào chữa rằng đây là khoản đầu tư cho nhan sắc khó có thể tiết kiệm, nhưng tổng số tiền từ những đơn nhỏ này cộng lại đang tạo ra một khoản thâm hụt đáng kể. Hãy học cách phân biệt giữa nhu cầu chăm sóc da thực tế và ham muốn mua sắm để giảm bớt căng thẳng.'
     ]
   },
 
   bargainHunter: {
     triggers: ['high_savings_rate', 'sale_focused'],
     insights: [
-      'Bạn tự hào là chiến thần săn sale nhưng thực chất đang bị thao túng tâm lý cực nặng bởi hiệu ứng mỏ neo từ các mức giá giảm sâu. Hội chứng sợ bỏ lỡ đã khiến bạn tích trữ hàng tá món đồ vô tri chỉ vì cảm giác "không mua là lỗ", khiến thần tài chỉ biết bất lực nhìn dòng tiền bay màu.',
-      'Tinh tú chỉ điểm rằng bạn đã trở thành nô lệ của thuật toán khuyến mãi, mỗi khi thấy mã giảm giá là não bộ tiết ra hormone hạnh phúc như được trúng xổ số. Nhưng thực tế bạn chỉ đang bị lừa bởi ảo giác tiết kiệm trong khi đống đồ không cần thiết ngày càng chồng chất.'
+      'Bạn tự hào là người săn lùng ưu đãi thực thụ nhưng thực chất đang chịu ảnh hưởng tâm lý từ các chiến dịch giảm giá của sàn thương mại. Hội chứng sợ bỏ lỡ cơ hội tốt đã khiến bạn tích trữ nhiều món đồ ít khi dùng tới chỉ vì cảm giác mua được giá rẻ. Thần tài chỉ biết bất lực nhìn dòng tiền của bạn giảm dần qua từng mã miễn phí vận chuyển.',
+      'Tinh tú chỉ điểm bạn đã vô tình trở thành người theo đuổi các chương trình khuyến mãi đầu và giữa tháng. Mỗi lần áp dụng thành công mã giảm giá sâu, bạn lại có cảm giác chiến thắng đầy phấn khích. Nhưng hãy nhớ rằng bạn chỉ thực sự tiết kiệm khi không mua những thứ mình không cần, thay vì tích trữ đống đồ giảm giá đang bám đầy bụi.'
     ]
   },
 
   impulseBuyer: {
     triggers: ['high_frequency', 'diverse_categories', 'low_planning'],
     insights: [
-      'Khổ chủ đang là nạn nhân của cơ chế tự động chốt đơn vô tri để giải tỏa căng thẳng tức thời. Sự thao túng tâm lý từ các giao diện mua sắm khiến bạn lầm tưởng mình đang thỏa mãn nhu cầu, nhưng thực tế là cảm giác trống trải vẫn chưa được giải quyết mà ví tiền lại ngày càng héo hon.',
-      'Vũ trụ nhìn thấu rằng bạn sử dụng hành vi mua sắm như một loại thuốc giảm đau cảm xúc tức thời. Mỗi lần stress là một lần bộ não tự động điều hướng ngón tay đến nút "thêm vào giỏ hàng" như một phản xạ có điều kiện không thể kiểm soát.'
+      'Khổ chủ đang có thói quen chốt đơn vô thức để xoa dịu những căng thẳng và lo âu tức thời trong cuộc sống hàng ngày. Sự tiện lợi của việc mua sắm trực tuyến khiến bạn dễ dàng đầu hàng trước những ham muốn nhất thời mà không hề có kế hoạch chi tiêu từ trước. Mỗi đơn hàng mang lại sự thỏa mãn ngắn hạn, nhưng cảm giác đó lại trôi đi rất nhanh ngay khi người giao hàng gõ cửa.',
+      'Vũ trụ nhìn thấu bạn sử dụng việc chốt đơn như một cách giảm bớt áp lực tinh thần tức thời mỗi khi gặp khó khăn. Bạn mua sắm trải rộng từ đồ gia dụng, quần áo đến đồ ăn vặt mà không tập trung vào nhu cầu thực tế nào. Sự thiếu nhất quán này đang làm dòng tiền của bạn bị phân tán, hãy thiết lập quy tắc trì hoãn mua sắm vài ngày trước khi thanh toán giỏ hàng.'
     ]
   },
 
   foodComfort: {
     triggers: ['food_dominant', 'comfort_spending'],
     insights: [
-      'Chòm sao hộ mệnh chỉ ra bạn là người dùng thức ăn làm công cụ xoa dịu áp lực cảm xúc và lấp đầy những khoảng trống tinh thần. Bộ não đã thành công thao túng tâm lý bạn rằng "ăn nốt miếng này rồi tính", tạo ra những khoảnh khắc hạnh phúc calo cao nhưng ví tiền thì lại đang suy dinh dưỡng trầm trọng.',
-      'Tinh tú chiếu rọi cho thấy bạn có xu hướng dùng đồ ăn ngon để tự thưởng sau những ngày làm việc vất vả, nhưng thực chất đây là cơ chế tự bào chữa để che giấu thói quen tiêu dùng cảm xúc không có kế hoạch.'
+      'Chòm sao hộ mệnh chỉ ra bạn là kiểu người dùng món ăn để vỗ về những áp lực cảm xúc và tìm kiếm sự ấm áp. Bạn dễ dàng tự thuyết phục bản thân rằng ăn ngon là cách tốt nhất để bù đắp năng lượng làm việc. Hệ quả là bạn có những khoảnh khắc hạnh phúc cùng ẩm thực nhưng ví tiền thì lại rơi vào tình trạng hao hụt nghiêm trọng.',
+      'Tinh tú chiếu rọi cho thấy bạn có xu hướng chi tiêu thoải mái cho đồ ăn vặt và ẩm thực như một phần thưởng tự trao sau giờ làm việc. Đây là cách giải tỏa căng thẳng tự nhiên giúp bạn lấy lại tinh thần nhanh nhất. Tuy nhiên, việc đặt đồ ăn liên tục trên sàn trực tuyến đang làm giảm đáng kể khoản tiết kiệm dài hạn của bạn.'
     ]
   },
 
   homeMaker: {
     triggers: ['home_dominant', 'consistent_spending'],
     insights: [
-      'Quẻ bói tiết lộ bạn đang sử dụng việc trang trí không gian sống như một hình thức thiền định hiện đại, nhưng đằng sau mỗi món đồ nội thất là khao khát được kiểm soát ít nhất một khía cạnh trong cuộc sống đầy bất định. Ngôi nhà đẹp không thể che giấu được sự mất cân bằng trong tài chính cá nhân.',
-      'Vũ trụ nhìn thấu rằng bạn tin tưởng vào việc một không gian sống hoàn hảo sẽ mang lại hạnh phúc, nhưng thực chất đây là cách bộ não tránh né việc đối mặt với những vấn đề sâu xa hơn thông qua việc tập trung vào môi trường bên ngoài.'
+      'Quẻ bói tiết lộ bạn đang sử dụng việc trang trí và nâng cấp không gian sống như một cách tìm kiếm sự bình yên trong tâm hồn. Bạn muốn tự tay chuẩn bị và kiểm soát mọi chi tiết nhỏ trong ngôi nhà của mình để tránh xa những biến động bên ngoài. Một không gian sống xinh đẹp là điều tuyệt vời, nhưng đừng để nó trở thành lý do để chi tiêu vượt quá giới hạn cho phép.',
+      'Vũ trụ nhìn thấu bạn tin tưởng rằng một căn phòng hoàn hảo với đầy đủ các món đồ trang trí tinh tế sẽ mang lại niềm vui lâu dài. Nhưng thực chất, sự thỏa mãn khi sở hữu đồ gia dụng mới chỉ kéo dài vài ngày trước khi bạn tiếp tục tìm kiếm món đồ tiếp theo. Hãy học cách hài lòng với những gì đang có để giữ cho dòng tiền cá nhân luôn ở trạng thái an toàn.'
+    ]
+  },
+
+  lifestyleSplurge: {
+    triggers: ['high_avg_value', 'high_frequency'],
+    insights: [
+      'Quẻ bói chỉ ra bạn đang sống theo phong cách của một người chi tiêu phóng khoáng trên sàn thương mại với số lượng đơn nhiều và giá trị lớn. Bạn tin rằng cuộc sống cần được tận hưởng tối đa và luôn chọn phiên bản tốt nhất cho mọi thứ. Tinh tú khuyên bạn nên bắt đầu theo dõi dòng tiền nghiêm túc trước khi những khoản chi tiêu này ảnh hưởng đến kế hoạch tương lai.',
+      'Tinh tú chiếu mệnh cho thấy bạn là người mua sắm chú trọng chất lượng sản phẩm, sẵn sàng chi tiêu mạnh tay một cách thường xuyên. Đây là thói quen của người có thu nhập ổn định hoặc đang yêu chiều bản thân quá mức bằng vật chất cao cấp. Hãy cẩn thận vì cảm giác tiêu dùng thoải mái này rất dễ gây nghiện và làm giảm khả năng kiểm soát tài chính khi cần thiết.'
+    ]
+  },
+
+  budgetSaver: {
+    triggers: ['high_savings_rate', 'frequent_small_orders'],
+    insights: [
+      'Quẻ bói đọc vị bạn là một người cực kỳ thực tế và chi tiết trong việc quản lý ngân sách cá nhân. Bạn chia nhỏ các đơn hàng và luôn tìm mọi cách để giảm chi phí xuống mức thấp nhất thông qua việc tích lũy điểm thưởng và mã giảm giá. Đây là một thói quen tốt, nhưng hãy cẩn thận đừng để việc so đo chi phí vận chuyển làm tốn quá nhiều thời gian quý báu của bạn.',
+      'Vũ trụ nhìn thấu bạn luôn có cảm giác tự hào khi mua được những món đồ nhỏ với giá rẻ. Việc này giúp bạn kiểm soát ngân sách tốt nhưng đôi khi lại dẫn đến việc mua quá nhiều món đồ lặt vặt chất lượng thấp. Hãy nhớ rằng việc mua một sản phẩm chất lượng dùng lâu dài đôi khi sẽ tiết kiệm hơn việc mua nhiều món đồ rẻ tiền nhanh hỏng.'
     ]
   }
+};
+
+const ARCHETYPE_PSYCHOLOGY_PATTERNS = {
+  reformed: [
+    'Quẻ bói chúc mừng bạn đã bước qua giai đoạn vung tay quá trán và đang hướng tới lối sống tiết kiệm, kỷ luật hơn. Những tinh tú nhận thấy sự nỗ lực kiềm chế ham muốn mua sắm tức thời để đổi lấy sự bình yên lâu dài cho ví tiền. Hãy tiếp tục giữ vững tinh thần thép này trước những đợt bão giảm giá sắp tới của vũ trụ.',
+    'Tinh tú chiếu mệnh cho thấy bạn đang trải qua một cuộc cách mạng tư duy tài chính đầy tích cực. Việc chủ động giảm tần suất chốt đơn là minh chứng rõ rệt cho thấy lý trí đã giành lại quyền kiểm soát từ tay cảm xúc nhất thời. Đây là hành trình tự rèn luyện đầy gian truân nhưng quả ngọt mang lại chính là một tương lai tài chính vững vàng.',
+    'Vũ trụ nhìn thấy sự chuyển mình rõ rệt trong thói quen chi tiêu của bạn thời gian gần đây. Bạn đã bắt đầu biết nói lời từ chối với những món đồ lấp lánh nhưng ít giá trị sử dụng thực tế để ưu tiên cho những mục tiêu dài hạn. Hãy tự hào vì bạn đang làm chủ cuộc chơi tiêu dùng chứ không còn bị các thuật toán mua sắm điều khiển.'
+  ],
+  night_owl: [
+    'Quẻ bói chỉ ra màn hình điện thoại tối và giỏ hàng lúc nửa đêm là nơi trú ẩn tinh thần của bạn sau một ngày dài kiệt sức. Bạn không hẳn cần món đồ đó, mà chỉ thèm khát cảm giác được chiều chuộng bản thân khi cả thế giới đã ngủ say. Tinh tú mách bảo hãy tắt kết nối mạng trước mười giờ tối nếu không muốn tài khoản liên tục rơi vào trạng thái báo động.',
+    'Chòm sao hộ mệnh tiết lộ rằng lý trí của bạn thường đi ngủ sớm hơn ngón tay chốt đơn vài tiếng đồng hồ. Những đơn hàng đặt lúc hai giờ sáng thực chất là tiếng cầu cứu của một tinh thần đang mệt mỏi cần được xoa dịu bằng niềm vui sở hữu đồ mới. Hãy cẩn thận kẻo niềm vui ngắn hạn lúc nửa đêm lại biến thành sự hối hận vào sáng hôm sau khi người giao hàng gõ cửa.',
+    'Vũ trụ nhìn thấu bạn là người chuyên canh giờ hoàng đạo lúc nửa đêm để tìm kiếm sự bình yên trong tâm hồn qua việc mua sắm. Sự yên tĩnh của bóng tối khiến bạn dễ dàng đầu hàng trước những lời quảng cáo hấp dẫn hơn bao giờ hết. Lời khuyên từ tinh tú là hãy để điện thoại tránh xa tầm tay trước khi chìm vào giấc ngủ.'
+  ],
+  fashion_healer: [
+    'Tinh tú chỉ ra bạn đang dùng quần áo và phụ kiện thời trang làm tấm lá chắn bảo vệ cảm xúc trước những áp lực bên ngoài. Mỗi bộ cánh mới được chốt đơn là một nỗ lực khoác lên mình một diện mạo tự tin và rạng rỡ hơn. Tuy nhiên, đống quần áo chưa cắt mác trong tủ đang âm thầm nhắc nhở rằng niềm vui thực sự không nằm ở việc sở hữu nhiều vải vóc.',
+    'Quẻ bói đọc vị bạn xem việc mua sắm quần áo như một liệu pháp giải tỏa căng thẳng và tự thưởng cho bản thân sau những mệt mỏi. Bạn thường mơ mộng về những dịp đặc biệt để diện chúng, nhưng thực tế đống đồ mới vẫn nằm im lìm trong góc tủ. Hãy học cách yêu thương bản thân bằng những trải nghiệm tinh thần ý nghĩa thay vì tích trữ vật chất bên ngoài.',
+    'Vũ trụ nhìn thấu gu thẩm mỹ tinh tế nhưng cũng đầy biến động cảm xúc của bạn qua từng đơn hàng thời trang. Việc thay đổi phong cách liên tục phản ánh hành trình tìm kiếm bản thân và định vị giá trị của chính bạn. Tinh tú khuyên bạn hãy tập trung vào những món đồ thực sự cơ bản và đa dụng trước khi chạy theo các xu hướng mới.'
+  ],
+  bargain_hunter: [
+    'Quẻ bói đọc vị bạn là một người cực kỳ nhạy bén với các cơ hội giảm giá nhưng lại dễ rơi vào bẫy tâm lý mua vì rẻ chứ không vì cần. Hội chứng sợ bỏ lỡ cơ hội tốt khiến bạn tích trữ hàng tá thứ chỉ để thỏa mãn cảm giác chiến thắng thuật toán của sàn thương mại. Thần tài khuyên bạn nên nhớ rằng việc không mua gì mới là cách tiết kiệm trọn vẹn nhất.',
+    'Tinh tú chiếu mệnh cho thấy bạn coi việc tìm kiếm mã giảm giá và quà tặng đi kèm như một trò chơi trí tuệ đầy phẩn khích. Mỗi lần chốt đơn thành công với giá hời là một lần bạn ngập tràn cảm giác tự hào và thỏa mãn. Thế nhưng, đống đồ giảm giá đang bám đầy bụi trong nhà đang phản ánh một thực tế chi tiêu chưa thực sự hiệu quả.',
+    'Vũ trụ nhận thấy bạn là một người có khả năng tính toán vô cùng thông minh để tối ưu hóa chi phí nhờ các chương trình khuyến mãi. Bạn có khả năng áp dụng các loại ưu đãi cực kỳ nhanh chóng, nhưng đôi khi sự tập trung quá mức vào phần trăm giảm giá khiến bạn quên mất chất lượng thực tế. Hãy tỉnh táo để không trở thành người mua những món đồ không cần thiết chỉ vì chúng đang rẻ.'
+  ],
+  emotional: [
+    'Quẻ bói tiết lộ giỏ hàng trực tuyến chính là cuốn nhật ký ghi lại những thăng trầm cảm xúc chân thực nhất của bạn. Khi vui bạn mua để ăn mừng, khi buồn bạn chốt đơn để giải sầu, và khi căng thẳng thì nút mua ngay trở thành phao cứu sinh. Tinh tú nhắc nhở rằng tiền có thể mua được sự thỏa mãn nhất thời, nhưng không thể chữa lành tận gốc những bất ổn bên trong.',
+    'Chòm sao hộ mệnh nhận thấy dòng tiền của bạn biến động dữ dội theo nhịp sinh học của tâm trạng mỗi tháng. Bạn dễ dàng rơi vào trạng thái mua sắm cuồng nhiệt không kiểm soát khi cảm xúc lấn át lý trí, để rồi sau đó lại trải qua giai đoạn tiếc nuối và tự trách mình. Hãy tập thói quen để đồ trong giỏ hàng vài ngày trước khi thực hiện thanh toán.',
+    'Vũ trụ nhìn thấu bạn là một người sống bản năng và để cảm xúc dẫn lối trong mọi quyết định mua sắm. Việc chốt đơn ngẫu hứng mang lại cho bạn cảm giác tự do và phấn khích tạm thời nhưng cũng tạo ra những áp lực tài chính không đáng có. Hãy tìm kiếm những cách giải tỏa tinh thần lành mạnh hơn để bảo vệ sự cân bằng cho ví tiền của mình.'
+  ],
+  premium_curator: [
+    'Quẻ bói tôn vinh gu thẩm mỹ cao cấp và tư duy mua sắm chú trọng chất lượng hơn số lượng của bạn. Bạn hiểu rõ giá trị của bản thân và từ chối thỏa hiệp với những sản phẩm giá rẻ kém bền để đầu tư vào những giá trị lâu dài. Tinh tú chỉ khuyên bạn nên cân đối ngân sách để phong cách sống đẳng cấp không làm ảnh hưởng đến nguồn tiền dự phòng.',
+    'Tinh tú chiếu mệnh cho thấy bạn là người có tiêu chuẩn rất cao và sẵn sàng chi trả xứng đáng cho những trải nghiệm và dịch vụ xuất sắc. Bạn tin rằng những món đồ cao cấp không chỉ phục vụ nhu cầu mà còn là tuyên ngôn về phong cách sống và sự tự tôn của bản thân. Hãy duy trì sự chọn lọc tinh tế này nhưng đừng để nó biến thành gánh nặng tài chính âm thầm.',
+    'Vũ trụ nhận thấy bạn rất ít khi bị thu hút bởi các chương trình giảm giá đại trà vì bạn chỉ tập trung vào giá trị thực sự của sản phẩm. Tư duy tiêu dùng thông minh này giúp bạn tránh xa đống đồ rẻ tiền dễ hỏng, nhưng đôi khi cũng khiến bạn chi tiêu quá tay cho các món đồ xa xỉ. Hãy đặt ra giới hạn chi tiêu rõ ràng cho mỗi tháng để giữ mọi thứ luôn trong tầm kiểm soát.'
+  ],
+  rising_addict: [
+    'Quẻ bói cảnh báo bạn đang bước vào giai đoạn say mê chốt đơn với tần suất và quy mô chi tiêu tăng trưởng rất nhanh. Bạn dường như đang bị cuốn vào vòng xoáy mua sắm khi mỗi ngày đều ngóng chờ những chuyến xe giao hàng mới. Tinh tú khuyên bạn hãy tạm dừng sử dụng các ứng dụng mua sắm một thời gian để lấy lại sự cân bằng trước khi ví tiền kiệt quệ.',
+    'Chòm sao hộ mệnh phát hiện ra niềm đam mê mua sắm của bạn đang leo thang một cách âm thầm nhưng vô cùng mạnh mẽ. Những món đồ nhỏ ban đầu đã nhường chỗ cho những đơn hàng lớn hơn và thường xuyên hơn. Hãy tự hỏi bản thân xem bạn đang thực sự cần dùng những món đồ đó hay chỉ đang nghiện cảm giác được sở hữu chúng.',
+    'Vũ trụ nhìn thấy mức độ phụ thuộc của bạn vào việc chốt đơn trực tuyến đang ở mức đáng lo ngại. Bạn tìm thấy sự phấn khích liên tục từ việc theo dõi hành trình đơn hàng và nhận bưu phẩm mỗi ngày. Tinh tú mách bảo hãy chuyển hướng nguồn năng lượng này sang các hoạt động thể chất hoặc học tập để bảo vệ tài khoản cá nhân.'
+  ],
+  morning_planner: [
+    'Quẻ bói khen ngợi sự kỷ luật và tỉnh táo của bạn khi luôn mua sắm vào những thời điểm lý trí minh mẫn nhất trong ngày. Bạn hiếm khi đưa ra các quyết định bốc đồng nhờ thói quen lập kế hoạch chi tiết và phân bổ ngân sách vô cùng khoa học. Tinh tú chúc mừng bạn vì đã làm chủ hoàn toàn hành vi tiêu dùng của bản thân mà không bị thuật toán thao túng.',
+    'Chòm sao hộ mệnh cho thấy bạn là tấm gương về sự kiên định và kiểm soát dòng tiền vô cùng xuất sắc. Bạn chỉ chốt đơn khi thực sự cần thiết và luôn cân nhắc kỹ lưỡng giữa mong muốn nhất thời và lợi ích lâu dài của món đồ. Hãy tiếp tục duy trì phong độ này để xây dựng một tương lai tài chính vững chắc và an toàn.',
+    'Vũ trụ nhận thấy tư duy thực tế và logic chi phối toàn bộ các quyết định mua sắm của bạn từ trước đến nay. Bạn không bị ảnh hưởng bởi những lời quảng cáo thổi phồng hay các trào lưu nhất thời trên mạng xã hội. Sự điềm tĩnh này giúp bạn bảo vệ ví tiền của mình một cách hoàn hảo trước mọi cạm bẫy tiêu dùng trực tuyến.'
+  ],
+  seasonal: [
+    'Quẻ bói chỉ ra bạn là người rất nhạy cảm với không khí lễ hội và thường có xu hướng chi tiêu bùng nổ theo các mùa trong năm. Khi không khí chuẩn bị Tết cận kề hay mùa mua sắm cuối năm đến, ví tiền của bạn lập tức tự động mở khóa để sắm sửa. Tinh tú nhắc nhở hãy chuẩn bị ngân sách dự phòng trước các mùa lễ hội để tránh bị rơi vào thế thụ động tài chính.',
+    'Tinh tú chiếu mệnh cho thấy hành vi mua sắm của bạn chịu ảnh hưởng lớn từ thời tiết và các dịp đặc biệt trong năm. Bạn có thể im hơi lặng tiếng suốt nhiều tháng liền nhưng sẵn sàng chi tiêu mạnh tay vào mùa hè hoặc dịp cuối năm để chuẩn bị cho các chuyến đi hoặc quà tặng. Hãy phân bổ ngân sách đều hơn để không tạo ra những cú sốc tài chính đột ngột.',
+    'Vũ trụ nhận thấy bạn coi việc mua sắm như một nghi thức để chào đón các mùa mới và kỷ niệm các dịp đặc biệt trong năm. Sự hào hứng chuẩn bị đồ đạc mang lại cho bạn niềm vui, nhưng cũng dễ khiến bạn chi tiêu vượt quá kế hoạch. Hãy lập danh sách những thứ thực sự cần thiết trước mỗi mùa để giữ cho ví tiền luôn an toàn.'
+  ],
+  beauty_selfcare: [
+    'Quẻ bói đọc vị bạn đang biến các sản phẩm chăm sóc da và làm đẹp thành những liều thuốc tinh thần để tự xoa dịu bản thân sau những ngày dài áp lực. Mỗi sản phẩm dưỡng da hay làm đẹp mới là một lời tự tình rằng bạn xứng đáng được nâng niu và trân trọng. Tinh tú chỉ khuyên bạn nên yêu thương bản thân một cách tỉnh táo, đừng để diện mạo thăng hoa mà tài khoản lại héo hon.',
+    'Chòm sao hộ mệnh thấy bạn dành rất nhiều tâm huyết và ngân sách để đầu tư vào vẻ bề ngoài cũng như sức khỏe của bản thân. Bạn tin rằng việc chăm sóc cơ thể là khoản đầu tư thông minh nhất và không bao giờ tiếc tiền cho việc này. Hãy tiếp tục chăm sóc bản thân nhưng hãy chọn lọc những sản phẩm thực sự phù hợp thay vì mua sắm theo trào lưu quảng cáo.',
+    'Vũ trụ nhìn thấu khao khát hoàn thiện vẻ đẹp bản thân và tìm kiếm sự tự tin của bạn qua các đơn hàng mỹ phẩm. Việc thực hiện các bước dưỡng da mỗi tối giống như một nghi thức giúp bạn lấy lại sự bình yên trong tâm hồn. Hãy nhớ rằng vẻ đẹp rạng ngời nhất của bạn xuất phát từ sự an yên bên trong chứ không chỉ từ những sản phẩm đắt đỏ.'
+  ],
+  tech_optimizer: [
+    'Quẻ bói chỉ ra bạn rất dễ bị mê hoặc bởi những thiết bị công nghệ mới với lời hứa hẹn sẽ tối ưu hóa hiệu suất làm việc hoặc nâng tầm cuộc sống. Đây thực chất là một cơ chế tâm lý giúp bạn tạo ra ảo giác về sự năng suất để trốn tránh áp lực công việc thực tế. Tinh tú mách bảo rằng thiết bị xịn chỉ là công cụ, thứ cần nâng cấp thực sự chính là sự tập trung của bạn.',
+    'Tinh tú chiếu mệnh cho thấy bạn luôn tin tưởng một không gian làm việc hiện đại với các thiết bị thông minh sẽ mang lại nguồn cảm hứng bất tận. Bạn không ngần ngại chi tiêu cho những món đồ công nghệ cao để thỏa mãn đam mê sở hữu thiết bị mạnh mẽ. Hãy cẩn thận kẻo ngân sách cá nhân bị quá tải trước khi bạn kịp sử dụng hết tính năng của đống đồ công nghệ đó.',
+    'Vũ trụ nhận thấy bạn là một người theo đuổi sự hoàn hảo về mặt kỹ thuật và luôn muốn sở hữu những giải pháp công nghệ tiên tiến nhất. Sở thích này giúp cuộc sống của bạn tiện nghi hơn nhưng cũng ngốn một lượng ngân sách lớn. Hãy đặt ra quy tắc đánh giá mức độ sử dụng thật kỹ trước khi quyết định chi tiền cho bất kỳ thiết bị mới nào.'
+  ],
+  home_nester: [
+    'Quẻ bói tiết lộ bạn đang tìm kiếm cảm giác an toàn và kiểm soát cuộc sống thông qua việc liên tục trang trí, nâng cấp không gian sống của mình. Một ngôi nhà ấm cúng với đầy đủ tiện nghi chính là thánh đường giúp bạn tránh xa thế giới đầy biến động ngoài kia. Tinh tú khuyên bạn hãy trân trọng tổ ấm của mình nhưng đừng để việc mua sắm đồ gia dụng vượt quá khả năng tài chính thực tế.',
+    'Chòm sao hộ mệnh nhìn thấy niềm vui giản dị nhưng sâu sắc của bạn khi tự tay chăm chút cho từng góc nhỏ trong căn nhà. Mỗi món đồ gia dụng tiện ích hay vật dụng trang trí mới chốt đơn là một viên gạch xây dựng nên cảm giác hạnh phúc gia đình. Hãy nhớ rằng sự ấm áp của tổ ấm đến từ tình cảm của những người sống trong đó chứ không phải từ số lượng đồ đạc bạn tích trữ.',
+    'Vũ trụ nhận thấy bạn có xu hướng chi tiêu đều đặn cho các sản phẩm nhà cửa đời sống nhằm nâng cao chất lượng sinh hoạt hàng ngày. Bạn là người thực tế, yêu thích sự gọn gàng và luôn muốn tối ưu hóa không gian sống của mình. Hãy cân nhắc kỹ xem món đồ gia dụng tiếp theo có thực sự cần thiết hay chỉ làm chật chội thêm ngôi nhà của bạn.'
+  ],
+  food_lover: [
+    'Quẻ bói chỉ ra bạn là kiểu người dùng hương vị ẩm thực để vỗ về những tổn thương cảm xúc và lấp đầy những khoảng trống tinh thần. Bộ não của bạn rất giỏi thuyết phục lý trí rằng ăn ngon là cách tốt nhất để tái tạo năng lượng làm việc sau những căng thẳng. Hệ quả là bạn có những khoảnh khắc hạnh phúc ngập tràn calo nhưng ví tiền thì lại rơi vào tình trạng hao hụt nghiêm trọng.',
+    'Tinh tú chiếu rọi cho thấy bạn sẵn sàng chi tiêu thoải mái cho đồ ăn vặt và ẩm thực như một phần thưởng tự trao sau những giờ làm việc mệt mỏi. Đây là cơ chế giải tỏa căng thẳng vô cùng nhanh chóng và hiệu quả đối với bạn. Tuy nhiên, việc đặt đồ ăn liên tục trên các ứng dụng đang âm thầm bào mòn khoản tiết kiệm dài hạn của bạn một cách đáng ngại.',
+    'Vũ trụ nhận thấy tình yêu lớn của bạn dành cho ẩm thực và niềm vui khám phá những món ăn mới lạ mỗi ngày. Bạn coi việc ăn uống là một trải nghiệm tận hưởng cuộc sống đích thực chứ không đơn thuần là nhu cầu sinh học bình thường. Hãy học cách tự nấu ăn nhiều hơn để vừa bảo vệ sức khỏe vừa giữ cho dòng tiền cá nhân luôn ở trạng thái an toàn.'
+  ],
+  family_center: [
+    'Quẻ bói gửi lời tri ân sâu sắc đến tấm lòng chu đáo của bạn khi luôn đặt gia đình và những người thân yêu lên vị trí ưu tiên hàng đầu trong mọi đơn hàng. Bạn sẵn sàng chi tiêu hào phóng cho con cái, cha mẹ nhưng lại vô cùng tiết kiệm khi mua sắm cho bản thân. Tinh tú nhắc nhở rằng bạn cũng cần được yêu thương, hãy nhớ tự thưởng cho mình những món quà nhỏ xứng đáng.',
+    'Chòm sao hộ mệnh thấy bạn là chỗ dựa vững chắc của cả nhà khi luôn lo toan chu đáo từ đồ dùng sinh hoạt cho đến các sản phẩm chăm sóc gia đình. Bạn tìm thấy niềm vui trong việc chăm sóc người khác và nhìn thấy người thân hạnh phúc. Tuy nhiên, hãy nhớ phân bổ một phần ngân sách riêng để chăm lo cho những sở thích cá nhân của chính bạn.',
+    'Vũ trụ ghi nhận sự vun vén của bạn qua danh sách đơn hàng hầu hết đều dành cho tổ ấm và những người thân yêu. Bạn hiếm khi chi tiêu bốc đồng cho những thứ vô bổ của bản thân mà luôn tính toán lợi ích cho cả gia đình. Đây là một phẩm chất tuyệt vời nhưng đừng quên rằng việc tự chăm sóc tốt cho mình cũng là cách yêu thương gia đình tốt nhất.'
+  ],
+  free_spirit: [
+    'Quẻ bói đọc vị bạn là một linh hồn tự do, yêu thích sự mới mẻ và luôn tò mò trải nghiệm nhiều lĩnh vực khác nhau trong cuộc sống. Danh mục mua sắm trải rộng của bạn phản ánh một tâm hồn rộng mở, ham học hỏi nhưng cũng rất nhanh chán. Tinh tú khuyên bạn nên tập trung năng lượng vào một vài sở thích nhất định để tránh lãng phí nguồn lực tài chính của bản thân.',
+    'Tinh tú chiếu mệnh cho thấy bạn mua sắm vô cùng ngẫu hứng, từ đồ trang trí, dụng cụ thể thao cho đến các món đồ độc lạ không theo bất kỳ quy luật nào. Bạn dễ dàng bị thu hút bởi những ý tưởng mới mẻ trên mạng xã hội và chốt đơn ngay lập tức. Sự phân tán này đang làm dòng tiền của bạn bị rò rỉ ở nhiều nơi, hãy thiết lập mục tiêu tài chính cụ thể hơn.',
+    'Vũ trụ nhận thấy bạn coi việc mua sắm như một chuyến phiêu lưu thú vị để khám phá thế giới xung quanh qua từng gói bưu phẩm. Bạn không ngại thử nghiệm những sản phẩm mới và luôn tìm kiếm nguồn cảm hứng từ những danh mục lạ lẫm. Hãy học cách quản lý giỏ hàng chặt chẽ hơn để chuyến phiêu lưu tiêu dùng này luôn mang lại niềm vui trọn vẹn.'
+  ]
 };
 
 const AI_FEW_SHOT_EXAMPLES = [
@@ -95,20 +189,30 @@ const AI_FEW_SHOT_EXAMPLES = [
   '',
   'Ví dụ 2:',
   'Hồ sơ đã phân tích: Kiểu người "Chiến Thần Săn Sale". Đặc điểm: Thích săn sale (73% chi ngày sale); Mua sắm thường xuyên (trung bình nhiều đơn/tháng); Hay mua cuối tuần.',
-  'Nhận xét: Não bộ bạn đã được lập trình để coi "giảm giá" là phần thưởng, không phải món đồ — mỗi đơn hàng chốt là một chiến thắng dopamine thuần túy, bất kể có dùng hay không. Chòm sao hộ mệnh chứng nhận: đây là loại hạnh phúc rẻ nhất và đắt nhất cùng một lúc.',
+  'Nhận xét: Não bộ bạn đã được lập trình để coi "giảm giá" là phần thưởng, không phải món đồ — mỗi đơn hàng chốt là một chiến thắng để có được sự thỏa mãn cảm xúc ngắn hạn, bất kể có dùng hay không. Chòm sao hộ mệnh chứng nhận: đây là loại hạnh phúc dễ đạt được và cũng tốn kém nhất cùng một lúc.',
   '',
   'Ví dụ 3:',
   'Hồ sơ đã phân tích: Kiểu người "Người Mua Chọn Lọc". Đặc điểm: Ưa đồ chất lượng (giá trị đơn cao); Mua sắm thưa thớt; Chi tiêu tăng dần theo năm.',
-  'Nhận xét: Bạn không mua nhiều, nhưng mỗi lần mua là một tuyên ngôn — rằng bạn xứng đáng có thứ tốt, và thứ rẻ tiền chỉ tốn tiền hai lần. Tinh tú chiếu rọi: đây là tư duy cao cấp, chỉ tiếc ví tiền đôi khi không đồng thuận với tiêu chuẩn của bạn.',
+  'Nhận xét: Bạn không mua nhiều, nhưng mỗi lần mua là một tuyên ngôn — rằng bạn xứng đáng có thứ tốt, và thứ rẻ tiền chỉ tốn tiền mua lại lần hai. Tinh tú chiếu rọi: đây là tư duy cao cấp, chỉ tiếc ví tiền đôi khi không đồng thuận với tiêu chuẩn của bạn.',
   '',
   'Ví dụ 4:',
   'Hồ sơ đã phân tích: Kiểu người "Người Mua Sắm Cảm Xúc". Đặc điểm: Chi tiêu không đều (CV cao); Hay mua cuối tuần; Đa dạng danh mục.',
-  'Nhận xét: Với bạn, mua sắm không phải kế hoạch — đó là phản xạ cảm xúc, một nút "reset" cho tâm trạng. Vũ trụ ghi nhận: bạn đang dùng giỏ hàng như nhật ký cảm xúc, và mỗi đơn hàng là một trang viết về trạng thái nội tâm hôm đó.'
+  'Nhận xét: Với bạn, mua sắm không phải kế hoạch — đó là phản xạ cảm xúc, một nút khởi động lại cho tâm trạng. Vũ trụ ghi nhận: bạn đang dùng giỏ hàng như nhật ký cảm xúc, và mỗi đơn hàng là một trang viết về trạng thái nội tâm hôm đó.'
 ].join('\n');
 
 
 // Generate psychological insights based on shopping patterns
-function generatePsychologicalInsight(data) {
+function generatePsychologicalInsight(data, profile) {
+  // Check profile archetype first for highly specific rule-based insights
+  if (profile && profile.archetype && profile.archetype.key) {
+    const archKey = profile.archetype.key;
+    const patterns = ARCHETYPE_PSYCHOLOGY_PATTERNS[archKey];
+    if (patterns && patterns.length > 0) {
+      const insightIndex = Math.floor(Math.random() * patterns.length);
+      return patterns[insightIndex];
+    }
+  }
+
   const triggers = analyzeBehaviorTriggers(data);
   const matchedPatterns = [];
   
@@ -225,20 +329,47 @@ function analyzeBehaviorTriggers(data) {
 
 function generateFallbackInsight(triggers) {
   const fallbacks = {
-    high_frequency: 'Vũ trụ nhìn thấu rằng bạn đã biến việc chốt đơn thành một thói quen gần như vô thức để đối phó với stress hàng ngày. Mỗi notification về đơn hàng mới như một liều dopamine nhỏ giúp bạn tạm quên đi những áp lực cuộc sống.',
+    high_frequency: [
+      'Vũ trụ nhìn thấu rằng bạn đã biến việc chốt đơn thành một thói quen gần như vô thức để đối phó với những căng thẳng hàng ngày. Mỗi thông báo về đơn hàng mới như một liều thuốc giải tỏa cảm xúc nhỏ giúp bạn tạm quên đi những áp lực cuộc sống. Tuy nhiên, niềm vui này trôi qua rất nhanh và thứ ở lại duy nhất là chiếc ví ngày một mỏng đi.',
+      'Chòm sao hộ mệnh phát hiện tần suất mua sắm dày đặc của bạn phản ánh sự thiếu hụt cảm giác bình yên trong cuộc sống thường nhật. Bạn chốt đơn liên tục để lấp đầy những khoảng trống thời gian và tạo cảm giác mình luôn bận rộn. Tinh tú khuyên bạn hãy tìm kiếm những thói quen lành mạnh khác để thay thế cho hành vi mua sắm vô thức này.',
+      'Quẻ bói chỉ ra việc nhận bưu phẩm mỗi ngày đã trở thành nguồn động lực chính giúp bạn duy trì năng lượng làm việc. Bạn bị phụ thuộc vào cảm giác mở hộp quà mới để xoa dịu những áp lực tinh thần đè nặng. Hãy tỉnh táo nhìn nhận lại xem bạn đang thực sự sử dụng các món đồ đó hay chỉ đang mua sắm để trốn tránh thực tại.'
+    ],
     
-    diverse_categories: 'Tinh tú chiếu mệnh cho thấy bạn có xu hướng mua sắm lan man để tìm kiếm cảm giác hài lòng từ nhiều nguồn khác nhau. Đây là dấu hiệu của một tâm hồn đang tìm kiếm sự viên mãn nhưng chưa xác định được điều mình thực sự cần.',
+    diverse_categories: [
+      'Tinh tú chiếu mệnh cho thấy bạn có xu hướng mua sắm dàn trải để tìm kiếm cảm giác hài lòng từ nhiều nguồn khác nhau. Đây là dấu hiệu của một tâm hồn đang tìm kiếm sự viên mãn nhưng chưa xác định được điều mình thực sự cần. Hãy thử dừng lại một nhịp để hiểu rõ bản thân trước khi tiếp tục thêm đồ vào giỏ hàng.',
+      'Vũ trụ nhận thấy danh mục mua sắm trải rộng phản ánh sự tò mò vô hạn nhưng cũng là biểu hiện của việc thiếu định hướng chi tiêu rõ ràng. Bạn dễ bị cuốn vào các xu hướng mới trên mạng xã hội và muốn trải nghiệm mọi thứ cùng một lúc. Tinh tú khuyên bạn hãy thiết lập một ngân sách cụ thể cho từng mục tiêu để bảo vệ dòng tiền cá nhân.',
+      'Quẻ bói đọc vị bạn là người có sở thích đa dạng và luôn muốn thử nghiệm những điều mới lạ trong cuộc sống. Việc mua sắm lan man giúp bạn thỏa mãn tính hiếu kỳ nhất thời nhưng cũng khiến ví tiền của bạn bị hao hụt ở nhiều nơi. Hãy học cách chọn lọc và đầu tư sâu sắc vào một vài sở thích thực sự có giá trị lâu dài.'
+    ],
     
-    sale_focused: 'Quẻ bói tiết lộ bạn đã trở thành tù nhân của tâm lý "giá rẻ là vua", nhưng thực chất đang bỏ qua việc đánh giá giá trị thực sự của món đồ. Cảm giác thắng lợi khi săn được sale đã che mờ khả năng phán đoán về nhu cầu thật sự.',
+    sale_focused: [
+      'Quẻ bói tiết lộ bạn đang chịu ảnh hưởng lớn của tâm lý thích đồ giá rẻ, luôn bị hấp dẫn bởi các nhãn giảm giá đỏ chót. Cảm giác chiến thắng khi áp dụng được mã giảm giá đã che mờ khả năng phán đoán của bạn về giá trị thực dụng của sản phẩm. Bạn đang tiêu tiền để mua cảm giác tiết kiệm chứ không phải mua món đồ mình thực sự cần.',
+      'Tinh tú chiếu mệnh cho thấy bạn là người có thói quen săn lùng khuyến mãi vô cùng kiên trì mỗi khi có cơ hội. Bạn cảm thấy hân hoan khi mua được món đồ dưới giá trị thông thường, bất kể nhu cầu sử dụng thực tế ra sao. Thần tài nhắc nhở rằng việc không mua sắm mới thực sự là cách tiết kiệm toàn diện nhất.',
+      'Vũ trụ nhìn thấu bạn dễ dàng bị thao túng tâm lý bởi các chiêu trò tiếp thị giảm giá và miễn phí vận chuyển của sàn thương mại. Bạn thường chốt đơn vội vã chỉ vì sợ bỏ lỡ một ưu đãi hời mà quên mất chất lượng sản phẩm. Hãy bình tĩnh phân tích giá trị thực tế của món hàng trước khi quyết định bấm nút thanh toán.'
+    ],
     
-    late_night_shopping: 'Chòm sao hộ mệnh chỉ ra những lúc đêm khuya là thời điểm bạn dễ bị thao túng tâm lý nhất, khi lý trí đã mệt mỏi và cảm xúc lên ngôi. Việc chốt đơn lúc này như một cách để tự an ủi bản thân sau một ngày dài căng thẳng.'
+    late_night_shopping: [
+      'Chòm sao hộ mệnh chỉ ra những lúc đêm khuya là thời điểm bạn dễ bị thao túng tâm lý nhất, khi lý trí đã mệt mỏi và cảm xúc lên ngôi. Việc chốt đơn lúc này như một cách để tự an ủi bản thân sau một ngày dài căng thẳng. Lời khuyên từ vũ trụ là hãy để điện thoại ở xa giường ngủ để bảo vệ tài khoản của bạn.',
+      'Quẻ bói nhận định các đơn hàng phát sinh vào lúc nửa đêm chính là tiếng lòng thổn thức của một tâm hồn đang cần được vỗ về. Bóng tối làm gia tăng cảm giác trống trải khiến bạn dễ dàng đầu hàng trước những ham muốn tiêu dùng bộc phát. Hãy tắt các ứng dụng mua sắm trước khi lên giường để đảm bảo cả giấc ngủ ngon và sự an toàn cho ví tiền.',
+      'Tinh tú chiếu rọi cho thấy bạn có thói quen lướt điện thoại vô thức trước khi đi ngủ và kết thúc bằng một vài đơn hàng bất ngờ. Sự tiện lợi của việc thanh toán nhanh chóng khiến bạn chi tiêu trong trạng thái nửa tỉnh nửa mơ. Vũ trụ khuyên bạn hãy thay thế thói quen này bằng việc đọc sách hoặc thư giãn tinh thần để tìm kiếm sự bình yên thực sự.'
+    ]
   };
   
   for (const trigger of triggers) {
-    if (fallbacks[trigger]) return fallbacks[trigger];
+    if (fallbacks[trigger]) {
+      const options = fallbacks[trigger];
+      const index = Math.floor(Math.random() * options.length);
+      return options[index];
+    }
   }
   
-  return 'Vũ trụ nhìn thấy trong bạn một tâm hồn đang tìm kiếm sự cân bằng giữa nhu cầu thực tế và khao khát cảm xúc thông qua hành vi mua sắm. Đây là cuộc hành trình tự khám phá bản thân qua từng quyết định tiêu dùng.';
+  const defaultOptions = [
+    'Vũ trụ nhìn thấy trong bạn một tâm hồn đang tìm kiếm sự cân bằng giữa nhu cầu thực tế và khao khát cảm xúc thông qua hành vi mua sắm. Đây là cuộc hành trình tự khám phá bản thân qua từng quyết định tiêu dùng và tự rút ra bài học cho mình.',
+    'Tinh tú chiếu mệnh cho thấy bạn là người luôn cân nhắc giữa việc yêu chiều bản thân và trách nhiệm quản lý tài chính cá nhân. Mỗi đơn hàng chốt thành công là một trải nghiệm thú vị giúp bạn hiểu rõ hơn về nhu cầu và phong cách sống của chính mình.',
+    'Quẻ bói nhận thấy hành trình mua sắm của bạn phản ánh sự trưởng thành và thích nghi không ngừng với nhịp sống hiện đại. Hãy tiếp tục duy trì sự thông thái và tỉnh táo trong tiêu dùng để luôn làm chủ dòng tiền cá nhân một cách tốt nhất.'
+  ];
+  
+  const defaultIndex = Math.floor(Math.random() * defaultOptions.length);
+  return defaultOptions[defaultIndex];
 }
 
 let _aiInsightSession = null;
@@ -487,7 +618,7 @@ async function _executeAIInsight(cardId) {
       totalOrders: (window.currentDashData && window.currentDashData.o) || 0,
       totalSaved: (window.currentDashData && window.currentDashData.s) || 0
     };
-    const localInsight = generatePsychologicalInsight(dataForInsight);
+    const localInsight = generatePsychologicalInsight(dataForInsight, profile);
 
     if (localInsight && localInsight.trim()) {
       const text = localInsight.trim();
