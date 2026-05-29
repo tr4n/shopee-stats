@@ -2156,6 +2156,32 @@ body {
 }
 
 /* ── Range Sliders ───────────────────────────── */
+.double-slider-wrap {
+  position: relative;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.double-slider-wrap .slider-track {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.double-slider-wrap .slider-range {
+  position: absolute;
+  top: 6px;
+  height: 5px;
+  background: var(--primary);
+  border-radius: 3px;
+  z-index: 2;
+}
+
 .double-slider-wrap input[type=range] {
   -webkit-appearance: none;
   appearance: none;
@@ -2164,6 +2190,10 @@ body {
   pointer-events: none;
   margin: 0;
   height: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
 }
 
 .double-slider-wrap input[type=range]::-webkit-slider-thumb {
@@ -2199,4 +2229,238 @@ body {
 .double-slider-wrap input[type=range]::-moz-range-track {
   background: transparent;
   border: none;
+}
+
+/* ── Unified Filter Bar ──────────────────────── */
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-search-box {
+  position: relative;
+  flex: 1 1 240px;
+}
+
+.filter-search-box .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.filter-search-box input {
+  width: 100%;
+  padding: 10px 36px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.filter-search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+.filter-search-box button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.15s;
+}
+
+.filter-search-box button:hover {
+  background-color: var(--dark);
+  color: var(--text);
+}
+
+.filter-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* Custom Select styling */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-wrapper .select-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.select-wrapper select {
+  padding: 8px 12px 8px 28px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
+}
+
+/* Add custom arrow indicator */
+.select-wrapper::after {
+  content: "▼";
+  font-size: 8px;
+  color: var(--muted);
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+}
+
+.select-wrapper select:hover {
+  border-color: var(--primary);
+}
+
+.select-wrapper select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+/* Filter Toggle Buttons (Sale, Advanced) */
+.filter-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.filter-toggle-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-toggle-btn.active {
+  background: var(--primary-dim);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-toggle-btn .arrow {
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 8px;
+}
+
+.filter-toggle-btn.active .arrow {
+  transform: rotate(180deg);
+}
+
+/* Collapsible drawer panel */
+.advanced-filters-panel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out, padding 0.3s ease-out, margin 0.3s ease-out;
+  margin-top: 0;
+  padding: 0;
+  border-top: 1px dashed transparent;
+}
+
+.advanced-filters-panel.show {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+}
+
+.advanced-filters-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 768px) {
+  .advanced-filters-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .advanced-filters-panel.show {
+    max-height: 350px;
+  }
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.slider-group span[id$="-range-label"] {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

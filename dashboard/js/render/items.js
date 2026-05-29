@@ -47,6 +47,17 @@ function renderTopItems(ti) {
   const searchClear = document.getElementById('items-search-clear');
   if (searchClear) searchClear.style.display = 'none';
 
+  // Reset custom toggle button states
+  const discountBtn = document.getElementById('btn-filter-discount');
+  if (discountBtn) discountBtn.classList.remove('active');
+  const discountCheckbox = document.getElementById('items-discount-checkbox');
+  if (discountCheckbox) discountCheckbox.checked = false;
+
+  const toggleAdvancedBtn = document.getElementById('btn-toggle-advanced');
+  if (toggleAdvancedBtn) toggleAdvancedBtn.classList.remove('active');
+  const advancedPanel = document.getElementById('advanced-filters-panel');
+  if (advancedPanel) advancedPanel.classList.remove('show');
+
   // Set date slider bounds dynamically based on d.ol
   const d = window.currentDashData || {};
   const orders = d.ol || [];
@@ -108,7 +119,6 @@ function renderTopItems(ti) {
   renderTopItemsList();
   
   reveal(document.getElementById('card-items'));
-  reveal(document.getElementById('card-items-chart'));
 }
 
 function populateCategorySelect() {
@@ -148,6 +158,10 @@ function initItemsEvents() {
   const catSelect = document.getElementById('items-cat-select');
   const sortSelect = document.getElementById('items-sort-select');
   const discountCheckbox = document.getElementById('items-discount-checkbox');
+  const discountBtn = document.getElementById('btn-filter-discount');
+  
+  const toggleAdvancedBtn = document.getElementById('btn-toggle-advanced');
+  const advancedPanel = document.getElementById('advanced-filters-panel');
   
   const priceMin = document.getElementById('price-min-input');
   const priceMax = document.getElementById('price-max-input');
@@ -167,6 +181,21 @@ function initItemsEvents() {
   sortSelect?.addEventListener('change', triggerReRender);
   discountCheckbox?.addEventListener('change', triggerReRender);
   
+  // Custom discount button toggler
+  discountBtn?.addEventListener('click', () => {
+    discountBtn.classList.toggle('active');
+    if (discountCheckbox) {
+      discountCheckbox.checked = discountBtn.classList.contains('active');
+      discountCheckbox.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // Advanced filters collapsible toggler
+  toggleAdvancedBtn?.addEventListener('click', () => {
+    toggleAdvancedBtn.classList.toggle('active');
+    advancedPanel?.classList.toggle('show');
+  });
+
   priceMin?.addEventListener('input', () => {
     updateSliderTracks();
     triggerReRender();
@@ -400,7 +429,6 @@ function renderTopItemsList() {
   
   if (displayItems.length === 0) {
     list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm phù hợp bộ lọc</div>';
-    updateTopItemsChart([]);
     return;
   }
   
@@ -459,109 +487,8 @@ function renderTopItemsList() {
       </div>`;
   }).join('');
   
-  // 5. Update top 10 chart based on filtered items (top 10 overall)
-  const chartItems = filtered.slice(0, 10);
-  updateTopItemsChart(chartItems);
 }
 
 function updateTopItemsChart(chartItems) {
-  const canvas = document.getElementById('chart-top-items');
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext('2d');
-  if (itemsChartInstance) {
-    itemsChartInstance.destroy();
-    itemsChartInstance = null;
-  }
-  
-  if (chartItems.length === 0) {
-    return;
-  }
-  
-  const labels = chartItems.map(item => {
-    const name = capFirst(item.n);
-    return name.length > 25 ? name.substring(0, 25) + '...' : name;
-  });
-  
-  const sortSelect = document.getElementById('items-sort-select');
-  const sortOrder = sortSelect ? sortSelect.value : "spend_desc";
-  
-  let dataVal = [];
-  let labelText = "Thực chi";
-  let valFormatter = fmtVND;
-  
-  if (sortOrder === "count_desc") {
-    dataVal = chartItems.map(item => item.c);
-    labelText = "Số lượt mua";
-    valFormatter = fmtNum;
-  } else if (sortOrder === "avg_desc") {
-    dataVal = chartItems.map(item => item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s));
-    labelText = "Đơn giá TB";
-    valFormatter = fmtVND;
-  } else if (sortOrder === "save_desc") {
-    dataVal = chartItems.map(item => item.op && item.dp && item.op > item.dp ? (item.op - item.dp) * item.c : 0);
-    labelText = "Tiết kiệm";
-    valFormatter = fmtVND;
-  } else {
-    dataVal = chartItems.map(item => item.s);
-    labelText = "Thực chi";
-    valFormatter = fmtVND;
-  }
-  
-  // Premium Horizontal Gradient
-  const gradient = ctx.createLinearGradient(0, 0, 350, 0);
-  gradient.addColorStop(0, 'rgba(238, 77, 45, 0.85)'); // var(--primary)
-  gradient.addColorStop(1, 'rgba(255, 138, 90, 0.85)'); // Peach/Light Orange
-  
-  itemsChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: labelText,
-        data: dataVal,
-        backgroundColor: gradient,
-        borderColor: '#ee4d2d',
-        borderWidth: 1,
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#ffffff',
-          borderColor: 'rgba(0,0,0,0.1)',
-          borderWidth: 1,
-          titleColor: '#1e293b',
-          bodyColor: 'rgba(30,41,59,0.8)',
-          padding: 10,
-          callbacks: {
-            label: ctx => '  ' + labelText + ': ' + valFormatter(ctx.parsed.x)
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          ticks: {
-            color: 'rgba(30,41,59,0.5)',
-            font: { size: 10, family: 'inherit' },
-            callback: v => valFormatter(v)
-          }
-        },
-        y: {
-          grid: { display: false },
-          ticks: {
-            color: 'rgba(30,41,59,0.7)',
-            font: { size: 11, weight: '600', family: 'inherit' }
-          }
-        }
-      }
-    }
-  });
+  // Chart has been removed from Top Products tab as per design updates
 }

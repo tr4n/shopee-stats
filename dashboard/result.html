@@ -227,7 +227,7 @@
       </div>
 
 
-      <div class="grid-2" id="items-grid">
+      <div id="items-grid">
         <div class="card" id="card-items">
           <div class="card-title" style="
                 display: flex;
@@ -235,64 +235,84 @@
                 align-items: center;
                 flex-wrap: wrap;
                 gap: 10px;
-                margin-bottom: 16px;
+                margin-bottom: 20px;
               ">
             <span>🏆 Bảng Xếp Hạng</span>
             <span id="items-quick-stats" style="font-size: 12.5px; font-weight: normal; color: var(--muted);"></span>
           </div>
 
-          <!-- Search Input Row -->
-          <div class="items-search-row" style="margin-bottom: 16px; position: relative;">
-            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none;">🔍</span>
-            <input type="text" id="items-search-input" placeholder="Tìm kiếm tên sản phẩm..." style="width: 100%; padding: 10px 32px 10px 32px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.2s;" />
-            <button id="items-search-clear" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; display: none; font-size: 16px; padding: 0 4px; line-height: 1;">✕</button>
-          </div>
-
-          <!-- Filter Control Panel (No Search Bar, Price dropdown replaced by Slider below, displays fixed Top 25) -->
-          <div class="items-filter-row" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;">
-            <select id="items-cat-select" class="limit-select" style="flex: 2; min-width: 150px;">
-              <option value="all">Tất cả danh mục</option>
-            </select>
-            <select id="items-sort-select" class="limit-select" style="flex: 1; min-width: 120px;">
-              <option value="spend_desc" selected>Thực chi ↓</option>
-              <option value="spend_asc">Thực chi ↑</option>
-              <option value="count_desc">Lượt mua ↓</option>
-              <option value="avg_desc">Đơn giá TB ↓</option>
-              <option value="save_desc">Tiết kiệm ↓</option>
-            </select>
-            <label class="checkbox-label" style="font-size: 12px; white-space: nowrap; user-select: none; display: flex; align-items: center; gap: 4px;">
-              <input type="checkbox" id="items-discount-checkbox" style="width: 14px; height: 14px;" />
-              Chỉ hàng sale
-            </label>
-          </div>
-
-          <!-- Dual Sliders Row for Price and Date Range -->
-          <div class="items-sliders-row" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; padding: 4px 0;">
-            <!-- Price Slider Group -->
-            <div class="slider-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--muted);">
-                <span>KHOẢNG GIÁ ĐƠN VỊ</span>
-                <span id="price-range-label" style="color: var(--primary); font-variant-numeric: tabular-nums;">0đ - 10trđ</span>
+          <!-- Unified Premium Filter Section -->
+          <div class="filter-container">
+            <div class="filter-main-row">
+              <!-- Search Bar -->
+              <div class="filter-search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="items-search-input" placeholder="Tìm kiếm tên sản phẩm..." />
+                <button id="items-search-clear" style="display: none;">✕</button>
               </div>
-              <div class="double-slider-wrap" style="position: relative; height: 20px; margin-top: 2px;">
-                <div class="slider-track" style="position: absolute; top: 6px; left: 0; right: 0; height: 5px; background: var(--border); border-radius: 3px; z-index: 1;"></div>
-                <div id="price-slider-range" style="position: absolute; top: 6px; height: 5px; background: var(--primary); border-radius: 3px; z-index: 2;"></div>
-                <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
-                <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+
+              <!-- Filter Actions Group -->
+              <div class="filter-actions-group">
+                <div class="select-wrapper">
+                  <span class="select-icon">🏷️</span>
+                  <select id="items-cat-select">
+                    <option value="all">Tất cả danh mục</option>
+                  </select>
+                </div>
+
+                <div class="select-wrapper">
+                  <span class="select-icon">⚡</span>
+                  <select id="items-sort-select">
+                    <option value="spend_desc" selected>Thực chi ↓</option>
+                    <option value="spend_asc">Thực chi ↑</option>
+                    <option value="count_desc">Lượt mua ↓</option>
+                    <option value="avg_desc">Đơn giá TB ↓</option>
+                    <option value="save_desc">Tiết kiệm ↓</option>
+                  </select>
+                </div>
+
+                <!-- Hidden default checkbox to maintain backward compatibility -->
+                <input type="checkbox" id="items-discount-checkbox" style="display: none;" />
+                <button type="button" id="btn-filter-discount" class="filter-toggle-btn">
+                  🏷️ Hàng Sale
+                </button>
+
+                <button type="button" id="btn-toggle-advanced" class="filter-toggle-btn btn-advanced-toggle">
+                  🎛️ Bộ lọc sâu <span class="arrow">▼</span>
+                </button>
               </div>
             </div>
 
-            <!-- Date Slider Group -->
-            <div class="slider-group" style="display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--muted);">
-                <span>KHOẢNG THỜI GIAN MUA HÀNG</span>
-                <span id="date-range-label" style="color: var(--primary); font-variant-numeric: tabular-nums;">--/--/---- - --/--/----</span>
-              </div>
-              <div class="double-slider-wrap" style="position: relative; height: 20px; margin-top: 2px;">
-                <div class="slider-track" style="position: absolute; top: 6px; left: 0; right: 0; height: 5px; background: var(--border); border-radius: 3px; z-index: 1;"></div>
-                <div id="date-slider-range" style="position: absolute; top: 6px; height: 5px; background: var(--primary); border-radius: 3px; z-index: 2;"></div>
-                <input type="range" id="date-min-input" min="0" max="100" value="0" step="1" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
-                <input type="range" id="date-max-input" min="0" max="100" value="100" step="1" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+            <!-- Collapsible Range Sliders Drawer -->
+            <div class="advanced-filters-panel" id="advanced-filters-panel">
+              <div class="advanced-filters-grid">
+                <!-- Price Range Filter -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-title">Khoảng giá đơn vị</span>
+                    <span id="price-range-label">0đ - 10trđ</span>
+                  </div>
+                  <div class="double-slider-wrap">
+                    <div class="slider-track"></div>
+                    <div id="price-slider-range" class="slider-range"></div>
+                    <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" />
+                    <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" />
+                  </div>
+                </div>
+
+                <!-- Date Range Filter -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-title">Khoảng thời gian mua</span>
+                    <span id="date-range-label">--/--/---- - --/--/----</span>
+                  </div>
+                  <div class="double-slider-wrap">
+                    <div class="slider-track"></div>
+                    <div id="date-slider-range" class="slider-range"></div>
+                    <input type="range" id="date-min-input" min="0" max="100" value="0" step="1" />
+                    <input type="range" id="date-max-input" min="0" max="100" value="100" step="1" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -302,13 +322,6 @@
           <!-- Load More Button -->
           <div class="load-more-wrap" style="text-align: center; margin-top: 20px;">
             <button id="items-load-more" class="pill" style="display: none; padding: 8px 24px; min-width: 140px; margin: 0 auto; cursor: pointer; outline: none; border-radius: 20px;">Xem thêm</button>
-          </div>
-        </div>
-
-        <div class="card" id="card-items-chart">
-          <div class="card-title">📊 Top 10 Sản Phẩm Chi Tiêu Nhiều Nhất</div>
-          <div class="chart-wrap tall" style="height: 400px;">
-            <canvas id="chart-top-items"></canvas>
           </div>
         </div>
       </div>
