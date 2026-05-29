@@ -95,9 +95,9 @@ function renderAnalyzeButton(cardId) {
         <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
         <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
       </svg>
-      Xem AI "phán" 🔮
+      Phân tích tính cách
     </button>
-    <span class="ai-analyze-hint">Xem Chrome AI bóc phốt ví tiền của bạn</span>
+    <span class="ai-analyze-hint">Chrome AI phân tích tâm lý mua sắm của bạn</span>
   </div>`;
 }
 
@@ -118,52 +118,63 @@ function renderSentencesHTML(text) {
   ).join('');
 }
 
-// history: string (legacy) or string[] (newest-first)
-// currentIndex: which item in history to display (default 0)
-// isRuleBased: use local-analysis badge style
-function renderAIInsight(history, cardId, currentIndex, isRuleBased) {
-  const histArr = Array.isArray(history) ? history : (history ? [String(history)] : []);
-  const idx = Math.max(0, Math.min(histArr.length - 1, currentIndex || 0));
-  const text = histArr[idx] || '';
-  const total = histArr.length;
-
-  const badgeClass = isRuleBased ? 'insight-ai-badge insight-ai-badge--local' : 'insight-ai-badge';
-  const badgeLabel = isRuleBased ? 'Đọc Vị' : 'AI Đọc Vị';
-  const titleText = isRuleBased ? 'Thầy Bói Vũ Trụ phán...' : 'Chrome AI phán xét...';
-
-  const historyNav = total > 1
-    ? `<span class="ai-history-nav">
-        <button type="button" class="ai-history-btn" onclick="navigateAIHistory('${escHtml(cardId)}',1)" ${idx >= total - 1 ? 'disabled' : ''} title="Quẻ cũ hơn">&#8249;</button>
-        <span class="ai-history-indicator">${idx + 1}/${total}</span>
-        <button type="button" class="ai-history-btn" onclick="navigateAIHistory('${escHtml(cardId)}',-1)" ${idx <= 0 ? 'disabled' : ''} title="Quẻ mới hơn">&#8250;</button>
-      </span>`
-    : '';
-
-  const copyBtn = cardId
-    ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép lời phán">
+// renderAIInsight(text, cardId, profile)
+// text: AI narrative string | null (null = not yet generated)
+// cardId: for refresh/copy buttons
+// profile: PersonalityProfile | null
+function renderAIInsight(text, cardId, profile) {
+  const copyBtn = (cardId && text)
+    ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép nhận xét">
         <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
        </button>`
     : '';
 
-  const refreshBtn = (cardId && !isRuleBased)
-    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display:none">
+  const refreshBtn = cardId
+    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Phân tích lại" style="display:none">
         <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        <span style="white-space:nowrap">Xin quẻ mới</span>
        </button>`
     : '';
 
-  return `<div class="insight-ai-header"><span class="${badgeClass}">${_AI_ICON_SVG}${escHtml(badgeLabel)}</span><span class="insight-ai-title">${escHtml(titleText)}</span>${historyNav}${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text)}</div>`;
+  const header = `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Phân tích tính cách</span>${copyBtn}${refreshBtn}</div>`;
+
+  // Archetype chip
+  let archetypeHtml = '';
+  if (profile && profile.archetype) {
+    const a = profile.archetype;
+    archetypeHtml = `<div class="ai-archetype"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`;
+  }
+
+  // Traits list
+  let traitsHtml = '';
+  if (profile && profile.traits && profile.traits.length > 0) {
+    const items = profile.traits.map(t =>
+      `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
+    ).join('');
+    traitsHtml = `<div class="ai-traits">${items}</div>`;
+  }
+
+  // AI narrative section (only when text is present)
+  let narrativeHtml = '';
+  if (text && text.trim()) {
+    narrativeHtml = `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`;
+  }
+
+  // Legacy layout: no profile, just text
+  if (!profile) {
+    return `${header}<div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
+  }
+
+  return `${header}${archetypeHtml}${traitsHtml}${narrativeHtml}`;
 }
 
-// Shell rendered immediately when streaming starts — body is populated progressively
+// Shell rendered immediately when streaming starts (no-profile legacy path)
 function renderAIInsightShell(cardId) {
   const refreshBtn = cardId
-    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display:none">
+    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Phân tích lại" style="display:none">
         <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        <span style="white-space:nowrap">Xin quẻ mới</span>
        </button>`
     : '';
-  return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Đọc Vị</span><span class="insight-ai-title">Chrome AI đang phán...</span>${refreshBtn}</div><div class="insight-ai-body insight-ai-body--streaming"></div>`;
+  return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Đang phân tích...</span>${refreshBtn}</div><div class="insight-ai-body insight-ai-body--streaming"></div>`;
 }
 
 // Legacy category name map for backward compatibility with old dashboard URLs (format: { id, s, c })

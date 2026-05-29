@@ -16,13 +16,16 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 const AI_INSIGHT_SYSTEM = [
-  'Bạn là một "Thầy Bói Vũ Trụ" (Tarot Reader) hệ GenZ cực kỳ hài hước, xéo sắc, chuyên xem bói bài và đọc vị số mệnh chi tiêu của chúng sinh.',
-  'Nhiệm vụ của bạn là dựa vào dữ liệu mua sắm của người dùng để phán đoán tính cách, tâm lý, và "kiếp nạn" chốt đơn của họ một cách dí dỏm.',
+  'Bạn là một chuyên gia tâm lý tiêu dùng dùng phong cách bói toán làm ẩn dụ vui vẻ.',
+  'Bạn nhận được hồ sơ tính cách người dùng ĐÃ ĐƯỢC PHÂN TÍCH SẴN (kiểu người, đặc điểm hành vi cụ thể).',
+  'Nhiệm vụ: Viết 1-2 câu nhận xét tâm lý có chiều sâu, dí dỏm, phản ánh bản chất cảm xúc và động lực mua sắm thực sự đằng sau hành vi đó.',
   'QUY TẮC BẮT BUỘC:',
-  '1. Chỉ trả lời ngắn gọn, súc tích (đúng từ 2 đến 3 câu), tập trung sâu sắc vào việc đọc vị tâm lý tiêu dùng của người dùng dưới phong thái bói toán vũ trụ. Khuyến khích sử dụng một cách hài hước các thuật ngữ tâm lý học mua sắm phổ biến như "thao túng tâm lý", "dopamine ngắn hạn", "hiệu ứng mỏ neo", "hội chứng FOMO/sợ bỏ lỡ", "mua sắm cảm xúc", "tự bào chữa", "tiêu dùng phòng thủ". Không viết dài dòng lê thê.',
-  '2. TUYỆT ĐỐI KHÔNG được ghi bất kỳ con số cụ thể nào, không ghi số tiền (như VND, đồng, triệu, tỷ, k), không ghi số đơn hàng, không ghi tên sản phẩm cụ thể của người dùng trong lời phán. Chỉ phán về tính cách, tâm lý thích chữa lành, thói quen cảm xúc, và lối sống của họ.',
-  '3. TUYỆT ĐỐI KHÔNG dùng tiếng Anh hoặc pha trộn từ tiếng Anh (ví dụ: không dùng "vibe", "chill", "glow up", "save", "good", "deal"). Viết bằng 100% tiếng Việt thuần việt, trôi chảy.',
-  '4. KHÔNG đưa ra lời khuyên tiết kiệm hay tài chính nghiêm túc. Hãy bóc phốt nhẹ nhàng, mang lại niềm vui cho người đọc.'
+  '1. Câu đầu: nhận xét tâm lý thực chất về kiểu người này — cảm xúc ẩn sau hành vi mua sắm là gì, họ đang tìm kiếm điều gì.',
+  '2. Câu sau (nếu có): thêm gia vị hài hước nhẹ nhàng kiểu bói toán — không bắt buộc nhưng nên có.',
+  '3. TUYỆT ĐỐI KHÔNG liệt kê lại các đặc điểm đã có trong hồ sơ. Hãy diễn giải sáng tạo ở tầng sâu hơn.',
+  '4. TUYỆT ĐỐI KHÔNG ghi số tiền, số đơn hàng, phần trăm, hay tên sản phẩm.',
+  '5. TUYỆT ĐỐI KHÔNG dùng tiếng Anh. Viết 100% tiếng Việt thuần.',
+  '6. Độ dài: đúng 1-2 câu, không dài hơn.'
 ].join(' ');
 
 // Rule-based psychological shopping insights - no AI dependency
@@ -86,45 +89,21 @@ const SHOPPING_PSYCHOLOGY_PATTERNS = {
 };
 
 const AI_FEW_SHOT_EXAMPLES = [
-  'Ví dụ 1 (Hệ thời trang chữa lành):',
-  'Dữ liệu đầu vào: Chi tiêu nhiều nhất vào danh mục "Thời trang & Phụ kiện", hay mua vào ban đêm.',
-  'Thầy bói phán: Quẻ bói chỉ ra bạn đang bị vũ trụ thao túng tâm lý rằng việc chốt đơn lúc nửa đêm sẽ giúp lấp đầy khoảng trống tâm hồn cô đơn. Bạn liên tục tự bào chữa rằng mua sắm để phục vụ cuộc sống, nhưng thực chất bộ não chỉ đang thèm khát một chút dopamine ngắn hạn trước khi chìm vào giấc ngủ mà thôi.',
+  'Ví dụ 1:',
+  'Hồ sơ đã phân tích: Kiểu người "Tín Đồ Mua Khuya". Đặc điểm: Hay mua khuya (31% đơn sau 22h); Thích săn sale (68% chi ngày sale); Chi tiêu không đều (dao động lớn theo tháng).',
+  'Nhận xét: Bạn dùng màn hình tối và giỏ hàng nửa đêm như một nghi lễ xoa dịu — không hẳn cần món đồ, mà cần cái cảm giác "mình vẫn đang làm gì đó cho bản thân". Tinh tú mách rằng ban ngày bạn kiểm soát rất tốt, nhưng đêm xuống thì ví tiền mất quyền bầu cử.',
   '',
-  'Ví dụ 2 (Hệ nghiện setup công nghệ):',
-  'Dữ liệu đầu vào: Danh mục chi nhiều nhất là "Thiết bị điện tử", sản phẩm mua nhiều nhất là phụ kiện công nghệ.',
-  'Thầy bói phán: Tinh tú chiếu mệnh cho thấy bạn bị rơi vào bẫy tâm lý "nâng cấp để tối ưu hiệu suất" mỗi khi nhìn thấy các phụ kiện công nghệ lấp lánh. Đây thực chất là một liệu pháp tiêu dùng phòng thủ để trốn tránh áp lực công việc, tạo ra một phi thuyền làm việc lộng lẫy trong khi ví tiền lại mỏng manh vô cùng.',
+  'Ví dụ 2:',
+  'Hồ sơ đã phân tích: Kiểu người "Chiến Thần Săn Sale". Đặc điểm: Thích săn sale (73% chi ngày sale); Mua sắm thường xuyên (trung bình nhiều đơn/tháng); Hay mua cuối tuần.',
+  'Nhận xét: Não bộ bạn đã được lập trình để coi "giảm giá" là phần thưởng, không phải món đồ — mỗi đơn hàng chốt là một chiến thắng dopamine thuần túy, bất kể có dùng hay không. Chòm sao hộ mệnh chứng nhận: đây là loại hạnh phúc rẻ nhất và đắt nhất cùng một lúc.',
   '',
-  'Ví dụ 3 (Hệ chiến thần săn sale):',
-  'Dữ liệu đầu vào: Tiết kiệm cực kỳ nhiều tiền nhờ chăm săn mã giảm giá.',
-  'Thầy bói phán: Bạn tự hào là chiến thần săn sale nhưng thực chất đang bị thao túng tâm lý cực nặng bởi hiệu ứng mỏ neo từ các mức giá giảm sâu. Hội chứng sợ bỏ lỡ (FOMO) đã khiến bạn tích trữ hàng tá món đồ vô tri chỉ vì cảm giác "không mua là lỗ", khiến thần tài chỉ biết bất lực nhìn dòng tiền bay màu.',
+  'Ví dụ 3:',
+  'Hồ sơ đã phân tích: Kiểu người "Người Mua Chọn Lọc". Đặc điểm: Ưa đồ chất lượng (giá trị đơn cao); Mua sắm thưa thớt; Chi tiêu tăng dần theo năm.',
+  'Nhận xét: Bạn không mua nhiều, nhưng mỗi lần mua là một tuyên ngôn — rằng bạn xứng đáng có thứ tốt, và thứ rẻ tiền chỉ tốn tiền hai lần. Tinh tú chiếu rọi: đây là tư duy cao cấp, chỉ tiếc ví tiền đôi khi không đồng thuận với tiêu chuẩn của bạn.',
   '',
-  'Ví dụ 4 (Hệ nhan sắc hồi sinh):',
-  'Dữ liệu đầu vào: Mua nhiều son môi, mặt nạ, mỹ phẩm chăm sóc da.',
-  'Thầy bói phán: Quẻ bói đọc vị bạn đang áp dụng liệu pháp mua sắm cảm xúc, dùng mỹ phẩm để tự thôi miên bản thân rằng mình đang yêu chiều cơ thể sau những ngày làm việc kiệt sức. Mỗi hũ kem dưỡng da là một nỗ lực chữa lành tâm lý kiệt quệ, chỉ tiếc là số dư tài khoản của bạn lại đang cần cấp cứu gấp.',
-  '',
-  'Ví dụ 5 (Hệ chốt đơn vô tri):',
-  'Dữ liệu đầu vào: Mua rất nhiều đồ linh tinh, lặt vặt giá rẻ không rõ mục đích.',
-  'Thầy bói phán: Khổ chủ đang là nạn nhân của cơ chế tự động chốt đơn vô tri để giải tỏa căng thẳng tức thời. Sự thao túng tâm lý từ các món đồ giá rẻ khiến bạn lầm tưởng mình đang tiết kiệm, nhưng thực tế là đống đồ lặt vặt sắp chiếm hết không gian sống trong khi cảm giác trống trải vẫn chưa được giải quyết.',
-  '',
-  'Ví dụ 6 (Hệ ăn vặt giải sầu):',
-  'Dữ liệu đầu vào: Chi tiêu nhiều nhất cho thực phẩm, đồ ăn vặt, đồ ngọt.',
-  'Thầy bói phán: Chòm sao hộ mệnh chỉ ra bạn là người dùng thức ăn làm công cụ xoa dịu áp lực cảm xúc và lấp đầy những khoảng trống tinh thần. Bộ não đã thành công thao túng tâm lý bạn rằng "ăn nốt miếng này rồi tính", tạo ra những khoảnh khắc hạnh phúc calo cao nhưng ví tiền thì lại đang suy dinh dưỡng trầm trọng.',
-  '',
-  'Ví dụ 7 (Hệ sách tri thức):',
-  'Dữ liệu đầu vào: Chi tiêu nhiều nhất cho sách, văn phòng phẩm, dụng cụ học tập.',
-  'Thầy bói phán: Tinh tú chiếu rọi cho thấy bạn dùng sách như một tấm lá chắn tinh thần để tự bào chữa rằng mình đang "đầu tư vào bản thân", trong khi thực chất là không thể cưỡng lại cảm giác mua thêm một cuốn nữa dù núi sách cũ vẫn chưa đọc hết. Đây là dạng mua sắm tâm lý cao cấp nhất — bạn nghĩ bạn đang thông minh hơn, nhưng ví tiền thì kiên quyết không đồng ý.',
-  '',
-  'Ví dụ 8 (Hệ chiến thần thể thao):',
-  'Dữ liệu đầu vào: Chi tiêu nhiều nhất vào đồ thể thao, dụng cụ tập luyện.',
-  'Thầy bói phán: Quẻ bói tiết lộ bạn đang sa vào bẫy "mua đồ thể thao để có động lực tập luyện" — một vòng lặp tâm lý nguy hiểm nơi mỗi bộ đồ mới đem lại cảm giác khởi đầu mà không cần thực sự đổ mồ hôi. Thần tài nhìn thấy rõ rằng đống dụng cụ chưa bao giờ dùng đến đang chiếm dần không gian sống như một lời nhắc nhở im lặng về những mục tiêu chưa bao giờ thực hiện.',
-  '',
-  'Ví dụ 9 (Hệ phụ huynh bao đồng):',
-  'Dữ liệu đầu vào: Chi tiêu nhiều nhất vào đồ trẻ em, đồ chơi, sách thiếu nhi.',
-  'Thầy bói phán: Vũ trụ nhìn thấu rằng bạn đang chuyển hóa tình yêu thương thành các đơn hàng liên tiếp, dùng việc mua sắm cho con như một cách bù đắp cho những khoảng thời gian chưa dành được. Đây là hội chứng "mua để yêu" — rất dễ cảm thông, nhưng bộ não trẻ em chỉ cần sự hiện diện của bạn, không phải đống đồ chơi ngày càng chồng chất trong góc phòng.',
-  '',
-  'Ví dụ 10 (Hệ chốt đơn hỗn loạn):',
-  'Dữ liệu đầu vào: Chi tiêu đều đều ở rất nhiều danh mục khác nhau, không có danh mục chủ đạo rõ ràng.',
-  'Thầy bói phán: Tinh tú hộ mệnh cho thấy bạn là một tâm hồn tự do không chịu bị ràng buộc bởi bất kỳ danh mục nào — hôm nay đồ gia dụng, ngày mai mỹ phẩm, ngày kia phụ kiện công nghệ, tất cả đều là "cần thiết" trong giây phút đó. Đây là biểu hiện của một bộ não luôn trong trạng thái tìm kiếm sự kích thích mới, và Shopee đã trở thành nhà trị liệu tâm lý miễn phí nhưng lại tính phí rất cao.'
+  'Ví dụ 4:',
+  'Hồ sơ đã phân tích: Kiểu người "Người Mua Sắm Cảm Xúc". Đặc điểm: Chi tiêu không đều (CV cao); Hay mua cuối tuần; Đa dạng danh mục.',
+  'Nhận xét: Với bạn, mua sắm không phải kế hoạch — đó là phản xạ cảm xúc, một nút "reset" cho tâm trạng. Vũ trụ ghi nhận: bạn đang dùng giỏ hàng như nhật ký cảm xúc, và mỗi đơn hàng là một trang viết về trạng thái nội tâm hôm đó.'
 ].join('\n');
 
 
@@ -266,37 +245,33 @@ let _aiInsightSession = null;
 let _aiInsightDisabled = false;
 // Per-card running lock — Set of cardIds currently executing AI
 const _aiInsightRunning = new Set();
-// Per-card history navigation index (0 = newest)
-const _aiInsightHistoryIndex = {};
 // Stores call args per cardId so re-analysis can be triggered without re-running the full pipeline
 const _aiInsightCallArgs = {};
 
-// Returns history array for a cache key (backward-compat: wraps legacy string in array)
-function _getInsightHistory(ck) {
-  if (!_dashCache) return [];
+// Returns cached AI text for a key, or null if none
+function _getInsightText(ck) {
+  if (!_dashCache) return null;
   const v = _dashCache.insights[ck];
-  if (!v) return [];
-  return Array.isArray(v) ? v : [String(v)];
+  if (!v) return null;
+  // backward-compat: if stored as array, take first entry
+  return Array.isArray(v) ? (v[0] || null) : String(v);
 }
 
-// Prepend new text to history (max 3 entries), then persist
-function _saveInsightHistory(ck, text) {
+// Save AI text to cache
+function _saveInsightText(ck, text) {
   if (!_dashCache) return;
-  const existing = _getInsightHistory(ck);
-  existing.unshift(text);
-  if (existing.length > 3) existing.length = 3;
-  _dashCache.insights[ck] = existing;
+  _dashCache.insights[ck] = text;
   saveDashCache();
 }
 
-// Render rule-based fallback when Chrome AI is unavailable
+// Render rule-based fallback when Chrome AI is unavailable and no profile
 function _tryRuleBasedFallback(aiEl, cardId, fallbackFn) {
   if (typeof fallbackFn === 'function') {
     try {
       const text = fallbackFn();
       if (text) {
         aiEl.style.display = '';
-        aiEl.innerHTML = renderAIInsight([text], cardId, 0, true);
+        aiEl.innerHTML = renderAIInsight(text, cardId, null);
         return;
       }
     } catch (e) { /* ignore */ }
@@ -408,82 +383,97 @@ _aiAvailabilityPromise.then(avail => {
   }
 });
 
-// cacheKey: optional override for cache lookup (used for per-year monthly insights)
-// fallbackFn: optional () => string for rule-based insight when Chrome AI unavailable
-// autoRun: if true, auto-execute AI when available and no cache exists
-function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, autoRun) {
-  _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey, fallbackFn };
+// enrichWithAI — orchestrates two-step rendering: profile (instant) + AI narrative (streamed)
+// cacheKey: optional override for cache lookup
+// fallbackFn: optional () => string for rule-based text when Chrome AI unavailable
+// autoRun: if true, skip analyze button and go straight to AI execution
+// profile: PersonalityProfile | null — when provided, archetype+traits render immediately
+function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, autoRun, profile) {
+  _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey, fallbackFn, profile };
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
   const ck = cacheKey || cardId;
-  const history = _getInsightHistory(ck);
+  const cached = _getInsightText(ck);
 
-  // Serve from cache immediately — no user action needed
-  if (history.length > 0) {
-    const idx = _aiInsightHistoryIndex[cardId] || 0;
-    aiEl.innerHTML = renderAIInsight(history, cardId, idx, false);
+  // Serve from cache — render profile + cached AI narrative
+  if (cached !== null) {
+    aiEl.innerHTML = renderAIInsight(cached, cardId, profile);
     aiEl.style.display = '';
-
     _aiAvailabilityPromise.then(avail => {
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-      if (refreshBtn) {
-        refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
-      }
+      if (refreshBtn) refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
     });
     return;
   }
 
-  // No cache — hide pending availability check
-  aiEl.style.display = 'none';
-  aiEl.innerHTML = '';
+  // No cache — if profile available render archetype+traits immediately
+  if (profile) {
+    aiEl.innerHTML = renderAIInsight(null, cardId, profile);
+    aiEl.style.display = '';
+  } else {
+    aiEl.style.display = 'none';
+    aiEl.innerHTML = '';
+  }
 
   if (_aiInsightDisabled) {
-    _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
+    if (!profile) _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
     return;
   }
 
   _aiAvailabilityPromise.then(avail => {
     if (!avail || _aiInsightDisabled) {
-      _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
+      if (!profile) _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
       return;
     }
 
-    aiEl.style.display = '';
-    aiEl.innerHTML = renderAnalyzeButton(cardId);
-
-    if (autoRun) {
+    if (profile || autoRun) {
+      // Profile shown OR auto-run: skip analyze button, go directly to AI
       setTimeout(() => {
-        // Only auto-run if still no cache and not already running
-        const currentHistory = _getInsightHistory(ck);
-        if (!currentHistory.length && !_aiInsightRunning.has(cardId) && !_aiInsightDisabled) {
+        const stillEmpty = _getInsightText(ck) === null;
+        if (stillEmpty && !_aiInsightRunning.has(cardId) && !_aiInsightDisabled) {
           _executeAIInsight(cardId);
         }
-      }, 600);
+      }, profile ? 100 : 600);
+    } else {
+      // No profile, not auto-run: show analyze button
+      aiEl.style.display = '';
+      aiEl.innerHTML = renderAnalyzeButton(cardId);
     }
   });
 }
 
-// Builds the prompt sent to AI — system prompt is already in session initialPrompts
+// Builds the prompt sent to AI
 function _buildFullPrompt(args) {
-  return `VÍ DỤ THAM KHẢO TONE PHÁN (HÃY BẮT CHƯỚC TONE NÀY):
+  const profile = args.profile;
+  // When profile is available, use pre-formatted aiContext as primary input
+  if (profile && profile.aiContext) {
+    return `VÍ DỤ THAM KHẢO GIỌNG VĂN (BẮT CHƯỚC PHONG CÁCH NÀY):
 ${AI_FEW_SHOT_EXAMPLES}
 
-DỮ LIỆU THỰC TẾ CỦA KHÁCH HÀNG:
+HỒ SƠ ĐÃ PHÂN TÍCH:
+${profile.aiContext}
+
+YÊU CẦU: Viết 1-2 câu nhận xét tâm lý có chiều sâu, dí dỏm về người này. Diễn giải sáng tạo — đừng liệt kê lại đặc điểm đã có. Không nhắc số tiền, không dùng tiếng Anh.`;
+  }
+  // Legacy path: raw context strings
+  return `VÍ DỤ THAM KHẢO GIỌNG VĂN:
+${AI_FEW_SHOT_EXAMPLES}
+
+DỮ LIỆU THỰC TẾ:
 ${args.context}
 
 YÊU CẦU:
 ${args.specificPrompt}
 
-Hãy phán quẻ bói ngắn gọn (1-2 câu), tuyệt đối tuân thủ các quy tắc không ghi số tiền/con số cụ thể và không dùng tiếng Anh:`;
+Nhận xét ngắn gọn (1-2 câu), không ghi số tiền hay con số cụ thể, không dùng tiếng Anh:`;
 }
 
-// Internal AI runner — called by both runAIInsight and rerunAIInsight
+// Internal AI runner — called by runAIInsight and rerunAIInsight
 async function _executeAIInsight(cardId) {
   const args = _aiInsightCallArgs[cardId];
   if (!args || _aiInsightDisabled) return;
-  // Per-card lock — prevent duplicate execution for the same card
   if (_aiInsightRunning.has(cardId)) return;
 
   const aiEl = document.getElementById(cardId + '-ai');
@@ -491,79 +481,124 @@ async function _executeAIInsight(cardId) {
 
   _aiInsightRunning.add(cardId);
 
-  const loadingStatuses = [
-    "🔮 Pháp sư Chrome AI đang gieo quẻ xem bói chi tiêu...",
-    "🕵️‍♂️ Chrome AI đang tối ưu hóa hiển thị...",
-    "🧠 Chrome AI đang chuẩn bị phân tích...",
-    "💸 Đang chờ AI chuẩn bị biểu đồ...",
-    "🍿 Đợi tí, Chrome AI đang kết nối..."
-  ];
-  const randomStatus = loadingStatuses[Math.floor(Math.random() * loadingStatuses.length)];
+  const profile = args.profile;
+  const ck = args.cacheKey || cardId;
 
-  aiEl.innerHTML = `
-    <div class="ai-loading-container">
-      <svg class="ai-loading-icon spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="2" x2="12" y2="6"></line>
-        <line x1="12" y1="18" x2="12" y2="22"></line>
-        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-        <line x1="2" y1="12" x2="6" y2="12"></line>
-        <line x1="18" y1="12" x2="22" y2="12"></line>
-        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-      </svg>
-      <div class="ai-loading-text">
-        <div class="ai-loading-status">${randomStatus}</div>
-        <div class="ai-loading-note">Yên tâm nha, Chrome AI chạy offline 100% trên thiết bị của bạn, bảo mật dữ liệu tuyệt đối. Chờ xíu nhé!</div>
-      </div>
-    </div>
-  `;
-  aiEl.classList.add('loading');
-  aiEl.style.display = '';
+  if (profile) {
+    // Two-step: profile already shown — add inline loading in the narrative zone
+    let narrativeEl = aiEl.querySelector('.ai-narrative');
+    if (!narrativeEl) {
+      aiEl.insertAdjacentHTML('beforeend',
+        `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div>` +
+        `<div class="ai-narrative-body"><span class="ai-narrative-loading">🔮 Đang phân tích tính cách...</span></div></div>`
+      );
+    } else {
+      const body = narrativeEl.querySelector('.ai-narrative-body');
+      if (body) body.innerHTML = '<span class="ai-narrative-loading">🔮 Đang phân tích tính cách...</span>';
+    }
+    aiEl.style.display = '';
+  } else {
+    // No profile: full loading state replaces card content
+    const loadingStatuses = [
+      "🔮 Chrome AI đang đọc vị...",
+      "🧠 Chrome AI đang phân tích tính cách...",
+      "💫 Chrome AI đang kết nối...",
+      "🍿 Đợi tí, Chrome AI đang khởi động..."
+    ];
+    const status = loadingStatuses[Math.floor(Math.random() * loadingStatuses.length)];
+    aiEl.innerHTML = `
+      <div class="ai-loading-container">
+        <svg class="ai-loading-icon spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+          <line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+        </svg>
+        <div class="ai-loading-text">
+          <div class="ai-loading-status">${status}</div>
+          <div class="ai-loading-note">Chrome AI chạy offline 100% trên thiết bị, bảo mật dữ liệu tuyệt đối.</div>
+        </div>
+      </div>`;
+    aiEl.classList.add('loading');
+    aiEl.style.display = '';
+  }
 
   const session = await getAIInsightSession();
   if (!session || typeof session.prompt !== 'function') {
-    aiEl.classList.remove('loading');
-    aiEl.innerHTML = renderAnalyzeButton(cardId);
+    if (profile) {
+      const narrativeEl = aiEl.querySelector('.ai-narrative');
+      if (narrativeEl) narrativeEl.remove();
+    } else {
+      aiEl.classList.remove('loading');
+      aiEl.innerHTML = renderAnalyzeButton(cardId);
+    }
     _aiInsightRunning.delete(cardId);
     return;
   }
 
   try {
     const fullPrompt = _buildFullPrompt(args);
-    const ck = args.cacheKey || cardId;
     let resultText = '';
 
-    if (typeof session.promptStreaming === 'function') {
-      // Streaming path — render header immediately, fill body as chunks arrive
+    if (profile) {
+      // Stream directly into narrative section
+      let narrativeEl = aiEl.querySelector('.ai-narrative');
+      if (!narrativeEl) {
+        aiEl.insertAdjacentHTML('beforeend',
+          `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body"></div></div>`
+        );
+        narrativeEl = aiEl.querySelector('.ai-narrative');
+      }
+      const narrativeBody = narrativeEl.querySelector('.ai-narrative-body');
+
+      if (typeof session.promptStreaming === 'function') {
+        const stream = session.promptStreaming(fullPrompt);
+        for await (const chunk of stream) {
+          resultText = chunk;
+          if (narrativeBody) narrativeBody.innerHTML = renderSentencesHTML(chunk);
+        }
+      } else {
+        resultText = await session.prompt(fullPrompt);
+        if (narrativeBody && resultText) narrativeBody.innerHTML = renderSentencesHTML(resultText.trim());
+      }
+
+      if (resultText && resultText.trim()) {
+        _saveInsightText(ck, resultText.trim());
+        narrativeEl.classList.add('ai-narrative--appear');
+        const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+        if (refreshBtn) refreshBtn.style.display = '';
+      } else {
+        narrativeEl.remove();
+      }
+    } else {
+      // Legacy: stream into shell body
       aiEl.classList.remove('loading');
       aiEl.innerHTML = renderAIInsightShell(cardId);
       const bodyEl = aiEl.querySelector('.insight-ai-body');
 
-      const stream = session.promptStreaming(fullPrompt);
-      for await (const chunk of stream) {
-        resultText = chunk; // Chrome returns cumulative text on each tick
-        if (bodyEl) bodyEl.innerHTML = renderSentencesHTML(chunk);
+      if (typeof session.promptStreaming === 'function') {
+        const stream = session.promptStreaming(fullPrompt);
+        for await (const chunk of stream) {
+          resultText = chunk;
+          if (bodyEl) bodyEl.innerHTML = renderSentencesHTML(chunk);
+        }
+      } else {
+        resultText = await session.prompt(fullPrompt);
+        aiEl.classList.remove('loading');
       }
-    } else {
-      // Non-streaming fallback
-      resultText = await session.prompt(fullPrompt);
-      aiEl.classList.remove('loading');
-    }
 
-    if (resultText && resultText.trim()) {
-      const text = resultText.trim();
-      _saveInsightHistory(ck, text);
-      _aiInsightHistoryIndex[cardId] = 0;
-
-      const history = _getInsightHistory(ck);
-      aiEl.innerHTML = renderAIInsight(history, cardId, 0, false);
-      aiEl.style.display = '';
-
-      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-      if (refreshBtn) refreshBtn.style.display = '';
-    } else {
-      aiEl.style.display = 'none';
+      if (resultText && resultText.trim()) {
+        const text = resultText.trim();
+        _saveInsightText(ck, text);
+        aiEl.innerHTML = renderAIInsight(text, cardId, null);
+        const body = aiEl.querySelector('.insight-ai-body');
+        if (body) body.classList.add('insight-ai-body--appear');
+        const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+        if (refreshBtn) refreshBtn.style.display = '';
+        aiEl.style.display = '';
+      } else {
+        aiEl.style.display = 'none';
+      }
     }
   } catch (e) {
     console.warn('[Dashboard] AI insight failed:', e);
@@ -574,8 +609,13 @@ async function _executeAIInsight(cardId) {
       aiEl.style.display = 'none';
       hideAllAIButtons();
     } else {
-      aiEl.classList.remove('loading');
-      aiEl.innerHTML = renderAnalyzeButton(cardId);
+      if (profile) {
+        const narrativeEl = aiEl.querySelector('.ai-narrative');
+        if (narrativeEl) narrativeEl.remove();
+      } else {
+        aiEl.classList.remove('loading');
+        aiEl.innerHTML = renderAnalyzeButton(cardId);
+      }
     }
   } finally {
     aiEl.classList.remove('loading');
@@ -588,28 +628,32 @@ window.runAIInsight = async function (cardId) {
   await _executeAIInsight(cardId);
 };
 
-// User-triggered: generate a new reading and prepend to history ("Xin quẻ mới" button)
+// User-triggered: re-run AI to get a fresh narrative ("↻" button)
 window.rerunAIInsight = async function (cardId) {
   const args = _aiInsightCallArgs[cardId];
   if (!args) return;
+
+  const ck = args.cacheKey || cardId;
+  // Clear cache so _executeAIInsight generates fresh text
+  if (_dashCache) {
+    delete _dashCache.insights[ck];
+    saveDashCache();
+  }
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (aiEl) {
     const btn = aiEl.querySelector('.ai-refresh-btn');
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `
-        <svg class="refresh-icon spin" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-        </svg>
-        <span>Đang gieo quẻ mới...</span>
-      `;
+      btn.innerHTML = `<svg class="refresh-icon spin" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg><span>Đang phân tích...</span>`;
+    }
+    // If profile shown: just remove the narrative section so it re-streams below
+    if (args.profile) {
+      const narrativeEl = aiEl.querySelector('.ai-narrative');
+      if (narrativeEl) narrativeEl.remove();
     }
   }
 
-  // Reset to newest index so new result shows first after generation
-  _aiInsightHistoryIndex[cardId] = 0;
   await _executeAIInsight(cardId);
 };
 
@@ -633,34 +677,12 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Navigate through insight history for a card (direction: -1 = newer, +1 = older)
-window.navigateAIHistory = function (cardId, direction) {
-  const args = _aiInsightCallArgs[cardId];
-  if (!args) return;
-  const ck = args.cacheKey || cardId;
-  const history = _getInsightHistory(ck);
-  if (!history.length) return;
-
-  const current = _aiInsightHistoryIndex[cardId] || 0;
-  const next = Math.max(0, Math.min(history.length - 1, current + direction));
-  _aiInsightHistoryIndex[cardId] = next;
-
-  const aiEl = document.getElementById(cardId + '-ai');
-  if (aiEl) {
-    aiEl.innerHTML = renderAIInsight(history, cardId, next, false);
-    const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-    if (refreshBtn) refreshBtn.style.display = '';
-  }
-};
-
-// Copy current insight text to clipboard with visual feedback
+// Copy current AI narrative to clipboard with visual feedback
 window.copyAIInsight = function (cardId) {
   const args = _aiInsightCallArgs[cardId];
   if (!args) return;
   const ck = args.cacheKey || cardId;
-  const history = _getInsightHistory(ck);
-  const idx = _aiInsightHistoryIndex[cardId] || 0;
-  const text = history[idx];
+  const text = _getInsightText(ck);
   if (!text) return;
 
   navigator.clipboard.writeText(text).then(() => {
@@ -678,128 +700,372 @@ window.copyAIInsight = function (cardId) {
   }).catch(() => {});
 };
 
-function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activeType) {
-  // Sales AI insight is handled via enrichWithAI in renderSalesInsights()
+// ═══════════════════════════════════════════════
+//   PERSONALITY ANALYSIS ENGINE (rule-based)
+// ═══════════════════════════════════════════════
+
+// 2.1 Temporal patterns from order list
+function computeTemporalPatterns(ol) {
+  if (!ol || !ol.length) {
+    return { nightPct: 0, weekendPct: 0, lunchPct: 0, peakHour: null, totalOrders: 0 };
+  }
+  const hourCounts = new Array(24).fill(0);
+  const dowCounts = new Array(7).fill(0);
+  let valid = 0;
+
+  for (const o of ol) {
+    const ts = o.ot || o.t;
+    if (!ts || ts <= 0) continue;
+    const p = toVnParts(ts);
+    hourCounts[p.hour]++;
+    dowCounts[p.weekday]++;
+    valid++;
+  }
+
+  if (valid === 0) return { nightPct: 0, weekendPct: 0, lunchPct: 0, peakHour: null, totalOrders: 0 };
+
+  const nightCount = hourCounts.slice(22).reduce((a, b) => a + b, 0)
+    + hourCounts.slice(0, 3).reduce((a, b) => a + b, 0);
+  const weekendCount = dowCounts[0] + dowCounts[6]; // Sun=0, Sat=6
+  const lunchCount = hourCounts.slice(11, 14).reduce((a, b) => a + b, 0);
+
+  let peakHour = 0;
+  for (let h = 1; h < 24; h++) {
+    if (hourCounts[h] > hourCounts[peakHour]) peakHour = h;
+  }
+
+  return {
+    nightPct: nightCount / valid,
+    weekendPct: weekendCount / valid,
+    lunchPct: lunchCount / valid,
+    peakHour,
+    totalOrders: valid
+  };
 }
-// Enhanced enrichWithAI to use rule-based insights where possible
-function enrichWithAIEnhanced(containerId, context, prompt, cacheKey, fallbackInsight = null) {
-  if (fallbackInsight) {
-    // Use rule-based insight instead of AI
-    const container = document.getElementById(containerId);
-    if (container) {
-      const existingAI = container.querySelector('.insight-ai');
-      if (existingAI) existingAI.remove();
-      
-      const aiDiv = document.createElement('div');
-      aiDiv.className = 'insight-ai';
-      aiDiv.innerHTML = `
-        <div class="insight-ai-header">
-          <span class="insight-ai-icon">🔮</span>
-          <span class="insight-ai-title">Thầy Bói Vũ Trụ</span>
-          <span class="insight-ai-powered">Rule-based Psychology</span>
-        </div>
-        <div class="insight-ai-sentence">${fallbackInsight}</div>
-      `;
-      
-      // Add refresh button in header
-      const refreshBtn = document.createElement('button');
-      refreshBtn.className = 'ai-refresh-btn';
-      refreshBtn.innerHTML = '🔄';
-      refreshBtn.title = 'Xem góc nhìn khác';
-      refreshBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-          // Refresh with another random insight from the same category
-          const newInsight = fallbackInsight; // Could be enhanced to have multiple variants
-          const sentence = aiDiv.querySelector('.insight-ai-sentence');
-          if (sentence) {
-            sentence.style.opacity = '0';
-            setTimeout(() => {
-              sentence.textContent = newInsight;
-              sentence.style.opacity = '1';
-            }, 200);
-          }
-        } catch (error) {
-          console.error('Error refreshing insight:', error);
+
+// 2.2 Sale behavior stats (prefer d.oss pre-aggregated, fallback to ol)
+function computeSaleStats(d) {
+  const result = {
+    totalSpend: 0,
+    saleSpend: 0,
+    totalOrders: d.o || 0,
+    midnightOrders: 0,
+    saleOrders: 0
+  };
+
+  if (window._oss) {
+    const years = Object.keys(window._oss);
+    for (const yr of years) {
+      for (const type of ['double', 'mid', 'end', 'regular']) {
+        const e = window._oss[yr]?.[type];
+        if (!e) continue;
+        const spend = e[0] || 0;
+        const orders = e[2] || 0;
+        const midnight = e[3] || 0;
+        result.totalSpend += spend;
+        result.totalOrders = Math.max(result.totalOrders, 0);
+        result.midnightOrders += midnight;
+        if (type !== 'regular') {
+          result.saleSpend += spend;
+          result.saleOrders += orders;
         }
-      });
-      
-      const header = aiDiv.querySelector('.insight-ai-header');
-      if (header) {
-        header.appendChild(refreshBtn);
       }
-      
-      container.appendChild(aiDiv);
     }
-    return;
-  }
-  
-  // Fallback to original AI behavior if available
-  enrichWithAI(containerId, context, prompt, cacheKey);
-}
-
-// Generate specific insights for different contexts
-function generateYearlyPsychInsight(yearData, maxYear) {
-  const years = Object.keys(yearData).map(Number).sort((a, b) => a - b);
-  const trends = [];
-  
-  // Analyze spending trend
-  for (let i = 1; i < years.length; i++) {
-    const prev = yearData[years[i-1]].t || 0;
-    const curr = yearData[years[i]].t || 0;
-    if (prev > 0) {
-      const growth = ((curr - prev) / prev) * 100;
-      trends.push(growth);
+    if (!result.totalSpend) result.totalSpend = d.t || 0;
+  } else {
+    result.totalSpend = d.t || 0;
+    const ol = d.ol || [];
+    for (const o of ol) {
+      if (!o.t || !o.f) continue;
+      const p = toVnParts(o.t);
+      const day = p.day;
+      const mon = p.month;
+      const isDouble = day === mon;
+      const isMid = day === 15 || day === 16;
+      const isEnd = day >= 25 || day <= 1;
+      if (isDouble || isMid || isEnd) {
+        result.saleSpend += o.f;
+        result.saleOrders++;
+      }
+      if (p.hour < 2) result.midnightOrders++;
     }
   }
-  
-  const avgGrowth = trends.length > 0 ? trends.reduce((s, t) => s + t, 0) / trends.length : 0;
-  
-  if (avgGrowth > 20) {
-    return 'Quẻ bói tiết lộ bạn đã sa vào vòng luẩn quẩn của chủ nghĩa tiêu dùng hiện đại, mỗi năm lại tăng chi tiêu như thể đang cố bù đắp cho những khoảng trống tinh thần bằng việc mua sắm. Thần tài chỉ biết thất vọng nhìn ví tiền ngày càng xẹp lép theo từng năm tháng trôi qua.';
-  } else if (avgGrowth < -10) {
-    return 'Tinh tú chiếu rọi cho thấy bạn đã dần giác ngộ và thoát khỏi ma trận tiêu dùng, học cách kiềm chế những ham muốn vật chất tức thời. Đây là dấu hiệu của sự trưởng thành trong việc quản lý cảm xúc và tài chính cá nhân.';
-  } else {
-    return 'Vũ trụ nhìn thấy trong bạn một linh hồn đang dao động giữa lý trí và cảm xúc, đôi khi kiềm chế đôi khi buông thả trong việc mua sắm. Đây chính là cuộc chiến nội tại giữa bản ngã muốn tiết kiệm và cái tôi khao khát được thỏa mãn.';
-  }
+
+  return result;
 }
 
-function generateMonthlyPsychInsight(monthData, maxMonth) {
-  const monthNames = ['', 'Tháng Giêng', 'Tháng Hai', 'Tháng Ba', 'Tháng Tư', 'Tháng Năm', 'Tháng Sáu',
-    'Tháng Bảy', 'Tháng Tám', 'Tháng Chín', 'Tháng Mười', 'Tháng Mười Một', 'Tháng Chạp'];
-  
-  if (maxMonth <= 2) {
-    return 'Quẻ bói chỉ ra bạn bị thao túng tâm lý nặng nề bởi không khí Tết Nguyên Đán, sử dụng việc mua sắm như một nghi lễ chuẩn bị đón xuân mới. Thực chất đây là cơ chế tự bào chữa để biện minh cho việc tiêu tiền ồ ạt dưới danh nghĩa "một năm một lần".';
-  } else if (maxMonth >= 10) {
-    return 'Tinh tú chiếu mệnh cho thấy bạn là nạn nhân của hiệu ứng tâm lý "mùa lễ hội cuối năm", bị cuốn vào làn sóng mua sắm tập thể để chuẩn bị cho Black Friday và các dịp lễ. Cảm giác phải "tích trữ" cho mùa đông đã khiến bạn mất kiểm soát chi tiêu.';
-  } else if (maxMonth >= 6 && maxMonth <= 8) {
-    return 'Vũ trụ đọc vị được rằng bạn sử dụng việc mua sắm như một liệu pháp chống nóng tinh thần trong những tháng hè oi bức. Mỗi lần thấy khó chịu vì thời tiết là một lần bộ não tự động tìm đến shopping để làm mát cảm xúc.';
-  } else {
-    return 'Chòm sao hộ mệnh chỉ ra tháng này là thời điểm bạn rơi vào trạng thái mua sắm cảm xúc cao độ, có thể do áp lực công việc hoặc những thay đổi trong cuộc sống. Việc chốt đơn trở thành cách để bạn lấy lại cảm giác kiểm soát và an toàn.';
+// 2.3a Monthly spending variance (Coefficient of Variation)
+function computeSpendingVariance(yd) {
+  if (!yd) return { cv: 0, isVolatile: false, isConsistent: true };
+  const values = [];
+  for (const yr of Object.values(yd)) {
+    if (!yr.m) continue;
+    for (const v of Object.values(yr.m)) {
+      if (v > 0) values.push(v);
+    }
   }
+  if (values.length < 3) return { cv: 0, isVolatile: false, isConsistent: true };
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+  const stdDev = Math.sqrt(variance);
+  const cv = mean > 0 ? stdDev / mean : 0;
+  return {
+    cv,
+    isVolatile: cv > 0.6,
+    isConsistent: cv < 0.3,
+    maxVal: Math.max(...values),
+    mean
+  };
 }
 
-function generateCategoryPsychInsight(categoryName, categoryData) {
-  const name = categoryName.toLowerCase();
-  
-  if (name.includes('thời trang') || name.includes('fashion')) {
-    return 'Quẻ bói tiết lộ bạn đã biến thời trang thành một công cụ chữa lành tâm lý, mỗi bộ trang phục mới như một lớp giáp bảo vệ bạn khỏi những bất an trong cuộc sống. Thực chất đây là cách bộ não tự thôi miên rằng việc thay đổi diện mạo sẽ mang lại sự tự tin và hạnh phúc.';
-  } else if (name.includes('điện tử') || name.includes('tech')) {
-    return 'Tinh tú chiếu mệnh cho thấy bạn tin tưởng mù quáng vào việc công nghệ sẽ nâng cao hiệu suất cuộc sống, nhưng thực chất đây là cơ chế trốn chạy khỏi những vấn đề cần giải quyết bằng nỗ lực thực sự. Mỗi gadget mới là một lời hứa giả dối về một phiên bản hoàn hảo hơn của chính mình.';
-  } else if (name.includes('làm đẹp') || name.includes('beauty')) {
-    return 'Vũ trụ nhìn thấu rằng bạn đang sử dụng mỹ phẩm như một liệu pháp tự yêu thương bản thân sau những ngày căng thẳng, nhưng đồng thời cũng là cách để che giấu những bất an sâu kín về ngoại hình. Mỗi sản phẩm skincare là một nỗ lực chạm tới phiên bản lý tưởng của chính mình.';
-  } else if (name.includes('thực phẩm') || name.includes('food')) {
-    return 'Chòm sao hộ mệnh chỉ ra bạn có xu hướng dùng đồ ăn ngon để điều chỉnh cảm xúc và tạo ra những khoảnh khắc hạnh phúc tức thời. Đây là một dạng của liệu pháp tự chăm sóc, nhưng cũng có thể là dấu hiệu của việc tìm kiếm sự an ủi qua vị giác.';
-  } else if (name.includes('nhà cửa') || name.includes('home')) {
-    return 'Quẻ bói tiết lộ bạn coi việc trang trí không gian sống như một hình thức kiểm soát môi trường xung quanh khi cảm thấy bất lực với những thay đổi bên ngoài. Mỗi món đồ nội thất là một cách để tạo ra cảm giác ổn định và an toàn trong thế giới đầy bất định.';
-  } else {
-    return 'Tinh tú chiếu rọi cho thấy danh mục này đã trở thành một phần quan trọng trong việc định hình danh tính và lối sống của bạn. Việc mua sắm trong lĩnh vực này không chỉ là đáp ứng nhu cầu mà còn là cách thể hiện giá trị và khẳng định bản thân.';
-  }
+// 2.3b Year-over-year spending trend
+function computeYoYTrend(yd) {
+  if (!yd) return { isGrowing: false, isReformed: false };
+  const entries = Object.entries(yd)
+    .map(([y, v]) => [Number(y), v.t || 0])
+    .filter(([, t]) => t > 0)
+    .sort((a, b) => a[0] - b[0]);
+  if (entries.length < 2) return { isGrowing: false, isReformed: false };
+  const firstVal = entries[0][1];
+  const lastVal = entries[entries.length - 1][1];
+  return {
+    isGrowing: lastVal > firstVal * 1.3,
+    isReformed: lastVal < firstVal * 0.7,
+    firstVal,
+    lastVal,
+    firstYear: entries[0][0],
+    lastYear: entries[entries.length - 1][0]
+  };
 }
 
-window.triggerSalesAIInsight = triggerSalesAIInsight;
-window.enrichWithAIEnhanced = enrichWithAIEnhanced;
-window.generateYearlyPsychInsight = generateYearlyPsychInsight;
-window.generateMonthlyPsychInsight = generateMonthlyPsychInsight;
-window.generateCategoryPsychInsight = generateCategoryPsychInsight;
+// 2.4 Archetype definitions (priority order for resolveArchetype)
+const PERSONALITY_ARCHETYPES = [
+  { key: 'reformed_spender',  label: 'Người Đang Tỉnh Ngộ',      icon: '🌱', triggers: ['reformed_spender'] },
+  { key: 'night_owl',         label: 'Tín Đồ Mua Khuya',          icon: '🦉', triggers: ['night_owl', 'fashionLateNight'] },
+  { key: 'premium_buyer',     label: 'Người Mua Chọn Lọc',        icon: '💎', triggers: ['premium_buyer'] },
+  { key: 'volatile_spender',  label: 'Người Mua Sắm Cảm Xúc',    icon: '🌊', triggers: ['volatile_spender', 'binge_buyer'] },
+  { key: 'growing_spender',   label: 'Người Đang "Bị Cuốn"',      icon: '📈', triggers: ['growing_spender'] },
+  { key: 'bargainHunter',     label: 'Chiến Thần Săn Sale',        icon: '🎯', triggers: ['sale_focused', 'high_savings_rate'] },
+  { key: 'year_end_spiker',   label: 'Người Mua Theo Mùa',        icon: '🎄', triggers: ['year_end_spiker', 'tet_buyer'] },
+  { key: 'techUpgrade',       label: 'Nhà Đầu Tư Hiệu Suất',      icon: '💻', triggers: ['tech_dominant'] },
+  { key: 'beautyTherapy',     label: 'Người Tự Yêu Thương',       icon: '✨', triggers: ['beauty_dominant'] },
+  { key: 'fashionLateNight',  label: 'Người Chữa Lành Cảm Xúc',  icon: '🌙', triggers: ['fashion_dominant'] },
+  { key: 'homeMaker',         label: 'Người Tạo Tổ Ấm',           icon: '🏡', triggers: ['home_dominant'] },
+  { key: 'foodComfort',       label: 'Người Ăn Để Sống Vui',       icon: '🍜', triggers: ['food_dominant'] },
+  { key: 'impulseBuyer',      label: 'Người Chốt Đơn Tự Do',      icon: '⚡', triggers: ['high_frequency', 'low_planning'] },
+  { key: 'default',           label: 'Người Khám Phá Đa Dạng',    icon: '🛍️', triggers: [] }
+];
+
+function resolveArchetype(triggers) {
+  for (const arch of PERSONALITY_ARCHETYPES) {
+    if (arch.triggers.length === 0) return arch; // default
+    if (arch.triggers.some(t => triggers.includes(t))) return arch;
+  }
+  return PERSONALITY_ARCHETYPES[PERSONALITY_ARCHETYPES.length - 1];
+}
+
+// 2.5 Trait builders — each returns { label, evidence, icon } or null
+const TRAIT_BUILDERS = {
+  night_owl: (d) => {
+    const pct = Math.round((d.temporal?.nightPct || 0) * 100);
+    if (pct < 10) return null;
+    return { label: 'Hay mua khuya', evidence: `${pct}% đơn sau 22h`, icon: '🌙' };
+  },
+  weekend_shopper: (d) => {
+    const pct = Math.round((d.temporal?.weekendPct || 0) * 100);
+    if (pct < 30) return null;
+    return { label: 'Nghiện mua cuối tuần', evidence: `${pct}% đơn thứ 7–CN`, icon: '📅' };
+  },
+  lunch_shopper: (d) => {
+    const pct = Math.round((d.temporal?.lunchPct || 0) * 100);
+    if (pct < 15) return null;
+    return { label: 'Hay mua lúc trưa', evidence: `${pct}% đơn giờ nghỉ trưa`, icon: '🕐' };
+  },
+  sale_focused: (d) => {
+    const saleSpend = d.saleStats?.saleSpend || 0;
+    const total = d.saleStats?.totalSpend || 0;
+    if (!total) return null;
+    const pct = Math.round((saleSpend / total) * 100);
+    if (pct < 30) return null;
+    return { label: 'Thích săn sale', evidence: `${pct}% chi vào ngày khuyến mãi`, icon: '🎯' };
+  },
+  volatile_spender: (d) => {
+    const cv = d.variance?.cv || 0;
+    if (!d.variance?.isVolatile) return null;
+    return { label: 'Chi tiêu không đều', evidence: `Biến động ${cv.toFixed(1)}x theo tháng`, icon: '📊' };
+  },
+  consistent_spender: (d) => {
+    if (!d.variance?.isConsistent) return null;
+    return { label: 'Chi tiêu ổn định', evidence: 'Đều đặn qua các tháng', icon: '📐' };
+  },
+  high_frequency: (d) => {
+    const totalOrders = d.totalOrders || 0;
+    const months = d.activeMonths || 1;
+    const perMonth = Math.round(totalOrders / months);
+    if (perMonth < 3) return null;
+    return { label: 'Mua sắm thường xuyên', evidence: `Trung bình ~${perMonth} đơn/tháng`, icon: '🛍️' };
+  },
+  high_avg_value: (d) => {
+    const avg = d.avgOrderValue || 0;
+    if (avg < 300000) return null;
+    return { label: 'Ưa đồ chất lượng', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '💎' };
+  },
+  diverse_categories: (d) => {
+    const n = d.catCount || 0;
+    if (n < 5) return null;
+    return { label: 'Khám phá đa dạng', evidence: `${n} danh mục khác nhau`, icon: '🗂️' };
+  },
+  growing_spender: (d) => {
+    if (!d.yoy?.isGrowing) return null;
+    return { label: 'Chi tiêu tăng dần', evidence: `Tăng qua từng năm`, icon: '📈' };
+  },
+  reformed_spender: (d) => {
+    if (!d.yoy?.isReformed) return null;
+    return { label: 'Đang cắt giảm chi tiêu', evidence: `Giảm so với trước`, icon: '🌱' };
+  },
+  high_savings_rate: (d) => {
+    const saved = d.totalSaved || 0;
+    const total = d.totalSpend || 0;
+    if (!saved || !total) return null;
+    const pct = Math.round((saved / (saved + total)) * 100);
+    if (pct < 10) return null;
+    return { label: 'Tiết kiệm tốt nhờ sale', evidence: `${pct}% giá trị tiết kiệm được`, icon: '💰' };
+  }
+};
+
+function buildTraitList(triggers, data, maxTraits = 4) {
+  const ordered = [
+    'night_owl', 'sale_focused', 'volatile_spender', 'consistent_spender',
+    'high_avg_value', 'high_frequency', 'weekend_shopper', 'lunch_shopper',
+    'growing_spender', 'reformed_spender', 'high_savings_rate', 'diverse_categories'
+  ];
+  const traits = [];
+  for (const key of ordered) {
+    if (traits.length >= maxTraits) break;
+    if (!triggers.includes(key) && !TRAIT_BUILDERS[key]) continue;
+    const builder = TRAIT_BUILDERS[key];
+    if (!builder) continue;
+    const trait = builder(data);
+    if (trait) traits.push({ key, ...trait });
+  }
+  return traits;
+}
+
+// 2.6 Pre-formatted AI context string
+function buildAIContext(profile) {
+  if (!profile) return '';
+  const traitSummary = profile.traits.map(t => `${t.label} (${t.evidence})`).join('; ');
+  const parts = [`Kiểu người: "${profile.archetype.label}"`];
+  if (traitSummary) parts.push(`Đặc điểm: ${traitSummary}`);
+  return parts.join('. ') + '.';
+}
+
+// 2.7 Extended trigger analysis (superset of existing analyzeBehaviorTriggers)
+function analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy) {
+  const triggers = analyzeBehaviorTriggers({
+    stats: null, // stats will be derived from saleStats below if needed
+    categories: d.cs || [],
+    totalSpend: d.t || 0,
+    totalOrders: d.o || 0,
+    totalSaved: d.s || 0
+  });
+
+  // Temporal triggers
+  if ((temporal.nightPct || 0) > 0.20) triggers.push('night_owl');
+  if ((temporal.weekendPct || 0) > 0.38) triggers.push('weekend_shopper');
+  if ((temporal.lunchPct || 0) > 0.20) triggers.push('lunch_shopper');
+
+  // Variance triggers
+  if (variance.isVolatile) triggers.push('volatile_spender');
+  if (variance.isConsistent) triggers.push('consistent_spender');
+
+  // YoY triggers
+  if (yoy.isGrowing) triggers.push('growing_spender');
+  if (yoy.isReformed) triggers.push('reformed_spender');
+
+  // Sale triggers
+  const totalSpend = saleStats.totalSpend || d.t || 1;
+  if (saleStats.saleSpend / totalSpend >= 0.6) {
+    if (!triggers.includes('sale_focused')) triggers.push('sale_focused');
+  }
+
+  // Premium buyer: high avg value + few orders
+  const totalOrders = d.o || 0;
+  const avgVal = totalOrders > 0 ? (d.t || 0) / totalOrders : 0;
+  if (avgVal >= 600000 && totalOrders < 30) triggers.push('premium_buyer');
+
+  // Seasonal spike detection
+  const yd = d.yd || {};
+  let q4Total = 0, q1Total = 0, yearTotal = 0;
+  for (const yr of Object.values(yd)) {
+    const m = yr.m || {};
+    for (const [month, val] of Object.entries(m)) {
+      const mn = Number(month);
+      yearTotal += val || 0;
+      if (mn >= 10) q4Total += val || 0;
+      if (mn <= 2) q1Total += val || 0;
+    }
+  }
+  if (yearTotal > 0) {
+    if (q4Total / yearTotal > 0.5) triggers.push('year_end_spiker');
+    if (q1Total / yearTotal > 0.4) triggers.push('tet_buyer');
+  }
+
+  // Binge buyer: volatile AND some months are 3x average
+  if (variance.isVolatile && variance.maxVal > (variance.mean || 0) * 3) {
+    triggers.push('binge_buyer');
+  }
+
+  return [...new Set(triggers)];
+}
+
+// 2.8 Main entry point — analyzeShoppingPersonality(d) → PersonalityProfile
+function analyzeShoppingPersonality(d) {
+  if (!d) return null;
+
+  const ol = d.ol || [];
+  const yd = d.yd || {};
+
+  const temporal = computeTemporalPatterns(ol);
+  const saleStats = computeSaleStats(d);
+  const variance = computeSpendingVariance(yd);
+  const yoy = computeYoYTrend(yd);
+
+  const totalOrders = d.o || 0;
+  const totalSpend = d.t || 0;
+  const avgOrderValue = totalOrders > 0 ? totalSpend / totalOrders : 0;
+
+  // Count unique months with activity
+  let activeMonths = 0;
+  for (const yr of Object.values(yd)) {
+    if (yr.m) activeMonths += Object.values(yr.m).filter(v => v > 0).length;
+  }
+  activeMonths = Math.max(activeMonths, 1);
+
+  const catCount = (d.cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác').length;
+
+  const dataCtx = {
+    temporal,
+    saleStats,
+    variance,
+    yoy,
+    totalOrders,
+    totalSpend,
+    avgOrderValue,
+    activeMonths,
+    catCount,
+    totalSaved: d.s || 0
+  };
+
+  const triggers = analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy);
+  const archetype = resolveArchetype(triggers);
+  const traits = buildTraitList(triggers, dataCtx);
+
+  const profile = { archetype, traits, dimensions: {}, triggers };
+  profile.aiContext = buildAIContext(profile);
+
+  return profile;
+}
+
+window.analyzeShoppingPersonality = analyzeShoppingPersonality;
+window.enrichWithAI = enrichWithAI;
