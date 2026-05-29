@@ -47,12 +47,6 @@ function renderTopItems(ti) {
   const searchClear = document.getElementById('items-search-clear');
   if (searchClear) searchClear.style.display = 'none';
 
-  // Reset custom toggle button states
-  const discountBtn = document.getElementById('btn-filter-discount');
-  if (discountBtn) discountBtn.classList.remove('active');
-  const discountCheckbox = document.getElementById('items-discount-checkbox');
-  if (discountCheckbox) discountCheckbox.checked = false;
-
   const toggleAdvancedBtn = document.getElementById('btn-toggle-advanced');
   if (toggleAdvancedBtn) toggleAdvancedBtn.classList.remove('active');
   const advancedPanel = document.getElementById('advanced-filters-panel');
@@ -62,8 +56,6 @@ function renderTopItems(ti) {
   const d = window.currentDashData || {};
   const orders = d.ol || [];
   
-  const priceMin = document.getElementById('price-min-input');
-  const priceMax = document.getElementById('price-max-input');
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
   
@@ -82,30 +74,6 @@ function renderTopItems(ti) {
       dateMax.max = maxTs;
       dateMax.value = maxTs;
     }
-  }
-  
-  // 2. Initialize Price Slider bounds
-  let maxPriceVal = 5000000; // default 5M
-  if (currentTopItems.length > 0) {
-    const prices = currentTopItems.map(item => item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s));
-    const highestItemPrice = Math.max(...prices, 0);
-    if (highestItemPrice > 0) {
-      maxPriceVal = Math.ceil(highestItemPrice / 100000) * 100000;
-    }
-  }
-  
-  if (priceMin && priceMax) {
-    priceMin.min = 0;
-    priceMin.max = maxPriceVal;
-    priceMin.value = 0;
-    
-    priceMax.min = 0;
-    priceMax.max = maxPriceVal;
-    priceMax.value = maxPriceVal;
-    
-    const stepVal = maxPriceVal >= 10000000 ? 100000 : 10000;
-    priceMin.step = stepVal;
-    priceMax.step = stepVal;
   }
   
   populateCategorySelect();
@@ -157,14 +125,10 @@ function populateCategorySelect() {
 function initItemsEvents() {
   const catSelect = document.getElementById('items-cat-select');
   const sortSelect = document.getElementById('items-sort-select');
-  const discountCheckbox = document.getElementById('items-discount-checkbox');
-  const discountBtn = document.getElementById('btn-filter-discount');
   
   const toggleAdvancedBtn = document.getElementById('btn-toggle-advanced');
   const advancedPanel = document.getElementById('advanced-filters-panel');
   
-  const priceMin = document.getElementById('price-min-input');
-  const priceMax = document.getElementById('price-max-input');
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
   
@@ -179,16 +143,6 @@ function initItemsEvents() {
   
   catSelect?.addEventListener('change', triggerReRender);
   sortSelect?.addEventListener('change', triggerReRender);
-  discountCheckbox?.addEventListener('change', triggerReRender);
-  
-  // Custom discount button toggler
-  discountBtn?.addEventListener('click', () => {
-    discountBtn.classList.toggle('active');
-    if (discountCheckbox) {
-      discountCheckbox.checked = discountBtn.classList.contains('active');
-      discountCheckbox.dispatchEvent(new Event('change'));
-    }
-  });
 
   // Advanced filters collapsible toggler
   toggleAdvancedBtn?.addEventListener('click', () => {
@@ -196,14 +150,6 @@ function initItemsEvents() {
     advancedPanel?.classList.toggle('show');
   });
 
-  priceMin?.addEventListener('input', () => {
-    updateSliderTracks();
-    triggerReRender();
-  });
-  priceMax?.addEventListener('input', () => {
-    updateSliderTracks();
-    triggerReRender();
-  });
   dateMin?.addEventListener('input', () => {
     updateSliderTracks();
     triggerReRender();
@@ -249,26 +195,6 @@ function initItemsEvents() {
 }
 
 function updateSliderTracks() {
-  const priceMin = document.getElementById('price-min-input');
-  const priceMax = document.getElementById('price-max-input');
-  const priceRange = document.getElementById('price-slider-range');
-  
-  if (priceMin && priceMax && priceRange) {
-    const minVal = parseInt(priceMin.value, 10);
-    const maxVal = parseInt(priceMax.value, 10);
-    const maxLimit = parseInt(priceMin.max, 10) || 1;
-    
-    if (minVal > maxVal) {
-      priceMin.value = maxVal;
-    }
-    
-    const leftPct = (priceMin.value / maxLimit) * 100;
-    const rightPct = 100 - (priceMax.value / maxLimit) * 100;
-    priceRange.style.left = leftPct + '%';
-    priceRange.style.right = rightPct + '%';
-    
-    document.getElementById('price-range-label').textContent = `${fmtVND(priceMin.value)} - ${fmtVND(priceMax.value)}`;
-  }
 
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
@@ -304,6 +230,14 @@ function getFilteredAndAggregatedItems() {
   if (orders.length > 0 && dateMinEl && dateMaxEl) {
     const minTs = parseInt(dateMinEl.value, 10);
     const maxTs = parseInt(dateMaxEl.value, 10);
+    const minLimit = parseInt(dateMinEl.min, 10);
+    const maxLimit = parseInt(dateMinEl.max, 10);
+    
+    // If the slider is at the default bounds, we do not need to filter/aggregate by date.
+    // We return the complete currentTopItems directly to prevent incorrect stats from incomplete orders list.
+    if (minTs === minLimit && maxTs === maxLimit) {
+      return currentTopItems;
+    }
     
     const filteredOrders = orders.filter(o => o.t && o.t >= minTs && o.t <= maxTs && o.f > 0);
     
@@ -347,17 +281,9 @@ function renderTopItemsList() {
 
   const catSelect = document.getElementById('items-cat-select');
   const sortSelect = document.getElementById('items-sort-select');
-  const discountCheckbox = document.getElementById('items-discount-checkbox');
-  
-  const priceMinEl = document.getElementById('price-min-input');
-  const priceMaxEl = document.getElementById('price-max-input');
   
   const category = catSelect ? catSelect.value : "all";
   const sortOrder = sortSelect ? sortSelect.value : "spend_desc";
-  const onlyDiscount = discountCheckbox ? discountCheckbox.checked : false;
-  
-  const minPrice = priceMinEl ? parseInt(priceMinEl.value, 10) : 0;
-  const maxPrice = priceMaxEl ? parseInt(priceMaxEl.value, 10) : Infinity;
   
   // 1. Dynamically retrieve aggregated items based on date slider range
   const activeItems = getFilteredAndAggregatedItems();
@@ -368,16 +294,6 @@ function renderTopItemsList() {
     if (category !== "all") {
       const resolved = resolveCategory(item.n, item.cat);
       if (resolved !== category) return false;
-    }
-    
-    // Price Range Filter
-    const avgPrice = item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s);
-    if (avgPrice < minPrice || avgPrice > maxPrice) return false;
-    
-    // Discount Filter
-    if (onlyDiscount) {
-      const hasDiscount = item.op && item.dp && item.op > item.dp;
-      if (!hasDiscount) return false;
     }
     
     return true;

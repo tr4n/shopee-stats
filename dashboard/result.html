@@ -271,14 +271,8 @@
                   </select>
                 </div>
 
-                <!-- Hidden default checkbox to maintain backward compatibility -->
-                <input type="checkbox" id="items-discount-checkbox" style="display: none;" />
-                <button type="button" id="btn-filter-discount" class="filter-toggle-btn">
-                  🏷️ Hàng Sale
-                </button>
-
                 <button type="button" id="btn-toggle-advanced" class="filter-toggle-btn btn-advanced-toggle">
-                  🎛️ Bộ lọc sâu <span class="arrow">▼</span>
+                  📅 Lọc thời gian <span class="arrow">▼</span>
                 </button>
               </div>
             </div>
@@ -286,20 +280,6 @@
             <!-- Collapsible Range Sliders Drawer -->
             <div class="advanced-filters-panel" id="advanced-filters-panel">
               <div class="advanced-filters-grid">
-                <!-- Price Range Filter -->
-                <div class="slider-group">
-                  <div class="slider-header">
-                    <span class="slider-title">Khoảng giá đơn vị</span>
-                    <span id="price-range-label">0đ - 10trđ</span>
-                  </div>
-                  <div class="double-slider-wrap">
-                    <div class="slider-track"></div>
-                    <div id="price-slider-range" class="slider-range"></div>
-                    <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" />
-                    <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" />
-                  </div>
-                </div>
-
                 <!-- Date Range Filter -->
                 <div class="slider-group">
                   <div class="slider-header">
