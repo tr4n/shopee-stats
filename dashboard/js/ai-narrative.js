@@ -467,7 +467,7 @@ Nhận xét ngắn gọn (1-2 câu), không ghi số tiền hay con số cụ th
 // Internal AI runner — called by runAIInsight and rerunAIInsight
 async function _executeAIInsight(cardId) {
   const args = _aiInsightCallArgs[cardId];
-  if (!args || _aiInsightDisabled) return;
+  if (!args) return;
   if (_aiInsightRunning.has(cardId)) return;
 
   const aiEl = document.getElementById(cardId + '-ai');
@@ -478,153 +478,41 @@ async function _executeAIInsight(cardId) {
   const profile = args.profile;
   const ck = args.cacheKey || cardId;
 
-  if (profile) {
-    // Clear the analyze button and render profile structure first (includes archetype and traits)
-    aiEl.innerHTML = renderAIInsight(null, cardId, profile);
-    let narrativeEl = aiEl.querySelector('.ai-narrative');
-    if (!narrativeEl) {
-      aiEl.insertAdjacentHTML('beforeend',
-        `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div>` +
-        `<div class="ai-narrative-body"><span class="ai-narrative-loading">🔮 Đang phân tích tính cách...</span></div></div>`
-      );
-    } else {
-      const body = narrativeEl.querySelector('.ai-narrative-body');
-      if (body) body.innerHTML = '<span class="ai-narrative-loading">🔮 Đang phân tích tính cách...</span>';
-    }
-    aiEl.style.display = '';
-  } else {
-    // No profile: full loading state replaces card content
-    const loadingStatuses = [
-      "🔮 Chrome AI đang đọc vị...",
-      "🧠 Chrome AI đang phân tích tính cách...",
-      "💫 Chrome AI đang kết nối...",
-      "🍿 Đợi tí, Chrome AI đang khởi động..."
-    ];
-    const status = loadingStatuses[Math.floor(Math.random() * loadingStatuses.length)];
-    aiEl.innerHTML = `
-      <div class="ai-loading-container">
-        <svg class="ai-loading-icon spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line>
-          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-          <line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line>
-          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-        </svg>
-        <div class="ai-loading-text">
-          <div class="ai-loading-status">${status}</div>
-          <div class="ai-loading-note">Chrome AI chạy offline 100% trên thiết bị, bảo mật dữ liệu tuyệt đối.</div>
-        </div>
-      </div>`;
-    aiEl.classList.add('loading');
-    aiEl.style.display = '';
-  }
-
-  const session = await getAIInsightSession();
-  if (!session || typeof session.prompt !== 'function') {
-    // Remove loading indicator, keep profile visible
-    const narrativeEl = aiEl.querySelector('.ai-narrative');
-    if (narrativeEl) narrativeEl.remove();
-    if (!profile) {
-      aiEl.classList.remove('loading');
-      // Only show analyze button if AI might become available later
-      if (!_aiInsightDisabled) aiEl.innerHTML = renderAnalyzeButton(cardId);
-      else aiEl.style.display = 'none';
-    }
-    _aiInsightRunning.delete(cardId);
-    return;
-  }
-
   try {
-    const fullPrompt = _buildFullPrompt(args);
-    let resultText = '';
+    // Generate local rule-based psychological insight
+    const dataForInsight = {
+      stats: (window.currentDashData && window.currentDashData.oss) || window._oss || null,
+      categories: (window.currentDashData && window.currentDashData.cs) || [],
+      totalSpend: (window.currentDashData && window.currentDashData.t) || 0,
+      totalOrders: (window.currentDashData && window.currentDashData.o) || 0,
+      totalSaved: (window.currentDashData && window.currentDashData.s) || 0
+    };
+    const localInsight = generatePsychologicalInsight(dataForInsight);
 
-    if (profile) {
-      // Stream directly into narrative section
-      let narrativeEl = aiEl.querySelector('.ai-narrative');
-      if (!narrativeEl) {
-        aiEl.insertAdjacentHTML('beforeend',
-          `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body"></div></div>`
-        );
-        narrativeEl = aiEl.querySelector('.ai-narrative');
-      }
-      if (!narrativeEl) { _aiInsightRunning.delete(cardId); return; } // guard
-      const narrativeBody = narrativeEl.querySelector('.ai-narrative-body');
-
-      if (typeof session.promptStreaming === 'function') {
-        const stream = session.promptStreaming(fullPrompt);
-        for await (const chunk of stream) {
-          resultText = chunk;
-          if (narrativeBody) narrativeBody.innerHTML = renderSentencesHTML(chunk);
-        }
-      } else {
-        resultText = await session.prompt(fullPrompt);
-        if (narrativeBody && resultText) narrativeBody.innerHTML = renderSentencesHTML(resultText.trim());
-      }
-
-      const finalText = resultText ? resultText.trim() : '';
-      if (finalText && /\p{L}/u.test(finalText)) {
-        _saveInsightText(ck, finalText);
-        narrativeEl.classList.add('ai-narrative--appear');
-        const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-        if (refreshBtn) refreshBtn.style.display = '';
-      } else {
-        // No AI output — remove the narrative section but keep the profile card visible
-        narrativeEl.remove();
-      }
+    if (localInsight && localInsight.trim()) {
+      const text = localInsight.trim();
+      _saveInsightText(ck, text);
+      aiEl.innerHTML = renderAIInsight(text, cardId, profile);
+      aiEl.style.display = '';
+      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+      if (refreshBtn) refreshBtn.style.display = '';
     } else {
-      // Legacy: stream into shell body
-      aiEl.classList.remove('loading');
-      aiEl.innerHTML = renderAIInsightShell(cardId);
-      const bodyEl = aiEl.querySelector('.insight-ai-body');
-
-      if (typeof session.promptStreaming === 'function') {
-        const stream = session.promptStreaming(fullPrompt);
-        for await (const chunk of stream) {
-          resultText = chunk;
-          if (bodyEl) bodyEl.innerHTML = renderSentencesHTML(chunk);
-        }
-      } else {
-        resultText = await session.prompt(fullPrompt);
-        aiEl.classList.remove('loading');
-      }
-
-      if (resultText && resultText.trim() && /\p{L}/u.test(resultText)) {
-        const text = resultText.trim();
-        _saveInsightText(ck, text);
-        aiEl.innerHTML = renderAIInsight(text, cardId, null);
-        const body = aiEl.querySelector('.insight-ai-body');
-        if (body) body.classList.add('insight-ai-body--appear');
-        const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-        if (refreshBtn) refreshBtn.style.display = '';
+      if (profile) {
+        aiEl.innerHTML = renderAIInsight(null, cardId, profile);
         aiEl.style.display = '';
       } else {
         aiEl.style.display = 'none';
       }
     }
   } catch (e) {
-    console.warn('[Dashboard] AI insight failed:', e);
-    if (isAIFatalError(e)) {
-      _aiInsightDisabled = true;
-      _aiInsightSession = null;
-      if (profile) {
-        // Preserve profile card — just remove the narrative section
-        const narrativeEl = aiEl.querySelector('.ai-narrative');
-        if (narrativeEl) narrativeEl.remove();
-      } else {
-        aiEl.innerHTML = '';
-        aiEl.style.display = 'none';
-      }
-      hideAllAIButtons();
+    console.warn('[Dashboard] Local psychological insight failed:', e);
+    if (profile) {
+      aiEl.innerHTML = renderAIInsight(null, cardId, profile);
+      aiEl.style.display = '';
     } else {
-      if (profile) {
-        const narrativeEl = aiEl.querySelector('.ai-narrative');
-        if (narrativeEl) narrativeEl.remove();
-      } else {
-        aiEl.classList.remove('loading');
-        aiEl.innerHTML = renderAnalyzeButton(cardId);
-      }
+      aiEl.style.display = 'none';
     }
   } finally {
-    aiEl.classList.remove('loading');
     _aiInsightRunning.delete(cardId);
   }
 }
@@ -876,53 +764,103 @@ const TRAIT_BUILDERS = {
   night_owl: (d) => {
     const pct = Math.round((d.temporal?.nightPct || 0) * 100);
     if (pct < 10) return null;
-    return { label: 'Hay mua khuya', evidence: `${pct}% đơn đặt sau 22h`, icon: '🌙' };
+    return { 
+      label: 'Hay mua khuya', 
+      evidence: `${pct}% đơn đặt sau 22h`, 
+      description: `Bạn thường mua sắm vào ban đêm với ${pct}% số đơn được đặt sau 22h.`,
+      icon: '🌙' 
+    };
   },
   payday_buyer: (d) => {
     const pct = Math.round((d.temporal?.paydayPct || 0) * 100);
     if (pct < 28) return null;
-    return { label: 'Mua nhiều đầu/giữa tháng', evidence: `${pct}% đơn ngày 1–3 & 15–17`, icon: '💸' };
+    return { 
+      label: 'Mua nhiều đầu/giữa tháng', 
+      evidence: `${pct}% đơn ngày 1–3 & 15–17`, 
+      description: `Bạn thường chi tiêu nhiều vào dịp nhận lương đầu/giữa tháng, chiếm ${pct}% số đơn vào các ngày 1–3 và 15–17.`,
+      icon: '💸' 
+    };
   },
   morning_planner: (d) => {
     const pct = Math.round((d.temporal?.morningPct || 0) * 100);
     if (pct < 28) return null;
-    return { label: 'Mua buổi sáng', evidence: `${pct}% đơn đặt 8h–12h`, icon: '☀️' };
+    return { 
+      label: 'Mua buổi sáng', 
+      evidence: `${pct}% đơn đặt 8h–12h`, 
+      description: `Bạn có thói quen mua sắm vào buổi sáng với ${pct}% số đơn được đặt từ 8h đến 12h.`,
+      icon: '☀️' 
+    };
   },
   weekend_shopper: (d) => {
     const pct = Math.round((d.temporal?.weekendPct || 0) * 100);
     if (pct < 30) return null;
-    return { label: 'Cuối tuần hay mua sắm', evidence: `${pct}% đơn thứ 7–CN`, icon: '📅' };
+    return { 
+      label: 'Cuối tuần hay mua sắm', 
+      evidence: `${pct}% đơn thứ 7–CN`, 
+      description: `Bạn hay mua sắm thư giãn vào cuối tuần, với khoảng ${pct}% số đơn đặt vào thứ 7 và Chủ Nhật.`,
+      icon: '📅' 
+    };
   },
   lunch_shopper: (d) => {
     const pct = Math.round((d.temporal?.lunchPct || 0) * 100);
     if (pct < 15) return null;
-    return { label: 'Mua giờ nghỉ trưa', evidence: `${pct}% đơn 11h–14h`, icon: '🍱' };
+    return { 
+      label: 'Mua giờ nghỉ trưa', 
+      evidence: `${pct}% đơn 11h–14h`, 
+      description: `Bạn thường tranh thủ chốt đơn vào giờ nghỉ trưa, chiếm ${pct}% số đơn phát sinh trong khoảng 11h–14h.`,
+      icon: '🍱' 
+    };
   },
   sale_focused: (d) => {
     const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
     if (pct < 30) return null;
-    return { label: 'Thích săn sale', evidence: `${pct}% chi vào ngày khuyến mãi`, icon: '🎯' };
+    return { 
+      label: 'Thích săn sale', 
+      evidence: `${pct}% chi vào ngày khuyến mãi`, 
+      description: `Bạn là người tích cực săn sale khi dành ra ${pct}% tổng chi tiêu vào các ngày khuyến mãi.`,
+      icon: '🎯' 
+    };
   },
   sale_only_buyer: (d) => {
     const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
     if (pct < 75) return null;
-    return { label: 'Chỉ mua khi có sale', evidence: `${pct}% chi vào ngày sale`, icon: '🔥' };
+    return { 
+      label: 'Chỉ mua khi có sale', 
+      evidence: `${pct}% chi vào ngày sale`, 
+      description: `Bạn hầu như chỉ mua sắm khi có ưu đãi lớn với ${pct}% ngân sách chi vào ngày sale.`,
+      icon: '🔥' 
+    };
   },
   full_price_loyal: (d) => {
     const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
     if (pct > 25 || (d.totalOrders || 0) < 8) return null;
-    return { label: 'Không phụ thuộc vào sale', evidence: `Chỉ ${pct}% chi vào ngày giảm giá`, icon: '🛡️' };
+    return { 
+      label: 'Không phụ thuộc vào sale', 
+      evidence: `Chỉ ${pct}% chi vào ngày giảm giá`, 
+      description: `Bạn mua sắm theo nhu cầu và không phụ thuộc vào sale (chỉ ${pct}% chi tiêu vào ngày giảm giá).`,
+      icon: '🛡️' 
+    };
   },
   volatile_spender: (d) => {
     if (!d.variance?.isVolatile) return null;
     const minStr = fmtVND(d.variance.minVal || 0);
     const maxStr = fmtVND(d.variance.maxVal || 0);
-    return { label: 'Chi tiêu không đều', evidence: `Từ ${minStr} đến ${maxStr}/tháng`, icon: '📊' };
+    return { 
+      label: 'Chi tiêu không đều', 
+      evidence: `Từ ${minStr} đến ${maxStr}/tháng`, 
+      description: `Chi tiêu hàng tháng của bạn biến động khá lớn, dao động từ mức thấp ${minStr} đến mức cao nhất là ${maxStr}/tháng.`,
+      icon: '📊' 
+    };
   },
   consistent_spender: (d) => {
     if (!d.variance?.isConsistent) return null;
     const avgStr = fmtVND(d.variance.mean || 0);
-    return { label: 'Chi tiêu đều đặn', evidence: `Ổn định ~${avgStr}/tháng`, icon: '📐' };
+    return { 
+      label: 'Chi tiêu đều đặn', 
+      evidence: `Ổn định ~${avgStr}/tháng`, 
+      description: `Bạn duy trì thói quen quản lý chi tiêu rất đều đặn, ổn định ở mức trung bình khoảng ${avgStr} mỗi tháng.`,
+      icon: '📐' 
+    };
   },
   binge_then_quiet: (d) => {
     if (!d.variance?.isBinge) return null;
@@ -931,38 +869,73 @@ const TRAIT_BUILDERS = {
     const yr = d.variance.bingeYear;
     const ratio = d.variance.mean > 0 ? (d.variance.maxVal / d.variance.mean).toFixed(1) : '?';
     const label = mn ? `${MONTHS_VN[mn]}${yr ? '/' + yr : ''}` : 'một tháng';
-    return { label: 'Có tháng mua bùng phát', evidence: `${label} nhiều hơn ${ratio}x tháng bình thường`, icon: '💥' };
+    return { 
+      label: 'Có tháng mua bùng phát', 
+      evidence: `${label} nhiều hơn ${ratio}x tháng bình thường`, 
+      description: `Bạn có giai đoạn mua sắm bùng phát đột ngột, cụ thể là vào ${label} tiêu nhiều hơn ${ratio} lần tháng bình thường.`,
+      icon: '💥' 
+    };
   },
   high_frequency: (d) => {
     const perMonth = Math.round((d.totalOrders || 0) / Math.max(d.activeMonths || 1, 1));
     if (perMonth < 3) return null;
-    return { label: 'Mua sắm thường xuyên', evidence: `Trung bình ~${perMonth} đơn/tháng`, icon: '🛍️' };
+    return { 
+      label: 'Mua sắm thường xuyên', 
+      evidence: `Trung bình ~${perMonth} đơn/tháng`, 
+      description: `Tần suất chốt đơn của bạn khá dày dặn, trung bình khoảng ${perMonth} đơn hàng mỗi tháng.`,
+      icon: '🛍️' 
+    };
   },
   high_avg_value: (d) => {
     const avg = d.avgOrderValue || 0;
     if (avg < 300000) return null;
-    return { label: 'Ưa đồ chất lượng', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '💎' };
+    return { 
+      label: 'Ưa đồ chất lượng', 
+      evidence: `Trung bình ${fmtVND(avg)}/đơn`, 
+      description: `Bạn ưu tiên lựa chọn các sản phẩm chất lượng hoặc có giá trị cao, trung bình đạt ${fmtVND(avg)} cho mỗi đơn hàng.`,
+      icon: '💎' 
+    };
   },
   selective_luxury: (d) => {
     const avg = d.avgOrderValue || 0;
     if (avg < 450000) return null;
-    return { label: 'Thiên về hàng cao cấp', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '👑' };
+    return { 
+      label: 'Thiên về hàng cao cấp', 
+      evidence: `Trung bình ${fmtVND(avg)}/đơn`, 
+      description: `Gu mua sắm của bạn nghiêng về các mặt hàng cao cấp, giá trị trung bình mỗi đơn hàng lên tới ${fmtVND(avg)}.`,
+      icon: '👑' 
+    };
   },
   anti_premium: (d) => {
     const avg = d.avgOrderValue || 0;
     const orders = d.totalOrders || 0;
     if (avg >= 120000 || orders < 25) return null;
-    return { label: 'Ưa đồ giá tốt', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '🏷️' };
+    return { 
+      label: 'Ưa đồ giá tốt', 
+      evidence: `Trung bình ${fmtVND(avg)}/đơn`, 
+      description: `Bạn ưa chuộng các sản phẩm bình dân hoặc có ưu đãi tốt, trung bình chỉ chi khoảng ${fmtVND(avg)} cho một đơn hàng.`,
+      icon: '🏷️' 
+    };
   },
   growing_spender: (d) => {
     if (!d.yoy?.isGrowing) return null;
     const pct = d.yoy.pctChange;
-    return { label: 'Chi tiêu ngày càng tăng', evidence: `Tăng ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, icon: '📈' };
+    return { 
+      label: 'Chi tiêu ngày càng tăng', 
+      evidence: `Tăng ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, 
+      description: `Mức độ mua sắm của bạn có xu hướng ngày càng tăng mạnh, tăng trưởng ${pct}% từ năm ${d.yoy.firstYear} lên năm ${d.yoy.lastYear}.`,
+      icon: '📈' 
+    };
   },
   reformed_spender: (d) => {
     if (!d.yoy?.isReformed) return null;
     const pct = Math.abs(d.yoy.pctChange);
-    return { label: 'Đang cắt giảm chi tiêu', evidence: `Giảm ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, icon: '🌱' };
+    return { 
+      label: 'Đang cắt giảm chi tiêu', 
+      evidence: `Giảm ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, 
+      description: `Bạn đang thắt chặt chi tiêu rất hiệu quả, cắt giảm được ${pct}% chi phí so với giai đoạn trước.`,
+      icon: '🌱' 
+    };
   },
   high_savings_rate: (d) => {
     const saved = d.totalSaved || 0;
@@ -970,37 +943,72 @@ const TRAIT_BUILDERS = {
     if (!saved || !total) return null;
     const pct = Math.round((saved / (saved + total)) * 100);
     if (pct < 10) return null;
-    return { label: 'Tiết kiệm tốt nhờ sale', evidence: `${pct}% giá trị đã tiết kiệm được`, icon: '💰' };
+    return { 
+      label: 'Tiết kiệm tốt nhờ sale', 
+      evidence: `${pct}% giá trị đã tiết kiệm được`, 
+      description: `Bạn đã tối ưu ngân sách rất tốt khi tiết kiệm được khoảng ${pct}% giá trị các món hàng nhờ áp mã giảm giá.`,
+      icon: '💰' 
+    };
   },
   diverse_categories: (d) => {
     const n = d.catCount || 0;
     if (n < 5) return null;
-    return { label: 'Khám phá đa dạng', evidence: `${n} danh mục khác nhau`, icon: '🗂️' };
+    return { 
+      label: 'Khám phá đa dạng', 
+      evidence: `${n} danh mục khác nhau`, 
+      description: `Nhu cầu tiêu dùng của bạn rất đa dạng khi mua sắm trải rộng trên ${n} nhóm sản phẩm khác nhau.`,
+      icon: '🗂️' 
+    };
   },
   self_care_priority: (d) => {
     const pct = Math.round((d.selfCareRatio || 0) * 100);
     if (pct < 28) return null;
-    return { label: 'Ưu tiên chăm sóc bản thân', evidence: `${pct}% chi cho làm đẹp & sức khỏe`, icon: '✨' };
+    return { 
+      label: 'Ưu tiên chăm sóc bản thân', 
+      evidence: `${pct}% chi cho làm đẹp & sức khỏe`, 
+      description: `Bạn rất quan tâm và yêu chiều cơ thể khi dành ra ${pct}% ngân sách cho danh mục sức khỏe & làm đẹp.`,
+      icon: '✨' 
+    };
   },
   family_buyer: (d) => {
     const pct = Math.round((d.familyRatio || 0) * 100);
     if (pct < 15) return null;
-    return { label: 'Mua nhiều cho gia đình', evidence: `${pct}% chi cho đồ trẻ em/gia đình`, icon: '👨‍👩‍👧' };
+    return { 
+      label: 'Mua nhiều cho gia đình', 
+      evidence: `${pct}% chi cho đồ trẻ em/gia đình`, 
+      description: `Bạn dành nhiều sự chăm chút cho tổ ấm của mình với ${pct}% chi tiêu hướng về các sản phẩm gia đình, mẹ & bé.`,
+      icon: '👨‍👩‍👧' 
+    };
   },
   year_end_spiker: (d) => {
     const pct = Math.round((d.q4Ratio || 0) * 100);
     if (pct < 40) return null;
-    return { label: 'Tập trung mua cuối năm', evidence: `${pct}% chi tiêu tháng 10–12`, icon: '🎄' };
+    return { 
+      label: 'Tập trung mua cuối năm', 
+      evidence: `${pct}% chi tiêu tháng 10–12`, 
+      description: `Mua sắm của bạn tập trung rất mạnh vào mùa lễ hội cuối năm, riêng quý IV (tháng 10–12) chiếm ${pct}% cả năm.`,
+      icon: '🎄' 
+    };
   },
   tet_buyer: (d) => {
     const pct = Math.round((d.q1Ratio || 0) * 100);
     if (pct < 30) return null;
-    return { label: 'Mua nhiều dịp Tết', evidence: `${pct}% chi tiêu tháng 1–2`, icon: '🧧' };
+    return { 
+      label: 'Mua nhiều dịp Tết', 
+      evidence: `${pct}% chi tiêu tháng 1–2`, 
+      description: `Bạn thường có đợt chi tiêu bận rộn nhất vào dịp sắm sửa đón Tết (tháng 1 & tháng 2), chiếm ${pct}% tổng chi tiêu năm.`,
+      icon: '🧧' 
+    };
   },
   summer_binge: (d) => {
     const pct = Math.round((d.summerRatio || 0) * 100);
     if (pct < 30) return null;
-    return { label: 'Mua nhiều mùa hè', evidence: `${pct}% chi tiêu tháng 6–8`, icon: '☀️' };
+    return { 
+      label: 'Mua nhiều mùa hè', 
+      evidence: `${pct}% chi tiêu tháng 6–8`, 
+      description: `Chi tiêu của bạn sôi động nhất vào dịp hè từ tháng 6 đến tháng 8, chiếm khoảng ${pct}% ngân sách cả năm.`,
+      icon: '☀️' 
+    };
   },
 };
 
@@ -1193,42 +1201,10 @@ function analyzeShoppingPersonality(d) {
 // sectionType: 'monthly' | 'categories' | 'sales' | 'items'
 function showProfileInsight(cardId, profile, sectionType) {
   const aiEl = document.getElementById(cardId + '-ai');
-  if (!aiEl) return;
-
-  _aiAvailabilityPromise.then(avail => {
-    if (!avail || _aiInsightDisabled) {
-      aiEl.style.display = 'none';
-      aiEl.innerHTML = '';
-      return;
-    }
-
-    if (!profile) return;
-
-    // Filter traits relevant to this section
-    const relevantKeys = SECTION_TRAITS[sectionType];
-    let displayTraits = profile.traits.slice(0, 2);
-    if (relevantKeys) {
-      const filtered = profile.traits.filter(t => relevantKeys.includes(t.key));
-      if (filtered.length > 0) {
-        displayTraits = filtered.slice(0, 2);
-      } else {
-        // Fallback: try to build traits directly from section-relevant builders
-        const fallback = [];
-        const dataCtx = profile.dataCtx || {};
-        for (const k of relevantKeys) {
-          if (fallback.length >= 2) break;
-          if (!TRAIT_BUILDERS[k]) continue;
-          const t = TRAIT_BUILDERS[k](dataCtx);
-          if (t) fallback.push({ key: k, ...t });
-        }
-        if (fallback.length > 0) displayTraits = fallback;
-      }
-    }
-
-    const sectionProfile = { ...profile, traits: displayTraits };
-    aiEl.innerHTML = renderCompactProfile(sectionProfile);
-    aiEl.style.display = '';
-  });
+  if (aiEl) {
+    aiEl.style.display = 'none';
+    aiEl.innerHTML = '';
+  }
 }
 
 window.analyzeShoppingPersonality = analyzeShoppingPersonality;

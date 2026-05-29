@@ -154,7 +154,7 @@ function renderAIInsight(text, cardId, profile) {
   const traitsHtml = (profile.traits && profile.traits.length > 0)
     ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${
         profile.traits.map(t =>
-          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
+          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.description || (t.label + ' · ' + t.evidence))}</span></div>`
         ).join('')
       }</div>`
     : '';
