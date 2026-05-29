@@ -108,7 +108,23 @@ const AI_FEW_SHOT_EXAMPLES = [
   '',
   'Ví dụ 6 (Hệ ăn vặt giải sầu):',
   'Dữ liệu đầu vào: Chi tiêu nhiều nhất cho thực phẩm, đồ ăn vặt, đồ ngọt.',
-  'Thầy bói phán: Chòm sao hộ mệnh chỉ ra bạn là người dùng thức ăn làm công cụ xoa dịu áp lực cảm xúc và lấp đầy những khoảng trống tinh thần. Bộ não đã thành công thao túng tâm lý bạn rằng "ăn nốt miếng này rồi tính", tạo ra những khoảnh khắc hạnh phúc calo cao nhưng ví tiền thì lại đang suy dinh dưỡng trầm trọng.'
+  'Thầy bói phán: Chòm sao hộ mệnh chỉ ra bạn là người dùng thức ăn làm công cụ xoa dịu áp lực cảm xúc và lấp đầy những khoảng trống tinh thần. Bộ não đã thành công thao túng tâm lý bạn rằng "ăn nốt miếng này rồi tính", tạo ra những khoảnh khắc hạnh phúc calo cao nhưng ví tiền thì lại đang suy dinh dưỡng trầm trọng.',
+  '',
+  'Ví dụ 7 (Hệ sách tri thức):',
+  'Dữ liệu đầu vào: Chi tiêu nhiều nhất cho sách, văn phòng phẩm, dụng cụ học tập.',
+  'Thầy bói phán: Tinh tú chiếu rọi cho thấy bạn dùng sách như một tấm lá chắn tinh thần để tự bào chữa rằng mình đang "đầu tư vào bản thân", trong khi thực chất là không thể cưỡng lại cảm giác mua thêm một cuốn nữa dù núi sách cũ vẫn chưa đọc hết. Đây là dạng mua sắm tâm lý cao cấp nhất — bạn nghĩ bạn đang thông minh hơn, nhưng ví tiền thì kiên quyết không đồng ý.',
+  '',
+  'Ví dụ 8 (Hệ chiến thần thể thao):',
+  'Dữ liệu đầu vào: Chi tiêu nhiều nhất vào đồ thể thao, dụng cụ tập luyện.',
+  'Thầy bói phán: Quẻ bói tiết lộ bạn đang sa vào bẫy "mua đồ thể thao để có động lực tập luyện" — một vòng lặp tâm lý nguy hiểm nơi mỗi bộ đồ mới đem lại cảm giác khởi đầu mà không cần thực sự đổ mồ hôi. Thần tài nhìn thấy rõ rằng đống dụng cụ chưa bao giờ dùng đến đang chiếm dần không gian sống như một lời nhắc nhở im lặng về những mục tiêu chưa bao giờ thực hiện.',
+  '',
+  'Ví dụ 9 (Hệ phụ huynh bao đồng):',
+  'Dữ liệu đầu vào: Chi tiêu nhiều nhất vào đồ trẻ em, đồ chơi, sách thiếu nhi.',
+  'Thầy bói phán: Vũ trụ nhìn thấu rằng bạn đang chuyển hóa tình yêu thương thành các đơn hàng liên tiếp, dùng việc mua sắm cho con như một cách bù đắp cho những khoảng thời gian chưa dành được. Đây là hội chứng "mua để yêu" — rất dễ cảm thông, nhưng bộ não trẻ em chỉ cần sự hiện diện của bạn, không phải đống đồ chơi ngày càng chồng chất trong góc phòng.',
+  '',
+  'Ví dụ 10 (Hệ chốt đơn hỗn loạn):',
+  'Dữ liệu đầu vào: Chi tiêu đều đều ở rất nhiều danh mục khác nhau, không có danh mục chủ đạo rõ ràng.',
+  'Thầy bói phán: Tinh tú hộ mệnh cho thấy bạn là một tâm hồn tự do không chịu bị ràng buộc bởi bất kỳ danh mục nào — hôm nay đồ gia dụng, ngày mai mỹ phẩm, ngày kia phụ kiện công nghệ, tất cả đều là "cần thiết" trong giây phút đó. Đây là biểu hiện của một bộ não luôn trong trạng thái tìm kiếm sự kích thích mới, và Shopee đã trở thành nhà trị liệu tâm lý miễn phí nhưng lại tính phí rất cao.'
 ].join('\n');
 
 
@@ -248,9 +264,45 @@ function generateFallbackInsight(triggers) {
 
 let _aiInsightSession = null;
 let _aiInsightDisabled = false;
-let _aiInsightRunning = false;
+// Per-card running lock — Set of cardIds currently executing AI
+const _aiInsightRunning = new Set();
+// Per-card history navigation index (0 = newest)
+const _aiInsightHistoryIndex = {};
 // Stores call args per cardId so re-analysis can be triggered without re-running the full pipeline
 const _aiInsightCallArgs = {};
+
+// Returns history array for a cache key (backward-compat: wraps legacy string in array)
+function _getInsightHistory(ck) {
+  if (!_dashCache) return [];
+  const v = _dashCache.insights[ck];
+  if (!v) return [];
+  return Array.isArray(v) ? v : [String(v)];
+}
+
+// Prepend new text to history (max 3 entries), then persist
+function _saveInsightHistory(ck, text) {
+  if (!_dashCache) return;
+  const existing = _getInsightHistory(ck);
+  existing.unshift(text);
+  if (existing.length > 3) existing.length = 3;
+  _dashCache.insights[ck] = existing;
+  saveDashCache();
+}
+
+// Render rule-based fallback when Chrome AI is unavailable
+function _tryRuleBasedFallback(aiEl, cardId, fallbackFn) {
+  if (typeof fallbackFn === 'function') {
+    try {
+      const text = fallbackFn();
+      if (text) {
+        aiEl.style.display = '';
+        aiEl.innerHTML = renderAIInsight([text], cardId, 0, true);
+        return;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  aiEl.style.display = 'none';
+}
 
 function isAIFatalError(error) {
   const msg = String(error?.message || error || '').toLowerCase();
@@ -357,62 +409,87 @@ _aiAvailabilityPromise.then(avail => {
 });
 
 // cacheKey: optional override for cache lookup (used for per-year monthly insights)
-function enrichWithAI(cardId, context, specificPrompt, cacheKey) {
-  // Always persist call args so buttons can re-trigger this analysis
-  _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey };
+// fallbackFn: optional () => string for rule-based insight when Chrome AI unavailable
+// autoRun: if true, auto-execute AI when available and no cache exists
+function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, autoRun) {
+  _aiInsightCallArgs[cardId] = { context, specificPrompt, cacheKey, fallbackFn };
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
   const ck = cacheKey || cardId;
+  const history = _getInsightHistory(ck);
 
   // Serve from cache immediately — no user action needed
-  if (_dashCache?.insights[ck]) {
-    aiEl.innerHTML = renderAIInsight(_dashCache.insights[ck], cardId);
-    aiEl.style.display = ''; // Ensure visible
+  if (history.length > 0) {
+    const idx = _aiInsightHistoryIndex[cardId] || 0;
+    aiEl.innerHTML = renderAIInsight(history, cardId, idx, false);
+    aiEl.style.display = '';
 
-    // Check AI availability to show/hide the refresh button
     _aiAvailabilityPromise.then(avail => {
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
       if (refreshBtn) {
-        if (avail && !_aiInsightDisabled) {
-          refreshBtn.style.display = '';
-        } else {
-          refreshBtn.remove();
-        }
+        refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
       }
     });
     return;
   }
 
-  // Hide it by default until availability check resolves
+  // No cache — hide pending availability check
   aiEl.style.display = 'none';
   aiEl.innerHTML = '';
 
-  if (_aiInsightDisabled) return;
+  if (_aiInsightDisabled) {
+    _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
+    return;
+  }
 
   _aiAvailabilityPromise.then(avail => {
     if (!avail || _aiInsightDisabled) {
-      aiEl.style.display = 'none';
-      aiEl.innerHTML = '';
+      _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
       return;
     }
 
-    // AI is available, show the analyze button
     aiEl.style.display = '';
     aiEl.innerHTML = renderAnalyzeButton(cardId);
+
+    if (autoRun) {
+      setTimeout(() => {
+        // Only auto-run if still no cache and not already running
+        const currentHistory = _getInsightHistory(ck);
+        if (!currentHistory.length && !_aiInsightRunning.has(cardId) && !_aiInsightDisabled) {
+          _executeAIInsight(cardId);
+        }
+      }, 600);
+    }
   });
+}
+
+// Builds the prompt sent to AI — system prompt is already in session initialPrompts
+function _buildFullPrompt(args) {
+  return `VÍ DỤ THAM KHẢO TONE PHÁN (HÃY BẮT CHƯỚC TONE NÀY):
+${AI_FEW_SHOT_EXAMPLES}
+
+DỮ LIỆU THỰC TẾ CỦA KHÁCH HÀNG:
+${args.context}
+
+YÊU CẦU:
+${args.specificPrompt}
+
+Hãy phán quẻ bói ngắn gọn (1-2 câu), tuyệt đối tuân thủ các quy tắc không ghi số tiền/con số cụ thể và không dùng tiếng Anh:`;
 }
 
 // Internal AI runner — called by both runAIInsight and rerunAIInsight
 async function _executeAIInsight(cardId) {
   const args = _aiInsightCallArgs[cardId];
-  if (!args || _aiInsightDisabled || _aiInsightRunning) return;
+  if (!args || _aiInsightDisabled) return;
+  // Per-card lock — prevent duplicate execution for the same card
+  if (_aiInsightRunning.has(cardId)) return;
 
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
-  _aiInsightRunning = true;
+  _aiInsightRunning.add(cardId);
 
   const loadingStatuses = [
     "🔮 Pháp sư Chrome AI đang gieo quẻ xem bói chi tiêu...",
@@ -442,62 +519,67 @@ async function _executeAIInsight(cardId) {
     </div>
   `;
   aiEl.classList.add('loading');
+  aiEl.style.display = '';
 
   const session = await getAIInsightSession();
   if (!session || typeof session.prompt !== 'function') {
     aiEl.classList.remove('loading');
     aiEl.innerHTML = renderAnalyzeButton(cardId);
-    _aiInsightRunning = false;
+    _aiInsightRunning.delete(cardId);
     return;
   }
 
   try {
-    const fullPrompt = `BẠN LÀ AI:
-${AI_INSIGHT_SYSTEM}
+    const fullPrompt = _buildFullPrompt(args);
+    const ck = args.cacheKey || cardId;
+    let resultText = '';
 
-VÍ DỤ THAM KHẢO TONE PHÁN (HÃY BẮT CHƯỚC TONE NÀY):
-${AI_FEW_SHOT_EXAMPLES}
+    if (typeof session.promptStreaming === 'function') {
+      // Streaming path — render header immediately, fill body as chunks arrive
+      aiEl.classList.remove('loading');
+      aiEl.innerHTML = renderAIInsightShell(cardId);
+      const bodyEl = aiEl.querySelector('.insight-ai-body');
 
-DỮ LIỆU THỰC TẾ CỦA KHÁCH HÀNG:
-${args.context}
+      const stream = session.promptStreaming(fullPrompt);
+      for await (const chunk of stream) {
+        resultText = chunk; // Chrome returns cumulative text on each tick
+        if (bodyEl) bodyEl.innerHTML = renderSentencesHTML(chunk);
+      }
+    } else {
+      // Non-streaming fallback
+      resultText = await session.prompt(fullPrompt);
+      aiEl.classList.remove('loading');
+    }
 
-YÊU CẦU:
-${args.specificPrompt}
+    if (resultText && resultText.trim()) {
+      const text = resultText.trim();
+      _saveInsightHistory(ck, text);
+      _aiInsightHistoryIndex[cardId] = 0;
 
-Hãy phán quẻ bói ngắn gọn (1-2 câu), tuyệt đối tuân thủ các quy tắc không ghi số tiền/con số cụ thể và không dùng tiếng Anh:`;
-    const result = await session.prompt(fullPrompt);
-    if (result && result.trim()) {
-      const text = result.trim();
-      aiEl.innerHTML = renderAIInsight(text, cardId);
-      // Reveal the refresh button since we just ran successfully and AI is ready
+      const history = _getInsightHistory(ck);
+      aiEl.innerHTML = renderAIInsight(history, cardId, 0, false);
+      aiEl.style.display = '';
+
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-      if (refreshBtn) {
-        refreshBtn.style.display = '';
-      }
-      if (_dashCache) {
-        const ck = args.cacheKey || cardId;
-        _dashCache.insights[ck] = text;
-        saveDashCache();
-      }
+      if (refreshBtn) refreshBtn.style.display = '';
     } else {
       aiEl.style.display = 'none';
     }
   } catch (e) {
     console.warn('[Dashboard] AI insight failed:', e);
-    const fatal = isAIFatalError(e);
-    if (fatal) {
+    if (isAIFatalError(e)) {
       _aiInsightDisabled = true;
       _aiInsightSession = null;
       aiEl.innerHTML = '';
       aiEl.style.display = 'none';
       hideAllAIButtons();
     } else {
-      // Non-fatal error, show the analyze button again so they can retry
+      aiEl.classList.remove('loading');
       aiEl.innerHTML = renderAnalyzeButton(cardId);
     }
   } finally {
     aiEl.classList.remove('loading');
-    _aiInsightRunning = false;
+    _aiInsightRunning.delete(cardId);
   }
 }
 
@@ -506,12 +588,11 @@ window.runAIInsight = async function (cardId) {
   await _executeAIInsight(cardId);
 };
 
-// User-triggered: clear cache then re-run AI ("Phân tích lại" button)
+// User-triggered: generate a new reading and prepend to history ("Xin quẻ mới" button)
 window.rerunAIInsight = async function (cardId) {
   const args = _aiInsightCallArgs[cardId];
   if (!args) return;
 
-  // Show spinner on the refresh button immediately
   const aiEl = document.getElementById(cardId + '-ai');
   if (aiEl) {
     const btn = aiEl.querySelector('.ai-refresh-btn');
@@ -527,13 +608,8 @@ window.rerunAIInsight = async function (cardId) {
     }
   }
 
-  // Clear cached result so the AI will be called fresh
-  const ck = args.cacheKey || cardId;
-  if (_dashCache?.insights) {
-    delete _dashCache.insights[ck];
-    saveDashCache();
-  }
-
+  // Reset to newest index so new result shows first after generation
+  _aiInsightHistoryIndex[cardId] = 0;
   await _executeAIInsight(cardId);
 };
 
@@ -556,6 +632,51 @@ document.addEventListener('click', (e) => {
     }
   }
 });
+
+// Navigate through insight history for a card (direction: -1 = newer, +1 = older)
+window.navigateAIHistory = function (cardId, direction) {
+  const args = _aiInsightCallArgs[cardId];
+  if (!args) return;
+  const ck = args.cacheKey || cardId;
+  const history = _getInsightHistory(ck);
+  if (!history.length) return;
+
+  const current = _aiInsightHistoryIndex[cardId] || 0;
+  const next = Math.max(0, Math.min(history.length - 1, current + direction));
+  _aiInsightHistoryIndex[cardId] = next;
+
+  const aiEl = document.getElementById(cardId + '-ai');
+  if (aiEl) {
+    aiEl.innerHTML = renderAIInsight(history, cardId, next, false);
+    const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+    if (refreshBtn) refreshBtn.style.display = '';
+  }
+};
+
+// Copy current insight text to clipboard with visual feedback
+window.copyAIInsight = function (cardId) {
+  const args = _aiInsightCallArgs[cardId];
+  if (!args) return;
+  const ck = args.cacheKey || cardId;
+  const history = _getInsightHistory(ck);
+  const idx = _aiInsightHistoryIndex[cardId] || 0;
+  const text = history[idx];
+  if (!text) return;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const aiEl = document.getElementById(cardId + '-ai');
+    if (!aiEl) return;
+    const copyBtn = aiEl.querySelector('.ai-copy-btn');
+    if (!copyBtn) return;
+    const originalHTML = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<span style="font-size:10px;white-space:nowrap">✓ Đã chép</span>';
+    copyBtn.style.color = 'var(--green)';
+    setTimeout(() => {
+      copyBtn.innerHTML = originalHTML;
+      copyBtn.style.color = '';
+    }, 1800);
+  }).catch(() => {});
+};
 
 function triggerSalesAIInsight(stats, totalSpend, totalOrders, activeYear, activeType) {
   // Sales AI insight is handled via enrichWithAI in renderSalesInsights()

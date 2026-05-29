@@ -105,31 +105,65 @@ function parseBold(raw) {
   return escHtml(raw).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
-function renderAIInsight(text, cardId) {
-  // Split by newlines first, then split each paragraph into individual sentences.
+const _AI_ICON_SVG = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:4px"><path d="M12 3 L13.5 8.5 L19 10 L13.5 11.5 L12 17 L10.5 11.5 L5 10 L10.5 8.5 Z"></path><path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path><path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path></svg>`;
+
+function renderSentencesHTML(text) {
   const sentences = text
     .split(/\n+/)
     .flatMap(p => p.split(/(?<=[.!?])\s+/))
     .map(s => s.trim())
     .filter(s => s.length > 0);
-  const items = sentences.map(s =>
+  return sentences.map(s =>
     `<div class="insight-ai-sentence"><span class="ai-bullet">•</span><span>${parseBold(s)}</span></div>`
   ).join('');
-  const refreshBtn = cardId
-    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display: none">
-        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-        </svg>
+}
+
+// history: string (legacy) or string[] (newest-first)
+// currentIndex: which item in history to display (default 0)
+// isRuleBased: use local-analysis badge style
+function renderAIInsight(history, cardId, currentIndex, isRuleBased) {
+  const histArr = Array.isArray(history) ? history : (history ? [String(history)] : []);
+  const idx = Math.max(0, Math.min(histArr.length - 1, currentIndex || 0));
+  const text = histArr[idx] || '';
+  const total = histArr.length;
+
+  const badgeClass = isRuleBased ? 'insight-ai-badge insight-ai-badge--local' : 'insight-ai-badge';
+  const badgeLabel = isRuleBased ? 'Đọc Vị' : 'AI Đọc Vị';
+  const titleText = isRuleBased ? 'Thầy Bói Vũ Trụ phán...' : 'Chrome AI phán xét...';
+
+  const historyNav = total > 1
+    ? `<span class="ai-history-nav">
+        <button type="button" class="ai-history-btn" onclick="navigateAIHistory('${escHtml(cardId)}',1)" ${idx >= total - 1 ? 'disabled' : ''} title="Quẻ cũ hơn">&#8249;</button>
+        <span class="ai-history-indicator">${idx + 1}/${total}</span>
+        <button type="button" class="ai-history-btn" onclick="navigateAIHistory('${escHtml(cardId)}',-1)" ${idx <= 0 ? 'disabled' : ''} title="Quẻ mới hơn">&#8250;</button>
+      </span>`
+    : '';
+
+  const copyBtn = cardId
+    ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép lời phán">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+       </button>`
+    : '';
+
+  const refreshBtn = (cardId && !isRuleBased)
+    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display:none">
+        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         <span style="white-space:nowrap">Xin quẻ mới</span>
        </button>`
     : '';
-  const aiIcon = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;margin-right:4px">
-    <path d="M12 3 L13.5 8.5 L19 10 L13.5 11.5 L12 17 L10.5 11.5 L5 10 L10.5 8.5 Z"></path>
-    <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
-    <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
-  </svg>`;
-  return `<div class="insight-ai-header"><span class="insight-ai-badge">${aiIcon}AI Đọc Vị</span><span class="insight-ai-title">Chrome AI phán xét...</span>${refreshBtn}</div><div class="insight-ai-body">${items}</div>`;
+
+  return `<div class="insight-ai-header"><span class="${badgeClass}">${_AI_ICON_SVG}${escHtml(badgeLabel)}</span><span class="insight-ai-title">${escHtml(titleText)}</span>${historyNav}${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text)}</div>`;
+}
+
+// Shell rendered immediately when streaming starts — body is populated progressively
+function renderAIInsightShell(cardId) {
+  const refreshBtn = cardId
+    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Xin quẻ mới" style="display:none">
+        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        <span style="white-space:nowrap">Xin quẻ mới</span>
+       </button>`
+    : '';
+  return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Đọc Vị</span><span class="insight-ai-title">Chrome AI đang phán...</span>${refreshBtn}</div><div class="insight-ai-body insight-ai-body--streaming"></div>`;
 }
 
 // Legacy category name map for backward compatibility with old dashboard URLs (format: { id, s, c })

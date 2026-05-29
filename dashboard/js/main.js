@@ -1018,47 +1018,41 @@ function setupDashboardRatingCard(d) {
         .filter(([, v]) => v > 0);
 
       const MONTH_NAMES_VN = [
-        "",
-        "Tháng 1",
-        "Tháng 2",
-        "Tháng 3",
-        "Tháng 4",
-        "Tháng 5",
-        "Tháng 6",
-        "Tháng 7",
-        "Tháng 8",
-        "Tháng 9",
-        "Tháng 10",
-        "Tháng 11",
-        "Tháng 12",
+        "", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
       ];
-      const monthBreakdown = monthEntries
-        .map(
-          ([m, v]) => `${MONTH_NAMES_VN[m] || "Tháng " + m}: ${fmtVND(v)}`,
-        )
-        .join(", ");
-      const activeMonths = monthEntries.length;
 
-      // Tính tháng chi nhiều tiền nhất trực tiếp bằng JS
-      let maxMonth = null;
-      let maxMonthVal = 0;
+      const monthBreakdown = monthEntries
+        .map(([m, v]) => `${MONTH_NAMES_VN[m] || "Tháng " + m}: ${fmtVND(v)}`)
+        .join(", ");
+
+      // Top 2 months and bottom month for richer context
+      const sortedByVal = [...monthEntries].sort((a, b) => b[1] - a[1]);
+      let maxMonth = null, maxMonthVal = 0, secondMaxMonthName = "";
+      let minMonth = null, minMonthVal = Infinity;
       for (const [m, v] of monthEntries) {
-        if (v > maxMonthVal) {
-          maxMonthVal = v;
-          maxMonth = m;
-        }
+        if (v > maxMonthVal) { maxMonthVal = v; maxMonth = m; }
+        if (v < minMonthVal) { minMonthVal = v; minMonth = m; }
+      }
+      if (sortedByVal.length >= 2) {
+        secondMaxMonthName = MONTH_NAMES_VN[sortedByVal[1][0]] || `Tháng ${sortedByVal[1][0]}`;
       }
       const maxMonthName = MONTH_NAMES_VN[maxMonth] || `Tháng ${maxMonth}`;
+      const minMonthName = minMonth ? (MONTH_NAMES_VN[minMonth] || `Tháng ${minMonth}`) : "";
 
       const contextLines = [
         `Năm ${yr}: tổng chi tiêu ${fmtVND(yearData.t || 0)} qua ${fmtNum(yearData.o || 0)} đơn hàng, trung bình mỗi đơn ${fmtVND(avgPerOrder)}.`,
         `Biến động các tháng: ${monthBreakdown || "không có dữ liệu"}.`,
-        `Tháng đỉnh điểm: ${maxMonthName} (chi tiêu nhiều nhất: ${fmtVND(maxMonthVal)}).`,
+        `Tháng đỉnh điểm: ${maxMonthName} (chi tiêu nhiều nhất trong năm).`,
+        secondMaxMonthName ? `Á quân chi tiêu: ${secondMaxMonthName}.` : "",
+        minMonthName && minMonthName !== maxMonthName ? `Tháng tiết kiệm nhất: ${minMonthName}.` : "",
       ];
 
       const specificPrompt = `Dữ liệu đầu vào:
       - Chi tiêu trong năm ${yr}.
       - Tháng chi nhiều tiền nhất: ${maxMonthName}.
+      ${secondMaxMonthName ? `- Tháng đứng thứ hai: ${secondMaxMonthName}.` : ""}
+      ${minMonthName && minMonthName !== maxMonthName ? `- Tháng chi ít nhất: ${minMonthName}.` : ""}
       
       Yêu cầu: Hãy phán một quẻ bói bóc phốt lý do tại sao khổ chủ lại chốt đơn điên cuồng vào ${maxMonthName}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
 
@@ -1067,6 +1061,7 @@ function setupDashboardRatingCard(d) {
         contextLines.filter(Boolean).join(" "),
         specificPrompt,
         `insight-monthly-${yr}`,
+        () => (typeof generateMonthlyPsychInsight === 'function' ? generateMonthlyPsychInsight(yearData.m || {}, Number(maxMonth)) : null),
       );
     }
     window.triggerMonthlyAIInsight = triggerMonthlyAIInsight;
@@ -1110,6 +1105,7 @@ function setupDashboardRatingCard(d) {
         context,
         specificPrompt,
         `insight-monthly-${year}-${monthStr}`,
+        () => (typeof generateMonthlyPsychInsight === 'function' ? generateMonthlyPsychInsight({}, Number(monthStr)) : null),
       );
     }
     window.triggerSingleMonthAIInsight = triggerSingleMonthAIInsight;
@@ -1118,32 +1114,41 @@ function setupDashboardRatingCard(d) {
       const totalSpend = d.t || 0;
       const totalOrders = d.o || 0;
       const totalSaved = d.s || 0;
-      const savePct = totalSpend > 0 ? Math.round((totalSaved / (totalSpend + totalSaved)) * 100) : 0;
 
       const yearEntries = Object.entries(d.yd || {})
         .sort((a, b) => Number(a[0]) - Number(b[0]))
         .filter(([, v]) => v.t > 0);
 
+      const activeYears = yearEntries.length;
+
+      // YoY growth rates for richer context
+      const yoyLines = [];
+      for (let i = 1; i < yearEntries.length; i++) {
+        const [prevY, prevV] = yearEntries[i - 1];
+        const [curY, curV] = yearEntries[i];
+        if (prevV.t > 0) {
+          const pct = Math.round(((curV.t - prevV.t) / prevV.t) * 100);
+          const dir = pct >= 0 ? `tăng ${pct}%` : `giảm ${Math.abs(pct)}%`;
+          yoyLines.push(`${prevY}→${curY}: ${dir}`);
+        }
+      }
+
       const yearlyBreakdown = yearEntries
         .map(([y, v]) => `Năm ${y} chi ${fmtVND(v.t)}`)
         .join(", ");
 
-      // Tìm năm chi nhiều tiền nhất và xu hướng
       let maxYear = null;
       let maxYearVal = 0;
       for (const [y, v] of yearEntries) {
-        if (v.t > maxYearVal) {
-          maxYearVal = v.t;
-          maxYear = y;
-        }
+        if (v.t > maxYearVal) { maxYearVal = v.t; maxYear = y; }
       }
 
       let trendText = "";
       if (yearEntries.length >= 2) {
-        const firstYear = yearEntries[0][0];
-        const lastYear = yearEntries[yearEntries.length - 1][0];
         const firstVal = yearEntries[0][1].t;
         const lastVal = yearEntries[yearEntries.length - 1][1].t;
+        const firstYear = yearEntries[0][0];
+        const lastYear = yearEntries[yearEntries.length - 1][0];
         if (lastVal > firstVal) {
           trendText = `Xu hướng chi tiêu ngày càng tăng vọt qua các năm từ ${firstYear} đến ${lastYear} (bị Shopee thao túng tâm lý ngày càng nặng nề).`;
         } else if (lastVal < firstVal) {
@@ -1153,23 +1158,32 @@ function setupDashboardRatingCard(d) {
         }
       }
 
-      const context = `Tổng quan chi tiêu trọn đời: tổng chi ${fmtVND(totalSpend)} qua ${fmtNum(totalOrders)} đơn.
-      Biến động qua các năm: ${yearlyBreakdown || "chưa có dữ liệu"}.
-      Năm đỉnh điểm phá ví: Năm ${maxYear || "chưa rõ"} (${fmtVND(maxYearVal)}).
-      ${trendText ? `Nhận định xu hướng: ${trendText}` : ""}`;
+      const contextLines = [
+        `Tổng quan chi tiêu trọn đời: tổng chi ${fmtVND(totalSpend)} qua ${fmtNum(totalOrders)} đơn trải dài ${activeYears} năm.`,
+        `Biến động qua các năm: ${yearlyBreakdown || "chưa có dữ liệu"}.`,
+        yoyLines.length ? `Tốc độ tăng/giảm YoY: ${yoyLines.join(", ")}.` : "",
+        `Năm đỉnh điểm phá ví: Năm ${maxYear || "chưa rõ"}.`,
+        trendText ? `Nhận định xu hướng: ${trendText}` : "",
+        totalSaved > 0 ? `Tổng tiết kiệm được nhờ voucher/giảm giá: ${fmtVND(totalSaved)}.` : "",
+      ].filter(Boolean);
+
+      const context = contextLines.join(" ");
 
       const specificPrompt = `Dữ liệu đầu vào:
-      - Chi tiêu trọn đời và biến động qua các năm.
+      - Chi tiêu trọn đời qua ${activeYears} năm trên Shopee.
       - Năm phá ví nhiều nhất: Năm ${maxYear}.
       ${trendText ? `- Xu hướng chi tiêu: ${trendText}` : ""}
+      ${yoyLines.length ? `- Tốc độ tăng trưởng: ${yoyLines.join(", ")}.` : ""}
       
-      Yêu cầu: Hãy phán một quẻ bói cuộc đời về duyên nợ chốt đơn của người dùng. Hãy đọc vị và bình luận dí dỏm về xu hướng chi tiêu qua các năm của họ (ví dụ: ngày càng bị lún sâu và thao túng tâm lý bởi vòng xoáy chốt đơn, hay đã dần giác ngộ và tiết chế hơn), đồng thời chỉ ra "kiếp nạn phá ví" lớn nhất của họ ở Năm ${maxYear}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số cụ thể nào.`;
+      Yêu cầu: Hãy phán một quẻ bói cuộc đời về duyên nợ chốt đơn của người dùng. Hãy đọc vị và bình luận dí dỏm về xu hướng chi tiêu qua các năm (ngày càng bị lún sâu hay đã giác ngộ?), đồng thời chỉ ra "kiếp nạn phá ví" lớn nhất. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số cụ thể nào.`;
 
       enrichWithAI(
         "insight-yearly",
         context,
         specificPrompt,
-        "insight-yearly-all"
+        "insight-yearly-all",
+        () => (typeof generateYearlyPsychInsight === 'function' ? generateYearlyPsychInsight(d.yd || {}, maxYear) : null),
+        true // auto-run when AI becomes available and no cache
       );
     }
     window.triggerYearlyAIInsight = triggerYearlyAIInsight;
@@ -1257,6 +1271,17 @@ function setupDashboardRatingCard(d) {
       );
       if (!filteredCs.length) return;
       const analyzedTotal = cs.reduce((sum, c) => sum + c.s, 0) || total || 1;
+
+      // Herfindahl-Hirschman Index (HHI) — measures category concentration (0–10000)
+      const hhi = Math.round(
+        filteredCs.reduce((sum, c) => {
+          const pct = (c.s / analyzedTotal) * 100;
+          return sum + pct * pct;
+        }, 0)
+      );
+      const concentrationDesc = hhi > 5000 ? "rất tập trung vào một vài danh mục" :
+        hhi > 2500 ? "tương đối tập trung" : "phân tán đa dạng";
+
       const catLines = filteredCs
         .map((c) => {
           const pct = Math.round((c.s / analyzedTotal) * 100);
@@ -1264,18 +1289,26 @@ function setupDashboardRatingCard(d) {
         })
         .join("; ");
 
-      // Xác định danh mục chi tiêu nhiều nhất bằng JS
       const topCategory = filteredCs[0];
       const topPct = Math.round((topCategory.s / analyzedTotal) * 100);
+      const numCats = filteredCs.length;
+
+      const context = [
+        `Phân bổ chi tiêu theo danh mục (${periodText}): ${catLines}.`,
+        `Tổng cộng ${numCats} danh mục, mức độ tập trung: ${concentrationDesc} (chỉ số HHI: ${hhi}).`,
+        `Danh mục đứng đầu "${topCategory.name}" chiếm ${topPct}% tổng chi.`,
+      ].join(" ");
 
       enrichWithAI(
         "insight-categories",
-        `Phân bổ chi tiêu theo danh mục (${periodText}): ${catLines}.`,
+        context,
         `Dữ liệu đầu vào:
-        - Danh mục chi tiêu nhiều nhất: "${topCategory.name}".
+        - Danh mục chi tiêu nhiều nhất: "${topCategory.name}" (${topPct}% tổng chi).
+        - Portfolio mua sắm: ${numCats} danh mục, ${concentrationDesc}.
         
-        Yêu cầu: Hãy phán xem hệ tâm linh ("hệ chữa lành", "hệ công nghệ", "hệ đẹp đẽ"...) của người dùng là gì dựa trên danh mục đầu bảng "${topCategory.name}" này. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`,
+        Yêu cầu: Hãy phán xem hệ tâm linh ("hệ chữa lành", "hệ công nghệ", "hệ đẹp đẽ"...) của người dùng là gì dựa trên danh mục đầu bảng và mức độ đa dạng chi tiêu. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`,
         cacheKey,
+        () => (typeof generateCategoryPsychInsight === 'function' ? generateCategoryPsychInsight(topCategory.name, topCategory) : null),
       );
     }
     window.triggerCategoryAIInsight = triggerCategoryAIInsight;
@@ -1314,6 +1347,7 @@ function setupDashboardRatingCard(d) {
         context,
         specificPrompt,
         `insight-categories-${year}-${catName}`,
+        () => (typeof generateCategoryPsychInsight === 'function' ? generateCategoryPsychInsight(catName, categoryStats) : null),
       );
     }
     window.triggerSingleCategoryAIInsight = triggerSingleCategoryAIInsight;
@@ -1521,13 +1555,38 @@ function setupDashboardRatingCard(d) {
       // 2. Items AI insight
       const top10 = (d.ti || []).slice(0, 10);
       const itemNames = top10.map((i) => `"${i.n}"`).join(", ");
+      const totalUniqueItems = (d.ti || []).length;
+      // Group top items by category for richer context
+      const catCounts = {};
+      for (const item of top10) {
+        const cat = (item.cat && item.cat !== '🏷️ Khác' && item.cat !== 'Khác') ? item.cat : null;
+        if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+      }
+      const catSummary = Object.entries(catCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([cat, n]) => `${cat} (${n} sản phẩm)`)
+        .join(", ");
+
+      const itemsContext = [
+        `Sản phẩm mua nhiều nhất: ${itemNames}.`,
+        totalUniqueItems > 10 ? `Tổng cộng ${totalUniqueItems} sản phẩm unique trong lịch sử mua.` : "",
+        catSummary ? `Phân loại top sản phẩm: ${catSummary}.` : "",
+      ].filter(Boolean).join(" ");
+
       enrichWithAI(
         "insight-items",
-        `Sản phẩm mua nhiều nhất: ${itemNames}.`,
+        itemsContext,
         `Dữ liệu đầu vào:
-        - Danh sách sản phẩm mua nhiều nhất: ${itemNames}.
+        - Danh sách sản phẩm mua nhiều nhất.
+        ${catSummary ? `- Nhóm danh mục nổi bật: ${catSummary}.` : ""}
+        ${totalUniqueItems > 10 ? `- Tổng số sản phẩm unique: ${totalUniqueItems}.` : ""}
         
         Yêu cầu: Dựa vào những món đồ "ruột" này, hãy bóc phốt tính cách, lối sống và "kiếp nạn" mua sắm của khổ chủ dưới phong thái của một thầy bói vui tính. Tuyệt đối tuân thủ quy tắc không liệt kê lại tên sản phẩm hay con số cụ thể nào trong câu phán.`,
+        undefined,
+        () => (typeof generatePsychologicalInsight === 'function'
+          ? generatePsychologicalInsight({ categories: d.cs || [], totalSpend: d.t || 0, totalOrders: d.o || 0, totalSaved: d.s || 0 })
+          : null),
       );
 
       // 3. Categories AI insight — only for 'all' view; year-specific handled by switchCategoryYear

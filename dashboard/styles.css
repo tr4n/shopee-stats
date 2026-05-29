@@ -1157,6 +1157,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  animation: ai-fadeInUp 0.3s ease both;
 }
 
 .insight-ai-sentence {
@@ -1200,6 +1201,7 @@ body {
   letter-spacing: 0.3px;
   transition: opacity 0.2s, transform 0.15s;
   white-space: nowrap;
+  animation: ai-pulse-once 1.2s ease 2s forwards;
 }
 
 .ai-analyze-btn:hover {
@@ -1227,6 +1229,96 @@ body {
   color: var(--blue, #4a90d9);
   text-decoration: underline;
   margin-left: 4px;
+}
+
+/* ── AI body fade-in animation ───────────────── */
+@keyframes ai-fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Streaming body — no initial animation, grows progressively */
+.insight-ai-body--streaming {
+  animation: none;
+  min-height: 24px;
+}
+
+/* Pulse attention cue on analyze button — runs once after 2s */
+@keyframes ai-pulse-once {
+  0%   { box-shadow: 0 0 0 0 rgba(38, 170, 153, 0.5); }
+  60%  { box-shadow: 0 0 0 8px rgba(38, 170, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(38, 170, 153, 0); }
+}
+
+/* ── Rule-based fallback badge ───────────────── */
+.insight-ai-badge--local {
+  background: linear-gradient(135deg, #7c6aad, #a06fc7);
+}
+
+/* ── Insight history navigation ──────────────── */
+.ai-history-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.ai-history-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: rgba(38, 170, 153, 0.08);
+  border: 1px solid rgba(38, 170, 153, 0.2);
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--green);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  padding: 0;
+}
+
+.ai-history-btn:hover:not(:disabled) {
+  background: rgba(38, 170, 153, 0.18);
+  transform: scale(1.1);
+}
+
+.ai-history-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.ai-history-indicator {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ── Copy insight button ─────────────────────── */
+.ai-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid rgba(38, 170, 153, 0.15);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.ai-copy-btn:hover {
+  color: var(--green);
+  border-color: rgba(38, 170, 153, 0.35);
+  background: rgba(38, 170, 153, 0.07);
 }
 
 /* ── Support nav divider ─────────────────────── */
