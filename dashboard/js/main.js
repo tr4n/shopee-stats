@@ -462,9 +462,9 @@ function setupSupportButton(d) {
         contactEl.value = "";
         contactEl.disabled = false;
       }
-      typeButtons.forEach((b, idx) => {
+      typeButtons.forEach((b) => {
         b.disabled = false;
-        if (idx === 0) b.classList.add("active");
+        if (b.getAttribute("data-type") === "suggestion") b.classList.add("active");
         else b.classList.remove("active");
       });
       if (statusEl) {
