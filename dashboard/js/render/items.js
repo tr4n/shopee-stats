@@ -311,7 +311,7 @@ function initItemsEvents() {
       } else {
         const days = parseInt(range, 10);
         const maxTs = parseInt(dateMax.max, 10);
-        const minTs = maxTs - (days * 24 * 60 * 60 * 1000);
+        const minTs = maxTs - (days * 24 * 60 * 60);
         dateMin.value = Math.max(minTs, parseInt(dateMin.min, 10));
         dateMax.value = maxTs;
       }
