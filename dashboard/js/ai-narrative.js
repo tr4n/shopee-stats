@@ -561,7 +561,7 @@ async function _executeAIInsight(cardId) {
       }
 
       const finalText = resultText ? resultText.trim() : '';
-      if (finalText) {
+      if (finalText && /\p{L}/u.test(finalText)) {
         _saveInsightText(ck, finalText);
         narrativeEl.classList.add('ai-narrative--appear');
         const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
@@ -587,7 +587,7 @@ async function _executeAIInsight(cardId) {
         aiEl.classList.remove('loading');
       }
 
-      if (resultText && resultText.trim()) {
+      if (resultText && resultText.trim() && /\p{L}/u.test(resultText)) {
         const text = resultText.trim();
         _saveInsightText(ck, text);
         aiEl.innerHTML = renderAIInsight(text, cardId, null);

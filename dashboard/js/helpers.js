@@ -111,8 +111,15 @@ function renderSentencesHTML(text) {
   const sentences = text
     .split(/\n+/)
     .flatMap(p => p.split(/(?<=[.!?])\s+/))
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .map(s => {
+      let cleaned = s.trim();
+      // Remove leading list markdown elements like *, -, •, +
+      cleaned = cleaned.replace(/^[\*\-\+•]\s*/, '');
+      // Remove leading "Nhận xét:" or "AI nhận xét:" or similar prefixes
+      cleaned = cleaned.replace(/^(Nhận xét|AI nhận xét|Nhận xét AI|Kết quả)\s*:\s*/i, '');
+      return cleaned.trim();
+    })
+    .filter(s => s.length > 0 && /\p{L}|\d/u.test(s));
   return sentences.map(s =>
     `<div class="insight-ai-sentence"><span class="ai-bullet">•</span><span>${parseBold(s)}</span></div>`
   ).join('');
