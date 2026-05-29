@@ -46,8 +46,22 @@ function saveDataToStorage(d) {
 }
 window.saveDataToStorage = saveDataToStorage;
 
-function cleanupStorage(currentId) {
+function cleanupStorage(currentId, extVersion) {
   try {
+    if (extVersion) {
+      const lastVersion = localStorage.getItem("shopee_last_ext_version");
+      if (lastVersion && lastVersion !== extVersion) {
+        console.log(`[Dashboard] Version changed from ${lastVersion} to ${extVersion}. Clearing cache.`);
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith(DASH_DATA_PREFIX) || key.startsWith("shopee_insight_cache_") || key === "shopee_insight_cache")) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+      localStorage.setItem("shopee_last_ext_version", extVersion);
+    }
+
     const dashDataKeys = [];
     const cacheKeys = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -68,7 +82,7 @@ function cleanupStorage(currentId) {
     const keptTimestamps = [];
     const now = Date.now();
     for (const item of dashDataKeys) {
-      if (now - item.ts > 24 * 3600 * 1000) {
+      if (now - item.ts > 3 * 24 * 3600 * 1000) { // 3 days
         localStorage.removeItem(item.key);
         console.log(`[Dashboard] Cleaned up expired dashboard data: ${item.key}`);
         continue;
@@ -104,7 +118,7 @@ function parseData() {
     const id = params.get("id");
     if (id) {
       const ts = parseInt(id, 10);
-      if (!isNaN(ts) && Date.now() - ts > 24 * 3600 * 1000) {
+      if (!isNaN(ts) && Date.now() - ts > 3 * 24 * 3600 * 1000) { // 3 days
         localStorage.removeItem(DASH_DATA_PREFIX + id);
         console.log("[Dashboard] Removed expired dashboard data:", id);
         return null;
@@ -936,7 +950,7 @@ function setupDashboardRatingCard(d) {
     renderNoData();
     setupSupportButton(null);
   } else {
-    cleanupStorage(getSessionId());
+    cleanupStorage(getSessionId(), d.ev);
     _dashCache = loadDashCache(d.ts, d.ev || '');
 
     let _categorizationFinished = false;
