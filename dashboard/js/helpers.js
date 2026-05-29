@@ -95,9 +95,9 @@ function renderAnalyzeButton(cardId) {
         <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
         <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
       </svg>
-      Phân tích tính cách
+      TÍNH CÁCH
     </button>
-    <span class="ai-analyze-hint">Chrome AI phân tích tâm lý mua sắm của bạn</span>
+    <span class="ai-analyze-hint">Khám phá tính cách mua sắm của bạn nhé!</span>
   </div>`;
 }
 
@@ -152,11 +152,10 @@ function renderAIInsight(text, cardId, profile) {
     : '';
 
   const traitsHtml = (profile.traits && profile.traits.length > 0)
-    ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${
-        profile.traits.map(t =>
-          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.description || (t.label + ' · ' + t.evidence))}</span></div>`
-        ).join('')
-      }</div>`
+    ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${profile.traits.map(t =>
+      `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.description || (t.label + ' · ' + t.evidence))}</span></div>`
+    ).join('')
+    }</div>`
     : '';
 
   const narrativeHtml = (text && text.trim())
@@ -180,11 +179,10 @@ function renderCompactProfile(profile) {
   const archetypeHtml = `<div class="ai-archetype ai-archetype--compact"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`;
 
   const traitsHtml = (profile.traits && profile.traits.length > 0)
-    ? `<div class="ai-traits ai-traits--compact">${
-        profile.traits.slice(0, 2).map(t =>
-          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
-        ).join('')
-      }</div>`
+    ? `<div class="ai-traits ai-traits--compact">${profile.traits.slice(0, 2).map(t =>
+      `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
+    ).join('')
+    }</div>`
     : '';
 
   return `<div class="insight-ai-header insight-ai-header--compact"><span class="insight-ai-badge insight-ai-badge--rule">${_AI_ICON_SVG}Tính cách</span></div>${archetypeHtml}${traitsHtml}`;
@@ -221,20 +219,20 @@ const LEGACY_CAT_NAMES = {
 function resolveCatLabel(c) {
   const nameOrId = c.name || c.id;
   if (!nameOrId) return 'Khác';
-  
+
   if (typeof getDashCatCodes === 'function') {
     const codes = getDashCatCodes();
     if (codes[nameOrId]) return codes[nameOrId];
   }
-  
+
   if (LEGACY_CAT_NAMES[nameOrId]) {
     return LEGACY_CAT_NAMES[nameOrId];
   }
-  
+
   if (!isNaN(Number(nameOrId))) {
     return 'Danh mục #' + nameOrId;
   }
-  
+
   return nameOrId;
 }
 
@@ -404,7 +402,7 @@ const SPECIAL_CHAR_REGEX = /[\u0370-\u03FF\u0400-\u04FF\u13A0-\u13FF\u200B-\u200
 
 function cleanHomoglyphsAndFonts(text) {
   if (!text) return '';
-  
+
   // Fast path: if the text doesn't contain any target bypass characters, skip normalization & translation entirely.
   // This is a major optimization for Vietnamese text because normalize("NFKD") decomposes accents,
   // which takes significant CPU time when done on thousands of items.
