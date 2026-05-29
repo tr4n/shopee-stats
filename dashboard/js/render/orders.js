@@ -920,38 +920,9 @@ function renderSalesInsights(stats) {
     window._lastCategories = topCategories;
   }
 
-  if (typeof enrichWithAI === 'function') {
-    const topCatName = topCategories[0]?.name || 'chưa rõ';
-    const saleBehavior = salePct >= 70 ? "nghiện sale nặng" :
-      salePct >= 40 ? "thường xuyên săn sale" :
-      salePct >= 20 ? "thỉnh thoảng săn sale" : "ít khi chốt đơn vào sale";
-    const context = [
-      `Thống kê săn sale (${ordersActiveYear === 'all' ? 'toàn bộ thời gian' : 'năm ' + ordersActiveYear}):`,
-      `${salePct}% chi tiêu vào ngày sale (đánh giá: ${saleBehavior}).`,
-      `Tổng số đơn trong kỳ: ${totalOrders}.`,
-      `Danh mục săn nhiều nhất: "${topCatName}".`,
-    ].join(" ");
-
-    const specificPrompt = `Dữ liệu đầu vào:
-    - Hành vi săn sale: ${saleBehavior}, danh mục ưa thích "${topCatName}".
-
-    Yêu cầu: Phán một quẻ bói vui về "kiếp nạn" săn sale của khổ chủ — thói quen canh giờ, tâm lý FOMO, hay kỷ luật tài chính. Tuyệt đối không ghi số tiền hay con số cụ thể.`;
-
-    enrichWithAI(
-      'insight-sales',
-      context,
-      specificPrompt,
-      `insight-sales-${ordersActiveYear}`,
-      () => {
-        if (typeof SHOPPING_PSYCHOLOGY_PATTERNS !== 'undefined') {
-          const pattern = SHOPPING_PSYCHOLOGY_PATTERNS.bargainHunter;
-          if (pattern && pattern.insights && pattern.insights.length) {
-            return pattern.insights[Math.floor(Math.random() * pattern.insights.length)];
-          }
-        }
-        return null;
-      }
-    );
+  // Sales section shows rule-based compact profile only (no AI)
+  if (typeof showProfileInsight === 'function') {
+    showProfileInsight('insight-sales', window._globalPersonalityProfile, 'sales');
   }
 }
 

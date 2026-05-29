@@ -701,17 +701,17 @@ window.copyAIInsight = function (cardId) {
 };
 
 // ═══════════════════════════════════════════════
-//   PERSONALITY ANALYSIS ENGINE (rule-based)
+//   PERSONALITY ANALYSIS ENGINE v2 (rule-based)
 // ═══════════════════════════════════════════════
 
-// 2.1 Temporal patterns from order list
+// 2.1 Enhanced temporal patterns from order list
 function computeTemporalPatterns(ol) {
   if (!ol || !ol.length) {
-    return { nightPct: 0, weekendPct: 0, lunchPct: 0, peakHour: null, totalOrders: 0 };
+    return { nightPct: 0, weekendPct: 0, lunchPct: 0, morningPct: 0, paydayPct: 0, peakHour: null, totalOrders: 0 };
   }
   const hourCounts = new Array(24).fill(0);
   const dowCounts = new Array(7).fill(0);
-  let valid = 0;
+  let valid = 0, nightCount = 0, lunchCount = 0, morningCount = 0, paydayCount = 0;
 
   for (const o of ol) {
     const ts = o.ot || o.t;
@@ -719,16 +719,17 @@ function computeTemporalPatterns(ol) {
     const p = toVnParts(ts);
     hourCounts[p.hour]++;
     dowCounts[p.weekday]++;
+    if (p.hour >= 22 || p.hour < 3) nightCount++;
+    if (p.hour >= 11 && p.hour < 14) lunchCount++;
+    if (p.hour >= 8 && p.hour < 12) morningCount++;
+    // Payday: 1-3 và 15-17 tháng (phát lương đầu & giữa tháng ở VN)
+    if ((p.day >= 1 && p.day <= 3) || (p.day >= 15 && p.day <= 17)) paydayCount++;
     valid++;
   }
 
-  if (valid === 0) return { nightPct: 0, weekendPct: 0, lunchPct: 0, peakHour: null, totalOrders: 0 };
+  if (valid === 0) return { nightPct: 0, weekendPct: 0, lunchPct: 0, morningPct: 0, paydayPct: 0, peakHour: null, totalOrders: 0 };
 
-  const nightCount = hourCounts.slice(22).reduce((a, b) => a + b, 0)
-    + hourCounts.slice(0, 3).reduce((a, b) => a + b, 0);
-  const weekendCount = dowCounts[0] + dowCounts[6]; // Sun=0, Sat=6
-  const lunchCount = hourCounts.slice(11, 14).reduce((a, b) => a + b, 0);
-
+  const weekendCount = dowCounts[0] + dowCounts[6]; // CN=0, T7=6
   let peakHour = 0;
   for (let h = 1; h < 24; h++) {
     if (hourCounts[h] > hourCounts[peakHour]) peakHour = h;
@@ -738,6 +739,8 @@ function computeTemporalPatterns(ol) {
     nightPct: nightCount / valid,
     weekendPct: weekendCount / valid,
     lunchPct: lunchCount / valid,
+    morningPct: morningCount / valid,
+    paydayPct: paydayCount / valid,
     peakHour,
     totalOrders: valid
   };
@@ -746,11 +749,8 @@ function computeTemporalPatterns(ol) {
 // 2.2 Sale behavior stats (prefer d.oss pre-aggregated, fallback to ol)
 function computeSaleStats(d) {
   const result = {
-    totalSpend: 0,
-    saleSpend: 0,
-    totalOrders: d.o || 0,
-    midnightOrders: 0,
-    saleOrders: 0
+    totalSpend: 0, saleSpend: 0,
+    totalOrders: d.o || 0, saleOrders: 0, midnightOrders: 0
   };
 
   if (window._oss) {
@@ -759,149 +759,176 @@ function computeSaleStats(d) {
       for (const type of ['double', 'mid', 'end', 'regular']) {
         const e = window._oss[yr]?.[type];
         if (!e) continue;
-        const spend = e[0] || 0;
-        const orders = e[2] || 0;
-        const midnight = e[3] || 0;
-        result.totalSpend += spend;
-        result.totalOrders = Math.max(result.totalOrders, 0);
-        result.midnightOrders += midnight;
-        if (type !== 'regular') {
-          result.saleSpend += spend;
-          result.saleOrders += orders;
-        }
+        result.totalSpend += e[0] || 0;
+        result.midnightOrders += e[3] || 0;
+        if (type !== 'regular') { result.saleSpend += e[0] || 0; result.saleOrders += e[2] || 0; }
       }
     }
     if (!result.totalSpend) result.totalSpend = d.t || 0;
   } else {
     result.totalSpend = d.t || 0;
-    const ol = d.ol || [];
-    for (const o of ol) {
+    for (const o of (d.ol || [])) {
       if (!o.t || !o.f) continue;
       const p = toVnParts(o.t);
-      const day = p.day;
-      const mon = p.month;
-      const isDouble = day === mon;
-      const isMid = day === 15 || day === 16;
-      const isEnd = day >= 25 || day <= 1;
-      if (isDouble || isMid || isEnd) {
-        result.saleSpend += o.f;
-        result.saleOrders++;
-      }
+      const isDouble = p.day === p.month;
+      const isMid = p.day === 15 || p.day === 16;
+      const isEnd = p.day >= 25 || p.day <= 1;
+      if (isDouble || isMid || isEnd) { result.saleSpend += o.f; result.saleOrders++; }
       if (p.hour < 2) result.midnightOrders++;
     }
   }
-
   return result;
 }
 
-// 2.3a Monthly spending variance (Coefficient of Variation)
+// 2.3a Monthly spending variance + binge detection
 function computeSpendingVariance(yd) {
-  if (!yd) return { cv: 0, isVolatile: false, isConsistent: true };
+  if (!yd) return { cv: 0, isVolatile: false, isConsistent: true, isBinge: false };
   const values = [];
-  for (const yr of Object.values(yd)) {
-    if (!yr.m) continue;
-    for (const v of Object.values(yr.m)) {
-      if (v > 0) values.push(v);
+  // Also collect entries by (year, month) for binge detection
+  const monthEntries = []; // [{yr, mn, val}]
+  for (const [yr, ydata] of Object.entries(yd)) {
+    if (!ydata.m) continue;
+    for (const [mn, v] of Object.entries(ydata.m)) {
+      if (v > 0) { values.push(v); monthEntries.push({ yr: Number(yr), mn: Number(mn), val: v }); }
     }
   }
-  if (values.length < 3) return { cv: 0, isVolatile: false, isConsistent: true };
+  if (values.length < 3) return { cv: 0, isVolatile: false, isConsistent: true, isBinge: false };
+
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
-  const stdDev = Math.sqrt(variance);
+  const stdDev = Math.sqrt(values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length);
   const cv = mean > 0 ? stdDev / mean : 0;
+  const maxVal = Math.max(...values);
+  const minVal = Math.min(...values);
+
+  // Find binge month (month where spend > 2.5x mean)
+  const bingePeak = monthEntries.find(e => e.val >= mean * 2.5);
+  const isBinge = maxVal >= mean * 3;
+
   return {
     cv,
     isVolatile: cv > 0.6,
     isConsistent: cv < 0.3,
-    maxVal: Math.max(...values),
-    mean
+    maxVal, minVal, mean,
+    isBinge,
+    bingeMonth: bingePeak?.mn || null,
+    bingeYear: bingePeak?.yr || null,
   };
 }
 
-// 2.3b Year-over-year spending trend
+// 2.3b Year-over-year trend (with percentage change)
 function computeYoYTrend(yd) {
   if (!yd) return { isGrowing: false, isReformed: false };
   const entries = Object.entries(yd)
-    .map(([y, v]) => [Number(y), v.t || 0])
-    .filter(([, t]) => t > 0)
+    .map(([y, v]) => [Number(y), v.t || 0]).filter(([, t]) => t > 0)
     .sort((a, b) => a[0] - b[0]);
   if (entries.length < 2) return { isGrowing: false, isReformed: false };
-  const firstVal = entries[0][1];
-  const lastVal = entries[entries.length - 1][1];
+  const [firstYear, firstVal] = entries[0];
+  const [lastYear, lastVal] = entries[entries.length - 1];
+  const pctChange = firstVal > 0 ? Math.round(((lastVal - firstVal) / firstVal) * 100) : 0;
   return {
     isGrowing: lastVal > firstVal * 1.3,
     isReformed: lastVal < firstVal * 0.7,
-    firstVal,
-    lastVal,
-    firstYear: entries[0][0],
-    lastYear: entries[entries.length - 1][0]
+    firstVal, lastVal, firstYear, lastYear, pctChange
   };
 }
 
-// 2.4 Archetype definitions (priority order for resolveArchetype)
-const PERSONALITY_ARCHETYPES = [
-  { key: 'reformed_spender',  label: 'Người Đang Tỉnh Ngộ',      icon: '🌱', triggers: ['reformed_spender'] },
-  { key: 'night_owl',         label: 'Tín Đồ Mua Khuya',          icon: '🦉', triggers: ['night_owl', 'fashionLateNight'] },
-  { key: 'premium_buyer',     label: 'Người Mua Chọn Lọc',        icon: '💎', triggers: ['premium_buyer'] },
-  { key: 'volatile_spender',  label: 'Người Mua Sắm Cảm Xúc',    icon: '🌊', triggers: ['volatile_spender', 'binge_buyer'] },
-  { key: 'growing_spender',   label: 'Người Đang "Bị Cuốn"',      icon: '📈', triggers: ['growing_spender'] },
-  { key: 'bargainHunter',     label: 'Chiến Thần Săn Sale',        icon: '🎯', triggers: ['sale_focused', 'high_savings_rate'] },
-  { key: 'year_end_spiker',   label: 'Người Mua Theo Mùa',        icon: '🎄', triggers: ['year_end_spiker', 'tet_buyer'] },
-  { key: 'techUpgrade',       label: 'Nhà Đầu Tư Hiệu Suất',      icon: '💻', triggers: ['tech_dominant'] },
-  { key: 'beautyTherapy',     label: 'Người Tự Yêu Thương',       icon: '✨', triggers: ['beauty_dominant'] },
-  { key: 'fashionLateNight',  label: 'Người Chữa Lành Cảm Xúc',  icon: '🌙', triggers: ['fashion_dominant'] },
-  { key: 'homeMaker',         label: 'Người Tạo Tổ Ấm',           icon: '🏡', triggers: ['home_dominant'] },
-  { key: 'foodComfort',       label: 'Người Ăn Để Sống Vui',       icon: '🍜', triggers: ['food_dominant'] },
-  { key: 'impulseBuyer',      label: 'Người Chốt Đơn Tự Do',      icon: '⚡', triggers: ['high_frequency', 'low_planning'] },
-  { key: 'default',           label: 'Người Khám Phá Đa Dạng',    icon: '🛍️', triggers: [] }
-];
+// 2.4 Archetype definitions with scoring weights
+const ARCHETYPE_DEFINITIONS = {
+  reformed:        { key: 'reformed',        label: 'Người Đang Tỉnh Ngộ',        icon: '🌱', w: { reformed_spender: 8 } },
+  night_owl:       { key: 'night_owl',       label: 'Tín Đồ Mua Khuya',            icon: '🦉', w: { night_owl: 5, late_night_shopping: 3, fashion_dominant: 1 } },
+  fashion_healer:  { key: 'fashion_healer',  label: 'Người Chữa Lành Cảm Xúc',    icon: '🌙', w: { fashion_dominant: 5, fashionLateNight: 4, night_owl: 2 } },
+  bargain_hunter:  { key: 'bargain_hunter',  label: 'Chiến Thần Săn Sale',          icon: '🎯', w: { sale_focused: 5, sale_only_buyer: 4, high_savings_rate: 3, weekend_shopper: 1 } },
+  emotional:       { key: 'emotional',       label: 'Người Mua Sắm Cảm Xúc',      icon: '🌊', w: { volatile_spender: 5, binge_buyer: 3, impulseBuyer: 2, diverse_categories: 1 } },
+  premium_curator: { key: 'premium_curator', label: 'Người Mua Chọn Lọc',          icon: '💎', w: { premium_buyer: 5, selective_luxury: 5, full_price_loyal: 3, high_avg_value: 2 } },
+  rising_addict:   { key: 'rising_addict',   label: 'Người Đang "Bị Cuốn"',        icon: '📈', w: { growing_spender: 6, high_frequency: 2 } },
+  morning_planner: { key: 'morning_planner', label: 'Người Mua Có Kế Hoạch',       icon: '📋', w: { morning_planner: 4, payday_buyer: 4, consistent_spender: 3, full_price_loyal: 2 } },
+  seasonal:        { key: 'seasonal',        label: 'Người Mua Theo Mùa',           icon: '🎄', w: { year_end_spiker: 5, tet_buyer: 5, summer_binge: 4 } },
+  beauty_selfcare: { key: 'beauty_selfcare', label: 'Người Tự Yêu Thương',         icon: '✨', w: { beauty_dominant: 5, self_care_priority: 5, beautyTherapy: 3 } },
+  tech_optimizer:  { key: 'tech_optimizer',  label: 'Nhà Đầu Tư Hiệu Suất',        icon: '💻', w: { tech_dominant: 6, techUpgrade: 3, high_avg_value: 1 } },
+  home_nester:     { key: 'home_nester',     label: 'Người Tạo Tổ Ấm',             icon: '🏡', w: { home_dominant: 6, homeMaker: 4, consistent_spending: 1 } },
+  food_lover:      { key: 'food_lover',      label: 'Người Sống Để Ăn Ngon',        icon: '🍜', w: { food_dominant: 6, foodComfort: 4, comfort_spending: 2 } },
+  family_center:   { key: 'family_center',   label: 'Người Mua Vì Gia Đình',        icon: '👨‍👩‍👧', w: { family_buyer: 8 } },
+  free_spirit:     { key: 'free_spirit',     label: 'Người Khám Phá Đa Dạng',      icon: '🛍️', w: { diverse_categories: 3, low_planning: 2, high_frequency: 1 } },
+};
 
+// Scoring-based archetype resolution — highest score wins
 function resolveArchetype(triggers) {
-  for (const arch of PERSONALITY_ARCHETYPES) {
-    if (arch.triggers.length === 0) return arch; // default
-    if (arch.triggers.some(t => triggers.includes(t))) return arch;
+  const triggerSet = new Set(triggers);
+  let best = ARCHETYPE_DEFINITIONS.free_spirit, bestScore = 0;
+  for (const archDef of Object.values(ARCHETYPE_DEFINITIONS)) {
+    let score = 0;
+    for (const [trigger, weight] of Object.entries(archDef.w)) {
+      if (triggerSet.has(trigger)) score += weight;
+    }
+    if (score > bestScore) { bestScore = score; best = archDef; }
   }
-  return PERSONALITY_ARCHETYPES[PERSONALITY_ARCHETYPES.length - 1];
+  return { key: best.key, label: best.label, icon: best.icon };
 }
 
-// 2.5 Trait builders — each returns { label, evidence, icon } or null
+// 2.5 Trait builders — concrete evidence with real numbers
 const TRAIT_BUILDERS = {
   night_owl: (d) => {
     const pct = Math.round((d.temporal?.nightPct || 0) * 100);
     if (pct < 10) return null;
-    return { label: 'Hay mua khuya', evidence: `${pct}% đơn sau 22h`, icon: '🌙' };
+    return { label: 'Hay mua khuya', evidence: `${pct}% đơn đặt sau 22h`, icon: '🌙' };
+  },
+  payday_buyer: (d) => {
+    const pct = Math.round((d.temporal?.paydayPct || 0) * 100);
+    if (pct < 28) return null;
+    return { label: 'Mua nhiều đầu/giữa tháng', evidence: `${pct}% đơn ngày 1–3 & 15–17`, icon: '💸' };
+  },
+  morning_planner: (d) => {
+    const pct = Math.round((d.temporal?.morningPct || 0) * 100);
+    if (pct < 28) return null;
+    return { label: 'Mua buổi sáng', evidence: `${pct}% đơn đặt 8h–12h`, icon: '☀️' };
   },
   weekend_shopper: (d) => {
     const pct = Math.round((d.temporal?.weekendPct || 0) * 100);
     if (pct < 30) return null;
-    return { label: 'Nghiện mua cuối tuần', evidence: `${pct}% đơn thứ 7–CN`, icon: '📅' };
+    return { label: 'Cuối tuần hay mua sắm', evidence: `${pct}% đơn thứ 7–CN`, icon: '📅' };
   },
   lunch_shopper: (d) => {
     const pct = Math.round((d.temporal?.lunchPct || 0) * 100);
     if (pct < 15) return null;
-    return { label: 'Hay mua lúc trưa', evidence: `${pct}% đơn giờ nghỉ trưa`, icon: '🕐' };
+    return { label: 'Mua giờ nghỉ trưa', evidence: `${pct}% đơn 11h–14h`, icon: '🍱' };
   },
   sale_focused: (d) => {
-    const saleSpend = d.saleStats?.saleSpend || 0;
-    const total = d.saleStats?.totalSpend || 0;
-    if (!total) return null;
-    const pct = Math.round((saleSpend / total) * 100);
+    const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
     if (pct < 30) return null;
     return { label: 'Thích săn sale', evidence: `${pct}% chi vào ngày khuyến mãi`, icon: '🎯' };
   },
+  sale_only_buyer: (d) => {
+    const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
+    if (pct < 75) return null;
+    return { label: 'Chỉ mua khi có sale', evidence: `${pct}% chi vào ngày sale`, icon: '🔥' };
+  },
+  full_price_loyal: (d) => {
+    const pct = Math.round(((d.saleStats?.saleSpend || 0) / Math.max(d.saleStats?.totalSpend || 1, 1)) * 100);
+    if (pct > 25 || (d.totalOrders || 0) < 8) return null;
+    return { label: 'Không phụ thuộc vào sale', evidence: `Chỉ ${pct}% chi vào ngày giảm giá`, icon: '🛡️' };
+  },
   volatile_spender: (d) => {
-    const cv = d.variance?.cv || 0;
     if (!d.variance?.isVolatile) return null;
-    return { label: 'Chi tiêu không đều', evidence: `Biến động ${cv.toFixed(1)}x theo tháng`, icon: '📊' };
+    const minStr = fmtVND(d.variance.minVal || 0);
+    const maxStr = fmtVND(d.variance.maxVal || 0);
+    return { label: 'Chi tiêu không đều', evidence: `Từ ${minStr} đến ${maxStr}/tháng`, icon: '📊' };
   },
   consistent_spender: (d) => {
     if (!d.variance?.isConsistent) return null;
-    return { label: 'Chi tiêu ổn định', evidence: 'Đều đặn qua các tháng', icon: '📐' };
+    const avgStr = fmtVND(d.variance.mean || 0);
+    return { label: 'Chi tiêu đều đặn', evidence: `Ổn định ~${avgStr}/tháng`, icon: '📐' };
+  },
+  binge_then_quiet: (d) => {
+    if (!d.variance?.isBinge) return null;
+    const MONTHS_VN = ['', 'T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+    const mn = d.variance.bingeMonth;
+    const yr = d.variance.bingeYear;
+    const ratio = d.variance.mean > 0 ? (d.variance.maxVal / d.variance.mean).toFixed(1) : '?';
+    const label = mn ? `${MONTHS_VN[mn]}${yr ? '/' + yr : ''}` : 'một tháng';
+    return { label: 'Có tháng mua bùng phát', evidence: `${label} nhiều hơn ${ratio}x tháng bình thường`, icon: '💥' };
   },
   high_frequency: (d) => {
-    const totalOrders = d.totalOrders || 0;
-    const months = d.activeMonths || 1;
-    const perMonth = Math.round(totalOrders / months);
+    const perMonth = Math.round((d.totalOrders || 0) / Math.max(d.activeMonths || 1, 1));
     if (perMonth < 3) return null;
     return { label: 'Mua sắm thường xuyên', evidence: `Trung bình ~${perMonth} đơn/tháng`, icon: '🛍️' };
   },
@@ -910,18 +937,26 @@ const TRAIT_BUILDERS = {
     if (avg < 300000) return null;
     return { label: 'Ưa đồ chất lượng', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '💎' };
   },
-  diverse_categories: (d) => {
-    const n = d.catCount || 0;
-    if (n < 5) return null;
-    return { label: 'Khám phá đa dạng', evidence: `${n} danh mục khác nhau`, icon: '🗂️' };
+  selective_luxury: (d) => {
+    const avg = d.avgOrderValue || 0;
+    if (avg < 450000) return null;
+    return { label: 'Thiên về hàng cao cấp', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '👑' };
+  },
+  anti_premium: (d) => {
+    const avg = d.avgOrderValue || 0;
+    const orders = d.totalOrders || 0;
+    if (avg >= 120000 || orders < 25) return null;
+    return { label: 'Ưa đồ giá tốt', evidence: `Trung bình ${fmtVND(avg)}/đơn`, icon: '🏷️' };
   },
   growing_spender: (d) => {
     if (!d.yoy?.isGrowing) return null;
-    return { label: 'Chi tiêu tăng dần', evidence: `Tăng qua từng năm`, icon: '📈' };
+    const pct = d.yoy.pctChange;
+    return { label: 'Chi tiêu ngày càng tăng', evidence: `Tăng ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, icon: '📈' };
   },
   reformed_spender: (d) => {
     if (!d.yoy?.isReformed) return null;
-    return { label: 'Đang cắt giảm chi tiêu', evidence: `Giảm so với trước`, icon: '🌱' };
+    const pct = Math.abs(d.yoy.pctChange);
+    return { label: 'Đang cắt giảm chi tiêu', evidence: `Giảm ${pct}% từ ${d.yoy.firstYear}→${d.yoy.lastYear}`, icon: '🌱' };
   },
   high_savings_rate: (d) => {
     const saved = d.totalSaved || 0;
@@ -929,102 +964,155 @@ const TRAIT_BUILDERS = {
     if (!saved || !total) return null;
     const pct = Math.round((saved / (saved + total)) * 100);
     if (pct < 10) return null;
-    return { label: 'Tiết kiệm tốt nhờ sale', evidence: `${pct}% giá trị tiết kiệm được`, icon: '💰' };
-  }
+    return { label: 'Tiết kiệm tốt nhờ sale', evidence: `${pct}% giá trị đã tiết kiệm được`, icon: '💰' };
+  },
+  diverse_categories: (d) => {
+    const n = d.catCount || 0;
+    if (n < 5) return null;
+    return { label: 'Khám phá đa dạng', evidence: `${n} danh mục khác nhau`, icon: '🗂️' };
+  },
+  self_care_priority: (d) => {
+    const pct = Math.round((d.selfCareRatio || 0) * 100);
+    if (pct < 28) return null;
+    return { label: 'Ưu tiên chăm sóc bản thân', evidence: `${pct}% chi cho làm đẹp & sức khỏe`, icon: '✨' };
+  },
+  family_buyer: (d) => {
+    const pct = Math.round((d.familyRatio || 0) * 100);
+    if (pct < 15) return null;
+    return { label: 'Mua nhiều cho gia đình', evidence: `${pct}% chi cho đồ trẻ em/gia đình`, icon: '👨‍👩‍👧' };
+  },
+  year_end_spiker: (d) => {
+    const pct = Math.round((d.q4Ratio || 0) * 100);
+    if (pct < 40) return null;
+    return { label: 'Tập trung mua cuối năm', evidence: `${pct}% chi tiêu tháng 10–12`, icon: '🎄' };
+  },
+  tet_buyer: (d) => {
+    const pct = Math.round((d.q1Ratio || 0) * 100);
+    if (pct < 30) return null;
+    return { label: 'Mua nhiều dịp Tết', evidence: `${pct}% chi tiêu tháng 1–2`, icon: '🧧' };
+  },
+  summer_binge: (d) => {
+    const pct = Math.round((d.summerRatio || 0) * 100);
+    if (pct < 30) return null;
+    return { label: 'Mua nhiều mùa hè', evidence: `${pct}% chi tiêu tháng 6–8`, icon: '☀️' };
+  },
+};
+
+// Trait priority order per section context
+const SECTION_TRAITS = {
+  yearly:     null, // show all (full profile on overview)
+  monthly:    ['night_owl', 'payday_buyer', 'morning_planner', 'weekend_shopper', 'volatile_spender',
+               'consistent_spender', 'binge_then_quiet', 'growing_spender', 'reformed_spender', 'lunch_shopper'],
+  categories: ['diverse_categories', 'self_care_priority', 'family_buyer', 'high_avg_value',
+               'selective_luxury', 'sale_focused', 'anti_premium'],
+  sales:      ['sale_focused', 'sale_only_buyer', 'full_price_loyal', 'high_savings_rate',
+               'night_owl', 'weekend_shopper'],
+  items:      ['high_avg_value', 'selective_luxury', 'anti_premium', 'high_frequency',
+               'diverse_categories', 'sale_focused'],
 };
 
 function buildTraitList(triggers, data, maxTraits = 4) {
-  const ordered = [
-    'night_owl', 'sale_focused', 'volatile_spender', 'consistent_spender',
-    'high_avg_value', 'high_frequency', 'weekend_shopper', 'lunch_shopper',
-    'growing_spender', 'reformed_spender', 'high_savings_rate', 'diverse_categories'
+  const triggerSet = new Set(triggers);
+  // Master priority: show most "interesting" traits first
+  const masterOrder = [
+    'reformed_spender', 'binge_then_quiet', 'night_owl', 'sale_only_buyer',
+    'volatile_spender', 'payday_buyer', 'self_care_priority', 'family_buyer',
+    'sale_focused', 'high_avg_value', 'selective_luxury', 'growing_spender',
+    'consistent_spender', 'morning_planner', 'high_frequency', 'weekend_shopper',
+    'full_price_loyal', 'year_end_spiker', 'tet_buyer', 'summer_binge',
+    'high_savings_rate', 'diverse_categories', 'lunch_shopper', 'anti_premium',
   ];
   const traits = [];
-  for (const key of ordered) {
+  for (const key of masterOrder) {
     if (traits.length >= maxTraits) break;
-    if (!triggers.includes(key) && !TRAIT_BUILDERS[key]) continue;
-    const builder = TRAIT_BUILDERS[key];
-    if (!builder) continue;
-    const trait = builder(data);
+    if (!triggerSet.has(key) || !TRAIT_BUILDERS[key]) continue;
+    const trait = TRAIT_BUILDERS[key](data);
     if (trait) traits.push({ key, ...trait });
   }
   return traits;
 }
 
-// 2.6 Pre-formatted AI context string
+// 2.6 Build AI context string from profile
 function buildAIContext(profile) {
   if (!profile) return '';
   const traitSummary = profile.traits.map(t => `${t.label} (${t.evidence})`).join('; ');
   const parts = [`Kiểu người: "${profile.archetype.label}"`];
-  if (traitSummary) parts.push(`Đặc điểm: ${traitSummary}`);
+  if (traitSummary) parts.push(`Đặc điểm nổi bật: ${traitSummary}`);
   return parts.join('. ') + '.';
 }
 
-// 2.7 Extended trigger analysis (superset of existing analyzeBehaviorTriggers)
-function analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy) {
+// 2.7 Extended trigger analysis
+function analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy, extras) {
   const triggers = analyzeBehaviorTriggers({
-    stats: null, // stats will be derived from saleStats below if needed
+    stats: null,
     categories: d.cs || [],
     totalSpend: d.t || 0,
     totalOrders: d.o || 0,
     totalSaved: d.s || 0
   });
 
-  // Temporal triggers
-  if ((temporal.nightPct || 0) > 0.20) triggers.push('night_owl');
-  if ((temporal.weekendPct || 0) > 0.38) triggers.push('weekend_shopper');
-  if ((temporal.lunchPct || 0) > 0.20) triggers.push('lunch_shopper');
+  // Temporal
+  if ((temporal.nightPct || 0) > 0.18) triggers.push('night_owl');
+  if ((temporal.weekendPct || 0) > 0.35) triggers.push('weekend_shopper');
+  if ((temporal.lunchPct || 0) > 0.18) triggers.push('lunch_shopper');
+  if ((temporal.morningPct || 0) > 0.28) triggers.push('morning_planner');
+  if ((temporal.paydayPct || 0) > 0.28) triggers.push('payday_buyer');
 
-  // Variance triggers
+  // Variance
   if (variance.isVolatile) triggers.push('volatile_spender');
   if (variance.isConsistent) triggers.push('consistent_spender');
+  if (variance.isBinge) triggers.push('binge_buyer');
 
-  // YoY triggers
+  // YoY
   if (yoy.isGrowing) triggers.push('growing_spender');
   if (yoy.isReformed) triggers.push('reformed_spender');
 
-  // Sale triggers
-  const totalSpend = saleStats.totalSpend || d.t || 1;
-  if (saleStats.saleSpend / totalSpend >= 0.6) {
-    if (!triggers.includes('sale_focused')) triggers.push('sale_focused');
-  }
+  // Sale behavior
+  const spendBase = saleStats.totalSpend || d.t || 1;
+  const saleRatio = saleStats.saleSpend / spendBase;
+  if (saleRatio >= 0.55 && !triggers.includes('sale_focused')) triggers.push('sale_focused');
+  if (saleRatio >= 0.78) triggers.push('sale_only_buyer');
+  if (saleRatio < 0.20 && (d.o || 0) > 10) triggers.push('full_price_loyal');
 
-  // Premium buyer: high avg value + few orders
+  // Value tier
   const totalOrders = d.o || 0;
   const avgVal = totalOrders > 0 ? (d.t || 0) / totalOrders : 0;
-  if (avgVal >= 600000 && totalOrders < 30) triggers.push('premium_buyer');
+  if (avgVal >= 550000 && totalOrders < 25) triggers.push('premium_buyer');
+  if (avgVal >= 450000) triggers.push('selective_luxury');
+  if (avgVal < 110000 && totalOrders > 30) triggers.push('anti_premium');
 
-  // Seasonal spike detection
+  // Category-derived
+  if ((extras.selfCareRatio || 0) >= 0.28) triggers.push('self_care_priority');
+  if ((extras.familyRatio || 0) >= 0.18) triggers.push('family_buyer');
+
+  // Seasonal
   const yd = d.yd || {};
-  let q4Total = 0, q1Total = 0, yearTotal = 0;
+  let q4T = 0, q1T = 0, summerT = 0, yrTotal = 0;
   for (const yr of Object.values(yd)) {
-    const m = yr.m || {};
-    for (const [month, val] of Object.entries(m)) {
-      const mn = Number(month);
-      yearTotal += val || 0;
-      if (mn >= 10) q4Total += val || 0;
-      if (mn <= 2) q1Total += val || 0;
+    for (const [mn, v] of Object.entries(yr.m || {})) {
+      const m = Number(mn);
+      yrTotal += v || 0;
+      if (m >= 10) q4T += v || 0;
+      if (m <= 2) q1T += v || 0;
+      if (m >= 6 && m <= 8) summerT += v || 0;
     }
   }
-  if (yearTotal > 0) {
-    if (q4Total / yearTotal > 0.5) triggers.push('year_end_spiker');
-    if (q1Total / yearTotal > 0.4) triggers.push('tet_buyer');
-  }
-
-  // Binge buyer: volatile AND some months are 3x average
-  if (variance.isVolatile && variance.maxVal > (variance.mean || 0) * 3) {
-    triggers.push('binge_buyer');
+  if (yrTotal > 0) {
+    if (q4T / yrTotal > 0.48) triggers.push('year_end_spiker');
+    if (q1T / yrTotal > 0.38) triggers.push('tet_buyer');
+    if (summerT / yrTotal > 0.32) triggers.push('summer_binge');
   }
 
   return [...new Set(triggers)];
 }
 
-// 2.8 Main entry point — analyzeShoppingPersonality(d) → PersonalityProfile
+// 2.8 Main entry point
 function analyzeShoppingPersonality(d) {
   if (!d) return null;
 
   const ol = d.ol || [];
   const yd = d.yd || {};
+  const cs = d.cs || [];
 
   const temporal = computeTemporalPatterns(ol);
   const saleStats = computeSaleStats(d);
@@ -1035,37 +1123,99 @@ function analyzeShoppingPersonality(d) {
   const totalSpend = d.t || 0;
   const avgOrderValue = totalOrders > 0 ? totalSpend / totalOrders : 0;
 
-  // Count unique months with activity
   let activeMonths = 0;
   for (const yr of Object.values(yd)) {
     if (yr.m) activeMonths += Object.values(yr.m).filter(v => v > 0).length;
   }
   activeMonths = Math.max(activeMonths, 1);
 
-  const catCount = (d.cs || []).filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác').length;
+  const catCount = cs.filter(c => c.name !== '🏷️ Khác' && c.name !== 'Khác').length;
 
-  const dataCtx = {
-    temporal,
-    saleStats,
-    variance,
-    yoy,
-    totalOrders,
-    totalSpend,
-    avgOrderValue,
-    activeMonths,
-    catCount,
-    totalSaved: d.s || 0
+  // Category ratios for special detections
+  const selfCareSpend = cs.filter(c => {
+    const n = (c.name || '').toLowerCase();
+    return n.includes('làm đẹp') || n.includes('beauty') || n.includes('sức khỏe') ||
+           n.includes('health') || n.includes('chăm sóc') || n.includes('skincare');
+  }).reduce((s, c) => s + c.s, 0);
+
+  const familySpend = cs.filter(c => {
+    const n = (c.name || '').toLowerCase();
+    return n.includes('trẻ em') || n.includes('baby') || n.includes('kids') ||
+           n.includes('đồ chơi') || n.includes('toy') || n.includes('mẹ & bé') ||
+           n.includes('sơ sinh') || n.includes('bé');
+  }).reduce((s, c) => s + c.s, 0);
+
+  // Seasonal ratios
+  let q4T = 0, q1T = 0, summerT = 0, yrTotal = 0;
+  for (const yr of Object.values(yd)) {
+    for (const [mn, v] of Object.entries(yr.m || {})) {
+      const m = Number(mn);
+      yrTotal += v || 0;
+      if (m >= 10) q4T += v || 0;
+      if (m <= 2) q1T += v || 0;
+      if (m >= 6 && m <= 8) summerT += v || 0;
+    }
+  }
+
+  const extras = {
+    selfCareRatio: totalSpend > 0 ? selfCareSpend / totalSpend : 0,
+    familyRatio: totalSpend > 0 ? familySpend / totalSpend : 0,
   };
 
-  const triggers = analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy);
+  const dataCtx = {
+    temporal, saleStats, variance, yoy,
+    totalOrders, totalSpend, avgOrderValue, activeMonths, catCount,
+    totalSaved: d.s || 0,
+    selfCareRatio: extras.selfCareRatio,
+    familyRatio: extras.familyRatio,
+    q4Ratio: yrTotal > 0 ? q4T / yrTotal : 0,
+    q1Ratio: yrTotal > 0 ? q1T / yrTotal : 0,
+    summerRatio: yrTotal > 0 ? summerT / yrTotal : 0,
+  };
+
+  const triggers = analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy, extras);
   const archetype = resolveArchetype(triggers);
   const traits = buildTraitList(triggers, dataCtx);
 
-  const profile = { archetype, traits, dimensions: {}, triggers };
+  const profile = { archetype, traits, triggers, dataCtx };
   profile.aiContext = buildAIContext(profile);
-
+  profile.totalOrders = totalOrders;
   return profile;
 }
 
+// 2.9 Show rule-based profile on non-AI sections (no AI call)
+// sectionType: 'monthly' | 'categories' | 'sales' | 'items'
+function showProfileInsight(cardId, profile, sectionType) {
+  if (!profile) return;
+  const aiEl = document.getElementById(cardId + '-ai');
+  if (!aiEl) return;
+
+  // Filter traits relevant to this section
+  const relevantKeys = SECTION_TRAITS[sectionType];
+  let displayTraits = profile.traits.slice(0, 2);
+  if (relevantKeys) {
+    const filtered = profile.traits.filter(t => relevantKeys.includes(t.key));
+    if (filtered.length > 0) {
+      displayTraits = filtered.slice(0, 2);
+    } else {
+      // Fallback: try to build traits directly from section-relevant builders
+      const fallback = [];
+      const dataCtx = profile.dataCtx || {};
+      for (const k of relevantKeys) {
+        if (fallback.length >= 2) break;
+        if (!TRAIT_BUILDERS[k]) continue;
+        const t = TRAIT_BUILDERS[k](dataCtx);
+        if (t) fallback.push({ key: k, ...t });
+      }
+      if (fallback.length > 0) displayTraits = fallback;
+    }
+  }
+
+  const sectionProfile = { ...profile, traits: displayTraits };
+  aiEl.innerHTML = renderCompactProfile(sectionProfile);
+  aiEl.style.display = '';
+}
+
 window.analyzeShoppingPersonality = analyzeShoppingPersonality;
+window.showProfileInsight = showProfileInsight;
 window.enrichWithAI = enrichWithAI;

@@ -118,9 +118,8 @@ function renderSentencesHTML(text) {
   ).join('');
 }
 
-// renderAIInsight(text, cardId, profile)
-// text: AI narrative string | null (null = not yet generated)
-// cardId: for refresh/copy buttons
+// renderAIInsight(text, cardId, profile) — full card for overview/AI sections
+// text: AI narrative string | null
 // profile: PersonalityProfile | null
 function renderAIInsight(text, cardId, profile) {
   const copyBtn = (cardId && text)
@@ -135,39 +134,56 @@ function renderAIInsight(text, cardId, profile) {
        </button>`
     : '';
 
-  const header = `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Phân tích tính cách</span>${copyBtn}${refreshBtn}</div>`;
-
-  // Archetype chip
-  let archetypeHtml = '';
-  if (profile && profile.archetype) {
-    const a = profile.archetype;
-    archetypeHtml = `<div class="ai-archetype"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`;
-  }
-
-  // Traits list
-  let traitsHtml = '';
-  if (profile && profile.traits && profile.traits.length > 0) {
-    const items = profile.traits.map(t =>
-      `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
-    ).join('');
-    traitsHtml = `<div class="ai-traits">${items}</div>`;
-  }
-
-  // AI narrative section (only when text is present)
-  let narrativeHtml = '';
-  if (text && text.trim()) {
-    narrativeHtml = `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`;
-  }
-
   // Legacy layout: no profile, just text
   if (!profile) {
-    return `${header}<div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
+    return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Phân tích tính cách</span>${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
   }
+
+  const a = profile.archetype;
+  const archetypeHtml = a
+    ? `<div class="ai-archetype"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`
+    : '';
+
+  const traitsHtml = (profile.traits && profile.traits.length > 0)
+    ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${
+        profile.traits.map(t =>
+          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
+        ).join('')
+      }</div>`
+    : '';
+
+  const narrativeHtml = (text && text.trim())
+    ? `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`
+    : '';
+
+  const orderNote = profile.totalOrders > 0
+    ? `<div class="ai-order-note">Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng</div>`
+    : '';
+
+  const header = `<div class="insight-ai-header insight-ai-header--full"><span class="insight-ai-badge">${_AI_ICON_SVG}Tính Cách</span>${orderNote}${copyBtn}${refreshBtn}</div>`;
 
   return `${header}${archetypeHtml}${traitsHtml}${narrativeHtml}`;
 }
 
-// Shell rendered immediately when streaming starts (no-profile legacy path)
+// renderCompactProfile(profile) — compact card for non-AI sections (monthly, categories, sales, items)
+function renderCompactProfile(profile) {
+  if (!profile || !profile.archetype) return '';
+  const a = profile.archetype;
+
+  const archetypeHtml = `<div class="ai-archetype ai-archetype--compact"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`;
+
+  const traitsHtml = (profile.traits && profile.traits.length > 0)
+    ? `<div class="ai-traits ai-traits--compact">${
+        profile.traits.slice(0, 2).map(t =>
+          `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.label)}</span><span class="ai-trait-evidence">· ${escHtml(t.evidence)}</span></div>`
+        ).join('')
+      }</div>`
+    : '';
+
+  return `<div class="insight-ai-header insight-ai-header--compact"><span class="insight-ai-badge insight-ai-badge--rule">${_AI_ICON_SVG}Tính cách</span></div>${archetypeHtml}${traitsHtml}`;
+}
+
+// Shell rendered immediately when streaming starts (legacy no-profile path)
 function renderAIInsightShell(cardId) {
   const refreshBtn = cardId
     ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Phân tích lại" style="display:none">

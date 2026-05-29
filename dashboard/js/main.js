@@ -1009,82 +1009,20 @@ function setupDashboardRatingCard(d) {
     }
 
     function triggerMonthlyAIInsight(d, yr, profile) {
-      const yearData = d.yd[yr] || {};
-      const monthEntries = Object.entries(yearData.m || {})
-        .sort((a, b) => Number(a[0]) - Number(b[0]))
-        .filter(([, v]) => v > 0);
-
-      const MONTH_NAMES_VN = [
-        "", "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
-      ];
-
-      let maxMonth = null, maxMonthVal = 0;
-      for (const [m, v] of monthEntries) {
-        if (v > maxMonthVal) { maxMonthVal = v; maxMonth = m; }
+      // Monthly section shows rule-based compact profile only (no AI)
+      const p = profile || window._globalPersonalityProfile;
+      if (typeof showProfileInsight === 'function') {
+        showProfileInsight('insight-monthly', p, 'monthly');
       }
-      const maxMonthName = MONTH_NAMES_VN[maxMonth] || `Tháng ${maxMonth}`;
-
-      const context = profile ? profile.aiContext
-        : monthEntries.map(([m, v]) => `${MONTH_NAMES_VN[m] || "Tháng " + m}: ${fmtVND(v)}`).join(", ");
-
-      const specificPrompt = profile
-        ? `Hồ sơ tính cách: ${profile.aiContext}\n\nBối cảnh năm ${yr}: Tháng cao điểm là ${maxMonthName}.\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý về lý do người này mua nhiều vào giai đoạn đó. Không số tiền, không tiếng Anh.`
-        : `Chi tiêu năm ${yr}, tháng cao điểm: ${maxMonthName}. Viết 1-2 câu nhận xét tâm lý về xu hướng mua sắm. Không số tiền.`;
-
-      enrichWithAI(
-        "insight-monthly",
-        context,
-        specificPrompt,
-        `insight-monthly-${yr}`,
-        null,
-        false,
-        profile,
-      );
     }
     window.triggerMonthlyAIInsight = triggerMonthlyAIInsight;
 
     function triggerSingleMonthAIInsight(d, year, monthStr) {
-      const ym = `${year}-${monthStr}`;
-      const monthItems = (d.mi && d.mi[ym]) || [];
-      const monthTotal =
-        (d.yd[year] && d.yd[year].m && d.yd[year].m[monthStr]) || 0;
-      const totalItemsCount = monthItems.reduce(
-        (sum, item) => sum + (item.c || 1),
-        0,
-      );
-
-      const MONTH_NAMES_VN = [
-        "",
-        "Tháng 1",
-        "Tháng 2",
-        "Tháng 3",
-        "Tháng 4",
-        "Tháng 5",
-        "Tháng 6",
-        "Tháng 7",
-        "Tháng 8",
-        "Tháng 9",
-        "Tháng 10",
-        "Tháng 11",
-        "Tháng 12",
-      ];
-      const vnMonthName = MONTH_NAMES_VN[Number(monthStr)] || `Tháng ${monthStr}`;
-
-      const context = `Chi tiêu trong ${vnMonthName} năm ${year}: tổng tiền ${fmtVND(monthTotal)} qua ${totalItemsCount} lần mua sản phẩm.`;
-
-      const specificPrompt = `Dữ liệu đầu vào:
-      - Thời gian: Tháng ${monthStr} năm ${year}.
-      
-      Yêu cầu: Hãy phán một quẻ bói cực vui vẻ về tâm trạng mua sắm và bản tính tiêu tiền của khổ chủ trong Tháng ${monthStr}/${year}. Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
-
-      enrichWithAI(
-        "insight-monthly",
-        context,
-        specificPrompt,
-        `insight-monthly-${year}-${monthStr}`,
-        null,
-      );
+      // Single month drill-down: show same compact profile (no AI)
+      const p = window._globalPersonalityProfile;
+      if (typeof showProfileInsight === 'function') {
+        showProfileInsight('insight-monthly', p, 'monthly');
+      }
     }
     window.triggerSingleMonthAIInsight = triggerSingleMonthAIInsight;
 
@@ -1192,71 +1130,20 @@ function setupDashboardRatingCard(d) {
     window.categorizeMiItems = categorizeMiItems;
 
     function triggerCategoryAIInsight(cs, ti, total, cacheKey, year, profile) {
-      const activeYear = year || "all";
-      const filteredCs = (cs || []).filter(
-        (c) => c.name !== "🏷️ Khác" && c.name !== "Khác",
-      );
-      if (!filteredCs.length) return;
-      const analyzedTotal = cs.reduce((sum, c) => sum + c.s, 0) || total || 1;
-      const topCategory = filteredCs[0];
-      const topPct = Math.round((topCategory.s / analyzedTotal) * 100);
-      const numCats = filteredCs.length;
-
-      const context = profile ? profile.aiContext
-        : `Danh mục chủ đạo: "${topCategory.name}" (${topPct}%), ${numCats} danh mục.`;
-
-      const specificPrompt = profile
-        ? `Hồ sơ tính cách: ${profile.aiContext}\n\nBối cảnh: Danh mục mua nhiều nhất là "${topCategory.name}".\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý về sở thích chi tiêu theo danh mục. Không số tiền, không tiếng Anh.`
-        : `Danh mục hàng đầu: "${topCategory.name}" (${topPct}%). Nhận xét 1-2 câu về tính cách mua sắm. Không số tiền.`;
-
-      enrichWithAI(
-        "insight-categories",
-        context,
-        specificPrompt,
-        cacheKey,
-        null,
-        false,
-        profile,
-      );
+      // Categories section shows rule-based compact profile only (no AI)
+      const p = profile || window._globalPersonalityProfile;
+      if (typeof showProfileInsight === 'function') {
+        showProfileInsight('insight-categories', p, 'categories');
+      }
     }
     window.triggerCategoryAIInsight = triggerCategoryAIInsight;
 
-    function triggerSingleCategoryAIInsight(
-      cs,
-      ti,
-      total,
-      catName,
-      year,
-      overallTotal,
-    ) {
-      const categoryStats = cs.find(
-        (c) => resolveCatLabel(c) === catName || c.name === catName,
-      );
-      if (!categoryStats) return;
-
-      const catTotal = categoryStats.s;
-      const catCount = categoryStats.c;
-
-      const overallText =
-        overallTotal > 0
-          ? ` (chiếm ${Math.round((catTotal / overallTotal) * 100)}% tổng chi tiêu)`
-          : "";
-      const periodText = year === "all" ? "toàn bộ thời gian" : `năm ${year}`;
-
-      const context = `Danh mục "${catName}" trong ${periodText}: đã chi ${fmtVND(catTotal)}${overallText} qua ${catCount} lần mua.`;
-
-      const specificPrompt = `Dữ liệu đầu vào:
-      - Danh mục cụ thể: "${catName}".
-      
-      Yêu cầu: Gieo quẻ bói về "kiếp nạn" hoặc "duyên nợ" của người dùng đối với riêng danh mục "${catName}" này (ví dụ: mua để chữa lành, bị thế lực vô hình dẫn lối...). Tuyệt đối tuân thủ quy tắc không ghi bất kỳ con số nào.`;
-
-      enrichWithAI(
-        "insight-categories",
-        context,
-        specificPrompt,
-        `insight-categories-${year}-${catName}`,
-        null,
-      );
+    function triggerSingleCategoryAIInsight(cs, ti, total, catName, year, overallTotal) {
+      // Single category drill-down: show compact profile (no AI)
+      const p = window._globalPersonalityProfile;
+      if (typeof showProfileInsight === 'function') {
+        showProfileInsight('insight-categories', p, 'categories');
+      }
     }
     window.triggerSingleCategoryAIInsight = triggerSingleCategoryAIInsight;
 
@@ -1445,40 +1332,25 @@ function setupDashboardRatingCard(d) {
         ? analyzeShoppingPersonality(d)
         : null;
 
-      // 1. Yearly Overview AI insight
+      // Store globally so trigger functions can access it
+      window._globalPersonalityProfile = globalProfile;
+
+      // 1. Yearly Overview — ONLY section with AI narrative
       triggerYearlyAIInsight(d, globalProfile);
 
-      // 2. Items AI insight
-      const top10 = (d.ti || []).slice(0, 10);
-      const catCounts = {};
-      for (const item of top10) {
-        const cat = (item.cat && item.cat !== '🏷️ Khác' && item.cat !== 'Khác') ? item.cat : null;
-        if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+      // 2. Items — rule-based compact profile (no AI)
+      if (typeof showProfileInsight === 'function') {
+        showProfileInsight('insight-items', globalProfile, 'items');
       }
-      const catSummary = Object.entries(catCounts)
-        .sort((a, b) => b[1] - a[1]).slice(0, 3)
-        .map(([cat, n]) => `${cat} (${n} sản phẩm)`).join(", ");
 
-      enrichWithAI(
-        "insight-items",
-        globalProfile ? globalProfile.aiContext : "",
-        globalProfile
-          ? `Hồ sơ tính cách: ${globalProfile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý về người này dựa trên sở thích mua sắm. Không liệt kê lại đặc điểm. Không số tiền, không tiếng Anh.`
-          : `Dựa vào các sản phẩm mua nhiều nhất${catSummary ? ` (${catSummary})` : ""}, hãy nhận xét ngắn gọn về tính cách mua sắm. Không liệt kê tên sản phẩm, không con số cụ thể.`,
-        undefined,
-        () => (typeof generatePsychologicalInsight === 'function'
-          ? generatePsychologicalInsight({ categories: d.cs || [], totalSpend: d.t || 0, totalOrders: d.o || 0, totalSaved: d.s || 0 })
-          : null),
-        false,
-        globalProfile,
-      );
-
-      // 3. Categories AI insight — only for 'all' view
+      // 3. Categories — rule-based compact profile (no AI)
       if (_activeCatYear === "all") {
-        triggerCategoryAIInsight(d.cs, d.ti, d.t, "insight-categories-all", "all", globalProfile);
+        if (typeof showProfileInsight === 'function') {
+          showProfileInsight('insight-categories', globalProfile, 'categories');
+        }
       }
 
-      // 4. Monthly insight for current active year
+      // 4. Monthly — rule-based compact profile (no AI)
       if (_activeYear) {
         triggerMonthlyAIInsight(d, _activeYear, globalProfile);
       }
