@@ -544,7 +544,7 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, aut
       aiEl.style.display = '';
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
       if (refreshBtn) {
-        refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
+        refreshBtn.style.display = 'none';
       }
       return;
     }
@@ -626,7 +626,7 @@ async function _executeAIInsight(cardId) {
       aiEl.innerHTML = renderAIInsight(text, cardId, profile);
       aiEl.style.display = '';
       const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-      if (refreshBtn) refreshBtn.style.display = '';
+      if (refreshBtn) refreshBtn.style.display = 'none';
     } else {
       if (profile) {
         aiEl.innerHTML = renderAIInsight(null, cardId, profile);
