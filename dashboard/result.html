@@ -226,6 +226,30 @@
         <div class="insight-ai" id="insight-items-ai" style="display: none"></div>
       </div>
 
+      <!-- Micro KPI Row for Top Items -->
+      <div class="kpi-row" id="items-kpi-row" style="margin-bottom: 24px;">
+        <div class="kpi in">
+          <div class="kpi-label">Tổng thực chi</div>
+          <div class="kpi-value orange" id="kpi-items-total-spend">0đ</div>
+          <div class="kpi-sub" id="kpi-items-total-spend-sub">Trong danh sách lọc</div>
+        </div>
+        <div class="kpi in">
+          <div class="kpi-label">Số sản phẩm</div>
+          <div class="kpi-value" id="kpi-items-total-count">0</div>
+          <div class="kpi-sub" id="kpi-items-total-count-sub">Khớp bộ lọc</div>
+        </div>
+        <div class="kpi in">
+          <div class="kpi-label">Tổng tiết kiệm</div>
+          <div class="kpi-value green" id="kpi-items-total-savings">0đ</div>
+          <div class="kpi-sub" id="kpi-items-total-savings-sub">Nhờ mua hàng sale</div>
+        </div>
+        <div class="kpi in">
+          <div class="kpi-label">Đơn giá trung bình</div>
+          <div class="kpi-value" id="kpi-items-avg-price">0đ</div>
+          <div class="kpi-sub" id="kpi-items-avg-price-sub">Tính trên mỗi món</div>
+        </div>
+      </div>
+
       <div class="grid-2" id="items-grid">
         <div class="card" id="card-items">
           <div class="card-title" style="
@@ -234,9 +258,17 @@
                 align-items: center;
                 flex-wrap: wrap;
                 gap: 10px;
+                margin-bottom: 16px;
               ">
             <span>🏆 Bảng Xếp Hạng</span>
             <span id="items-quick-stats" style="font-size: 12.5px; font-weight: normal; color: var(--muted);"></span>
+          </div>
+
+          <!-- Search Input Row -->
+          <div class="items-search-row" style="margin-bottom: 16px; position: relative;">
+            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none;">🔍</span>
+            <input type="text" id="items-search-input" placeholder="Tìm kiếm tên sản phẩm..." style="width: 100%; padding: 10px 32px 10px 32px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.2s;" />
+            <button id="items-search-clear" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; display: none; font-size: 16px; padding: 0 4px; line-height: 1;">✕</button>
           </div>
 
           <!-- Filter Control Panel (No Search Bar, Price dropdown replaced by Slider below, displays fixed Top 25) -->
@@ -289,6 +321,11 @@
           </div>
 
           <div class="top-list" id="items-list"></div>
+          
+          <!-- Load More Button -->
+          <div class="load-more-wrap" style="text-align: center; margin-top: 20px;">
+            <button id="items-load-more" class="pill" style="display: none; padding: 8px 24px; min-width: 140px; margin: 0 auto; cursor: pointer; outline: none; border-radius: 20px;">Xem thêm</button>
+          </div>
         </div>
 
         <div class="card" id="card-items-chart">

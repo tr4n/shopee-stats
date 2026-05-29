@@ -7,6 +7,8 @@
 let currentTopItems = [];
 let itemsChartInstance = null;
 let itemsEventsInitialized = false;
+let itemsSearchQuery = "";
+let itemsLimit = 25;
 
 function resolveCategory(itemName, rawCatId) {
   if (typeof resolveItemCategory === 'function') {
@@ -15,9 +17,36 @@ function resolveCategory(itemName, rawCatId) {
   return resolveCatLabel({ id: rawCatId, name: rawCatId });
 }
 
+function removeVnAccents(str) {
+  return (str || '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
+function getCategoryTagClass(catLabel) {
+  const label = (catLabel || '').toLowerCase();
+  if (label.includes('sức khỏe') || label.includes('làm đẹp') || label.includes('beauty')) return 'cat-tag-beauty';
+  if (label.includes('thời trang') || label.includes('phụ kiện') || label.includes('fashion') || label.includes('quần áo') || label.includes('giày') || label.includes('túi')) return 'cat-tag-fashion';
+  if (label.includes('điện thoại') || label.includes('máy tính') || label.includes('điện tử') || label.includes('công nghệ') || label.includes('tech') || label.includes('electronic')) return 'cat-tag-tech';
+  if (label.includes('nhà cửa') || label.includes('đời sống') || label.includes('home') || label.includes('living') || label.includes('bách hóa') || label.includes('grocery')) return 'cat-tag-home';
+  if (label.includes('thể thao') || label.includes('du lịch') || label.includes('sport')) return 'cat-tag-sport';
+  if (label.includes('giải trí') || label.includes('giáo dục') || label.includes('sách') || label.includes('edu')) return 'cat-tag-edu';
+  return 'cat-tag-other';
+}
+
 function renderTopItems(ti) {
   currentTopItems = ti || [];
+  itemsLimit = 25;
+  itemsSearchQuery = "";
   
+  const searchInput = document.getElementById('items-search-input');
+  if (searchInput) searchInput.value = "";
+  const searchClear = document.getElementById('items-search-clear');
+  if (searchClear) searchClear.style.display = 'none';
+
   // Set date slider bounds dynamically based on d.ol
   const d = window.currentDashData || {};
   const orders = d.ol || [];
@@ -125,7 +154,12 @@ function initItemsEvents() {
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
   
+  const searchInput = document.getElementById('items-search-input');
+  const searchClear = document.getElementById('items-search-clear');
+  const loadMoreBtn = document.getElementById('items-load-more');
+  
   const triggerReRender = () => {
+    itemsLimit = 25;
     renderTopItemsList();
   };
   
@@ -149,6 +183,40 @@ function initItemsEvents() {
     updateSliderTracks();
     triggerReRender();
   });
+
+  if (searchInput) {
+    let searchDebounceTimeout = null;
+    searchInput.addEventListener('input', (e) => {
+      itemsSearchQuery = e.target.value;
+      if (searchClear) {
+        searchClear.style.display = itemsSearchQuery ? 'block' : 'none';
+      }
+      
+      clearTimeout(searchDebounceTimeout);
+      searchDebounceTimeout = setTimeout(() => {
+        itemsLimit = 25;
+        renderTopItemsList();
+      }, 150);
+    });
+  }
+  
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = "";
+      }
+      itemsSearchQuery = "";
+      searchClear.style.display = 'none';
+      triggerReRender();
+    });
+  }
+  
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      itemsLimit += 25;
+      renderTopItemsList();
+    });
+  }
 }
 
 function updateSliderTracks() {
@@ -285,6 +353,14 @@ function renderTopItemsList() {
     
     return true;
   });
+
+  // 2.2 Text Search Filter (accent-insensitive)
+  if (itemsSearchQuery.trim()) {
+    const q = removeVnAccents(itemsSearchQuery);
+    filtered = filtered.filter(item => {
+      return removeVnAccents(item.n).includes(q);
+    });
+  }
   
   // 3. Sort filtered items
   filtered.sort((a, b) => {
@@ -301,15 +377,46 @@ function renderTopItemsList() {
     
     return b.s - a.s;
   });
+
+  // Calculate dynamic KPIs on filtered items (before slicing)
+  const totalSpendFiltered = filtered.reduce((sum, item) => sum + item.s, 0);
+  const totalCountFiltered = filtered.length;
+  const totalSavingsFiltered = filtered.reduce((sum, item) => {
+    const hasDiscount = item.op && item.dp && item.op > item.dp;
+    return sum + (hasDiscount ? (item.op - item.dp) * item.c : 0);
+  }, 0);
+  const totalQuantityFiltered = filtered.reduce((sum, item) => sum + item.c, 0);
+  const avgUnitPriceFiltered = totalQuantityFiltered > 0 ? Math.round(totalSpendFiltered / totalQuantityFiltered) : 0;
+
+  // Render dynamic KPIs
+  const kpiSpendEl = document.getElementById('kpi-items-total-spend');
+  const kpiCountEl = document.getElementById('kpi-items-total-count');
+  const kpiSavingsEl = document.getElementById('kpi-items-total-savings');
+  const kpiAvgPriceEl = document.getElementById('kpi-items-avg-price');
   
-  // 4. Slice to fixed Top 25 products
-  const displayItems = filtered.slice(0, 25);
+  if (kpiSpendEl) animateCounter(kpiSpendEl, fmtVND(totalSpendFiltered), 600);
+  if (kpiCountEl) animateCounter(kpiCountEl, fmtNum(totalCountFiltered), 600);
+  if (kpiSavingsEl) animateCounter(kpiSavingsEl, fmtVND(totalSavingsFiltered), 600);
+  if (kpiAvgPriceEl) animateCounter(kpiAvgPriceEl, fmtVND(avgUnitPriceFiltered), 600);
+  
+  // 4. Slice to itemsLimit
+  const displayItems = filtered.slice(0, itemsLimit);
   
   // Render quick stats
   const quickStatsEl = document.getElementById('items-quick-stats');
   if (quickStatsEl) {
-    const totalSpendFiltered = displayItems.reduce((sum, item) => sum + item.s, 0);
-    quickStatsEl.textContent = `Hiện ${fmtNum(displayItems.length)}/${fmtNum(filtered.length)} SP · Chi tiêu: ${fmtVND(totalSpendFiltered)}`;
+    quickStatsEl.textContent = `Hiện ${fmtNum(displayItems.length)}/${fmtNum(filtered.length)} SP · Lọc chi tiêu: ${fmtVND(totalSpendFiltered)}`;
+  }
+
+  // Load More button display
+  const loadMoreBtn = document.getElementById('items-load-more');
+  if (loadMoreBtn) {
+    if (filtered.length > itemsLimit) {
+      loadMoreBtn.style.display = 'block';
+      loadMoreBtn.textContent = `Xem thêm (còn ${filtered.length - itemsLimit} SP)`;
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
   }
   
   if (displayItems.length === 0) {
@@ -325,6 +432,26 @@ function renderTopItemsList() {
     const pct = Math.round((item.s / maxS) * 100);
     const hasDiscount = item.op && item.dp && item.op > item.dp;
     
+    // Category Tag
+    const resolvedCat = resolveCategory(item.n, item.cat) || "🏷️ Khác";
+    const catClass = getCategoryTagClass(resolvedCat);
+    const catTagHtml = `<span class="item-category-tag ${catClass}">${escHtml(resolvedCat)}</span>`;
+    
+    // Rank Badge Class
+    let rankClass = "rank-default";
+    if (rank === 1) rankClass = "rank-1";
+    else if (rank === 2) rankClass = "rank-2";
+    else if (rank === 3) rankClass = "rank-3";
+
+    // Discount percentage
+    let discountPctHtml = "";
+    if (hasDiscount && item.op > 0) {
+      const discPct = Math.round((1 - item.dp / item.op) * 100);
+      if (discPct > 0) {
+        discountPctHtml = `<span class="item-discount-tag">-${discPct}%</span>`;
+      }
+    }
+
     const savings = hasDiscount ? (item.op - item.dp) * item.c : 0;
     const savingsText = savings > 0 
       ? ` · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND(savings)}</span>`
@@ -334,20 +461,27 @@ function renderTopItemsList() {
       ? `${fmtNum(item.c)} lượt · Mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>)${savingsText}`
       : `${fmtNum(item.c)} lượt · TB: ${fmtVND(Math.round(item.s / item.c))}/món`;
 
+    const metaRowHtml = `
+      <div class="top-meta">
+        ${catTagHtml}
+        ${discountPctHtml}
+        <span>${metaText}</span>
+      </div>`;
+
     return `
       <div class="top-row in">
-        <div class="top-num">${rank}</div>
+        <div class="top-num ${rankClass}">${rank}</div>
         <div class="top-name-wrap">
           <div class="top-name" title="${escHtml(item.n)}">${escHtml(capFirst(item.n))}</div>
           <div class="top-bar-wrap"><div class="top-bar-fill" style="width: ${pct}%"></div></div>
-          <div class="top-meta">${metaText}</div>
+          ${metaRowHtml}
         </div>
         <div class="top-val">${fmtVND(item.s)}</div>
       </div>`;
   }).join('');
   
-  // 5. Update top 10 chart based on displayItems
-  const chartItems = displayItems.slice(0, 10);
+  // 5. Update top 10 chart based on filtered items (top 10 overall)
+  const chartItems = filtered.slice(0, 10);
   updateTopItemsChart(chartItems);
 }
 
@@ -395,20 +529,10 @@ function updateTopItemsChart(chartItems) {
     valFormatter = fmtVND;
   }
   
-  const colors = [
-    'rgba(238, 77, 45, 0.85)',
-    'rgba(238, 77, 45, 0.80)',
-    'rgba(238, 77, 45, 0.75)',
-    'rgba(238, 77, 45, 0.70)',
-    'rgba(238, 77, 45, 0.65)',
-    'rgba(238, 77, 45, 0.60)',
-    'rgba(238, 77, 45, 0.55)',
-    'rgba(238, 77, 45, 0.50)',
-    'rgba(238, 77, 45, 0.45)',
-    'rgba(238, 77, 45, 0.40)'
-  ];
-  
-  const borderColors = colors.map(c => c.replace('0.', '1.'));
+  // Premium Horizontal Gradient
+  const gradient = ctx.createLinearGradient(0, 0, 350, 0);
+  gradient.addColorStop(0, 'rgba(238, 77, 45, 0.85)'); // var(--primary)
+  gradient.addColorStop(1, 'rgba(255, 138, 90, 0.85)'); // Peach/Light Orange
   
   itemsChartInstance = new Chart(ctx, {
     type: 'bar',
@@ -417,10 +541,11 @@ function updateTopItemsChart(chartItems) {
       datasets: [{
         label: labelText,
         data: dataVal,
-        backgroundColor: colors.slice(0, chartItems.length),
-        borderColor: borderColors.slice(0, chartItems.length),
+        backgroundColor: gradient,
+        borderColor: '#ee4d2d',
         borderWidth: 1,
-        borderRadius: 4
+        borderRadius: 6,
+        borderSkipped: false
       }]
     },
     options: {
@@ -446,7 +571,7 @@ function updateTopItemsChart(chartItems) {
           grid: { color: 'rgba(0,0,0,0.05)' },
           ticks: {
             color: 'rgba(30,41,59,0.5)',
-            font: { size: 10 },
+            font: { size: 10, family: 'inherit' },
             callback: v => valFormatter(v)
           }
         },
@@ -454,7 +579,7 @@ function updateTopItemsChart(chartItems) {
           grid: { display: false },
           ticks: {
             color: 'rgba(30,41,59,0.7)',
-            font: { size: 11, weight: '600' }
+            font: { size: 11, weight: '600', family: 'inherit' }
           }
         }
       }
