@@ -378,34 +378,13 @@ function renderTopItemsList() {
     return b.s - a.s;
   });
 
-  // Calculate dynamic KPIs on filtered items (before slicing)
-  const totalSpendFiltered = filtered.reduce((sum, item) => sum + item.s, 0);
-  const totalCountFiltered = filtered.length;
-  const totalSavingsFiltered = filtered.reduce((sum, item) => {
-    const hasDiscount = item.op && item.dp && item.op > item.dp;
-    return sum + (hasDiscount ? (item.op - item.dp) * item.c : 0);
-  }, 0);
-  const totalQuantityFiltered = filtered.reduce((sum, item) => sum + item.c, 0);
-  const avgUnitPriceFiltered = totalQuantityFiltered > 0 ? Math.round(totalSpendFiltered / totalQuantityFiltered) : 0;
-
-  // Render dynamic KPIs
-  const kpiSpendEl = document.getElementById('kpi-items-total-spend');
-  const kpiCountEl = document.getElementById('kpi-items-total-count');
-  const kpiSavingsEl = document.getElementById('kpi-items-total-savings');
-  const kpiAvgPriceEl = document.getElementById('kpi-items-avg-price');
-  
-  if (kpiSpendEl) animateCounter(kpiSpendEl, fmtVND(totalSpendFiltered), 600);
-  if (kpiCountEl) animateCounter(kpiCountEl, fmtNum(totalCountFiltered), 600);
-  if (kpiSavingsEl) animateCounter(kpiSavingsEl, fmtVND(totalSavingsFiltered), 600);
-  if (kpiAvgPriceEl) animateCounter(kpiAvgPriceEl, fmtVND(avgUnitPriceFiltered), 600);
-  
   // 4. Slice to itemsLimit
   const displayItems = filtered.slice(0, itemsLimit);
   
   // Render quick stats
   const quickStatsEl = document.getElementById('items-quick-stats');
   if (quickStatsEl) {
-    quickStatsEl.textContent = `Hiện ${fmtNum(displayItems.length)}/${fmtNum(filtered.length)} SP · Lọc chi tiêu: ${fmtVND(totalSpendFiltered)}`;
+    quickStatsEl.textContent = `Hiện ${fmtNum(displayItems.length)}/${fmtNum(filtered.length)} sản phẩm`;
   }
 
   // Load More button display
