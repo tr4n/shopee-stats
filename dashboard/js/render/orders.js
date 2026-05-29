@@ -348,8 +348,14 @@ function renderSalesKPIs(stats) {
       </div>`;
     }
 
+    let hoverTitle = "Click để lọc chi tiết";
+    if (k === 'double') hoverTitle = "Đợt siêu sale Ngày Đôi (ngày trùng tháng 1/1, 2/2... hoặc Black Friday). Click để lọc chi tiết.";
+    else if (k === 'mid') hoverTitle = "Đợt sale Giữa Tháng (ngày 15 hàng tháng). Click để lọc chi tiết.";
+    else if (k === 'end') hoverTitle = "Đợt sale Lương Về (từ ngày 25 đến cuối tháng). Click để lọc chi tiết.";
+    else if (k === 'regular') hoverTitle = "Các ngày thường không có lịch sale lớn. Click để lọc chi tiết.";
+
     return `
-      <div class="kpi interactive${isActive ? ' active' : ''}" data-type="${k}" title="Click để lọc chi tiết">
+      <div class="kpi interactive${isActive ? ' active' : ''}" data-type="${k}" title="${hoverTitle}">
         <div class="kpi-label">
           <span style="font-size:16px; margin-right:4px;">${cardIcon}</span>
           ${s.label}
@@ -915,7 +921,6 @@ function renderSalesInsights(stats) {
   }
 
   if (typeof enrichWithAI === 'function') {
-    const saleTypeLabels = { double: 'Ngày Đôi', mid: 'Giữa Tháng', end: 'Lương Về', regular: 'Ngày Thường' };
     const topCatName = topCategories[0]?.name || 'chưa rõ';
     const context = `Thống kê săn sale: **${salePct}%** chi tiêu vào ngày sale, **${totalOrders}** đơn, danh mục săn nhiều nhất là "${topCatName}".`;
     const specificPrompt = `Dữ liệu đầu vào:
