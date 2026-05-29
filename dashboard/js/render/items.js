@@ -5,15 +5,69 @@
  ───────────────────────────────────────────────── */
 
 let currentTopItems = [];
-let itemsCurrentPage = 1;
-let itemsPerPage = 20;
 let itemsChartInstance = null;
 let itemsEventsInitialized = false;
+
+function resolveCategory(itemName, rawCatId) {
+  if (typeof resolveItemCategory === 'function') {
+    return resolveItemCategory(itemName, rawCatId);
+  }
+  return resolveCatLabel({ id: rawCatId, name: rawCatId });
+}
 
 function renderTopItems(ti) {
   currentTopItems = ti || [];
   
-  // Dynamically populate categories in the select element
+  // Set date slider bounds dynamically based on d.ol
+  const d = window.currentDashData || {};
+  const orders = d.ol || [];
+  
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
+  const dateMin = document.getElementById('date-min-input');
+  const dateMax = document.getElementById('date-max-input');
+  
+  // 1. Initialize Date Slider bounds
+  if (orders.length > 0 && dateMin && dateMax) {
+    const timestamps = orders.map(o => o.t).filter(t => t > 0);
+    if (timestamps.length > 0) {
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+      
+      dateMin.min = minTs;
+      dateMin.max = maxTs;
+      dateMin.value = minTs;
+      
+      dateMax.min = minTs;
+      dateMax.max = maxTs;
+      dateMax.value = maxTs;
+    }
+  }
+  
+  // 2. Initialize Price Slider bounds
+  let maxPriceVal = 5000000; // default 5M
+  if (currentTopItems.length > 0) {
+    const prices = currentTopItems.map(item => item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s));
+    const highestItemPrice = Math.max(...prices, 0);
+    if (highestItemPrice > 0) {
+      maxPriceVal = Math.ceil(highestItemPrice / 100000) * 100000;
+    }
+  }
+  
+  if (priceMin && priceMax) {
+    priceMin.min = 0;
+    priceMin.max = maxPriceVal;
+    priceMin.value = 0;
+    
+    priceMax.min = 0;
+    priceMax.max = maxPriceVal;
+    priceMax.value = maxPriceVal;
+    
+    const stepVal = maxPriceVal >= 10000000 ? 100000 : 10000;
+    priceMin.step = stepVal;
+    priceMax.step = stepVal;
+  }
+  
   populateCategorySelect();
   
   if (!itemsEventsInitialized) {
@@ -21,6 +75,7 @@ function renderTopItems(ti) {
     itemsEventsInitialized = true;
   }
   
+  updateSliderTracks();
   renderTopItemsList();
   
   reveal(document.getElementById('card-items'));
@@ -33,11 +88,10 @@ function populateCategorySelect() {
   
   const savedValue = catSelect.value || "all";
   
-  // Gather unique category labels
   const categoriesSet = new Set();
   currentTopItems.forEach(item => {
     if (item.cat) {
-      const resolved = resolveCatLabel({ name: item.cat, id: item.cat });
+      const resolved = resolveCategory(item.n, item.cat);
       if (resolved && resolved !== 'Khác' && resolved !== '🏷️ Khác') {
         categoriesSet.add(resolved);
       }
@@ -50,13 +104,10 @@ function populateCategorySelect() {
   sortedCategories.forEach(cat => {
     html += `<option value="${escHtml(cat)}">${escHtml(cat)}</option>`;
   });
-  
-  // Append Uncategorized / Others option at the bottom if applicable
   html += `<option value="🏷️ Khác">🏷️ Khác</option>`;
   
   catSelect.innerHTML = html;
   
-  // Restore previous selection if valid
   if (Array.from(catSelect.options).some(opt => opt.value === savedValue)) {
     catSelect.value = savedValue;
   } else {
@@ -66,24 +117,131 @@ function populateCategorySelect() {
 
 function initItemsEvents() {
   const catSelect = document.getElementById('items-cat-select');
-  const priceSelect = document.getElementById('items-price-select');
   const sortSelect = document.getElementById('items-sort-select');
-  const limitSelect = document.getElementById('items-limit-select');
   const discountCheckbox = document.getElementById('items-discount-checkbox');
   
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
+  const dateMin = document.getElementById('date-min-input');
+  const dateMax = document.getElementById('date-max-input');
+  
   const triggerReRender = () => {
-    itemsCurrentPage = 1;
     renderTopItemsList();
   };
   
   catSelect?.addEventListener('change', triggerReRender);
-  priceSelect?.addEventListener('change', triggerReRender);
   sortSelect?.addEventListener('change', triggerReRender);
-  limitSelect?.addEventListener('change', (e) => {
-    itemsPerPage = parseInt(e.target.value, 10) || 20;
+  discountCheckbox?.addEventListener('change', triggerReRender);
+  
+  priceMin?.addEventListener('input', () => {
+    updateSliderTracks();
     triggerReRender();
   });
-  discountCheckbox?.addEventListener('change', triggerReRender);
+  priceMax?.addEventListener('input', () => {
+    updateSliderTracks();
+    triggerReRender();
+  });
+  dateMin?.addEventListener('input', () => {
+    updateSliderTracks();
+    triggerReRender();
+  });
+  dateMax?.addEventListener('input', () => {
+    updateSliderTracks();
+    triggerReRender();
+  });
+}
+
+function updateSliderTracks() {
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
+  const priceRange = document.getElementById('price-slider-range');
+  
+  if (priceMin && priceMax && priceRange) {
+    const minVal = parseInt(priceMin.value, 10);
+    const maxVal = parseInt(priceMax.value, 10);
+    const maxLimit = parseInt(priceMin.max, 10) || 1;
+    
+    if (minVal > maxVal) {
+      priceMin.value = maxVal;
+    }
+    
+    const leftPct = (priceMin.value / maxLimit) * 100;
+    const rightPct = 100 - (priceMax.value / maxLimit) * 100;
+    priceRange.style.left = leftPct + '%';
+    priceRange.style.right = rightPct + '%';
+    
+    document.getElementById('price-range-label').textContent = `${fmtVND(priceMin.value)} - ${fmtVND(priceMax.value)}`;
+  }
+
+  const dateMin = document.getElementById('date-min-input');
+  const dateMax = document.getElementById('date-max-input');
+  const dateRange = document.getElementById('date-slider-range');
+  
+  if (dateMin && dateMax && dateRange) {
+    const minVal = parseInt(dateMin.value, 10);
+    const maxVal = parseInt(dateMax.value, 10);
+    const minLimit = parseInt(dateMin.min, 10);
+    const maxLimit = parseInt(dateMin.max, 10);
+    const range = maxLimit - minLimit || 1;
+    
+    if (minVal > maxVal) {
+      dateMin.value = maxVal;
+    }
+    
+    const leftPct = ((dateMin.value - minLimit) / range) * 100;
+    const rightPct = 100 - ((dateMax.value - minLimit) / range) * 100;
+    dateRange.style.left = leftPct + '%';
+    dateRange.style.right = rightPct + '%';
+    
+    document.getElementById('date-range-label').textContent = `${fmtVnDate(dateMin.value)} - ${fmtVnDate(dateMax.value)}`;
+  }
+}
+
+function getFilteredAndAggregatedItems() {
+  const d = window.currentDashData || {};
+  const orders = d.ol || [];
+  
+  const dateMinEl = document.getElementById('date-min-input');
+  const dateMaxEl = document.getElementById('date-max-input');
+  
+  if (orders.length > 0 && dateMinEl && dateMaxEl) {
+    const minTs = parseInt(dateMinEl.value, 10);
+    const maxTs = parseInt(dateMaxEl.value, 10);
+    
+    const filteredOrders = orders.filter(o => o.t && o.t >= minTs && o.t <= maxTs && o.f > 0);
+    
+    const map = {};
+    const localCatCache = {};
+    for (const o of filteredOrders) {
+      const name = o.n || "Sản phẩm không tên";
+      const key = name.toLowerCase().substring(0, 120);
+      if (!map[key]) {
+        if (!localCatCache[key]) {
+          localCatCache[key] = resolveCategory(name, o.c);
+        }
+        const cat = localCatCache[key];
+        
+        map[key] = {
+          n: name,
+          s: 0,
+          c: 0,
+          cat: cat,
+          op: o.r || o.f,
+          dp: o.f
+        };
+      }
+      map[key].s += o.f || 0;
+      map[key].c += 1;
+      
+      if (o.f < map[key].dp) {
+        map[key].dp = o.f;
+        map[key].op = o.r || o.f;
+      }
+    }
+    return Object.values(map);
+  }
+  
+  return currentTopItems;
 }
 
 function renderTopItemsList() {
@@ -91,31 +249,33 @@ function renderTopItemsList() {
   if (!list) return;
 
   const catSelect = document.getElementById('items-cat-select');
-  const priceSelect = document.getElementById('items-price-select');
   const sortSelect = document.getElementById('items-sort-select');
-  const limitSelect = document.getElementById('items-limit-select');
   const discountCheckbox = document.getElementById('items-discount-checkbox');
   
+  const priceMinEl = document.getElementById('price-min-input');
+  const priceMaxEl = document.getElementById('price-max-input');
+  
   const category = catSelect ? catSelect.value : "all";
-  const priceRange = priceSelect ? priceSelect.value : "all";
   const sortOrder = sortSelect ? sortSelect.value : "spend_desc";
-  const limit = parseInt(limitSelect ? limitSelect.value : "20", 10) || 20;
   const onlyDiscount = discountCheckbox ? discountCheckbox.checked : false;
   
-  // 1. Filter dataset in-memory
-  let filtered = currentTopItems.filter(item => {
+  const minPrice = priceMinEl ? parseInt(priceMinEl.value, 10) : 0;
+  const maxPrice = priceMaxEl ? parseInt(priceMaxEl.value, 10) : Infinity;
+  
+  // 1. Dynamically retrieve aggregated items based on date slider range
+  const activeItems = getFilteredAndAggregatedItems();
+  
+  // 2. Filter aggregated items
+  let filtered = activeItems.filter(item => {
     // Category Filter
     if (category !== "all") {
-      const resolved = resolveCatLabel({ name: item.cat, id: item.cat });
+      const resolved = resolveCategory(item.n, item.cat);
       if (resolved !== category) return false;
     }
     
-    // Price segment Filter based on average purchased price
+    // Price Range Filter
     const avgPrice = item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s);
-    if (priceRange === "under100k" && avgPrice >= 100000) return false;
-    if (priceRange === "100k-500k" && (avgPrice < 100000 || avgPrice >= 500000)) return false;
-    if (priceRange === "500k-2m" && (avgPrice < 500000 || avgPrice >= 2000000)) return false;
-    if (priceRange === "over2m" && avgPrice < 2000000) return false;
+    if (avgPrice < minPrice || avgPrice > maxPrice) return false;
     
     // Discount Filter
     if (onlyDiscount) {
@@ -126,7 +286,7 @@ function renderTopItemsList() {
     return true;
   });
   
-  // 2. Sort dataset in-memory
+  // 3. Sort filtered items
   filtered.sort((a, b) => {
     const avgA = a.dp && a.dp > 0 ? a.dp : (a.c > 0 ? a.s / a.c : a.s);
     const avgB = b.dp && b.dp > 0 ? b.dp : (b.c > 0 ? b.s / b.c : b.s);
@@ -139,43 +299,32 @@ function renderTopItemsList() {
     if (sortOrder === "avg_desc") return avgB - avgA;
     if (sortOrder === "save_desc") return saveB - saveA;
     
-    return b.s - a.s; // default
+    return b.s - a.s;
   });
   
-  // 3. Render quick statistics
+  // 4. Slice to fixed Top 25 products
+  const displayItems = filtered.slice(0, 25);
+  
+  // Render quick stats
   const quickStatsEl = document.getElementById('items-quick-stats');
   if (quickStatsEl) {
-    const totalSpendFiltered = filtered.reduce((sum, item) => sum + item.s, 0);
-    quickStatsEl.textContent = `Tổng: ${fmtNum(filtered.length)} SP · Chi tiêu: ${fmtVND(totalSpendFiltered)}`;
+    const totalSpendFiltered = displayItems.reduce((sum, item) => sum + item.s, 0);
+    quickStatsEl.textContent = `Hiện ${fmtNum(displayItems.length)}/${fmtNum(filtered.length)} SP · Chi tiêu: ${fmtVND(totalSpendFiltered)}`;
   }
   
-  // 4. Handle pagination slicing
-  const totalItems = filtered.length;
-  const totalPages = Math.ceil(totalItems / limit);
-  
-  if (itemsCurrentPage > totalPages) itemsCurrentPage = totalPages;
-  if (itemsCurrentPage < 1) itemsCurrentPage = 1;
-  
-  const startIdx = (itemsCurrentPage - 1) * limit;
-  const pageItems = filtered.slice(startIdx, startIdx + limit);
-  
-  if (pageItems.length === 0) {
+  if (displayItems.length === 0) {
     list.innerHTML = '<div class="no-data">Không có dữ liệu sản phẩm phù hợp bộ lọc</div>';
-    const paginationEl = document.getElementById('items-pagination');
-    if (paginationEl) paginationEl.innerHTML = '';
     updateTopItemsChart([]);
     return;
   }
   
-  // Determine maximum spending in the filtered subset to normalize the bar width
-  const maxS = Math.max(...filtered.map(i => i.s), 1);
+  const maxS = Math.max(...displayItems.map(i => i.s), 1);
   
-  list.innerHTML = pageItems.map((item, idx) => {
-    const absoluteRank = startIdx + idx + 1;
+  list.innerHTML = displayItems.map((item, idx) => {
+    const rank = idx + 1;
     const pct = Math.round((item.s / maxS) * 100);
     const hasDiscount = item.op && item.dp && item.op > item.dp;
     
-    // Save metric
     const savings = hasDiscount ? (item.op - item.dp) * item.c : 0;
     const savingsText = savings > 0 
       ? ` · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND(savings)}</span>`
@@ -187,7 +336,7 @@ function renderTopItemsList() {
 
     return `
       <div class="top-row in">
-        <div class="top-num">${absoluteRank}</div>
+        <div class="top-num">${rank}</div>
         <div class="top-name-wrap">
           <div class="top-name" title="${escHtml(item.n)}">${escHtml(capFirst(item.n))}</div>
           <div class="top-bar-wrap"><div class="top-bar-fill" style="width: ${pct}%"></div></div>
@@ -197,49 +346,9 @@ function renderTopItemsList() {
       </div>`;
   }).join('');
   
-  // Render pagination buttons
-  const paginationEl = document.getElementById('items-pagination');
-  renderItemsTablePagination(paginationEl, totalPages, limit);
-  
-  // 5. Update top 10 chart based on filtered list
-  const chartItems = filtered.slice(0, 10);
+  // 5. Update top 10 chart based on displayItems
+  const chartItems = displayItems.slice(0, 10);
   updateTopItemsChart(chartItems);
-}
-
-function renderItemsTablePagination(pagination, totalPages, limit) {
-  if (!pagination) return;
-  if (totalPages <= 1) { pagination.innerHTML = ""; return; }
-
-  let pagesHtml = "";
-  pagesHtml += `<button class="pill${itemsCurrentPage === 1 ? " disabled" : ""}" data-page="${itemsCurrentPage - 1}" ${itemsCurrentPage === 1 ? "disabled" : ""}>← Trước</button>`;
-
-  const maxPagesToShow = 5;
-  let startPage = Math.max(1, itemsCurrentPage - 2);
-  let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-  if (endPage - startPage + 1 < maxPagesToShow) startPage = Math.max(1, endPage - maxPagesToShow + 1);
-
-  if (startPage > 1) {
-    pagesHtml += `<button class="pill" data-page="1">1</button>`;
-    if (startPage > 2) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
-  }
-  for (let p = startPage; p <= endPage; p++) {
-    pagesHtml += `<button class="pill${p === itemsCurrentPage ? " active" : ""}" data-page="${p}">${p}</button>`;
-  }
-  if (endPage < totalPages) {
-    if (endPage < totalPages - 1) pagesHtml += `<span style="color:var(--muted);align-self:center;">...</span>`;
-    pagesHtml += `<button class="pill" data-page="${totalPages}">${totalPages}</button>`;
-  }
-
-  pagesHtml += `<button class="pill${itemsCurrentPage === totalPages ? " disabled" : ""}" data-page="${itemsCurrentPage + 1}" ${itemsCurrentPage === totalPages ? "disabled" : ""}>Sau →</button>`;
-  pagination.innerHTML = pagesHtml;
-
-  pagination.querySelectorAll("button[data-page]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      itemsCurrentPage = parseInt(btn.getAttribute("data-page"), 10);
-      renderTopItemsList();
-      document.getElementById("card-items")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  });
 }
 
 function updateTopItemsChart(chartItems) {
@@ -256,7 +365,6 @@ function updateTopItemsChart(chartItems) {
     return;
   }
   
-  // Capitalize first letter and truncate names to look neat in chart labels
   const labels = chartItems.map(item => {
     const name = capFirst(item.n);
     return name.length > 25 ? name.substring(0, 25) + '...' : name;
@@ -287,7 +395,6 @@ function updateTopItemsChart(chartItems) {
     valFormatter = fmtVND;
   }
   
-  // Custom orange gradient theme consistent with Shopee style
   const colors = [
     'rgba(238, 77, 45, 0.85)',
     'rgba(238, 77, 45, 0.80)',
@@ -317,7 +424,7 @@ function updateTopItemsChart(chartItems) {
       }]
     },
     options: {
-      indexAxis: 'y', // Makes it a horizontal bar chart
+      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
       plugins: {

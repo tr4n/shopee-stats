@@ -239,30 +239,17 @@
             <span id="items-quick-stats" style="font-size: 12.5px; font-weight: normal; color: var(--muted);"></span>
           </div>
 
-          <!-- Filter Control Panel (No Search Bar) -->
+          <!-- Filter Control Panel (No Search Bar, Price dropdown replaced by Slider below, displays fixed Top 25) -->
           <div class="items-filter-row" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;">
-            <select id="items-cat-select" class="limit-select" style="flex: 1.5; min-width: 130px;">
+            <select id="items-cat-select" class="limit-select" style="flex: 2; min-width: 150px;">
               <option value="all">Tất cả danh mục</option>
             </select>
-            <select id="items-price-select" class="limit-select" style="flex: 1.2; min-width: 120px;">
-              <option value="all">Mọi phân khúc giá</option>
-              <option value="under100k">Dưới 100k</option>
-              <option value="100k-500k">100k - 500k</option>
-              <option value="500k-2m">500k - 2tr</option>
-              <option value="over2m">Trên 2tr</option>
-            </select>
-            <select id="items-sort-select" class="limit-select" style="flex: 1; min-width: 110px;">
+            <select id="items-sort-select" class="limit-select" style="flex: 1; min-width: 120px;">
               <option value="spend_desc" selected>Thực chi ↓</option>
               <option value="spend_asc">Thực chi ↑</option>
               <option value="count_desc">Lượt mua ↓</option>
               <option value="avg_desc">Đơn giá TB ↓</option>
               <option value="save_desc">Tiết kiệm ↓</option>
-            </select>
-            <select id="items-limit-select" class="limit-select" style="min-width: 90px;">
-              <option value="10">Hiện 10</option>
-              <option value="20" selected>Hiện 20</option>
-              <option value="50">Hiện 50</option>
-              <option value="100">Hiện 100</option>
             </select>
             <label class="checkbox-label" style="font-size: 12px; white-space: nowrap; user-select: none; display: flex; align-items: center; gap: 4px;">
               <input type="checkbox" id="items-discount-checkbox" style="width: 14px; height: 14px;" />
@@ -270,8 +257,38 @@
             </label>
           </div>
 
+          <!-- Dual Sliders Row for Price and Date Range -->
+          <div class="items-sliders-row" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; padding: 4px 0;">
+            <!-- Price Slider Group -->
+            <div class="slider-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--muted);">
+                <span>KHOẢNG GIÁ ĐƠN VỊ</span>
+                <span id="price-range-label" style="color: var(--primary); font-variant-numeric: tabular-nums;">0đ - 10trđ</span>
+              </div>
+              <div class="double-slider-wrap" style="position: relative; height: 20px; margin-top: 2px;">
+                <div class="slider-track" style="position: absolute; top: 6px; left: 0; right: 0; height: 5px; background: var(--border); border-radius: 3px; z-index: 1;"></div>
+                <div id="price-slider-range" style="position: absolute; top: 6px; height: 5px; background: var(--primary); border-radius: 3px; z-index: 2;"></div>
+                <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+                <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+              </div>
+            </div>
+
+            <!-- Date Slider Group -->
+            <div class="slider-group" style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--muted);">
+                <span>KHOẢNG THỜI GIAN MUA HÀNG</span>
+                <span id="date-range-label" style="color: var(--primary); font-variant-numeric: tabular-nums;">--/--/---- - --/--/----</span>
+              </div>
+              <div class="double-slider-wrap" style="position: relative; height: 20px; margin-top: 2px;">
+                <div class="slider-track" style="position: absolute; top: 6px; left: 0; right: 0; height: 5px; background: var(--border); border-radius: 3px; z-index: 1;"></div>
+                <div id="date-slider-range" style="position: absolute; top: 6px; height: 5px; background: var(--primary); border-radius: 3px; z-index: 2;"></div>
+                <input type="range" id="date-min-input" min="0" max="100" value="0" step="1" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+                <input type="range" id="date-max-input" min="0" max="100" value="100" step="1" style="position: absolute; width: 100%; top: 0; left: 0; pointer-events: none; background: transparent; -webkit-appearance: none; z-index: 3;" />
+              </div>
+            </div>
+          </div>
+
           <div class="top-list" id="items-list"></div>
-          <div id="items-pagination" class="orders-pagination" style="display: flex; justify-content: center; gap: 8px; margin-top: 20px;"></div>
         </div>
 
         <div class="card" id="card-items-chart">
