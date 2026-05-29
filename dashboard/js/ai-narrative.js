@@ -396,39 +396,34 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, aut
   const ck = cacheKey || cardId;
   const cached = _getInsightText(ck);
 
-  // Serve from cache — render profile + cached AI narrative
-  if (cached !== null) {
-    aiEl.innerHTML = renderAIInsight(cached, cardId, profile);
-    aiEl.style.display = '';
-    _aiAvailabilityPromise.then(avail => {
-      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
-      if (refreshBtn) refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
-    });
-    return;
-  }
-
-  // No cache — if profile available render archetype+traits immediately
-  if (profile) {
-    aiEl.innerHTML = renderAIInsight(null, cardId, profile);
-    aiEl.style.display = '';
-  } else {
-    aiEl.style.display = 'none';
-    aiEl.innerHTML = '';
-  }
-
-  if (_aiInsightDisabled) {
-    if (!profile) _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
-    return;
-  }
+  // Hide initially to prevent flickering or showing AI features when not available
+  aiEl.style.display = 'none';
+  aiEl.innerHTML = '';
 
   _aiAvailabilityPromise.then(avail => {
     if (!avail || _aiInsightDisabled) {
-      if (!profile) _tryRuleBasedFallback(aiEl, cardId, fallbackFn);
+      aiEl.style.display = 'none';
+      aiEl.innerHTML = '';
       return;
     }
 
-    if (profile || autoRun) {
-      // Profile shown OR auto-run: skip analyze button, go directly to AI
+    // Serve from cache — render profile + cached AI narrative
+    if (cached !== null) {
+      aiEl.innerHTML = renderAIInsight(cached, cardId, profile);
+      aiEl.style.display = '';
+      const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+      if (refreshBtn) {
+        refreshBtn.style.display = (avail && !_aiInsightDisabled) ? '' : 'none';
+      }
+      return;
+    }
+
+    if (autoRun) {
+      // Auto-run enabled: show loading/profile immediately and run AI
+      if (profile) {
+        aiEl.innerHTML = renderAIInsight(null, cardId, profile);
+      }
+      aiEl.style.display = '';
       setTimeout(() => {
         const stillEmpty = _getInsightText(ck) === null;
         if (stillEmpty && !_aiInsightRunning.has(cardId) && !_aiInsightDisabled) {
@@ -436,9 +431,9 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, aut
         }
       }, profile ? 100 : 600);
     } else {
-      // No profile, not auto-run: show analyze button
-      aiEl.style.display = '';
+      // Show analyze button, don't auto-run
       aiEl.innerHTML = renderAnalyzeButton(cardId);
+      aiEl.style.display = '';
     }
   });
 }
@@ -484,7 +479,8 @@ async function _executeAIInsight(cardId) {
   const ck = args.cacheKey || cardId;
 
   if (profile) {
-    // Two-step: profile already shown — add inline loading in the narrative zone
+    // Clear the analyze button and render profile structure first (includes archetype and traits)
+    aiEl.innerHTML = renderAIInsight(null, cardId, profile);
     let narrativeEl = aiEl.querySelector('.ai-narrative');
     if (!narrativeEl) {
       aiEl.insertAdjacentHTML('beforeend',
@@ -1196,34 +1192,43 @@ function analyzeShoppingPersonality(d) {
 // 2.9 Show rule-based profile on non-AI sections (no AI call)
 // sectionType: 'monthly' | 'categories' | 'sales' | 'items'
 function showProfileInsight(cardId, profile, sectionType) {
-  if (!profile) return;
   const aiEl = document.getElementById(cardId + '-ai');
   if (!aiEl) return;
 
-  // Filter traits relevant to this section
-  const relevantKeys = SECTION_TRAITS[sectionType];
-  let displayTraits = profile.traits.slice(0, 2);
-  if (relevantKeys) {
-    const filtered = profile.traits.filter(t => relevantKeys.includes(t.key));
-    if (filtered.length > 0) {
-      displayTraits = filtered.slice(0, 2);
-    } else {
-      // Fallback: try to build traits directly from section-relevant builders
-      const fallback = [];
-      const dataCtx = profile.dataCtx || {};
-      for (const k of relevantKeys) {
-        if (fallback.length >= 2) break;
-        if (!TRAIT_BUILDERS[k]) continue;
-        const t = TRAIT_BUILDERS[k](dataCtx);
-        if (t) fallback.push({ key: k, ...t });
-      }
-      if (fallback.length > 0) displayTraits = fallback;
+  _aiAvailabilityPromise.then(avail => {
+    if (!avail || _aiInsightDisabled) {
+      aiEl.style.display = 'none';
+      aiEl.innerHTML = '';
+      return;
     }
-  }
 
-  const sectionProfile = { ...profile, traits: displayTraits };
-  aiEl.innerHTML = renderCompactProfile(sectionProfile);
-  aiEl.style.display = '';
+    if (!profile) return;
+
+    // Filter traits relevant to this section
+    const relevantKeys = SECTION_TRAITS[sectionType];
+    let displayTraits = profile.traits.slice(0, 2);
+    if (relevantKeys) {
+      const filtered = profile.traits.filter(t => relevantKeys.includes(t.key));
+      if (filtered.length > 0) {
+        displayTraits = filtered.slice(0, 2);
+      } else {
+        // Fallback: try to build traits directly from section-relevant builders
+        const fallback = [];
+        const dataCtx = profile.dataCtx || {};
+        for (const k of relevantKeys) {
+          if (fallback.length >= 2) break;
+          if (!TRAIT_BUILDERS[k]) continue;
+          const t = TRAIT_BUILDERS[k](dataCtx);
+          if (t) fallback.push({ key: k, ...t });
+        }
+        if (fallback.length > 0) displayTraits = fallback;
+      }
+    }
+
+    const sectionProfile = { ...profile, traits: displayTraits };
+    aiEl.innerHTML = renderCompactProfile(sectionProfile);
+    aiEl.style.display = '';
+  });
 }
 
 window.analyzeShoppingPersonality = analyzeShoppingPersonality;

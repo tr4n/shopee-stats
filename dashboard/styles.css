@@ -1160,7 +1160,7 @@ body {
 }
 
 .insight-ai-body--appear {
-  animation: ai-fadeInUp 0.35s ease both;
+  /* No fade-in animation */
 }
 
 .insight-ai-sentence {
@@ -1204,7 +1204,6 @@ body {
   letter-spacing: 0.3px;
   transition: opacity 0.2s, transform 0.15s;
   white-space: nowrap;
-  animation: ai-pulse-once 1.2s ease 2s forwards;
 }
 
 .ai-analyze-btn:hover {
@@ -1385,7 +1384,7 @@ body {
 }
 
 .ai-narrative--appear {
-  animation: ai-fadeInUp 0.35s ease both;
+  /* No fade-in animation */
 }
 
 .ai-narrative-label {

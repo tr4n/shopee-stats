@@ -1049,7 +1049,7 @@ function setupDashboardRatingCard(d) {
         specificPrompt,
         "insight-yearly-all",
         null,
-        true,
+        false,
         profile,
       );
     }
