@@ -287,19 +287,18 @@ function isAIFatalError(error) {
 }
 
 function hideAllAIButtons() {
-  // Hide all main analyze buttons/wrappers
   document.querySelectorAll('.ai-analyze-wrap').forEach(el => {
     el.style.display = 'none';
   });
-  // Remove all refresh buttons
   document.querySelectorAll('.ai-refresh-btn').forEach(el => {
     el.remove();
   });
-  // Also hide empty AI containers (without generated or cached text sentences)
+  // Hide containers that have NO content at all (no AI sentences AND no profile card)
   document.querySelectorAll('.insight-ai').forEach(el => {
-    if (!el.querySelector('.insight-ai-sentence')) {
-      el.style.display = 'none';
-    }
+    const hasContent = el.querySelector('.insight-ai-sentence') ||
+                       el.querySelector('.ai-archetype') ||
+                       el.querySelector('.ai-traits');
+    if (!hasContent) el.style.display = 'none';
   });
 }
 
@@ -525,12 +524,14 @@ async function _executeAIInsight(cardId) {
 
   const session = await getAIInsightSession();
   if (!session || typeof session.prompt !== 'function') {
-    if (profile) {
-      const narrativeEl = aiEl.querySelector('.ai-narrative');
-      if (narrativeEl) narrativeEl.remove();
-    } else {
+    // Remove loading indicator, keep profile visible
+    const narrativeEl = aiEl.querySelector('.ai-narrative');
+    if (narrativeEl) narrativeEl.remove();
+    if (!profile) {
       aiEl.classList.remove('loading');
-      aiEl.innerHTML = renderAnalyzeButton(cardId);
+      // Only show analyze button if AI might become available later
+      if (!_aiInsightDisabled) aiEl.innerHTML = renderAnalyzeButton(cardId);
+      else aiEl.style.display = 'none';
     }
     _aiInsightRunning.delete(cardId);
     return;
@@ -549,6 +550,7 @@ async function _executeAIInsight(cardId) {
         );
         narrativeEl = aiEl.querySelector('.ai-narrative');
       }
+      if (!narrativeEl) { _aiInsightRunning.delete(cardId); return; } // guard
       const narrativeBody = narrativeEl.querySelector('.ai-narrative-body');
 
       if (typeof session.promptStreaming === 'function') {
@@ -562,12 +564,14 @@ async function _executeAIInsight(cardId) {
         if (narrativeBody && resultText) narrativeBody.innerHTML = renderSentencesHTML(resultText.trim());
       }
 
-      if (resultText && resultText.trim()) {
-        _saveInsightText(ck, resultText.trim());
+      const finalText = resultText ? resultText.trim() : '';
+      if (finalText) {
+        _saveInsightText(ck, finalText);
         narrativeEl.classList.add('ai-narrative--appear');
         const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
         if (refreshBtn) refreshBtn.style.display = '';
       } else {
+        // No AI output — remove the narrative section but keep the profile card visible
         narrativeEl.remove();
       }
     } else {
@@ -605,8 +609,14 @@ async function _executeAIInsight(cardId) {
     if (isAIFatalError(e)) {
       _aiInsightDisabled = true;
       _aiInsightSession = null;
-      aiEl.innerHTML = '';
-      aiEl.style.display = 'none';
+      if (profile) {
+        // Preserve profile card — just remove the narrative section
+        const narrativeEl = aiEl.querySelector('.ai-narrative');
+        if (narrativeEl) narrativeEl.remove();
+      } else {
+        aiEl.innerHTML = '';
+        aiEl.style.display = 'none';
+      }
       hideAllAIButtons();
     } else {
       if (profile) {
