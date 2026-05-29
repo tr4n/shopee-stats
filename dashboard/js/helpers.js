@@ -116,7 +116,7 @@ function renderSentencesHTML(text) {
       // Remove leading list markdown elements like *, -, •, +
       cleaned = cleaned.replace(/^[\*\-\+•]\s*/, '');
       // Remove leading "Nhận xét:" or "AI nhận xét:" or similar prefixes
-      cleaned = cleaned.replace(/^(Nhận xét|AI nhận xét|Nhận xét AI|Kết quả)\s*:\s*/i, '');
+      cleaned = cleaned.replace(/^(Nhận xét|AI nhận xét|Nhận xét AI|Vũ trụ phán|Kết quả)\s*:\s*/i, '');
       return cleaned.trim();
     })
     .filter(s => s.length > 0 && /\p{L}|\d/u.test(s));
@@ -160,7 +160,7 @@ function renderAIInsight(text, cardId, profile) {
     : '';
 
   const narrativeHtml = (text && text.trim())
-    ? `<div class="ai-narrative"><div class="ai-narrative-label">AI nhận xét</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`
+    ? `<div class="ai-narrative"><div class="ai-narrative-label">Vũ trụ phán</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`
     : '';
 
   const orderNote = profile.totalOrders > 0
