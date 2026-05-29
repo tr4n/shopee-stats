@@ -1078,6 +1078,7 @@ body {
   transition: all 0.2s ease-in-out;
   flex-shrink: 0;
   white-space: nowrap;
+  display: none;
 }
 
 .ai-refresh-btn:hover {
@@ -1235,8 +1236,15 @@ body {
 
 /* ── AI body fade-in animation ───────────────── */
 @keyframes ai-fadeInUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Streaming body — no initial animation, grows progressively */
@@ -1247,9 +1255,17 @@ body {
 
 /* Pulse attention cue on analyze button — runs once after 2s */
 @keyframes ai-pulse-once {
-  0%   { box-shadow: 0 0 0 0 rgba(38, 170, 153, 0.5); }
-  60%  { box-shadow: 0 0 0 8px rgba(38, 170, 153, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(38, 170, 153, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(38, 170, 153, 0.5);
+  }
+
+  60% {
+    box-shadow: 0 0 0 8px rgba(38, 170, 153, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(38, 170, 153, 0);
+  }
 }
 
 /* ── Rule-based fallback badge ───────────────── */
@@ -2017,7 +2033,7 @@ body {
   margin-bottom: 20px;
   font-size: 12.5px;
   color: var(--muted);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
   line-height: 1.5;
   max-width: fit-content;
 }
