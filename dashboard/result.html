@@ -266,13 +266,12 @@
                     <option value="spend_desc" selected>Thực chi ↓</option>
                     <option value="spend_asc">Thực chi ↑</option>
                     <option value="count_desc">Lượt mua ↓</option>
-                    <option value="avg_desc">Đơn giá TB ↓</option>
                     <option value="save_desc">Tiết kiệm ↓</option>
                   </select>
                 </div>
 
                 <button type="button" id="btn-toggle-advanced" class="filter-toggle-btn btn-advanced-toggle">
-                  📅 Lọc thời gian <span class="arrow">▼</span>
+                  🎛️ Bộ lọc sâu <span class="arrow">▼</span>
                 </button>
               </div>
             </div>
@@ -280,17 +279,56 @@
             <!-- Collapsible Range Sliders Drawer -->
             <div class="advanced-filters-panel" id="advanced-filters-panel">
               <div class="advanced-filters-grid">
-                <!-- Date Range Filter -->
+                <!-- Price Range Filter with Histogram & Pills -->
+                <div class="slider-group">
+                  <div class="slider-header">
+                    <span class="slider-title">Khoảng giá trị mua</span>
+                    <span id="price-range-label">0đ - 10trđ</span>
+                  </div>
+                  
+                  <!-- Dynamic Histogram -->
+                  <div id="price-histogram" class="histogram-container"></div>
+                  
+                  <div class="double-slider-wrap">
+                    <div class="slider-track"></div>
+                    <div id="price-slider-range" class="slider-range"></div>
+                    <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" />
+                    <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" />
+                  </div>
+                  
+                  <!-- Quick Select Price Pills -->
+                  <div class="quick-pills-row">
+                    <span class="quick-pill active" data-price-range="all">Tất cả</span>
+                    <span class="quick-pill" data-price-range="0-50000">&lt; 50k</span>
+                    <span class="quick-pill" data-price-range="50000-200000">50k-200k</span>
+                    <span class="quick-pill" data-price-range="200000-1000000">200k-1M</span>
+                    <span class="quick-pill" data-price-range="1000000-max">&gt; 1M</span>
+                  </div>
+                </div>
+
+                <!-- Date Range Filter with Histogram & Pills -->
                 <div class="slider-group">
                   <div class="slider-header">
                     <span class="slider-title">Khoảng thời gian mua</span>
                     <span id="date-range-label">--/--/---- - --/--/----</span>
                   </div>
+                  
+                  <!-- Dynamic Histogram -->
+                  <div id="date-histogram" class="histogram-container"></div>
+                  
                   <div class="double-slider-wrap">
                     <div class="slider-track"></div>
                     <div id="date-slider-range" class="slider-range"></div>
                     <input type="range" id="date-min-input" min="0" max="100" value="0" step="1" />
                     <input type="range" id="date-max-input" min="0" max="100" value="100" step="1" />
+                  </div>
+                  
+                  <!-- Quick Select Date Pills -->
+                  <div class="quick-pills-row">
+                    <span class="quick-pill active" data-date-range="all">Tất cả</span>
+                    <span class="quick-pill" data-date-range="30">30 ngày qua</span>
+                    <span class="quick-pill" data-date-range="180">6 tháng qua</span>
+                    <span class="quick-pill" data-date-range="365">1 năm qua</span>
                   </div>
                 </div>
               </div>

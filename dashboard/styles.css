@@ -2415,7 +2415,7 @@ body {
 }
 
 .advanced-filters-panel.show {
-  max-height: 200px;
+  max-height: 280px;
   opacity: 1;
   margin-top: 16px;
   padding-top: 16px;
@@ -2431,10 +2431,10 @@ body {
 @media (max-width: 768px) {
   .advanced-filters-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 24px;
   }
   .advanced-filters-panel.show {
-    max-height: 350px;
+    max-height: 520px;
   }
 }
 
@@ -2463,4 +2463,60 @@ body {
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Histograms above range sliders ──────────── */
+.histogram-container {
+  display: flex;
+  align-items: flex-end;
+  height: 36px;
+  margin-top: 6px;
+  padding: 0 4px;
+  width: 100%;
+}
+
+.hist-bar {
+  flex: 1;
+  background: var(--border);
+  margin: 0 1px;
+  border-radius: 2px 2px 0 0;
+  opacity: 0.25;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.hist-bar.active {
+  background: var(--primary);
+  opacity: 0.85;
+}
+
+/* ── Quick-select Pills ──────────────────────── */
+.quick-pills-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.quick-pill {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.quick-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.quick-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
 }

@@ -52,10 +52,20 @@ function renderTopItems(ti) {
   const advancedPanel = document.getElementById('advanced-filters-panel');
   if (advancedPanel) advancedPanel.classList.remove('show');
 
+  // Reset custom quick pills active states
+  document.querySelectorAll('.quick-pill[data-price-range]').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-price-range') === 'all');
+  });
+  document.querySelectorAll('.quick-pill[data-date-range]').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-date-range') === 'all');
+  });
+
   // Set date slider bounds dynamically based on d.ol
   const d = window.currentDashData || {};
   const orders = d.ol || [];
   
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
   
@@ -75,8 +85,33 @@ function renderTopItems(ti) {
       dateMax.value = maxTs;
     }
   }
+
+  // 2. Initialize Price Slider bounds
+  let maxPriceVal = 5000000; // default 5M
+  if (currentTopItems.length > 0) {
+    const prices = currentTopItems.map(item => item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s));
+    const highestItemPrice = Math.max(...prices, 0);
+    if (highestItemPrice > 0) {
+      maxPriceVal = Math.ceil(highestItemPrice / 100000) * 100000;
+    }
+  }
+  
+  if (priceMin && priceMax) {
+    priceMin.min = 0;
+    priceMin.max = maxPriceVal;
+    priceMin.value = 0;
+    
+    priceMax.min = 0;
+    priceMax.max = maxPriceVal;
+    priceMax.value = maxPriceVal;
+    
+    const stepVal = maxPriceVal >= 10000000 ? 100000 : 10000;
+    priceMin.step = stepVal;
+    priceMax.step = stepVal;
+  }
   
   populateCategorySelect();
+  populatePriceAndDateHistograms();
   
   if (!itemsEventsInitialized) {
     initItemsEvents();
@@ -87,6 +122,66 @@ function renderTopItems(ti) {
   renderTopItemsList();
   
   reveal(document.getElementById('card-items'));
+}
+
+function populatePriceAndDateHistograms() {
+  const items = currentTopItems;
+  const d = window.currentDashData || {};
+  const orders = d.ol || [];
+
+  // Price Histogram (based on unit prices of items)
+  const priceContainer = document.getElementById('price-histogram');
+  if (priceContainer && items.length > 0) {
+    const prices = items.map(item => item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s));
+    const priceMinEl = document.getElementById('price-min-input');
+    const maxPrice = priceMinEl ? (parseInt(priceMinEl.max, 10) || 1) : Math.max(...prices, 1);
+    
+    // Create 25 buckets
+    const bucketCount = 25;
+    const bucketSize = maxPrice / bucketCount;
+    const buckets = Array(bucketCount).fill(0);
+    
+    prices.forEach(p => {
+      const idx = Math.min(Math.floor(p / bucketSize), bucketCount - 1);
+      buckets[idx]++;
+    });
+    
+    const maxBucketVal = Math.max(...buckets, 1);
+    
+    priceContainer.innerHTML = buckets.map((count) => {
+      const height = (count / maxBucketVal) * 100;
+      const displayHeight = height > 0 ? Math.max(height, 8) : 2;
+      return `<div class="hist-bar active" style="height: ${displayHeight}%;"></div>`;
+    }).join('');
+  }
+
+  // Date Histogram (based on orders)
+  const dateContainer = document.getElementById('date-histogram');
+  if (dateContainer && orders.length > 0) {
+    const timestamps = orders.map(o => o.t).filter(t => t > 0);
+    if (timestamps.length > 0) {
+      const minTs = Math.min(...timestamps);
+      const maxTs = Math.max(...timestamps);
+      const range = maxTs - minTs || 1;
+      
+      const bucketCount = 25;
+      const bucketSize = range / bucketCount;
+      const buckets = Array(bucketCount).fill(0);
+      
+      timestamps.forEach(t => {
+        const idx = Math.min(Math.floor((t - minTs) / bucketSize), bucketCount - 1);
+        buckets[idx]++;
+      });
+      
+      const maxBucketVal = Math.max(...buckets, 1);
+      
+      dateContainer.innerHTML = buckets.map((count) => {
+        const height = (count / maxBucketVal) * 100;
+        const displayHeight = height > 0 ? Math.max(height, 8) : 2;
+        return `<div class="hist-bar active" style="height: ${displayHeight}%;"></div>`;
+      }).join('');
+    }
+  }
 }
 
 function populateCategorySelect() {
@@ -129,6 +224,8 @@ function initItemsEvents() {
   const toggleAdvancedBtn = document.getElementById('btn-toggle-advanced');
   const advancedPanel = document.getElementById('advanced-filters-panel');
   
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
   
@@ -150,13 +247,77 @@ function initItemsEvents() {
     advancedPanel?.classList.toggle('show');
   });
 
+  const clearQuickPricePills = () => {
+    document.querySelectorAll('.quick-pill[data-price-range]').forEach(p => p.classList.remove('active'));
+  };
+
+  const clearQuickDatePills = () => {
+    document.querySelectorAll('.quick-pill[data-date-range]').forEach(p => p.classList.remove('active'));
+  };
+
+  priceMin?.addEventListener('input', () => {
+    clearQuickPricePills();
+    updateSliderTracks();
+    triggerReRender();
+  });
+  priceMax?.addEventListener('input', () => {
+    clearQuickPricePills();
+    updateSliderTracks();
+    triggerReRender();
+  });
   dateMin?.addEventListener('input', () => {
+    clearQuickDatePills();
     updateSliderTracks();
     triggerReRender();
   });
   dateMax?.addEventListener('input', () => {
+    clearQuickDatePills();
     updateSliderTracks();
     triggerReRender();
+  });
+
+  // Bind Quick Select Price Pills
+  document.querySelectorAll('.quick-pill[data-price-range]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      if (!priceMin || !priceMax) return;
+      clearQuickPricePills();
+      pill.classList.add('active');
+      
+      const range = pill.getAttribute('data-price-range');
+      if (range === 'all') {
+        priceMin.value = priceMin.min;
+        priceMax.value = priceMax.max;
+      } else {
+        const [min, max] = range.split('-');
+        priceMin.value = min;
+        priceMax.value = max === 'max' ? priceMax.max : max;
+      }
+      updateSliderTracks();
+      triggerReRender();
+    });
+  });
+
+  // Bind Quick Select Date Pills
+  document.querySelectorAll('.quick-pill[data-date-range]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      if (!dateMin || !dateMax) return;
+      clearQuickDatePills();
+      pill.classList.add('active');
+      
+      const range = pill.getAttribute('data-date-range');
+      if (range === 'all') {
+        dateMin.value = dateMin.min;
+        dateMax.value = dateMax.max;
+      } else {
+        const days = parseInt(range, 10);
+        const maxTs = parseInt(dateMax.max, 10);
+        const minTs = maxTs - (days * 24 * 60 * 60 * 1000);
+        dateMin.value = Math.max(minTs, parseInt(dateMin.min, 10));
+        dateMax.value = maxTs;
+      }
+      updateSliderTracks();
+      triggerReRender();
+    });
   });
 
   if (searchInput) {
@@ -195,6 +356,41 @@ function initItemsEvents() {
 }
 
 function updateSliderTracks() {
+  const priceMin = document.getElementById('price-min-input');
+  const priceMax = document.getElementById('price-max-input');
+  const priceRange = document.getElementById('price-slider-range');
+  
+  if (priceMin && priceMax && priceRange) {
+    const minVal = parseInt(priceMin.value, 10);
+    const maxVal = parseInt(priceMax.value, 10);
+    const maxLimit = parseInt(priceMin.max, 10) || 1;
+    
+    if (minVal > maxVal) {
+      priceMin.value = maxVal;
+    }
+    
+    const leftPct = (priceMin.value / maxLimit) * 100;
+    const rightPct = 100 - (priceMax.value / maxLimit) * 100;
+    priceRange.style.left = leftPct + '%';
+    priceRange.style.right = rightPct + '%';
+    
+    document.getElementById('price-range-label').textContent = `${fmtVND(priceMin.value)} - ${fmtVND(priceMax.value)}`;
+
+    // Update active class on price histogram bars
+    const priceBars = document.querySelectorAll('#price-histogram .hist-bar');
+    if (priceBars.length > 0) {
+      const bucketCount = priceBars.length;
+      const bucketSize = maxLimit / bucketCount;
+      priceBars.forEach((bar, idx) => {
+        const barPrice = idx * bucketSize;
+        if (barPrice >= minVal && barPrice <= maxVal) {
+          bar.classList.add('active');
+        } else {
+          bar.classList.remove('active');
+        }
+      });
+    }
+  }
 
   const dateMin = document.getElementById('date-min-input');
   const dateMax = document.getElementById('date-max-input');
@@ -217,6 +413,21 @@ function updateSliderTracks() {
     dateRange.style.right = rightPct + '%';
     
     document.getElementById('date-range-label').textContent = `${fmtVnDate(dateMin.value)} - ${fmtVnDate(dateMax.value)}`;
+
+    // Update active class on date histogram bars
+    const dateBars = document.querySelectorAll('#date-histogram .hist-bar');
+    if (dateBars.length > 0) {
+      const bucketCount = dateBars.length;
+      const bucketSize = range / bucketCount;
+      dateBars.forEach((bar, idx) => {
+        const barTs = minLimit + (idx * bucketSize);
+        if (barTs >= minVal && barTs <= maxVal) {
+          bar.classList.add('active');
+        } else {
+          bar.classList.remove('active');
+        }
+      });
+    }
   }
 }
 
@@ -282,8 +493,14 @@ function renderTopItemsList() {
   const catSelect = document.getElementById('items-cat-select');
   const sortSelect = document.getElementById('items-sort-select');
   
+  const priceMinEl = document.getElementById('price-min-input');
+  const priceMaxEl = document.getElementById('price-max-input');
+  
   const category = catSelect ? catSelect.value : "all";
   const sortOrder = sortSelect ? sortSelect.value : "spend_desc";
+  
+  const minPrice = priceMinEl ? parseInt(priceMinEl.value, 10) : 0;
+  const maxPrice = priceMaxEl ? parseInt(priceMaxEl.value, 10) : Infinity;
   
   // 1. Dynamically retrieve aggregated items based on date slider range
   const activeItems = getFilteredAndAggregatedItems();
@@ -295,6 +512,10 @@ function renderTopItemsList() {
       const resolved = resolveCategory(item.n, item.cat);
       if (resolved !== category) return false;
     }
+    
+    // Price Range Filter
+    const avgPrice = item.dp && item.dp > 0 ? item.dp : (item.c > 0 ? item.s / item.c : item.s);
+    if (avgPrice < minPrice || avgPrice > maxPrice) return false;
     
     return true;
   });
@@ -317,7 +538,6 @@ function renderTopItemsList() {
     if (sortOrder === "spend_desc") return b.s - a.s;
     if (sortOrder === "spend_asc") return a.s - b.s;
     if (sortOrder === "count_desc") return b.c - a.c;
-    if (sortOrder === "avg_desc") return avgB - avgA;
     if (sortOrder === "save_desc") return saveB - saveA;
     
     return b.s - a.s;
