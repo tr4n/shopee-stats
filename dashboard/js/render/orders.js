@@ -278,6 +278,10 @@ function applyFiltersAndRender() {
   renderSalesProfileCard(stats);
   
   renderSaleDaysTable(filteredYearOrders);
+
+  // Reveal the hidden cards using the IntersectionObserver
+  reveal(document.getElementById('card-sales-heatmap'));
+  reveal(document.getElementById('card-orders'));
 }
 
 function calculateSalesStats(orders) {
