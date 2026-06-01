@@ -3088,6 +3088,7 @@ body {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   position: relative;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .heatmap-day:hover {
@@ -3097,7 +3098,7 @@ body {
 }
 
 /* Level colors for heatmap density */
-.heatmap-day.lvl-0 { background-color: var(--border); opacity: 0.3; }
+.heatmap-day.lvl-0 { background-color: var(--dark); opacity: 1; }
 .heatmap-day.lvl-1 { background-color: rgba(238, 77, 45, 0.15); }
 .heatmap-day.lvl-2 { background-color: rgba(238, 77, 45, 0.35); }
 .heatmap-day.lvl-3 { background-color: rgba(238, 77, 45, 0.65); }
@@ -3115,7 +3116,7 @@ body {
   height: 10px;
   border-radius: 2px;
 }
-.heatmap-legend-color.lvl-0 { background-color: var(--border); opacity: 0.3; }
+.heatmap-legend-color.lvl-0 { background-color: var(--dark); opacity: 1; }
 .heatmap-legend-color.lvl-1 { background-color: rgba(238, 77, 45, 0.15); }
 .heatmap-legend-color.lvl-2 { background-color: rgba(238, 77, 45, 0.35); }
 .heatmap-legend-color.lvl-3 { background-color: rgba(238, 77, 45, 0.65); }
