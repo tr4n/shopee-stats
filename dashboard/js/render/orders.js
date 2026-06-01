@@ -16,7 +16,6 @@ let ordersCurrentPage = 1;
 let ordersSearchQuery = "";
 let ordersCatFilter = "all";
 let ordersEventsBound = false;
-let ordersActiveDateFilter = null; // 'YYYY-MM-DD' | null — set by clicking heatmap
 
 let salesDistributionChart = null;
 let salesSpendSavingsChart = null;
@@ -144,7 +143,6 @@ function renderOrders(ol) {
   ordersActiveType = 'all';
   ordersActiveHour = null;
   ordersActiveCat = null;
-  ordersActiveDateFilter = null;
   ordersCurrentPage = 1;
   
   ordersSearchQuery = "";
@@ -249,9 +247,6 @@ function renderOrdersYearPills() {
       ordersActiveType = 'all'; // Reset interactive card filter
       ordersActiveHour = null;
       ordersActiveCat = null;
-      ordersActiveDateFilter = null; // Reset heatmap date filter
-      // Clear heatmap selection highlight
-      document.querySelectorAll('.heatmap-day--selected').forEach(el => el.classList.remove('heatmap-day--selected'));
       ordersCurrentPage = 1;
       applyFiltersAndRender();
     });
@@ -278,14 +273,11 @@ function applyFiltersAndRender() {
   renderSalesInsights(stats);
   renderSalesProductList(filteredYearOrders);
   
-  // Heatmap and Shopper profile upgrades
-  renderSalesHeatmap(filteredYearOrders);
   renderSalesProfileCard(stats);
-  
+
   renderSaleDaysTable(filteredYearOrders);
 
   // Reveal the hidden cards using the IntersectionObserver
-  reveal(document.getElementById('card-sales-heatmap'));
   reveal(document.getElementById('card-orders'));
 }
 
@@ -809,13 +801,6 @@ function getFilteredSaleOrders(filteredYearOrders) {
       if (resolvedCat !== ordersActiveCat) return false;
     }
 
-    // Apply date filter from heatmap click
-    if (ordersActiveDateFilter !== null) {
-      const p = toVnParts(o.t);
-      const dayKey = `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
-      if (dayKey !== ordersActiveDateFilter) return false;
-    }
-
     // Apply table search filter
     if (ordersSearchQuery.trim()) {
       const q = removeVnAccents(ordersSearchQuery);
@@ -1066,7 +1051,7 @@ function renderSaleDaysTable(filteredYearOrders) {
 
   if (!tbody) return;
 
-  const isDetailMode = ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null || ordersActiveDateFilter !== null;
+  const isDetailMode = ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null;
 
   // Show/Hide table filters row and bind event listeners
   const filtersRow = document.getElementById('orders-filters-row');
@@ -1097,12 +1082,6 @@ function renderSaleDaysTable(filteredYearOrders) {
       const colors = getCategoryColor(ordersActiveCat);
       badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:${colors.bg};color:${colors.fg};font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">🏷️ ${escHtml(ordersActiveCat)}</span>`);
     }
-    if (ordersActiveDateFilter) {
-      // Format YYYY-MM-DD → DD/MM/YYYY
-      const [fy, fm, fd] = ordersActiveDateFilter.split('-');
-      const dateDisp = `${fd}/${fm}/${fy}`;
-      badges.push(`<span class="filter-badge" style="display:inline-flex;align-items:center;background:rgba(238,77,45,0.10);color:#ee4d2d;font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;line-height:1;">📅 ${dateDisp}</span>`);
-    }
 
     if (badges.length > 0) {
       titleHtml += ': ' + badges.join(' ');
@@ -1116,7 +1095,6 @@ function renderSaleDaysTable(filteredYearOrders) {
         ordersActiveHour = null;
         ordersActiveCat = null;
         ordersActiveType = 'all';
-        ordersActiveDateFilter = null;
         ordersCurrentPage = 1;
         ordersSearchQuery = "";
         ordersCatFilter = "all";
@@ -1126,8 +1104,6 @@ function renderSaleDaysTable(filteredYearOrders) {
         if (searchClear) searchClear.style.display = 'none';
         const catSelect = document.getElementById('orders-cat-select');
         if (catSelect) catSelect.value = "all";
-        // Also clear heatmap selection highlight
-        document.querySelectorAll('.heatmap-day--selected').forEach(el => el.classList.remove('heatmap-day--selected'));
         applyFiltersAndRender();
       });
     }
@@ -1446,303 +1422,6 @@ function bindOrdersFiltersEvents(filteredYearOrders) {
   ordersEventsBound = true;
 }
 
-function renderSalesHeatmap(orders) {
-  const container = document.getElementById('sales-calendar-heatmap');
-  if (!container) return;
-
-  // ── Build day → count and day → spend maps ──
-  const dayMap = {};
-  const spendMap = {};
-  orders.forEach(o => {
-    if (!o.t || o.t <= 0 || !(o.f > 0)) return;
-    const p = toVnParts(o.t);
-    const key = `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
-    dayMap[key] = (dayMap[key] || 0) + 1;
-    spendMap[key] = (spendMap[key] || 0) + (o.f || 0);
-  });
-
-  const maxCount = Math.max(1, ...Object.values(dayMap));
-
-  // ── Calculate start/end dates ──
-  let startDate, endDate;
-  if (ordersActiveYear !== 'all') {
-    const yearNum = parseInt(ordersActiveYear, 10);
-    startDate = new Date(yearNum, 0, 1, 0, 0, 0, 0);
-    endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999);
-  } else {
-    const timestamps = orders.map(o => o.t).filter(t => t > 0);
-    let maxTs = timestamps.length > 0 ? Math.max(...timestamps) : Math.floor(Date.now() / 1000);
-    endDate = new Date(maxTs * 1000);
-    endDate.setHours(23, 59, 59, 999);
-    startDate = new Date(endDate.getTime() - 364 * 24 * 60 * 60 * 1000);
-    startDate.setHours(0, 0, 0, 0);
-  }
-
-  // ── Compute Mini Stats ──
-  const allDayKeys = Object.keys(dayMap);
-  const activeDays = allDayKeys.length;
-  let specialDays = 0;
-  allDayKeys.forEach(k => {
-    // parse YYYY-MM-DD
-    const [y, m, d] = k.split('-').map(Number);
-    const fakeTs = Math.floor(new Date(y, m - 1, d, 12).getTime() / 1000);
-    const t = getSaleTypeFromTs(fakeTs);
-    if (t === 'double' || t === 'mid' || t === 'end') specialDays++;
-  });
-
-  // Longest streak (consecutive active days)
-  let maxStreak = 0, streak = 0;
-  const sortedKeys = allDayKeys.slice().sort();
-  for (let i = 0; i < sortedKeys.length; i++) {
-    if (i === 0) { streak = 1; }
-    else {
-      const prev = new Date(sortedKeys[i - 1]);
-      const cur = new Date(sortedKeys[i]);
-      const diff = Math.round((cur - prev) / 86400000);
-      streak = diff === 1 ? streak + 1 : 1;
-    }
-    if (streak > maxStreak) maxStreak = streak;
-  }
-
-  // Average days with orders per week (over the visible range)
-  const totalDays = Math.round((endDate - startDate) / 86400000) + 1;
-  const totalWeeks = Math.max(1, totalDays / 7);
-  const avgPerWeek = (activeDays / totalWeeks).toFixed(1);
-
-  // Render mini stats bar
-  const miniStatsEl = document.getElementById('heatmap-mini-stats');
-  if (miniStatsEl) {
-    miniStatsEl.innerHTML = [
-      `<span class="heatmap-stat-chip chip-highlight">
-        <span class="chip-label">🔥 Ngày có đơn</span>
-        <span class="chip-val">${activeDays}</span>
-      </span>`,
-      specialDays > 0 ? `<span class="heatmap-stat-chip chip-highlight">
-        <span class="chip-label">⚡ Ngày sale đặc biệt</span>
-        <span class="chip-val">${specialDays}</span>
-      </span>` : '',
-      maxStreak >= 2 ? `<span class="heatmap-stat-chip chip-green">
-        <span class="chip-label">🌊 Streak dài nhất</span>
-        <span class="chip-val">${maxStreak} ngày</span>
-      </span>` : '',
-      `<span class="heatmap-stat-chip chip-blue">
-        <span class="chip-label">📅 Trung bình</span>
-        <span class="chip-val">${avgPerWeek} ngày/tuần</span>
-      </span>`,
-    ].join('');
-  }
-
-  // ── Adjust startDate to start on Sunday ──
-  const startDayOfWeek = startDate.getDay();
-  let cur = new Date(startDate.getTime());
-  cur.setHours(0, 0, 0, 0);
-  cur.setDate(cur.getDate() - startDayOfWeek);
-
-  const weeks = [];
-  let currentWeek = [];
-
-  while (cur <= endDate || currentWeek.length > 0) {
-    if (currentWeek.length === 0) {
-      weeks.push(currentWeek);
-    }
-
-    const isWithinRange = cur >= startDate && cur <= endDate;
-    const yyyy = cur.getFullYear();
-    const mm = String(cur.getMonth() + 1).padStart(2, '0');
-    const dd = String(cur.getDate()).padStart(2, '0');
-    const key = `${yyyy}-${mm}-${dd}`;
-    const count = isWithinRange ? (dayMap[key] || 0) : 0;
-    const spend = isWithinRange ? (spendMap[key] || 0) : 0;
-    const ts = Math.floor(cur.getTime() / 1000);
-    const saleType = isWithinRange ? getSaleTypeFromTs(ts) : 'regular';
-    const isSpecial = isWithinRange && (saleType === 'double' || saleType === 'mid' || saleType === 'end');
-
-    // Vietnamese day of week label
-    const DOW_VI = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    const dowLabel = DOW_VI[cur.getDay()];
-
-    currentWeek.push({
-      key, count, spend,
-      dateLabel: `${dd}/${mm}/${yyyy}`,
-      dowLabel,
-      isSpecial,
-      saleType,
-      isWithinRange,
-      dayOfWeek: cur.getDay()
-    });
-
-    if (currentWeek.length === 7) {
-      currentWeek = [];
-    }
-
-    cur.setDate(cur.getDate() + 1);
-  }
-
-  // ── Month label spans ──
-  const monthSpans = [];
-  let currentMonthName = '';
-  let currentSpan = 0;
-  const MONTH_NAMES = ['Thg 1','Thg 2','Thg 3','Thg 4','Thg 5','Thg 6','Thg 7','Thg 8','Thg 9','Thg 10','Thg 11','Thg 12'];
-
-  weeks.forEach((wk, index) => {
-    const middleDay = wk.find(d => d.isWithinRange) || wk[3] || wk[0];
-    const dateParts = middleDay.dateLabel.split('/');
-    const monthNum = parseInt(dateParts[1], 10);
-    const monthName = MONTH_NAMES[monthNum - 1] || 'Không rõ';
-
-    if (monthName !== currentMonthName) {
-      if (currentSpan > 0) monthSpans.push({ name: currentMonthName, span: currentSpan });
-      currentMonthName = monthName;
-      currentSpan = 1;
-    } else {
-      currentSpan++;
-    }
-    if (index === weeks.length - 1) monthSpans.push({ name: currentMonthName, span: currentSpan });
-  });
-
-  // Cell width: 14px cell + 4px gap = 18px per week column
-  const CELL_W = 18;
-
-  let monthsHtml = '<div class="heatmap-months-row">';
-  monthSpans.forEach(m => {
-    monthsHtml += `<div class="heatmap-month-label" style="width: ${m.span * CELL_W}px;">${m.name}</div>`;
-  });
-  monthsHtml += '</div>';
-
-  let gridHtml = '<div class="heatmap-grid-row">';
-  weeks.forEach(wk => {
-    gridHtml += '<div class="heatmap-week">';
-    wk.forEach(day => {
-      if (!day.isWithinRange) {
-        gridHtml += '<div class="heatmap-day" style="visibility: hidden;"></div>';
-        return;
-      }
-
-      let level = 0;
-      if (day.count > 0) {
-        if (maxCount === 1) level = 4;
-        else if (maxCount === 2) level = day.count === 1 ? 2 : 4;
-        else if (maxCount === 3) level = day.count === 1 ? 1 : day.count === 2 ? 3 : 4;
-        else if (maxCount === 4) level = day.count;
-        else {
-          const ratio = day.count / maxCount;
-          if (ratio <= 0.25) level = 1;
-          else if (ratio <= 0.5) level = 2;
-          else if (ratio <= 0.75) level = 3;
-          else level = 4;
-        }
-      }
-
-      const specialClass = day.isSpecial ? ' special-day' : '';
-      const saleTypeAttr = day.isSpecial ? ` data-sale-type="${day.saleType}"` : '';
-      const isSelected = ordersActiveDateFilter === day.key ? ' heatmap-day--selected' : '';
-
-      gridHtml += `<div class="heatmap-day lvl-${level}${specialClass}${isSelected}" data-date="${day.key}" data-count="${day.count}" data-spend="${day.spend}"${saleTypeAttr}></div>`;
-    });
-    gridHtml += '</div>';
-  });
-  gridHtml += '</div>';
-
-  let html = '<div class="heatmap-scroll-wrap">';
-  html += monthsHtml;
-  html += gridHtml;
-  html += '</div>';
-  container.innerHTML = html;
-
-  // ── Rich Tooltip + Click handler ──
-  const SALE_TYPE_CONFIG = {
-    double: { label: '🎁 Ngày Đôi', color: '#ee4d2d', bg: 'rgba(238,77,45,0.25)' },
-    mid:    { label: '🌗 Giữa Tháng', color: '#26aa99', bg: 'rgba(38,170,153,0.25)' },
-    end:    { label: '💰 Lương Về', color: '#3b82f6', bg: 'rgba(59,130,246,0.25)' },
-  };
-
-  const daysEls = container.querySelectorAll('.heatmap-day[data-date]');
-  daysEls.forEach(el => {
-    const dateKey = el.getAttribute('data-date');
-    const count = parseInt(el.getAttribute('data-count') || '0', 10);
-    const spend = parseInt(el.getAttribute('data-spend') || '0', 10);
-    const saleType = el.getAttribute('data-sale-type');
-    const saleConf = SALE_TYPE_CONFIG[saleType];
-
-    // Parse dateKey → display label
-    const [y, m, d] = dateKey.split('-');
-    const dateObj = new Date(+y, +m - 1, +d);
-    const DOW_FULL = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
-    const dateDisplayLabel = `${d}/${m}/${y} · ${DOW_FULL[dateObj.getDay()]}`;
-
-    // ── Hover: show rich tooltip ──
-    el.addEventListener('mouseenter', (e) => {
-      let tooltip = document.getElementById('heatmap-tooltip');
-      if (!tooltip) {
-        tooltip = document.createElement('div');
-        tooltip.id = 'heatmap-tooltip';
-        tooltip.className = 'heatmap-tooltip';
-        document.body.appendChild(tooltip);
-      }
-
-      let html = `<div class="tt-date">${dateDisplayLabel}</div>`;
-
-      if (count === 0) {
-        html += `<div class="tt-row"><span class="tt-icon">📭</span> Không có đơn hàng</div>`;
-      } else {
-        html += `<div class="tt-row"><span class="tt-icon">🛍️</span> <strong>${count}</strong> đơn hàng</div>`;
-        if (spend > 0) {
-          html += `<div class="tt-row"><span class="tt-icon">💰</span> ${fmtVND(spend)}</div>`;
-        }
-      }
-
-      if (saleConf) {
-        html += `<div class="tt-tag" style="background:${saleConf.bg};color:${saleConf.color};">${saleConf.label}</div>`;
-      }
-
-      tooltip.innerHTML = html;
-      tooltip.style.display = 'block';
-
-      const rect = el.getBoundingClientRect();
-      // Position above the cell, centred
-      tooltip.style.left = (rect.left + window.scrollX + (rect.width / 2) - (tooltip.offsetWidth / 2)) + 'px';
-      tooltip.style.top = (rect.top + window.scrollY - tooltip.offsetHeight - 8) + 'px';
-    });
-
-    el.addEventListener('mouseleave', () => {
-      const tooltip = document.getElementById('heatmap-tooltip');
-      if (tooltip) tooltip.style.display = 'none';
-    });
-
-    // ── Click: filter table by this date ──
-    el.addEventListener('click', () => {
-      // Toggle off if clicking already-selected date
-      if (ordersActiveDateFilter === dateKey) {
-        ordersActiveDateFilter = null;
-        el.classList.remove('heatmap-day--selected');
-      } else {
-        // Remove previous selection
-        container.querySelectorAll('.heatmap-day--selected').forEach(prev => prev.classList.remove('heatmap-day--selected'));
-        ordersActiveDateFilter = dateKey;
-        el.classList.add('heatmap-day--selected');
-      }
-
-      // Reset pagination and re-render table only (not full re-render)
-      ordersCurrentPage = 1;
-      ordersActiveType = 'all';
-      ordersActiveHour = null;
-      ordersActiveCat = null;
-
-      const filteredYearOrders = currentOrders.filter(o => {
-        if (ordersActiveYear !== 'all' && o.t) {
-          return String(getVnYear(o.t)) === ordersActiveYear;
-        }
-        return true;
-      });
-
-      renderSaleDaysTable(filteredYearOrders);
-
-      // Scroll to orders table
-      const ordersCard = document.getElementById('card-orders');
-      if (ordersCard) ordersCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    });
-  });
-}
 
 function renderSalesProfileCard(stats) {
   const profileCard = document.getElementById('card-sales-profile');
