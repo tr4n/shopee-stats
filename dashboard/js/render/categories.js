@@ -253,6 +253,10 @@ function showCatItems(catName, ti) {
   
   if (detailGrid) detailGrid.style.display = 'grid';
 
+  // Restore the display style of the items card in case it was hidden when switching years
+  const catItemsCard = document.getElementById('card-cat-items');
+  if (catItemsCard) catItemsCard.style.display = '';
+
   // Render product list
   renderCatItemsList();
 

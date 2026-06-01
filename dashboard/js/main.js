@@ -1322,10 +1322,15 @@ function setupDashboardRatingCard(d) {
           sub.textContent = `Danh mục năm ${year} · dữ liệu top 20 sản phẩm/tháng`;
       }
 
-      document.getElementById("card-cat-items").style.display = "none";
-      document
-        .querySelectorAll("#cat-bars .cat-row")
-        .forEach((r) => r.classList.remove("cat-row-active"));
+      // Clear category selection when switching year to clean up the UI
+      if (typeof window.clearCategorySelection === 'function') {
+        window.clearCategorySelection();
+      } else {
+        document.getElementById("card-cat-items").style.display = "none";
+        document
+          .querySelectorAll("#cat-bars .cat-row")
+          .forEach((r) => r.classList.remove("cat-row-active"));
+      }
 
       renderCategories(cs, ti, total, year);
       renderInsightCard(
