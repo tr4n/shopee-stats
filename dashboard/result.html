@@ -350,6 +350,12 @@
         </div>
         <div class="pill-row" id="cat-year-pills" style="margin-bottom: 0; align-items: flex-end; flex-shrink: 0"></div>
       </div>
+
+      <!-- Categories KPI Row -->
+      <div class="kpi-row" id="cat-kpi-row" style="margin-bottom: 20px;">
+        <!-- KPI Cards will be injected dynamically -->
+      </div>
+
       <div class="grid-2">
         <div class="card" id="card-cat-pie">
           <div class="card-title">🍩 Tỷ Lệ Chi Tiêu</div>
@@ -364,15 +370,49 @@
         </div>
       </div>
 
-      <div class="insight-card" id="insight-categories" style="display: none">
+      <div class="insight-card" id="insight-categories" style="display: none; margin-top: 20px;">
         <div class="insight-title">📊 Phân Tích & Nhận Xét Danh Mục</div>
         <ul class="insight-list" id="insight-categories-list"></ul>
       </div>
-      <div class="card" id="card-cat-items" style="display: none">
-        <div class="card-title" id="cat-items-title">
-          🏷️ Sản Phẩm Danh Mục
+
+      <!-- Category detail grid: Trend Chart & Product list side-by-side -->
+      <div class="grid-2" id="cat-detail-grid" style="display: none; margin-top: 20px;">
+        <div class="card" id="card-cat-trend" style="margin-bottom: 0;">
+          <div class="card-title" id="cat-trend-title">📈 Xu Hướng Chi Tiêu Tháng</div>
+          <div class="chart-wrap tall"><canvas id="chart-cat-trend"></canvas></div>
         </div>
-        <div id="cat-items-list"></div>
+        <div class="card" id="card-cat-items" style="margin-bottom: 0;">
+          <div class="card-title" id="cat-items-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+            <span>🏷️ Sản Phẩm Danh Mục</span>
+          </div>
+          
+          <!-- Compact Filters for Category Items -->
+          <div class="filter-container" style="margin-bottom: 15px; background: transparent; padding: 0; border: none;">
+            <div class="filter-main-row" style="gap: 8px; flex-wrap: wrap;">
+              <div class="filter-search-box" style="flex: 1; min-width: 140px;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="cat-items-search-input" placeholder="Tìm sản phẩm..." />
+                <button id="cat-items-search-clear" style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
+              </div>
+              <div class="select-wrapper">
+                <span class="select-icon">⚡</span>
+                <select id="cat-items-sort-select" class="limit-select">
+                  <option value="spend_desc" selected>Thực chi ↓</option>
+                  <option value="spend_asc">Thực chi ↑</option>
+                  <option value="count_desc">Lượt mua ↓</option>
+                  <option value="save_desc">Tiết kiệm ↓</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="top-list" id="cat-items-list"></div>
+          
+          <!-- Load More Button for Category Items -->
+          <div class="load-more-wrap" style="text-align: center; margin-top: 15px;">
+            <button id="cat-items-load-more" class="pill" style="display: none; padding: 6px 20px; border-radius: 20px; cursor: pointer; outline: none;">Xem thêm</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -394,6 +434,27 @@
         </span>
       </div>
       <div class="pill-row" id="orders-year-pills"></div>
+
+      <!-- Calendar Heatmap Card -->
+      <div class="card" id="card-sales-heatmap" style="margin-bottom: 20px;">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <span>📅 Bản Đồ Nhiệt Săn Sale</span>
+          <span style="font-size: 12px; font-weight: normal; color: var(--muted);">Tần suất chốt đơn mua hàng hàng ngày</span>
+        </div>
+        <div id="sales-calendar-heatmap" class="heatmap-container">
+          <!-- Calendar heatmap will be generated here -->
+        </div>
+        <div class="heatmap-legend" style="display: flex; justify-content: flex-end; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 12px; flex-wrap: wrap;">
+          <span>Ít đơn</span>
+          <div class="heatmap-legend-color lvl-0"></div>
+          <div class="heatmap-legend-color lvl-1"></div>
+          <div class="heatmap-legend-color lvl-2"></div>
+          <div class="heatmap-legend-color lvl-3"></div>
+          <div class="heatmap-legend-color lvl-4"></div>
+          <span>Nhiều đơn</span>
+          <span style="margin-left: 12px; font-weight: 600;"><span style="color: var(--primary);">■</span> Viền phát sáng: Ngày Sale đặc biệt</span>
+        </div>
+      </div>
 
       <!-- KPI cards comparing the 4 sale types -->
       <div class="kpi-row" id="sales-kpi-row">
@@ -434,6 +495,14 @@
         <ul class="insight-list" id="insight-sales-list"></ul>
       </div>
 
+      <!-- Sale Campaign Profile Card -->
+      <div class="card" id="card-sales-profile" style="display: none; margin-bottom: 20px;">
+        <div class="card-title" id="sales-profile-title">👤 Thẻ Hồ Sơ Săn Sale</div>
+        <div id="sales-profile-content">
+          <!-- Will be dynamically populated -->
+        </div>
+      </div>
+
       <!-- Detailed Sale Day Table -->
       <div class="card" id="card-sales-products" style="display:none; margin-bottom: 20px;">
         <div class="card-title" id="sales-products-title">Top Sản Phẩm Săn Sale</div>
@@ -441,7 +510,7 @@
       </div>
 
       <div class="card" id="card-orders">
-        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
           <span id="sales-detail-title">📅 Chi Tiết Từng Đợt Sale</span>
           <div style="display: flex; gap: 8px;">
             <select id="orders-limit-select" class="limit-select" style="height: 32px;">
@@ -452,6 +521,24 @@
             </select>
           </div>
         </div>
+
+        <!-- Orders Table Filters (Product Search and Category Filter) -->
+        <div id="orders-filters-row" class="filter-container" style="display: none; margin-bottom: 15px; background: transparent; padding: 0; border: none;">
+          <div class="filter-main-row" style="gap: 8px; flex-wrap: wrap;">
+            <div class="filter-search-box" style="flex: 1; min-width: 140px;">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="orders-search-input" placeholder="Tìm sản phẩm săn sale..." />
+              <button id="orders-search-clear" style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
+            </div>
+            <div class="select-wrapper">
+              <span class="select-icon">🏷️</span>
+              <select id="orders-cat-select" class="limit-select">
+                <option value="all">Tất cả danh mục</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="table-wrap" id="orders-table-wrap">
           <table class="table" id="orders-table">
             <thead>

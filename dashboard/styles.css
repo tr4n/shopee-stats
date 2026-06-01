@@ -3032,3 +3032,240 @@ body {
   align-items: center;
   gap: 3px;
 }
+
+/* ==========================================================================
+   Upgrades: Categories and Sales View Styles
+   ========================================================================== */
+
+/* --- Category and Sales KPI Cards interactions --- */
+.kpi.interactive {
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid var(--border);
+}
+
+.kpi.interactive:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.1);
+  background: var(--surface-2, rgba(255, 255, 255, 0.02));
+}
+
+.kpi.interactive.active {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--card) 60%, rgba(238, 77, 45, 0.05) 100%);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.08);
+}
+
+/* --- Calendar Heatmap styling --- */
+.heatmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.heatmap-scroll-wrap {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  min-width: max-content;
+}
+
+.heatmap-week {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heatmap-day {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: var(--border);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.heatmap-day:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Level colors for heatmap density */
+.heatmap-day.lvl-0 { background-color: var(--border); opacity: 0.3; }
+.heatmap-day.lvl-1 { background-color: rgba(238, 77, 45, 0.15); }
+.heatmap-day.lvl-2 { background-color: rgba(238, 77, 45, 0.35); }
+.heatmap-day.lvl-3 { background-color: rgba(238, 77, 45, 0.65); }
+.heatmap-day.lvl-4 { background-color: rgba(238, 77, 45, 1.0); }
+
+/* Glow effect for special sale days */
+.heatmap-day.special-day {
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 4px rgba(238, 77, 45, 0.6);
+}
+
+/* Legend styling */
+.heatmap-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.heatmap-legend-color.lvl-0 { background-color: var(--border); opacity: 0.3; }
+.heatmap-legend-color.lvl-1 { background-color: rgba(238, 77, 45, 0.15); }
+.heatmap-legend-color.lvl-2 { background-color: rgba(238, 77, 45, 0.35); }
+.heatmap-legend-color.lvl-3 { background-color: rgba(238, 77, 45, 0.65); }
+.heatmap-legend-color.lvl-4 { background-color: rgba(238, 77, 45, 1.0); }
+
+/* --- Campaign Profile Card styling --- */
+.sales-profile-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .sales-profile-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+.profile-persona-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-persona-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.profile-persona-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.profile-persona-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.profile-stats-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.profile-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.profile-stat-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.profile-stat-label {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.profile-stat-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* --- Interactive clock widget & Peak hour widget styling --- */
+.sales-adv-item:hover {
+  background: var(--surface-2, rgba(255, 255, 255, 0.02));
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.01);
+}
+
+.sales-adv-item.active {
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.06);
+}
+
+/* Tooltip standard styles */
+.heatmap-tooltip {
+  position: absolute;
+  background: #1e293b;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  white-space: nowrap;
+}
+
+/* --- Category search input and clean button styling --- */
+.filter-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.filter-search-box input {
+  width: 100%;
+  padding: 6px 30px 6px 30px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 12.5px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+.filter-search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-dim);
+}
+.filter-search-box .search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+.filter-search-box button {
+  position: absolute;
+  right: 10px;
+  font-size: 11px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}

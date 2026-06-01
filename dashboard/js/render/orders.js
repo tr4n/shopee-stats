@@ -13,12 +13,25 @@ let ordersActiveHour = null;  // null | 'midnight'|'early'|'morning'|'noon'|'aft
 let ordersActiveCat = null;   // null | category name string
 let ordersCurrentPage = 1;
 
+let ordersSearchQuery = "";
+let ordersCatFilter = "all";
+let ordersEventsBound = false;
+
 let salesDistributionChart = null;
 let salesSpendSavingsChart = null;
 
 // Stats memoization — cleared on new data load, keyed by active year
 let _statsCache = null;
 let _statsCacheYear = null;
+
+function removeVnAccents(str) {
+  return (str || '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
 
 function isDateBlackFriday(tsSec) {
   return isVnBlackFriday(tsSec);
@@ -119,6 +132,8 @@ function resolveItemCategory(itemName, rawCatId) {
   return resolveCatLabel({ id: rawCatId, name: rawCatId });
 }
 
+window.resolveItemCategory = resolveItemCategory;
+
 function renderOrders(ol) {
   currentOrders = (ol || []).map(o => ({
     ...o,
@@ -129,6 +144,17 @@ function renderOrders(ol) {
   ordersActiveHour = null;
   ordersActiveCat = null;
   ordersCurrentPage = 1;
+  
+  ordersSearchQuery = "";
+  ordersCatFilter = "all";
+  
+  const searchInput = document.getElementById('orders-search-input');
+  if (searchInput) searchInput.value = "";
+  const searchClear = document.getElementById('orders-search-clear');
+  if (searchClear) searchClear.style.display = 'none';
+  const catSelect = document.getElementById('orders-cat-select');
+  if (catSelect) catSelect.value = "all";
+
   _statsCache = null;
   _statsCacheYear = null;
 
@@ -246,6 +272,11 @@ function applyFiltersAndRender() {
   renderAdvancedAnalytics(filteredYearOrders, stats);
   renderSalesInsights(stats);
   renderSalesProductList(filteredYearOrders);
+  
+  // Heatmap and Shopper profile upgrades
+  renderSalesHeatmap(filteredYearOrders);
+  renderSalesProfileCard(stats);
+  
   renderSaleDaysTable(filteredYearOrders);
 }
 
@@ -769,6 +800,18 @@ function getFilteredSaleOrders(filteredYearOrders) {
       if (resolvedCat !== ordersActiveCat) return false;
     }
 
+    // Apply table search filter
+    if (ordersSearchQuery.trim()) {
+      const q = removeVnAccents(ordersSearchQuery);
+      if (!removeVnAccents(o.n || "").includes(q)) return false;
+    }
+
+    // Apply table category filter
+    if (ordersCatFilter !== "all") {
+      const resolvedCat = resolveItemCategory(o.n, o.c);
+      if (resolvedCat !== ordersCatFilter) return false;
+    }
+
     return true;
   });
 }
@@ -1009,6 +1052,18 @@ function renderSaleDaysTable(filteredYearOrders) {
 
   const isDetailMode = ordersActiveType !== 'all' || ordersActiveHour !== null || ordersActiveCat !== null;
 
+  // Show/Hide table filters row and bind event listeners
+  const filtersRow = document.getElementById('orders-filters-row');
+  if (filtersRow) {
+    if (isDetailMode) {
+      filtersRow.style.display = 'block';
+      populateOrdersCatSelect(filteredYearOrders);
+      bindOrdersFiltersEvents(filteredYearOrders);
+    } else {
+      filtersRow.style.display = 'none';
+    }
+  }
+
   // ── Build dynamic title with filter badges + clear button ──
   if (detailTitle) {
     let titleHtml = '📅 Chi Tiết Chi Tiêu';
@@ -1040,6 +1095,14 @@ function renderSaleDaysTable(filteredYearOrders) {
         ordersActiveCat = null;
         ordersActiveType = 'all';
         ordersCurrentPage = 1;
+        ordersSearchQuery = "";
+        ordersCatFilter = "all";
+        const searchInput = document.getElementById('orders-search-input');
+        if (searchInput) searchInput.value = "";
+        const searchClear = document.getElementById('orders-search-clear');
+        if (searchClear) searchClear.style.display = 'none';
+        const catSelect = document.getElementById('orders-cat-select');
+        if (catSelect) catSelect.value = "all";
         applyFiltersAndRender();
       });
     }
@@ -1295,3 +1358,281 @@ function renderOrdersTablePagination(pagination, totalPages, filteredYearOrders)
 
 // Expose for classification.js fallback re-render path
 window.renderOrders = renderOrders;
+
+function populateOrdersCatSelect(filteredYearOrders) {
+  const catSelect = document.getElementById('orders-cat-select');
+  if (!catSelect) return;
+  
+  const savedValue = catSelect.value || "all";
+  const categoriesSet = new Set();
+  
+  filteredYearOrders.forEach(o => {
+    if (o.c || o.n) {
+      const resolved = resolveItemCategory(o.n, o.c);
+      if (resolved && resolved !== 'Khác' && resolved !== '🏷️ Khác') {
+        categoriesSet.add(resolved);
+      }
+    }
+  });
+  
+  const sortedCategories = Array.from(categoriesSet).sort();
+  let html = `<option value="all">Tất cả danh mục</option>`;
+  sortedCategories.forEach(cat => {
+    html += `<option value="${escHtml(cat)}">${escHtml(cat)}</option>`;
+  });
+  html += `<option value="🏷️ Khác">🏷️ Khác</option>`;
+  
+  catSelect.innerHTML = html;
+  if (Array.from(catSelect.options).some(opt => opt.value === savedValue)) {
+    catSelect.value = savedValue;
+  } else {
+    catSelect.value = "all";
+  }
+}
+
+function bindOrdersFiltersEvents(filteredYearOrders) {
+  if (ordersEventsBound) return;
+  
+  const searchInput = document.getElementById('orders-search-input');
+  const searchClear = document.getElementById('orders-search-clear');
+  const catSelect = document.getElementById('orders-cat-select');
+  
+  searchInput?.addEventListener('input', (e) => {
+    ordersSearchQuery = e.target.value || "";
+    if (searchClear) searchClear.style.display = ordersSearchQuery ? 'block' : 'none';
+    ordersCurrentPage = 1;
+    renderSaleDaysTable(filteredYearOrders);
+  });
+  
+  searchClear?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = "";
+    ordersSearchQuery = "";
+    if (searchClear) searchClear.style.display = 'none';
+    ordersCurrentPage = 1;
+    renderSaleDaysTable(filteredYearOrders);
+  });
+  
+  catSelect?.addEventListener('change', (e) => {
+    ordersCatFilter = e.target.value || "all";
+    ordersCurrentPage = 1;
+    renderSaleDaysTable(filteredYearOrders);
+  });
+  
+  ordersEventsBound = true;
+}
+
+function renderSalesHeatmap(orders) {
+  const container = document.getElementById('sales-calendar-heatmap');
+  if (!container) return;
+  
+  const dayMap = {};
+  orders.forEach(o => {
+    if (!o.t || o.t <= 0 || !(o.f > 0)) return;
+    const p = toVnParts(o.t);
+    const key = `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')}`;
+    dayMap[key] = (dayMap[key] || 0) + 1;
+  });
+
+  // Calculate start/end dates
+  let startDate, endDate;
+  if (ordersActiveYear !== 'all') {
+    const yearNum = parseInt(ordersActiveYear, 10);
+    startDate = new Date(yearNum, 0, 1);
+    endDate = new Date(yearNum, 11, 31);
+  } else {
+    const timestamps = orders.map(o => o.t).filter(t => t > 0);
+    let maxTs = timestamps.length > 0 ? Math.max(...timestamps) : Math.floor(Date.now() / 1000);
+    endDate = new Date(maxTs * 1000);
+    startDate = new Date(endDate.getTime() - 364 * 24 * 60 * 60 * 1000);
+  }
+
+  // Adjust startDate to start on Sunday
+  const startDayOfWeek = startDate.getDay();
+  let cur = new Date(startDate.getTime());
+  cur.setDate(cur.getDate() - startDayOfWeek);
+
+  const weeks = [];
+  let currentWeek = [];
+
+  while (cur <= endDate || currentWeek.length > 0) {
+    if (currentWeek.length === 0) {
+      weeks.push(currentWeek);
+    }
+    
+    const isWithinRange = cur >= startDate && cur <= endDate;
+    const yyyy = cur.getFullYear();
+    const mm = String(cur.getMonth() + 1).padStart(2, '0');
+    const dd = String(cur.getDate()).padStart(2, '0');
+    const key = `${yyyy}-${mm}-${dd}`;
+    const count = isWithinRange ? (dayMap[key] || 0) : 0;
+    const ts = Math.floor(cur.getTime() / 1000);
+    const saleType = isWithinRange ? getSaleTypeFromTs(ts) : 'regular';
+    const isSpecial = isWithinRange && (saleType === 'double' || saleType === 'mid' || saleType === 'end');
+    
+    currentWeek.push({
+      key,
+      count,
+      dateLabel: `${dd}/${mm}/${yyyy}`,
+      isSpecial,
+      saleType,
+      isWithinRange,
+      dayOfWeek: cur.getDay()
+    });
+    
+    if (currentWeek.length === 7) {
+      currentWeek = [];
+    }
+    
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  let html = '<div class="heatmap-scroll-wrap">';
+  weeks.forEach(wk => {
+    html += '<div class="heatmap-week">';
+    wk.forEach(day => {
+      if (!day.isWithinRange) {
+        html += '<div class="heatmap-day" style="visibility: hidden;"></div>';
+        return;
+      }
+      
+      let level = 0;
+      if (day.count === 0) level = 0;
+      else if (day.count === 1) level = 1;
+      else if (day.count === 2) level = 2;
+      else if (day.count <= 4) level = 3;
+      else level = 4;
+      
+      const specialClass = day.isSpecial ? ' special-day' : '';
+      const campaignName = day.saleType === 'double' ? 'Ngày Đôi' : day.saleType === 'mid' ? 'Giữa Tháng' : 'Lương Về';
+      const titleText = `${day.dateLabel}: ${day.count} đơn` + (day.isSpecial ? ` (${campaignName})` : '');
+      
+      html += `<div class="heatmap-day lvl-${level}${specialClass}" data-date="${day.key}" title="${titleText}"></div>`;
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Custom tooltips on mouseover
+  const daysEls = container.querySelectorAll('.heatmap-day');
+  daysEls.forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const titleText = el.getAttribute('title');
+      if (!titleText) return;
+      el.dataset.title = titleText;
+      el.removeAttribute('title'); // hide native tooltip
+      
+      let tooltip = document.getElementById('heatmap-tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'heatmap-tooltip';
+        tooltip.className = 'heatmap-tooltip';
+        document.body.appendChild(tooltip);
+      }
+      tooltip.textContent = titleText;
+      tooltip.style.display = 'block';
+      
+      const rect = el.getBoundingClientRect();
+      tooltip.style.left = (rect.left + window.scrollX + (rect.width - tooltip.offsetWidth) / 2) + 'px';
+      tooltip.style.top = (rect.top + window.scrollY - tooltip.offsetHeight - 6) + 'px';
+    });
+    
+    el.addEventListener('mouseleave', () => {
+      if (el.dataset.title) {
+        el.setAttribute('title', el.dataset.title);
+      }
+      const tooltip = document.getElementById('heatmap-tooltip');
+      if (tooltip) tooltip.style.display = 'none';
+    });
+  });
+}
+
+function renderSalesProfileCard(stats) {
+  const profileCard = document.getElementById('card-sales-profile');
+  const profileContent = document.getElementById('sales-profile-content');
+  
+  if (ordersActiveType === 'all') {
+    if (profileCard) profileCard.style.display = 'none';
+    return;
+  }
+  
+  if (!profileCard || !profileContent) return;
+  
+  profileCard.style.display = 'block';
+  reveal(profileCard);
+  
+  const s = stats[ordersActiveType];
+  const saved = Math.max(0, s.raw - s.spend);
+  const savingPct = s.raw > 0 ? Math.round((saved / s.raw) * 100) : 0;
+  const aov = s.orders > 0 ? Math.round(s.spend / s.orders) : 0;
+  const midnightPct = s.orders > 0 ? Math.round((s.midnightOrders / s.orders) * 100) : 0;
+  
+  const sortedCats = Object.entries(s.categories)
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.spend - a.spend);
+  const topCatName = sortedCats.length > 0 ? sortedCats[0].name : 'Không có';
+  
+  let personaIcon = '🛍️';
+  let personaName = 'Khách Hàng Thân Thiết';
+  let personaDesc = 'Bạn có thói quen mua sắm đa dạng trên Shopee.';
+  
+  if (ordersActiveType === 'double') {
+    if (midnightPct >= 20) {
+      personaIcon = '🦉';
+      personaName = 'Thợ Săn Đêm Chuyên Nghiệp';
+      personaDesc = 'Bạn cực kỳ kiên nhẫn săn voucher lúc nửa đêm (00h-02h) của các ngày đôi. Bạn chốt đơn rất nhanh trước khi các voucher hot hết lượt sử dụng!';
+    } else {
+      personaIcon = '🎁';
+      personaName = 'Chiến Thần Siêu Sale Ngày Đôi';
+      personaDesc = 'Bạn là khách hàng trung thành của các đợt Siêu Sale Ngày Đôi trùng tháng. Chi tiêu tập trung và tiết kiệm được lượng tiền rất lớn.';
+    }
+  } else if (ordersActiveType === 'mid') {
+    personaIcon = '🌗';
+    personaName = 'Người Săn Sale Ngẫu Hứng';
+    personaDesc = 'Bạn xem các đợt Giữa Tháng (ngày 15) là thời điểm thích hợp để bổ sung nhu yếu phẩm gia đình, tận dụng các mã freeship và hoàn xu vừa phải.';
+  } else if (ordersActiveType === 'end') {
+    personaIcon = '💸';
+    personaName = 'Tín Đồ Chi Tiêu Tự Thưởng';
+    personaDesc = 'Lương vừa về là thời khắc bạn tự thưởng bản thân. Bạn chốt đơn thoải mái hơn, tập trung vào mặt hàng giá trị lớn hoặc chăm sóc cá nhân.';
+  } else if (ordersActiveType === 'regular') {
+    personaIcon = '⚖️';
+    personaName = 'Người Tiêu Dùng Thực Tế';
+    personaDesc = 'Bạn mua sắm dựa trên nhu cầu thực sự phát sinh hàng ngày. Bạn không quan tâm nhiều đến việc chờ đợi các chiến dịch sale lớn, đặt tiện lợi làm ưu tiên hàng đầu.';
+  }
+  
+  profileContent.innerHTML = `
+    <div class="sales-profile-grid">
+      <div class="profile-persona-box">
+        <div class="profile-persona-icon">${personaIcon}</div>
+        <div class="profile-persona-name">${personaName}</div>
+        <div class="profile-persona-desc">${personaDesc}</div>
+      </div>
+      <div class="profile-stats-box">
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Tổng thực chi:</span>
+          <span class="profile-stat-value" style="color: var(--primary); font-size: 15px;">${fmtVND(s.spend)}</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Tổng số đơn hàng:</span>
+          <span class="profile-stat-value">${s.orders} đơn</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Giá trị trung bình đơn:</span>
+          <span class="profile-stat-value">${fmtVND(aov)} / đơn</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Số tiền tiết kiệm được:</span>
+          <span class="profile-stat-value" style="color: var(--green); font-weight: 600;">${fmtVND(saved)} (-${savingPct}%)</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Đơn chốt lúc nửa đêm (00h-02h):</span>
+          <span class="profile-stat-value">${s.midnightOrders} đơn (${midnightPct}%)</span>
+        </div>
+        <div class="profile-stat-row">
+          <span class="profile-stat-label">Danh mục chi tiêu nhiều nhất:</span>
+          <span class="profile-stat-value" style="font-weight: 600;">${escHtml(topCatName)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
