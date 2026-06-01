@@ -1433,22 +1433,28 @@ function renderSalesHeatmap(orders) {
     dayMap[key] = (dayMap[key] || 0) + 1;
   });
 
-  // Calculate start/end dates
+  const maxCount = Math.max(1, ...Object.values(dayMap));
+
+  // Calculate start/end dates normalized to midnight
   let startDate, endDate;
   if (ordersActiveYear !== 'all') {
     const yearNum = parseInt(ordersActiveYear, 10);
-    startDate = new Date(yearNum, 0, 1);
-    endDate = new Date(yearNum, 11, 31);
+    startDate = new Date(yearNum, 0, 1, 0, 0, 0, 0);
+    endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999);
   } else {
     const timestamps = orders.map(o => o.t).filter(t => t > 0);
     let maxTs = timestamps.length > 0 ? Math.max(...timestamps) : Math.floor(Date.now() / 1000);
     endDate = new Date(maxTs * 1000);
+    endDate.setHours(23, 59, 59, 999);
+    
     startDate = new Date(endDate.getTime() - 364 * 24 * 60 * 60 * 1000);
+    startDate.setHours(0, 0, 0, 0);
   }
 
   // Adjust startDate to start on Sunday
   const startDayOfWeek = startDate.getDay();
   let cur = new Date(startDate.getTime());
+  cur.setHours(0, 0, 0, 0);
   cur.setDate(cur.getDate() - startDayOfWeek);
 
   const weeks = [];
@@ -1496,11 +1502,27 @@ function renderSalesHeatmap(orders) {
       }
       
       let level = 0;
-      if (day.count === 0) level = 0;
-      else if (day.count === 1) level = 1;
-      else if (day.count === 2) level = 2;
-      else if (day.count <= 4) level = 3;
-      else level = 4;
+      if (day.count === 0) {
+        level = 0;
+      } else {
+        if (maxCount === 1) {
+          level = 4;
+        } else if (maxCount === 2) {
+          level = day.count === 1 ? 2 : 4;
+        } else if (maxCount === 3) {
+          if (day.count === 1) level = 1;
+          else if (day.count === 2) level = 3;
+          else level = 4;
+        } else if (maxCount === 4) {
+          level = day.count;
+        } else {
+          const ratio = day.count / maxCount;
+          if (ratio <= 0.25) level = 1;
+          else if (ratio <= 0.5) level = 2;
+          else if (ratio <= 0.75) level = 3;
+          else level = 4;
+        }
+      }
       
       const specialClass = day.isSpecial ? ' special-day' : '';
       const campaignName = day.saleType === 'double' ? 'Ngày Đôi' : day.saleType === 'mid' ? 'Giữa Tháng' : 'Lương Về';
