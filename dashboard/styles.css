@@ -2520,3 +2520,309 @@ body {
   border-color: var(--primary);
   color: #ffffff;
 }
+
+/* ==========================================================================
+   UPGRADED OVERVIEW SCREEN STYLING (PREMIUM AESTHETICS)
+   ========================================================================== */
+
+/* --- Custom KPI Cards --- */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; /* wider minimum to fit icons nicely */
+  gap: 18px !important;
+  margin-bottom: 28px !important;
+}
+
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.01);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.kpi-card.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.kpi-card-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+}
+
+.kpi-card:hover .kpi-card-icon-wrap {
+  transform: scale(1.08);
+}
+
+/* Color thematic styles for KPIs */
+.kpi-card.orange {
+  border-left: 4px solid var(--primary);
+}
+.kpi-card.orange .kpi-card-icon-wrap {
+  background: rgba(238, 77, 45, 0.08);
+  color: var(--primary);
+}
+.kpi-card.orange:hover {
+  border-color: var(--primary);
+}
+
+.kpi-card.blue {
+  border-left: 4px solid #3b82f6;
+}
+.kpi-card.blue .kpi-card-icon-wrap {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+.kpi-card.blue:hover {
+  border-color: #3b82f6;
+}
+
+.kpi-card.green {
+  border-left: 4px solid var(--green);
+}
+.kpi-card.green .kpi-card-icon-wrap {
+  background: rgba(38, 170, 153, 0.08);
+  color: var(--green);
+}
+.kpi-card.green:hover {
+  border-color: var(--green);
+}
+
+.kpi-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 5px;
+}
+
+.kpi-card-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.kpi-card-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* --- Period progress bars 4-color custom gradients --- */
+#card-period .period-row:nth-child(1) .period-bar-fill {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa) !important; /* Blue for 1M */
+}
+#card-period .period-row:nth-child(2) .period-bar-fill {
+  background: linear-gradient(90deg, #26aa99, #5fe8cc) !important; /* Teal for 3M */
+}
+#card-period .period-row:nth-child(3) .period-bar-fill {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa) !important; /* Purple for 6M */
+}
+#card-period .period-row:nth-child(4) .period-bar-fill {
+  background: linear-gradient(90deg, #ee4d2d, #ff7a59) !important; /* Shopee Orange for 1Y */
+}
+
+.period-row {
+  transition: background-color 0.2s ease;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 0 -8px;
+}
+
+.period-row:hover {
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+.period-subtext {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  display: block;
+}
+
+/* --- Overview split-grid Insight Card --- */
+.overview-insight-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.01) !important;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.overview-insight-card .insight-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--text) !important;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.overview-insight-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .overview-insight-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.overview-insight-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.overview-insight-right {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.015);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px dashed var(--border);
+}
+
+/* Overrides for right-side AI element inside split-grid */
+.overview-insight-right .insight-ai {
+  margin-top: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+}
+
+.overview-insight-left .insight-list {
+  gap: 12px !important;
+}
+
+.overview-insight-left .insight-list li {
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.overview-insight-left .insight-list li .ins-bullet {
+  color: var(--primary) !important;
+  font-size: 18px;
+  line-height: 1;
+  margin-right: 4px;
+}
+
+/* --- Shopping Personality Badges & Cards --- */
+.overview-insight-right .ai-archetype {
+  background: linear-gradient(135deg, rgba(238, 77, 45, 0.08) 0%, rgba(255, 122, 89, 0.04) 100%) !important;
+  border: 1px solid rgba(238, 77, 45, 0.18) !important;
+  padding: 14px 18px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.03);
+}
+
+.overview-insight-right .ai-archetype-icon {
+  font-size: 28px !important;
+}
+
+.overview-insight-right .ai-archetype-label {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+}
+
+.overview-insight-right .ai-traits-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  opacity: 0.7;
+  margin-top: 6px;
+  margin-bottom: 8px !important;
+}
+
+.overview-insight-right .ai-trait-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 12.5px !important;
+}
+
+.overview-insight-right .ai-trait-icon {
+  font-size: 15px !important;
+  width: auto !important;
+}
+
+.overview-insight-right .ai-trait-label {
+  font-weight: 700 !important;
+}
+
+.overview-insight-right .ai-narrative {
+  border-top: 1px dashed var(--border) !important;
+  padding-top: 14px !important;
+  margin-top: 12px !important;
+}
+
+.overview-insight-right .ai-narrative-label {
+  color: var(--text) !important;
+  font-weight: 800 !important;
+  opacity: 0.8;
+  margin-bottom: 8px !important;
+}
+
+.overview-insight-right .ai-narrative-body .insight-ai-sentence {
+  font-size: 13px !important;
+  color: var(--text) !important;
+  opacity: 0.9;
+  line-height: 1.6 !important;
+  margin-bottom: 6px;
+}
+
+/* --- Compact Yearly Top Items --- */
+#card-yearly-items {
+  margin-top: 24px;
+}
+
+#card-yearly-items .top-row {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  margin-bottom: 6px;
+  padding: 8px 12px;
+}
+
+#card-yearly-items .top-row:hover {
+  border-color: rgba(238, 77, 45, 0.2) !important;
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02) !important;
+}

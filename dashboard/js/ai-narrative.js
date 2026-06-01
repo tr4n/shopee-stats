@@ -530,11 +530,30 @@ function enrichWithAI(cardId, context, specificPrompt, cacheKey, fallbackFn, aut
   // Hide initially to prevent flickering or showing AI features when not available
   aiEl.style.display = 'none';
   aiEl.innerHTML = '';
-
   _aiAvailabilityPromise.then(avail => {
     if (!avail || _aiInsightDisabled) {
-      aiEl.style.display = 'none';
-      aiEl.innerHTML = '';
+      const dataForInsight = {
+        stats: (window.currentDashData && window.currentDashData.oss) || window._oss || null,
+        categories: (window.currentDashData && window.currentDashData.cs) || [],
+        totalSpend: (window.currentDashData && window.currentDashData.t) || 0,
+        totalOrders: (window.currentDashData && window.currentDashData.o) || 0,
+        totalSaved: (window.currentDashData && window.currentDashData.s) || 0
+      };
+      
+      const localInsight = typeof generatePsychologicalInsight === 'function'
+        ? generatePsychologicalInsight(dataForInsight, profile)
+        : '';
+        
+      if (profile || (localInsight && localInsight.trim())) {
+        aiEl.innerHTML = renderAIInsight(localInsight || '', cardId, profile);
+        aiEl.style.display = '';
+        
+        const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+        if (refreshBtn) refreshBtn.style.display = 'none';
+      } else {
+        aiEl.style.display = 'none';
+        aiEl.innerHTML = '';
+      }
       return;
     }
 

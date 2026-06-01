@@ -1245,12 +1245,20 @@ function setupDashboardRatingCard(d) {
 
       if (yearlyChart) {
         const years = Object.keys(d.yd || {}).sort();
-        const colors = years.map((y) =>
-          y === String(new Date().getFullYear())
-            ? "#ee4d2d"
-            : "rgba(238,77,45,0.4)",
-        );
-        yearlyChart.data.datasets[0].backgroundColor = colors;
+        const ctx = document.getElementById('chart-yearly').getContext('2d');
+        const currentYearStr = String(new Date().getFullYear());
+        const gradients = years.map(y => {
+          const grad = ctx.createLinearGradient(0, 0, 0, 300);
+          if (y === currentYearStr) {
+            grad.addColorStop(0, '#ee4d2d');
+            grad.addColorStop(1, '#ff8060');
+          } else {
+            grad.addColorStop(0, 'rgba(203, 213, 225, 0.95)');
+            grad.addColorStop(1, 'rgba(148, 163, 184, 0.45)');
+          }
+          return grad;
+        });
+        yearlyChart.data.datasets[0].backgroundColor = gradients;
         yearlyChart.update();
       }
 
