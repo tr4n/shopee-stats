@@ -73,7 +73,8 @@ function renderMonthly(yd, year, d) {
           borderWidth: 1,
           borderRadius: 6,
           borderSkipped: false,
-          yAxisID: 'y'
+          yAxisID: 'y',
+          order: 2
         },
         {
           label: 'Đơn hàng',
@@ -87,7 +88,8 @@ function renderMonthly(yd, year, d) {
           pointRadius: 4.5,
           pointHoverRadius: 6,
           tension: 0.35,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          order: 1
         }
       ]
     },

@@ -140,7 +140,8 @@ function renderYearlyChart(yd, d) {
           backgroundColor: spendGradients,
           borderRadius: 6,
           borderSkipped: false,
-          yAxisID: 'y'
+          yAxisID: 'y',
+          order: 2
         },
         {
           label: 'Đơn hàng',
@@ -154,7 +155,8 @@ function renderYearlyChart(yd, d) {
           pointRadius: 4.5,
           pointHoverRadius: 6,
           tension: 0.35,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          order: 1
         }
       ]
     },
