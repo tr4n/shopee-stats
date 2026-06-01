@@ -3063,7 +3063,9 @@ body {
   flex-direction: row;
   gap: 10px;
   align-items: flex-start;
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .heatmap-weekdays {
@@ -3089,7 +3091,6 @@ body {
   flex-direction: column;
   overflow-x: auto;
   padding-bottom: 8px;
-  width: 100%;
 }
 
 /* Custom premium scrollbar for heatmap */
