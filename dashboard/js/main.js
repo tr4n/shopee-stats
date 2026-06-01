@@ -1277,6 +1277,30 @@ function setupDashboardRatingCard(d) {
         (window.currentMonthlySelection &&
           window.currentMonthlySelection.year) ||
         Object.keys(d.yd || {}).sort((a, b) => b - a)[0];
+
+      if (monthlyChart) {
+        const ctx = document.getElementById('chart-monthly').getContext('2d');
+        const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
+        const ydata = d.yd[yr];
+        if (ydata) {
+          const vals = months.map(m => ydata.m[m] || 0);
+          const peakVal = Math.max(...vals, 1);
+          const barColors = vals.map(v => {
+            const grad = ctx.createLinearGradient(0, 0, 0, 320);
+            if (v === peakVal && v > 0) {
+              grad.addColorStop(0, '#ee4d2d');
+              grad.addColorStop(1, '#ff8060');
+            } else {
+              grad.addColorStop(0, 'rgba(238, 77, 45, 0.45)');
+              grad.addColorStop(1, 'rgba(238, 77, 45, 0.1)');
+            }
+            return grad;
+          });
+          monthlyChart.data.datasets[0].backgroundColor = barColors;
+          monthlyChart.update();
+        }
+      }
+
       renderInsightCard("insight-monthly", computeMonthlyInsights(d.yd, yr));
       triggerMonthlyAIInsight(d, yr);
     };

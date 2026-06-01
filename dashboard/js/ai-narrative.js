@@ -1351,10 +1351,42 @@ function analyzeShoppingPersonality(d) {
 // sectionType: 'monthly' | 'categories' | 'sales' | 'items'
 function showProfileInsight(cardId, profile, sectionType) {
   const aiEl = document.getElementById(cardId + '-ai');
-  if (aiEl) {
+  if (!aiEl) return;
+
+  if (!profile || !profile.archetype) {
     aiEl.style.display = 'none';
     aiEl.innerHTML = '';
+    return;
   }
+
+  // Filter traits relevant to this section
+  const sectionKeys = SECTION_TRAITS[sectionType];
+  let filteredTraits = profile.traits;
+  if (sectionKeys) {
+    filteredTraits = profile.traits.filter(t => sectionKeys.includes(t.key));
+  }
+
+  // If no relevant traits, fallback to show first 2 traits
+  if (filteredTraits.length === 0) {
+    filteredTraits = profile.traits.slice(0, 2);
+  }
+
+  const localProfile = {
+    archetype: profile.archetype,
+    traits: filteredTraits,
+    totalOrders: profile.totalOrders
+  };
+
+  // Render the archetype + traits, leaving narrative empty for non-AI sections
+  aiEl.innerHTML = renderAIInsight('', cardId, localProfile);
+
+  // Hide the AI copy and refresh buttons since there is no narrative text
+  const copyBtn = aiEl.querySelector('.ai-copy-btn');
+  if (copyBtn) copyBtn.style.display = 'none';
+  const refreshBtn = aiEl.querySelector('.ai-refresh-btn');
+  if (refreshBtn) refreshBtn.style.display = 'none';
+
+  aiEl.style.display = '';
 }
 
 window.analyzeShoppingPersonality = analyzeShoppingPersonality;

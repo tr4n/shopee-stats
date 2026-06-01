@@ -580,11 +580,19 @@ function renderTopItemsList() {
     const catClass = getCategoryTagClass(resolvedCat);
     const catTagHtml = `<span class="item-category-tag ${catClass}">${escHtml(resolvedCat)}</span>`;
     
-    // Rank Badge Class
+    // Rank Highlight & Badge Class
     let rankClass = "rank-default";
-    if (rank === 1) rankClass = "rank-1";
-    else if (rank === 2) rankClass = "rank-2";
-    else if (rank === 3) rankClass = "rank-3";
+    let highlightClass = "";
+    if (rank === 1) {
+      rankClass = "rank-1";
+      highlightClass = " highlight-rank-1";
+    } else if (rank === 2) {
+      rankClass = "rank-2";
+      highlightClass = " highlight-rank-2";
+    } else if (rank === 3) {
+      rankClass = "rank-3";
+      highlightClass = " highlight-rank-3";
+    }
 
     // Discount percentage
     let discountPctHtml = "";
@@ -595,24 +603,26 @@ function renderTopItemsList() {
       }
     }
 
+    // Styled savings tag
     const savings = hasDiscount ? (item.op - item.dp) * item.c : 0;
-    const savingsText = savings > 0 
-      ? ` · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND(savings)}</span>`
+    const savingsHtml = savings > 0 
+      ? `<span class="savings-tag">💰 Tiết kiệm ${fmtVND(savings)}</span>`
       : '';
       
     const metaText = hasDiscount 
-      ? `${fmtNum(item.c)} lượt · Mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>)${savingsText}`
+      ? `${fmtNum(item.c)} lượt · Mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>)`
       : `${fmtNum(item.c)} lượt · TB: ${fmtVND(Math.round(item.s / item.c))}/món`;
 
     const metaRowHtml = `
-      <div class="top-meta">
+      <div class="top-meta" style="gap: 8px;">
         ${catTagHtml}
         ${discountPctHtml}
+        ${savingsHtml}
         <span>${metaText}</span>
       </div>`;
 
     return `
-      <div class="top-row in">
+      <div class="top-row in${highlightClass}">
         <div class="top-num ${rankClass}">${rank}</div>
         <div class="top-name-wrap">
           <div class="top-name" title="${escHtml(item.n)}">${escHtml(capFirst(item.n))}</div>

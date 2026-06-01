@@ -2826,3 +2826,209 @@ body {
   transform: translateY(-1.5px) !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02) !important;
 }
+
+/* --- Upgraded Top SP & Monthly Insights Card Split Grid --- */
+.items-insight-card,
+.monthly-insight-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.01) !important;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.items-insight-card .insight-title,
+.monthly-insight-card .insight-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--text) !important;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.items-insight-grid,
+.monthly-insight-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .items-insight-grid,
+  .monthly-insight-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.items-insight-left,
+.monthly-insight-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.items-insight-right,
+.monthly-insight-right {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.015);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px dashed var(--border);
+}
+
+/* Overrides for right-side AI element inside split-grids */
+.items-insight-right .insight-ai,
+.monthly-insight-right .insight-ai {
+  margin-top: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+}
+
+.items-insight-left .insight-list,
+.monthly-insight-left .insight-list {
+  gap: 12px !important;
+}
+
+.items-insight-left .insight-list li,
+.monthly-insight-left .insight-list li {
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.items-insight-left .insight-list li .ins-bullet,
+.monthly-insight-left .insight-list li .ins-bullet {
+  color: var(--primary) !important;
+  font-size: 18px;
+  line-height: 1;
+  margin-right: 4px;
+}
+
+/* Shopping Profile card overrides inside items & monthly grids */
+.items-insight-right .ai-archetype,
+.monthly-insight-right .ai-archetype {
+  background: linear-gradient(135deg, rgba(238, 77, 45, 0.08) 0%, rgba(255, 122, 89, 0.04) 100%) !important;
+  border: 1px solid rgba(238, 77, 45, 0.18) !important;
+  padding: 14px 18px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.03);
+}
+
+.items-insight-right .ai-archetype-icon,
+.monthly-insight-right .ai-archetype-icon {
+  font-size: 28px !important;
+}
+
+.items-insight-right .ai-archetype-label,
+.monthly-insight-right .ai-archetype-label {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+}
+
+.items-insight-right .ai-traits-label,
+.monthly-insight-right .ai-traits-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  opacity: 0.7;
+  margin-top: 6px;
+  margin-bottom: 8px !important;
+}
+
+.items-insight-right .ai-trait-item,
+.monthly-insight-right .ai-trait-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 12.5px !important;
+}
+
+.items-insight-right .ai-trait-icon,
+.monthly-insight-right .ai-trait-icon {
+  font-size: 15px !important;
+  width: auto !important;
+}
+
+.items-insight-right .ai-trait-label,
+.monthly-insight-right .ai-trait-label {
+  font-weight: 700 !important;
+}
+
+.items-insight-right .ai-narrative,
+.monthly-insight-right .ai-narrative {
+  border-top: 1px dashed var(--border) !important;
+  padding-top: 14px !important;
+  margin-top: 12px !important;
+}
+
+.items-insight-right .ai-narrative-label,
+.monthly-insight-right .ai-narrative-label {
+  color: var(--text) !important;
+  font-weight: 800 !important;
+  opacity: 0.8;
+  margin-bottom: 8px !important;
+}
+
+.items-insight-right .ai-narrative-body .insight-ai-sentence,
+.monthly-insight-right .ai-narrative-body .insight-ai-sentence {
+  font-size: 13px !important;
+  color: var(--text) !important;
+  opacity: 0.9;
+  line-height: 1.6 !important;
+  margin-bottom: 6px;
+}
+
+/* --- Premium Row Highlights (Rank 1, 2, 3) --- */
+.top-row.highlight-rank-1 {
+  border-color: rgba(255, 215, 0, 0.38) !important;
+  background: linear-gradient(135deg, var(--surface) 60%, rgba(255, 215, 0, 0.04) 100%) !important;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.03) !important;
+}
+.top-row.highlight-rank-1:hover {
+  border-color: rgba(255, 215, 0, 0.6) !important;
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.08) !important;
+}
+
+.top-row.highlight-rank-2 {
+  border-color: rgba(161, 196, 253, 0.38) !important;
+  background: linear-gradient(135deg, var(--surface) 60%, rgba(161, 196, 253, 0.04) 100%) !important;
+  box-shadow: 0 4px 12px rgba(161, 196, 253, 0.03) !important;
+}
+.top-row.highlight-rank-2:hover {
+  border-color: rgba(161, 196, 253, 0.6) !important;
+  box-shadow: 0 8px 20px rgba(161, 196, 253, 0.08) !important;
+}
+
+.top-row.highlight-rank-3 {
+  border-color: rgba(160, 82, 45, 0.28) !important;
+  background: linear-gradient(135deg, var(--surface) 60%, rgba(160, 82, 45, 0.02) 100%) !important;
+  box-shadow: 0 4px 12px rgba(160, 82, 45, 0.02) !important;
+}
+.top-row.highlight-rank-3:hover {
+  border-color: rgba(160, 82, 45, 0.45) !important;
+  box-shadow: 0 8px 20px rgba(160, 82, 45, 0.06) !important;
+}
+
+/* --- Savings badge design --- */
+.savings-tag {
+  background: rgba(38, 170, 153, 0.1);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
