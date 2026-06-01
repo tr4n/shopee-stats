@@ -3058,20 +3058,80 @@ body {
 }
 
 /* --- Calendar Heatmap styling --- */
+.heatmap-widget-wrap {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.heatmap-weekdays {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 20px; /* Aligns with the grid, shifting below the 18px months row + 2px margin */
+  flex-shrink: 0;
+}
+
+.heatmap-weekday {
+  height: 12px;
+  line-height: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: right;
+  width: 22px;
+}
+
 .heatmap-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   overflow-x: auto;
-  padding: 10px 0;
+  padding-bottom: 8px;
   width: 100%;
+}
+
+/* Custom premium scrollbar for heatmap */
+.heatmap-container::-webkit-scrollbar {
+  height: 5px;
+}
+.heatmap-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.heatmap-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+.heatmap-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .heatmap-scroll-wrap {
   display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+.heatmap-months-row {
+  display: flex;
+  flex-direction: row;
+  height: 18px;
+  margin-bottom: 2px;
+}
+
+.heatmap-month-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.heatmap-grid-row {
+  display: flex;
   flex-direction: row;
   gap: 3px;
-  min-width: max-content;
 }
 
 .heatmap-week {

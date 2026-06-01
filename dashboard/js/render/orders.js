@@ -1496,12 +1496,45 @@ function renderSalesHeatmap(orders) {
     cur.setDate(cur.getDate() + 1);
   }
 
-  let html = '<div class="heatmap-scroll-wrap">';
+  const monthSpans = [];
+  let currentMonthName = '';
+  let currentSpan = 0;
+
+  weeks.forEach((wk, index) => {
+    // Get the month of the middle day of the week to represent the week's month
+    const middleDay = wk.find(d => d.isWithinRange) || wk[3] || wk[0];
+    const dateParts = middleDay.dateLabel.split('/'); // dd/mm/yyyy
+    const monthNum = parseInt(dateParts[1], 10);
+    const monthNames = ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 9', 'Thg 10', 'Thg 11', 'Thg 12'];
+    const monthName = monthNames[monthNum - 1] || 'Không rõ';
+
+    if (monthName !== currentMonthName) {
+      if (currentSpan > 0) {
+        monthSpans.push({ name: currentMonthName, span: currentSpan });
+      }
+      currentMonthName = monthName;
+      currentSpan = 1;
+    } else {
+      currentSpan++;
+    }
+
+    if (index === weeks.length - 1) {
+      monthSpans.push({ name: currentMonthName, span: currentSpan });
+    }
+  });
+
+  let monthsHtml = '<div class="heatmap-months-row">';
+  monthSpans.forEach(m => {
+    monthsHtml += `<div class="heatmap-month-label" style="width: ${m.span * 15}px;">${m.name}</div>`;
+  });
+  monthsHtml += '</div>';
+
+  let gridHtml = '<div class="heatmap-grid-row">';
   weeks.forEach(wk => {
-    html += '<div class="heatmap-week">';
+    gridHtml += '<div class="heatmap-week">';
     wk.forEach(day => {
       if (!day.isWithinRange) {
-        html += '<div class="heatmap-day" style="visibility: hidden;"></div>';
+        gridHtml += '<div class="heatmap-day" style="visibility: hidden;"></div>';
         return;
       }
       
@@ -1532,10 +1565,15 @@ function renderSalesHeatmap(orders) {
       const campaignName = day.saleType === 'double' ? 'Ngày Đôi' : day.saleType === 'mid' ? 'Giữa Tháng' : 'Lương Về';
       const titleText = `${day.dateLabel}: ${day.count} đơn` + (day.isSpecial ? ` (${campaignName})` : '');
       
-      html += `<div class="heatmap-day lvl-${level}${specialClass}" data-date="${day.key}" title="${titleText}"></div>`;
+      gridHtml += `<div class="heatmap-day lvl-${level}${specialClass}" data-date="${day.key}" title="${titleText}"></div>`;
     });
-    html += '</div>';
+    gridHtml += '</div>';
   });
+  gridHtml += '</div>';
+
+  let html = '<div class="heatmap-scroll-wrap">';
+  html += monthsHtml;
+  html += gridHtml;
   html += '</div>';
   container.innerHTML = html;
 
