@@ -3071,14 +3071,14 @@ body {
 .heatmap-weekdays {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin-top: 20px; /* Aligns with the grid, shifting below the 18px months row + 2px margin */
+  gap: 4px;
+  margin-top: 22px; /* Aligns with the grid: 18px months row + 4px margin */
   flex-shrink: 0;
 }
 
 .heatmap-weekday {
-  height: 12px;
-  line-height: 12px;
+  height: 14px;
+  line-height: 14px;
   font-size: 10px;
   color: var(--muted);
   font-weight: 700;
@@ -3118,7 +3118,7 @@ body {
   display: flex;
   flex-direction: row;
   height: 18px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .heatmap-month-label {
@@ -3132,56 +3132,182 @@ body {
 .heatmap-grid-row {
   display: flex;
   flex-direction: row;
-  gap: 3px;
+  gap: 4px;
 }
 
 .heatmap-week {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .heatmap-day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
   background-color: var(--border);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease;
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
+  outline: 2px solid transparent;
+  outline-offset: 1px;
 }
 
 .heatmap-day:hover {
-  transform: scale(1.3);
+  transform: scale(1.35);
   z-index: 10;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Level colors for heatmap density */
-.heatmap-day.lvl-0 { background-color: var(--border); opacity: 0.6; }
-.heatmap-day.lvl-1 { background-color: rgba(238, 77, 45, 0.22); }
-.heatmap-day.lvl-2 { background-color: rgba(238, 77, 45, 0.45); }
-.heatmap-day.lvl-3 { background-color: rgba(238, 77, 45, 0.70); }
-.heatmap-day.lvl-4 { background-color: rgba(238, 77, 45, 1.0); }
+.heatmap-day.lvl-0 { background-color: var(--border); opacity: 0.55; }
+.heatmap-day.lvl-1 { background-color: rgba(238, 77, 45, 0.22); opacity: 1; }
+.heatmap-day.lvl-2 { background-color: rgba(238, 77, 45, 0.45); opacity: 1; }
+.heatmap-day.lvl-3 { background-color: rgba(238, 77, 45, 0.70); opacity: 1; }
+.heatmap-day.lvl-4 { background-color: rgba(238, 77, 45, 1.0); opacity: 1; }
 
-/* Glow effect for special sale days */
-.heatmap-day.special-day {
-  border: 1px solid var(--primary);
-  box-shadow: 0 0 4px rgba(238, 77, 45, 0.6);
+/* Selected state — outline when clicked */
+.heatmap-day--selected {
+  outline: 2.5px solid var(--text) !important;
+  outline-offset: 1.5px;
+  transform: scale(1.2);
+  z-index: 5;
+}
+
+/* Sale-type glow borders by campaign type */
+.heatmap-day.special-day[data-sale-type="double"] {
+  box-shadow: 0 0 0 1.5px #ee4d2d, 0 0 5px rgba(238, 77, 45, 0.5);
+}
+.heatmap-day.special-day[data-sale-type="mid"] {
+  box-shadow: 0 0 0 1.5px #26aa99, 0 0 5px rgba(38, 170, 153, 0.5);
+}
+.heatmap-day.special-day[data-sale-type="end"] {
+  box-shadow: 0 0 0 1.5px #3b82f6, 0 0 5px rgba(59, 130, 246, 0.5);
 }
 
 /* Legend styling */
 .heatmap-legend-color {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border-radius: 2px;
+  flex-shrink: 0;
 }
-.heatmap-legend-color.lvl-0 { background-color: var(--border); opacity: 0.6; }
+.heatmap-legend-color.lvl-0 { background-color: var(--border); opacity: 0.55; }
 .heatmap-legend-color.lvl-1 { background-color: rgba(238, 77, 45, 0.22); }
 .heatmap-legend-color.lvl-2 { background-color: rgba(238, 77, 45, 0.45); }
 .heatmap-legend-color.lvl-3 { background-color: rgba(238, 77, 45, 0.70); }
 .heatmap-legend-color.lvl-4 { background-color: rgba(238, 77, 45, 1.0); }
+
+/* Mini stats chips row */
+.heatmap-mini-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.heatmap-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.heatmap-stat-chip .chip-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.heatmap-stat-chip .chip-val {
+  font-weight: 800;
+  color: var(--text);
+}
+
+.heatmap-stat-chip.chip-highlight .chip-val { color: var(--primary); }
+.heatmap-stat-chip.chip-green .chip-val { color: var(--green); }
+.heatmap-stat-chip.chip-blue .chip-val { color: #3b82f6; }
+
+/* Legend 2-row layout */
+.heatmap-legend-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.heatmap-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.heatmap-legend-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.heatmap-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.heatmap-legend-dot.type-double {
+  background: rgba(238, 77, 45, 0.4);
+  box-shadow: 0 0 0 1.5px #ee4d2d;
+}
+.heatmap-legend-dot.type-mid {
+  background: rgba(38, 170, 153, 0.4);
+  box-shadow: 0 0 0 1.5px #26aa99;
+}
+.heatmap-legend-dot.type-end {
+  background: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 0 1.5px #3b82f6;
+}
+
+/* Active date filter notification bar */
+.heatmap-date-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(238, 77, 45, 0.06);
+  border: 1px solid rgba(238, 77, 45, 0.2);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.heatmap-date-filter-bar .dfb-clear {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.heatmap-date-filter-bar .dfb-clear:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
 
 /* --- Campaign Profile Card styling --- */
 .sales-profile-grid {
@@ -3275,18 +3401,51 @@ body {
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.06);
 }
 
-/* Tooltip standard styles */
+/* Tooltip — rich multi-line version */
 .heatmap-tooltip {
-  position: absolute;
+  position: fixed;
   background: #1e293b;
   color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-size: 11.5px;
   pointer-events: none;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 9999;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
   white-space: nowrap;
+  line-height: 1.65;
+  min-width: 130px;
+}
+
+.heatmap-tooltip .tt-date {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding-bottom: 4px;
+}
+
+.heatmap-tooltip .tt-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.heatmap-tooltip .tt-row .tt-icon {
+  font-size: 12px;
+  width: 16px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.heatmap-tooltip .tt-tag {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
 }
 
 /* --- Category search input and clean button styling --- */
