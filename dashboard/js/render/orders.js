@@ -493,6 +493,37 @@ function renderSalesCharts(stats) {
     const ctx = ssCtx.getContext('2d');
     if (salesSpendSavingsChart) salesSpendSavingsChart.destroy();
 
+    // Create dynamic premium gradients for Spend and Savings
+    const spendGradients = typeKeys.map((k, i) => {
+      const grad = ctx.createLinearGradient(0, 0, 0, 250);
+      if (activeIndex === -1) {
+        grad.addColorStop(0, '#ee4d2d');
+        grad.addColorStop(1, '#ff8060');
+      } else if (i === activeIndex) {
+        grad.addColorStop(0, '#ee4d2d');
+        grad.addColorStop(1, '#ff8060');
+      } else {
+        grad.addColorStop(0, 'rgba(238, 77, 45, 0.15)');
+        grad.addColorStop(1, 'rgba(238, 77, 45, 0.05)');
+      }
+      return grad;
+    });
+
+    const savingsGradients = typeKeys.map((k, i) => {
+      const grad = ctx.createLinearGradient(0, 0, 0, 250);
+      if (activeIndex === -1) {
+        grad.addColorStop(0, '#26aa99');
+        grad.addColorStop(1, '#5fe8cc');
+      } else if (i === activeIndex) {
+        grad.addColorStop(0, '#26aa99');
+        grad.addColorStop(1, '#5fe8cc');
+      } else {
+        grad.addColorStop(0, 'rgba(38, 170, 153, 0.15)');
+        grad.addColorStop(1, 'rgba(38, 170, 153, 0.05)');
+      }
+      return grad;
+    });
+
     salesSpendSavingsChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -501,9 +532,7 @@ function renderSalesCharts(stats) {
           {
             label: 'Thực chi',
             data: spendData,
-            backgroundColor: activeIndex === -1
-              ? 'rgba(238, 77, 45, 0.85)'
-              : typeKeys.map((k, i) => i === activeIndex ? 'rgba(238, 77, 45, 0.95)' : 'rgba(238, 77, 45, 0.15)'),
+            backgroundColor: spendGradients,
             borderColor: activeIndex === -1
               ? '#ee4d2d'
               : typeKeys.map((k, i) => i === activeIndex ? '#ee4d2d' : 'rgba(238, 77, 45, 0.25)'),
@@ -513,9 +542,7 @@ function renderSalesCharts(stats) {
           {
             label: 'Tiết kiệm',
             data: savedData,
-            backgroundColor: activeIndex === -1
-              ? 'rgba(38, 170, 153, 0.85)'
-              : typeKeys.map((k, i) => i === activeIndex ? 'rgba(38, 170, 153, 0.95)' : 'rgba(38, 170, 153, 0.15)'),
+            backgroundColor: savingsGradients,
             borderColor: activeIndex === -1
               ? '#26aa99'
               : typeKeys.map((k, i) => i === activeIndex ? '#26aa99' : 'rgba(38, 170, 153, 0.25)'),
@@ -796,19 +823,50 @@ function renderSalesProductList(filteredYearOrders) {
 
   const maxS = Math.max(...products.map(p => p.spend), 1);
   container.innerHTML = products.map((item, idx) => {
+    const rank = idx + 1;
     const pct = Math.round((item.spend / maxS) * 100);
     const saved = Math.max(0, item.raw - item.spend);
-    const metaText = saved > 0
-      ? `${fmtNum(item.count)} lần mua · Tiết kiệm: <span style="color:var(--green);font-weight:600;">${fmtVND(saved)}</span>`
-      : `${fmtNum(item.count)} lần mua`;
+    
+    // Rank Highlight & Badge Class
+    let rankClass = "rank-default";
+    let highlightClass = "";
+    if (rank === 1) {
+      rankClass = "rank-1";
+      highlightClass = " highlight-rank-1";
+    } else if (rank === 2) {
+      rankClass = "rank-2";
+      highlightClass = " highlight-rank-2";
+    } else if (rank === 3) {
+      rankClass = "rank-3";
+      highlightClass = " highlight-rank-3";
+    }
+
+    // Category Tag
+    const resolvedCat = item.cat || "🏷️ Khác";
+    const catClass = (typeof getCategoryTagClass === 'function') ? getCategoryTagClass(resolvedCat) : 'cat-tag-other';
+    const catTagHtml = `<span class="item-category-tag ${catClass}">${escHtml(resolvedCat)}</span>`;
+
+    // Styled savings tag
+    const savingsHtml = saved > 0 
+      ? `<span class="savings-tag">💰 Tiết kiệm ${fmtVND(saved)}</span>`
+      : '';
+      
+    const metaText = `${fmtNum(item.count)} lượt mua`;
+
+    const metaRowHtml = `
+      <div class="top-meta" style="gap: 8px;">
+        ${catTagHtml}
+        ${savingsHtml}
+        <span>${metaText}</span>
+      </div>`;
 
     return `
-      <div class="top-row in">
-        <div class="top-num">${idx + 1}</div>
+      <div class="top-row in${highlightClass}">
+        <div class="top-num ${rankClass}">${rank}</div>
         <div class="top-name-wrap">
-          <div class="top-name">${escHtml(capFirst(item.n))}</div>
-          <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
-          <div class="top-meta">${metaText}</div>
+          <div class="top-name" title="${escHtml(item.n)}">${escHtml(capFirst(item.n))}</div>
+          <div class="top-bar-wrap"><div class="top-bar-fill" style="width: ${pct}%"></div></div>
+          ${metaRowHtml}
         </div>
         <div class="top-val">${fmtVND(item.spend)}</div>
       </div>`;
@@ -918,11 +976,6 @@ function renderSalesInsights(stats) {
 
   if (allCategories && Object.keys(allCategories).length > 0) {
     window._lastCategories = topCategories;
-  }
-
-  // Sales section shows rule-based compact profile only (no AI)
-  if (typeof showProfileInsight === 'function') {
-    showProfileInsight('insight-sales', window._globalPersonalityProfile, 'sales');
   }
 }
 

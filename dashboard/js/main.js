@@ -1023,20 +1023,12 @@ function setupDashboardRatingCard(d) {
     }
 
     function triggerMonthlyAIInsight(d, yr, profile) {
-      // Monthly section shows rule-based compact profile only (no AI)
-      const p = profile || window._globalPersonalityProfile;
-      if (typeof showProfileInsight === 'function') {
-        showProfileInsight('insight-monthly', p, 'monthly');
-      }
+      // No-op
     }
     window.triggerMonthlyAIInsight = triggerMonthlyAIInsight;
 
     function triggerSingleMonthAIInsight(d, year, monthStr) {
-      // Single month drill-down: show same compact profile (no AI)
-      const p = window._globalPersonalityProfile;
-      if (typeof showProfileInsight === 'function') {
-        showProfileInsight('insight-monthly', p, 'monthly');
-      }
+      // No-op
     }
     window.triggerSingleMonthAIInsight = triggerSingleMonthAIInsight;
 
@@ -1144,20 +1136,12 @@ function setupDashboardRatingCard(d) {
     window.categorizeMiItems = categorizeMiItems;
 
     function triggerCategoryAIInsight(cs, ti, total, cacheKey, year, profile) {
-      // Categories section shows rule-based compact profile only (no AI)
-      const p = profile || window._globalPersonalityProfile;
-      if (typeof showProfileInsight === 'function') {
-        showProfileInsight('insight-categories', p, 'categories');
-      }
+      // No-op
     }
     window.triggerCategoryAIInsight = triggerCategoryAIInsight;
 
     function triggerSingleCategoryAIInsight(cs, ti, total, catName, year, overallTotal) {
-      // Single category drill-down: show compact profile (no AI)
-      const p = window._globalPersonalityProfile;
-      if (typeof showProfileInsight === 'function') {
-        showProfileInsight('insight-categories', p, 'categories');
-      }
+      // No-op
     }
     window.triggerSingleCategoryAIInsight = triggerSingleCategoryAIInsight;
 
@@ -1383,23 +1367,6 @@ function setupDashboardRatingCard(d) {
 
       // 1. Yearly Overview — ONLY section with AI narrative
       triggerYearlyAIInsight(d, globalProfile);
-
-      // 2. Items — rule-based compact profile (no AI)
-      if (typeof showProfileInsight === 'function') {
-        showProfileInsight('insight-items', globalProfile, 'items');
-      }
-
-      // 3. Categories — rule-based compact profile (no AI)
-      if (_activeCatYear === "all") {
-        if (typeof showProfileInsight === 'function') {
-          showProfileInsight('insight-categories', globalProfile, 'categories');
-        }
-      }
-
-      // 4. Monthly — rule-based compact profile (no AI)
-      if (_activeYear) {
-        triggerMonthlyAIInsight(d, _activeYear, globalProfile);
-      }
     }
 
     async function initDashboard() {

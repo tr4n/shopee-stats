@@ -7,13 +7,24 @@
 let catChart = null;
 let currentCatData = null;
 
+const CATEGORY_PALETTE = [
+  '#ee4d2d', '#26aa99', '#3b82f6', '#ec4899', '#f59e0b',
+  '#a855f7', '#14b8a6', '#10b981', '#06b6d4', '#ef4444',
+  '#8b5cf6', '#64748b'
+];
+
 window.currentCategorySelection = null;
 
 window.clearCategorySelection = function() {
   window.currentCategorySelection = null;
   const card = document.getElementById('card-cat-items');
   if (card) card.style.display = 'none';
-  document.querySelectorAll('#cat-bars .cat-row').forEach(r => r.classList.remove('cat-row-active'));
+  document.querySelectorAll('#cat-bars .cat-row').forEach(r => {
+    r.classList.remove('cat-row-active');
+    r.style.background = '';
+    r.style.borderColor = '';
+    r.style.boxShadow = '';
+  });
   
   if (currentCatData) {
     renderInsightCard('insight-categories', computeCategoryInsights(currentCatData.cs, currentCatData.total));
@@ -23,12 +34,7 @@ window.clearCategorySelection = function() {
     }
   }
   if (catChart && currentCatData && currentCatData.cs) {
-    const PALETTE = [
-      '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
-      '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
-      '#8b5cf6', '#06b6d4'
-    ];
-    catChart.data.datasets[0].backgroundColor = currentCatData.cs.map((c, i) => PALETTE[i % PALETTE.length]);
+    catChart.data.datasets[0].backgroundColor = currentCatData.cs.map((c, i) => CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]);
     catChart.update();
   }
 };
@@ -48,9 +54,20 @@ function showCatItems(catName, ti) {
     return false;
   }).slice(0, 100);
 
-  // Highlight selected bar
-  document.querySelectorAll('.cat-row').forEach(r => {
-    r.classList.toggle('cat-row-active', r.getAttribute('data-cat') === catName);
+  // Highlight selected bar with category color theme
+  document.querySelectorAll('.cat-row').forEach((r, idx) => {
+    const isSelected = r.getAttribute('data-cat') === catName;
+    r.classList.toggle('cat-row-active', isSelected);
+    if (isSelected) {
+      const baseColor = CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length];
+      r.style.background = `${baseColor}18`; // ~10% opacity
+      r.style.borderColor = `${baseColor}40`; // ~25% opacity
+      r.style.boxShadow = `0 4px 12px ${baseColor}08`;
+    } else {
+      r.style.background = '';
+      r.style.borderColor = '';
+      r.style.boxShadow = '';
+    }
   });
 
   title.innerHTML = `
@@ -67,19 +84,57 @@ function showCatItems(catName, ti) {
 
   const maxS = Math.max(...items.map(i => i.s), 1);
   list.innerHTML = items.map((item, idx) => {
+    const rank = idx + 1;
     const pct = Math.round((item.s / maxS) * 100);
     const hasDiscount = item.op && item.dp && item.op > item.dp;
+    
+    // Rank Highlight & Badge Class
+    let rankClass = "rank-default";
+    let highlightClass = "";
+    if (rank === 1) {
+      rankClass = "rank-1";
+      highlightClass = " highlight-rank-1";
+    } else if (rank === 2) {
+      rankClass = "rank-2";
+      highlightClass = " highlight-rank-2";
+    } else if (rank === 3) {
+      rankClass = "rank-3";
+      highlightClass = " highlight-rank-3";
+    }
+
+    // Discount percentage tag
+    let discountPctHtml = "";
+    if (hasDiscount && item.op > 0) {
+      const discPct = Math.round((1 - item.dp / item.op) * 100);
+      if (discPct > 0) {
+        discountPctHtml = `<span class="item-discount-tag">-${discPct}%</span>`;
+      }
+    }
+
+    // Styled savings tag
+    const savings = hasDiscount ? (item.op - item.dp) * item.c : 0;
+    const savingsHtml = savings > 0 
+      ? `<span class="savings-tag">💰 Tiết kiệm ${fmtVND(savings)}</span>`
+      : '';
+      
     const metaText = hasDiscount 
-      ? `${fmtNum(item.c)} lượt · Giá mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>) · Tiết kiệm: <span style="color: var(--green); font-weight: 600;">${fmtVND((item.op - item.dp) * item.c)}</span>`
-      : `${fmtNum(item.c)} lượt · ${fmtVND(item.s)}`;
+      ? `${fmtNum(item.c)} lượt · Mua: ${fmtVND(item.dp)} (Gốc: <span style="text-decoration: line-through; opacity: 0.7;">${fmtVND(item.op)}</span>)`
+      : `${fmtNum(item.c)} lượt · TB: ${fmtVND(Math.round(item.s / item.c))}/món`;
+
+    const metaRowHtml = `
+      <div class="top-meta" style="gap: 8px;">
+        ${discountPctHtml}
+        ${savingsHtml}
+        <span>${metaText}</span>
+      </div>`;
 
     return `
-      <div class="top-row in">
-        <div class="top-num">${idx + 1}</div>
+      <div class="top-row in${highlightClass}">
+        <div class="top-num ${rankClass}">${rank}</div>
         <div class="top-name-wrap">
-          <div class="top-name">${escHtml(capFirst(item.n))}</div>
-          <div class="top-bar-wrap"><div class="top-bar-fill" style="width:${pct}%"></div></div>
-          <div class="top-meta">${metaText}</div>
+          <div class="top-name" title="${escHtml(item.n)}">${escHtml(capFirst(item.n))}</div>
+          <div class="top-bar-wrap"><div class="top-bar-fill" style="width: ${pct}%"></div></div>
+          ${metaRowHtml}
         </div>
         <div class="top-val">${fmtVND(item.s)}</div>
       </div>`;
@@ -98,14 +153,9 @@ function showCatItems(catName, ti) {
   }
 
   if (catChart && currentCatData && currentCatData.cs) {
-    const PALETTE = [
-      '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
-      '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
-      '#8b5cf6', '#06b6d4'
-    ];
     catChart.data.datasets[0].backgroundColor = currentCatData.cs.map((c, i) => {
       const name = resolveCatLabel(c);
-      const baseColor = PALETTE[i % PALETTE.length];
+      const baseColor = CATEGORY_PALETTE[i % CATEGORY_PALETTE.length];
       return name === catName ? baseColor : baseColor + '40';
     });
     catChart.update();
@@ -125,18 +175,21 @@ function renderCategories(cs, ti, total, year) {
 
   const maxS = Math.max(...cs.map(c => c.s), 1);
   const bars = document.getElementById('cat-bars');
-  bars.innerHTML = cs.map(c => {
+  bars.innerHTML = cs.map((c, i) => {
     const name = resolveCatLabel(c);
     const pct = Math.round((c.s / maxS) * 100);
+    const baseColor = CATEGORY_PALETTE[i % CATEGORY_PALETTE.length];
     return `
       <div class="cat-row" data-cat="${escHtml(name)}" style="cursor:pointer" title="Click để xem sản phẩm">
         <div class="cat-label">${escHtml(name)}</div>
-        <div class="cat-bar-wrap"><div class="cat-bar-fill" data-pct="${pct}"></div></div>
+        <div class="cat-bar-wrap">
+          <div class="cat-bar-fill" data-pct="${pct}" style="background: linear-gradient(90deg, ${baseColor}, ${baseColor}80)"></div>
+        </div>
         <div class="cat-val">${fmtVND(c.s)}</div>
       </div>`;
   }).join('');
 
-  bars.querySelectorAll('.cat-row').forEach(row => {
+  bars.querySelectorAll('.cat-row').forEach((row, i) => {
     row.addEventListener('click', () => {
       const cat = row.getAttribute('data-cat');
       if (window.currentCategorySelection === cat) {
@@ -160,11 +213,6 @@ function renderCategories(cs, ti, total, year) {
   reveal(document.getElementById('card-cat-bars'));
 
   // Donut chart
-  const PALETTE = [
-    '#ee4d2d', '#ff7555', '#ffa07a', '#26aa99', '#5fe8cc',
-    '#4a90d9', '#a855f7', '#f59e0b', '#10b981', '#ef4444',
-    '#8b5cf6', '#06b6d4'
-  ];
   const ctx = document.getElementById('chart-cat').getContext('2d');
   if (catChart) catChart.destroy();
   catChart = new Chart(ctx, {
@@ -175,7 +223,7 @@ function renderCategories(cs, ti, total, year) {
         data: cs.map(c => c.s),
         backgroundColor: cs.map((c, i) => {
           const name = resolveCatLabel(c);
-          const baseColor = PALETTE[i % PALETTE.length];
+          const baseColor = CATEGORY_PALETTE[i % CATEGORY_PALETTE.length];
           if (!window.currentCategorySelection) return baseColor;
           return name === window.currentCategorySelection ? baseColor : baseColor + '40';
         }),
