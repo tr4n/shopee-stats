@@ -361,44 +361,9 @@ function renderCategories(cs, ti, total, year) {
   currentCatData = { cs, ti, total: total || (window.currentDashData ? window.currentDashData.t : 0), year: year || 'all' };
   
   if (!cs || cs.length === 0) {
-    const kpiRow = document.getElementById('cat-kpi-row');
-    if (kpiRow) kpiRow.innerHTML = '';
     document.getElementById('cat-bars').innerHTML =
       '<div class="no-data">Không có dữ liệu danh mục<br><small>Shopee API có thể không trả về catid cho các đơn này</small></div>';
     return;
-  }
-
-  // 1. Render KPI Summary Cards
-  const catTotalSpend = cs.reduce((sum, c) => sum + c.s, 0);
-  const mostSpentCat = [...cs].sort((a, b) => b.s - a.s)[0];
-  const mostPurchasedCat = [...cs].sort((a, b) => b.c - a.c)[0];
-  const avgSpend = cs.length > 0 ? catTotalSpend / cs.length : 0;
-
-  const kpiRow = document.getElementById('cat-kpi-row');
-  if (kpiRow) {
-    kpiRow.innerHTML = `
-      <div class="kpi">
-        <div class="kpi-label">🏷️ Tổng danh mục</div>
-        <div class="kpi-value">${cs.length}</div>
-        <div class="kpi-sub">Đã phát sinh chi tiêu</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">🔥 Chi nhiều nhất</div>
-        <div class="kpi-value" style="font-size: 18px; line-height: 1.4; color: var(--primary);" title="${escHtml(resolveCatLabel(mostSpentCat))}">${escHtml(truncateText(resolveCatLabel(mostSpentCat), 14))}</div>
-        <div class="kpi-sub">Thực chi: <strong>${fmtVND(mostSpentCat.s)}</strong></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">🛒 Mua nhiều nhất</div>
-        <div class="kpi-value" style="font-size: 18px; line-height: 1.4; color: #26aa99;" title="${escHtml(resolveCatLabel(mostPurchasedCat))}">${escHtml(truncateText(resolveCatLabel(mostPurchasedCat), 14))}</div>
-        <div class="kpi-sub">Số lượt mua: <strong>${fmtNum(mostPurchasedCat.c)}</strong></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">📊 Chi tiêu TB / DM</div>
-        <div class="kpi-value" style="font-size: 18px; line-height: 1.4; color: #3b82f6;">${fmtVND(avgSpend)}</div>
-        <div class="kpi-sub">Chia đều cho ${cs.length} nhóm</div>
-      </div>
-    `;
-    kpiRow.querySelectorAll('.kpi').forEach(el => reveal(el));
   }
 
   // 2. Render Bars list

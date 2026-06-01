@@ -18,6 +18,17 @@ function switchView(name) {
   navBtns.forEach((b) =>
     b.classList.toggle("active", b.getAttribute("data-view") === name),
   );
+
+  // Trigger resize event so Chart.js can update layouts of newly visible canvases
+  window.dispatchEvent(new Event("resize"));
+
+  // If switching to orders view, re-run filtering and rendering after a short delay
+  // to recreate the gradients with correct canvas dimensions once the view is visible.
+  if (name === "orders" && typeof applyFiltersAndRender === "function") {
+    setTimeout(() => {
+      applyFiltersAndRender();
+    }, 0);
+  }
 }
 
 navBtns.forEach((btn) =>
