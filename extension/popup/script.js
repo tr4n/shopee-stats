@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBarFill = document.getElementById('progress-bar-fill');
   const cacheInfo = document.getElementById('cache-info');
   const cacheBadgeText = document.getElementById('cache-badge-text');
+  const loadingTitle = document.querySelector('.loading-title');
+  const spinnerCenter = document.querySelector('.spinner-center');
 
   // Debug elements
   const debugPanel = document.getElementById('debug-panel');
@@ -298,6 +300,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // === Time Limit Selection ===
+  function getSelectedLimitYears() {
+    const activeBtn = document.querySelector('.range-btn.active');
+    return activeBtn ? activeBtn.getAttribute('data-value') : '3';
+  }
+
+  function setupRangeButtons() {
+    const rangeBtns = document.querySelectorAll('.range-btn');
+    rangeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('active')) return;
+        rangeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const limitYears = btn.getAttribute('data-value');
+        chrome.storage.local.set({ shopee_limit_years: limitYears }, () => {
+          updateCacheStatus(3, false);
+        });
+      });
+    });
+  }
+
   // === Cache Management ===
   const CURRENT_EXT_VERSION = chrome.runtime?.getManifest?.()?.version || '';
 
@@ -307,6 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if ((cache.v || 0) < 3) return false;
     // Invalidate caches built by an older version of the extension
     if (CURRENT_EXT_VERSION && cache.ev !== CURRENT_EXT_VERSION) return false;
+    // Invalidate cache if the selected time limit doesn't match the cache's limit
+    if (cache.limitYears !== getSelectedLimitYears()) return false;
     // Cache is only valid for up to 24 hours (86400 seconds) to avoid stale data
     const ageSec = Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated || 0);
     if (ageSec > 86400) return false;
@@ -348,7 +373,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Unified Initialization ===
   function initializeApp() {
     const listType = 3;
-    chrome.storage.local.get(['shopee_cache', 'shopee_analysis_lock', 'theme'], (res) => {
+    chrome.storage.local.get(['shopee_cache', 'shopee_analysis_lock', 'theme', 'shopee_limit_years'], (res) => {
+      // Initialize time limit buttons
+      let limitYears = res.shopee_limit_years || '3';
+      if (limitYears !== '3' && limitYears !== '5' && limitYears !== 'all') {
+        limitYears = '3';
+      }
+      const rangeBtns = document.querySelectorAll('.range-btn');
+      rangeBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-value') === limitYears);
+      });
+
       // 1. Apply Theme
       applyTheme(res.theme === 'dark');
 
@@ -426,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initializeApp();
+  setupRangeButtons();
   btnClearCache.addEventListener('click', () => {
     chrome.storage.local.remove(['shopee_cache'], () => {
       cacheData = null;
@@ -493,6 +529,12 @@ document.addEventListener('DOMContentLoaded', () => {
     progressBarFill.style.width = '0%';
     progressBarFill.classList.remove('indeterminate');
     progressText.textContent = 'Vui lòng chờ trong giây lát';
+
+    if (loadingTitle) loadingTitle.textContent = 'Đang chuẩn bị...';
+    if (spinnerCenter) {
+      spinnerCenter.textContent = '🛍️';
+      spinnerCenter.style.fontSize = '24px';
+    }
 
 
     analysisStartTime = null;
@@ -779,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const payload = {
       v: payloadVersion,
       ev: extVersion,
+      limitYears: getSelectedLimitYears(),
       t: totalSpent,
       o: totalOrders,
       s: totalSaved,
@@ -948,9 +991,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const listType = getSelectedListType();
       const useCache = !shouldIgnoreCache && cacheData && cacheData.listType === listType && isCacheValid(cacheData);
+      const limitYears = getSelectedLimitYears();
       const configPayload = {
         listType,
         nonce,  // content script echoes this back so popup can verify message origin
+        limitYears,
         lastUpdated: useCache ? (cacheData.lastUpdated || 0) : 0,
         miniOrders: useCache ? cacheData.miniOrders : [],
         itemMap: useCache && cacheData.itemMap ? cacheData.itemMap : {}
@@ -1027,6 +1072,23 @@ document.addEventListener('DOMContentLoaded', () => {
         label = `Đang chuẩn bị hiển thị...`;
       }
       progressText.textContent = label;
+
+      // Update loading status with processed count in the title (parenthesis)
+
+      // Update rolling count of scanned orders inside the spinner center
+      if (spinnerCenter && processed > 0) {
+        spinnerCenter.textContent = processed;
+        spinnerCenter.style.fontWeight = 'bold';
+        spinnerCenter.style.color = 'var(--primary)';
+        // Dynamically scale font size based on digit count to fit inside the spinner circle
+        if (processed >= 1000) {
+          spinnerCenter.style.fontSize = '14px';
+        } else if (processed >= 100) {
+          spinnerCenter.style.fontSize = '18px';
+        } else {
+          spinnerCenter.style.fontSize = '22px';
+        }
+      }
     } else if (message.type === 'error') {
       console.error('[ShopeeAnalytics] Error returned from content script:', message.message);
       clearAnalysisLock();

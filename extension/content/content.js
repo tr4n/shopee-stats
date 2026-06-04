@@ -38,6 +38,7 @@
     const LAST_UPDATED = cfg.lastUpdated || 0;
     const CACHED_MINI_ORDERS = Array.isArray(cfg.miniOrders) ? cfg.miniOrders : [];
     const CACHED_ITEM_MAP = cfg.itemMap || {};
+    const LIMIT_YEARS = cfg.limitYears || '3';
     // Nonce ties this content script instance to the popup run that spawned it.
     // The popup uses it to drop messages from any parallel/stale instances.
     runNonce = cfg.nonce || null;
@@ -131,9 +132,26 @@
     throw lastErr || new Error('Lỗi mạng. Kiểm tra kết nối internet.');
   }
 
+  function getIdDerivedTs(orderObj) {
+    if (!orderObj) return 0;
+    const orderId = orderObj.order_id || (orderObj.info_card && orderObj.info_card.order_id);
+    if (orderId) {
+      const idNum = Number(orderId);
+      if (idNum > 10000000000 && idNum < 9999999999999999) {
+        return 1546300800 + Math.floor(idNum / 1000000);
+      }
+    }
+    return 0;
+  }
+
   function getRawTs(orderObj) {
     if (!orderObj) return 0;
-    // For other features, prioritize delivery completion time (ctime in tracking_info)
+    
+    // Ưu tiên thời gian đặt hàng giải mã từ ID
+    const idTs = getIdDerivedTs(orderObj);
+    if (idTs) return idTs;
+
+    // Các mốc thời gian khác kém chính xác hơn nhưng mang tính tương đối
     if (
       orderObj.shipping &&
       orderObj.shipping.tracking_info &&
@@ -141,30 +159,21 @@
     ) {
       return orderObj.shipping.tracking_info.ctime;
     }
-    if (orderObj.create_time) return orderObj.create_time;
-    if (orderObj.ctime) return orderObj.ctime;
-    if (orderObj.info_card && orderObj.info_card.create_time) {
-      return orderObj.info_card.create_time;
-    }
-    return 0;
+    return getOrderPlacementTs(orderObj);
   }
 
   function getOrderPlacementTs(orderObj) {
     if (!orderObj) return 0;
-    // For sales statistics, prioritize order creation time (create_time) or derive from order ID
+    
+    // Ưu tiên thời gian đặt hàng giải mã từ ID
+    const idTs = getIdDerivedTs(orderObj);
+    if (idTs) return idTs;
+
+    // Các mốc thời gian khác
     if (orderObj.create_time) return orderObj.create_time;
     if (orderObj.ctime) return orderObj.ctime;
     if (orderObj.info_card && orderObj.info_card.create_time) {
       return orderObj.info_card.create_time;
-    }
-    
-    // Derived timestamp from Shopee order ID (starts with year suffix since 2019-01-01)
-    const orderId = orderObj.order_id || (orderObj.info_card && orderObj.info_card.order_id);
-    if (orderId) {
-      const idNum = Number(orderId);
-      if (idNum > 10000000000 && idNum < 9999999999999999) {
-        return 1546300800 + Math.floor(idNum / 1000000);
-      }
     }
 
     if (
@@ -362,6 +371,15 @@
       let hitCache = false;
       let totalCount = 0;
 
+      // Define cutoff limit based on LIMIT_YEARS setting
+      let cutoffTs = 0;
+      if (LIMIT_YEARS !== 'all') {
+        const yearsNum = parseInt(LIMIT_YEARS, 10) || 3;
+        const currentYear = new Date().getFullYear();
+        const minAllowedYear = currentYear - (yearsNum - 1);
+        cutoffTs = Math.floor(new Date(minAllowedYear, 0, 1).getTime() / 1000);
+      }
+
       // Smart dynamic congestion control parameters
       // We implement adaptive rate-limiting (backing off when API response is slow)
       // to protect Shopee's API servers from load spikes and avoid HTTP 429 rate-limiting.
@@ -427,6 +445,13 @@
 
         for (const order of orders) {
           const rawTs = getRawTs(order);
+          const ots = getOrderPlacementTs(order);
+
+          // Stop fetching if the order is older than the selected limit
+          if (cutoffTs > 0 && ((rawTs > 0 && rawTs < cutoffTs) || (ots > 0 && ots < cutoffTs))) {
+            hasMoreData = false;
+            break;
+          }
 
           if (LAST_UPDATED > 0 && rawTs > 0 && rawTs <= LAST_UPDATED) {
             hitCache = true;
@@ -496,7 +521,6 @@
             }
           }
 
-          const ots = getOrderPlacementTs(order);
           newMiniOrders.push({ ts: rawTs, ots, finalCost, rawCost, itemCount, il: orderItemList });
         }
 
@@ -512,10 +536,27 @@
         }
       }
 
-      const allMiniOrders = [...newMiniOrders, ...CACHED_MINI_ORDERS];
+      const allMiniOrders = [...newMiniOrders, ...CACHED_MINI_ORDERS].filter(o => {
+        const t = o.ots || o.ts;
+        return cutoffTs === 0 || t >= cutoffTs;
+      });
       const stats = computeStats(allMiniOrders);
 
-      const cappedItemMap = capMap(itemMap, 500);
+      // Rebuild itemMap to only contain items within the 5-year limit
+      const filteredItemMap = {};
+      for (const order of allMiniOrders) {
+        for (const item of (order.il || [])) {
+          const uniqueItemId = item.i;
+          if (uniqueItemId) {
+            if (!filteredItemMap[uniqueItemId]) {
+              filteredItemMap[uniqueItemId] = { name: item.n, spent: 0, count: 0, catId: item.cat };
+            }
+            filteredItemMap[uniqueItemId].spent += item.s;
+            filteredItemMap[uniqueItemId].count += item.c;
+          }
+        }
+      }
+      const cappedItemMap = capMap(filteredItemMap, 500);
 
       // Aggregate items for top-spending list; category is left empty for dashboard to classify
       const allItemAggr = {};
@@ -544,6 +585,7 @@
       const cachePayload = {
         v: 3,
         ev: extVersion,
+        limitYears: LIMIT_YEARS,
         fetchTime: Math.floor(Date.now() / 1000),
         lastUpdated: newLastUpdated || LAST_UPDATED,
         listType: LIST_TYPE,

@@ -111,7 +111,7 @@ function renderYearlyChart(yd, d) {
   const years = Object.keys(yd).sort();
   const spendData = years.map(y => yd[y].t);
   const orderData = years.map(y => yd[y].o);
-  const currentYearStr = String(new Date().getFullYear());
+  const currentYearStr = d && d.ts ? String(toVnParts(d.ts).year) : String(new Date().getFullYear());
 
   const ctx = document.getElementById('chart-yearly').getContext('2d');
   

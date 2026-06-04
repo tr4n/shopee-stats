@@ -956,6 +956,100 @@ function setupDashboardRatingCard(d) {
   if (hasRaw) return;
   const d = parseData();
 
+  if (d) {
+    // Limit data dynamically based on the selected limitYears option
+    const limitYears = d.limitYears || 'all';
+    if (limitYears !== 'all') {
+      const yearsNum = parseInt(limitYears, 10) || 3;
+      const currentYear = d.ts ? toVnParts(d.ts).year : new Date().getFullYear();
+      const minAllowedYear = currentYear - (yearsNum - 1);
+
+      // 1. Filter yearly stats (yd)
+      if (d.yd) {
+        for (const yr of Object.keys(d.yd)) {
+          if (parseInt(yr, 10) < minAllowedYear) {
+            delete d.yd[yr];
+          }
+        }
+      }
+
+      // 2. Filter order history (ol)
+      if (d.ol) {
+        d.ol = d.ol.filter(o => {
+          const ts = Array.isArray(o) ? (o[5] || o[0]) : (o.ot || o.t);
+          if (!ts) return false;
+          const yr = toVnParts(ts).year;
+          return yr >= minAllowedYear;
+        });
+      }
+
+      // 3. Filter monthly items (mi)
+      if (d.mi) {
+        for (const key of Object.keys(d.mi)) {
+          const yr = parseInt(key.split('-')[0], 10);
+          if (yr < minAllowedYear) {
+            delete d.mi[key];
+          }
+        }
+      }
+
+      // 4. Rebuild ti (top items) from the filtered mi to ensure consistency
+      if (d.mi) {
+        const miMap = {};
+        for (const key of Object.keys(d.mi)) {
+          for (const item of d.mi[key] || []) {
+            const name = Array.isArray(item) ? item[0] : item.n;
+            const spent = Array.isArray(item) ? item[1] : item.s;
+            const count = Array.isArray(item) ? item[2] : item.c;
+            const cat = Array.isArray(item) ? item[3] : item.cat;
+            const op = Array.isArray(item) ? item[4] : item.op;
+            const dp = Array.isArray(item) ? item[5] : item.dp;
+
+            const k = name.toLowerCase().substring(0, 120);
+            if (!miMap[k]) {
+              miMap[k] = { n: name, s: 0, c: 0, cat: cat || '', op: op || 0, dp: dp || 0 };
+            }
+            miMap[k].s += spent || 0;
+            miMap[k].c += count || 0;
+            if (op) miMap[k].op = op;
+            if (dp) miMap[k].dp = dp;
+            if (cat) miMap[k].cat = cat;
+          }
+        }
+        d.ti = Object.values(miMap).sort((a, b) => b.s - a.s).slice(0, 150);
+      }
+
+      // 5. Filter oss (order stats summary)
+      if (d.oss) {
+        for (const yr of Object.keys(d.oss)) {
+          if (parseInt(yr, 10) < minAllowedYear) {
+            delete d.oss[yr];
+          }
+        }
+      }
+
+      // 6. Recalculate totals
+      let newTotalSpent = 0;
+      let newTotalOrders = 0;
+      let newTotalSaved = 0;
+      let newTotalItems = 0;
+
+      if (d.yd) {
+        for (const yr of Object.keys(d.yd)) {
+          const yrData = d.yd[yr];
+          newTotalSpent += yrData.t || 0;
+          newTotalOrders += yrData.o || 0;
+          newTotalItems += yrData.ip || 0;
+          newTotalSaved += yrData.s || 0;
+        }
+        d.t = newTotalSpent;
+        d.o = newTotalOrders;
+        d.s = newTotalSaved;
+        d.ip = newTotalItems;
+      }
+    }
+  }
+
   if (!d || !d.t) {
     console.warn("[Dashboard] No data or invalid data, showing no-data view");
     renderNoData();
