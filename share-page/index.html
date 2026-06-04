@@ -555,11 +555,58 @@
      ==================================================== */
     function parseData() {
       try {
-        const match = location.hash.match(/[#&]d=([^&]+)/);
-        if (!match) return null;
-        return JSON.parse(decodeURIComponent(escape(atob(match[1]))));
-      } catch { return null; }
+        // 1. Try matching s= (new format)
+        const matchS = location.hash.match(/[#&]s=([^&]+)/);
+        if (matchS) {
+          const rawStr = decodeURIComponent(escape(atob(matchS[1])));
+          const parts = rawStr.split('|');
+          if (parts.length >= 9) {
+            const version = parseInt(parts[0], 10);
+            const rankVal = parseInt(parts[1], 10);
+            const beat = parseInt(parts[2], 10);
+            const finalTotal = parseFloat(parts[3]);
+            const totalOrders = parseInt(parts[4], 10);
+            const totalItems = parseInt(parts[5], 10);
+            const finalSaved = parseFloat(parts[6]);
+            const tsVal = parseInt(parts[7], 10);
+
+            // The last part is always ydStr
+            const ydStr = parts[parts.length - 1] || '';
+            // All parts in between (index 8 to parts.length - 2) belong to finalTopItem
+            const finalTopItem = parts.slice(8, parts.length - 1).join('|');
+
+            let yd = [];
+            if (ydStr) {
+              yd = ydStr.split(';').map(item => {
+                const sub = item.split(',');
+                return [sub[0], parseFloat(sub[1])];
+              });
+            }
+
+            return {
+              r: rankVal,
+              p: beat,
+              t: finalTotal,
+              o: totalOrders,
+              ip: totalItems,
+              s: finalSaved,
+              ts: tsVal,
+              ti: finalTopItem,
+              yd: yd
+            };
+          }
+        }
+
+        // 2. Fallback to older d= format
+        const matchD = location.hash.match(/[#&]d=([^&]+)/);
+        if (!matchD) return null;
+        return JSON.parse(decodeURIComponent(escape(atob(matchD[1]))));
+      } catch (err) {
+        console.error("Failed to parse sharing data:", err);
+        return null;
+      }
     }
+
 
     /* ====================================================
        Render error
@@ -672,7 +719,7 @@
       // Slide 4: Yearly Breakdown
       const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
       const chartRowsHtml = Array.isArray(d.yd) ? d.yd.map(([y, v]) => {
-        const pct = Math.round((v / maxVal) * 100);
+        const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
         const isCurrent = Number(y) === currentYear;
         const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
         return `
@@ -721,7 +768,7 @@
           <div class="glass-card cta-card" style="margin: auto 0;">
             <div class="sticker-slogan">${randomSlogan}</div>
             <div style="font-size: 15px; font-weight: 600; line-height: 1.5; margin-bottom: 8px;">
-              Xem thống kê chi tiêu Shopee của bạn với tiện ích <strong>Shopee Analytics</strong> chạy offline 100% cục bộ.
+              Xem thống kê chi tiêu Shopee của bạn với tiện ích <strong>Shopee Analytics</strong> bảo mật 100% offline.
             </div>
             <a class="cta-btn" href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank">
               Cài Đặt Tiện Ích Miễn Phí
