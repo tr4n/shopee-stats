@@ -811,9 +811,9 @@ function setupShareButtons(d) {
         topItemB64Url
       ].join('-');
 
-      let shareUrlBase = "https://tr4n.github.io/shopee-stats/share-page/";
+      let shareUrlBase = "https://tr4n.github.io/shopee-stats/share/";
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
-        shareUrlBase = "../share-page/";
+        shareUrlBase = "../share/";
       }
 
       const shareUrl = `${shareUrlBase}#s=${encoded}`;
