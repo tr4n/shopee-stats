@@ -8,10 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
 
-  const btnPopupShareLink = document.getElementById('btn-popup-share-link');
-  const btnPopupShareDashboard = document.getElementById('btn-popup-share-dashboard');
-  const popupShareHideAmount = document.getElementById('popup-share-hide-amount');
-  const popupShareHideNames = document.getElementById('popup-share-hide-names');
+
 
   const stateInitial = document.getElementById('initial-state');
   const stateLoading = document.getElementById('loading-state');
@@ -887,76 +884,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function buildPopupSharePageUrl(data, hideAmount, hideNames) {
-    if (!data) return '';
-    try {
-      const curYear = new Date().getFullYear();
-      let finalTotal = data.totalSpent;
-      let finalSaved = data.totalSaved;
-      let finalTopItem = data.topItems && data.topItems[0] ? data.topItems[0].name : '';
-      let finalYd = Object.entries(data.yearlyStats || {}).map(([y, v]) => [y, v.total.totalSpent]);
-
-      if (hideAmount) {
-        finalTotal = -1;
-        finalSaved = -1;
-        finalYd = finalYd.map(([y]) => [y, -1]);
-      }
-
-      if (hideNames) {
-        finalTopItem = 'Sản phẩm đã ẩn';
-      }
-
-      // get spending percentile
-      const annualSpent = data.yearlyStats && data.yearlyStats[curYear] 
-        ? data.yearlyStats[curYear].total.totalSpent 
-        : data.totalSpent;
-      const beat = getSpendingPercentile(annualSpent);
-
-      const rankVal = data.totalSpent <= 10000000 ? 1 : (data.totalSpent <= 50000000 ? 2 : (data.totalSpent < 80000000 ? 3 : 4));
-      const tsVal = Math.floor(Date.now() / 1000);
-      const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
-
-      const pipeStr = [
-        1, // version
-        rankVal,
-        beat,
-        finalTotal,
-        data.totalOrders,
-        data.totalItems,
-        finalSaved,
-        tsVal,
-        finalTopItem,
-        ydStr
-      ].join('|');
-
-      const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
-      return `https://tr4n.github.io/shopee-stats/share-page/#s=${encoded}`;
-    } catch (e) {
-      console.error('[Popup] Failed to build share page URL:', e);
-      return '';
-    }
-  }
-
-  async function shortenUrlExtension(longUrl, timeoutMs = 2500) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`, {
-        signal: controller.signal
-      });
-      clearTimeout(id);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.shorturl) {
-          return data.shorturl;
-        }
-      }
-    } catch (err) {
-      console.warn('[Popup] Failed to shorten URL via fetch:', err);
-    }
-    return longUrl;
-  }
-
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
@@ -964,55 +891,6 @@ document.addEventListener('DOMContentLoaded', () => {
         openDashboardWithData(lastCompleteData);
       } else {
         chrome.tabs.create({ url: DASHBOARD_BASE + '/' });
-      }
-    });
-  }
-
-  // === Share Links from Popup ===
-  if (btnPopupShareLink) {
-    btnPopupShareLink.addEventListener('click', async () => {
-      if (!lastCompleteData) return;
-      const orig = btnPopupShareLink.innerHTML;
-      btnPopupShareLink.innerHTML = 'Đang rút gọn...';
-      try {
-        const url = buildPopupSharePageUrl(
-          lastCompleteData,
-          popupShareHideAmount?.checked || false,
-          popupShareHideNames?.checked || false
-        );
-        let finalUrl = url;
-        let isShortened = false;
-        if (url) {
-          try {
-            finalUrl = await shortenUrlExtension(url, 2500);
-            isShortened = true;
-          } catch (shortenErr) {
-            console.warn('[Popup] Failed to shorten, using long URL:', shortenErr);
-          }
-        }
-        await navigator.clipboard.writeText(finalUrl);
-        btnPopupShareLink.innerHTML = isShortened ? '✓ Đã copy link rút gọn!' : '✓ Đã copy!';
-      } catch (err) {
-        console.error(err);
-        btnPopupShareLink.innerHTML = '❌ Lỗi';
-      } finally {
-        setTimeout(() => {
-          btnPopupShareLink.innerHTML = orig;
-        }, 2000);
-      }
-    });
-  }
-
-  if (btnPopupShareDashboard) {
-    btnPopupShareDashboard.addEventListener('click', () => {
-      if (!lastCompleteData) return;
-      const url = buildPopupSharePageUrl(
-        lastCompleteData,
-        popupShareHideAmount?.checked || false,
-        popupShareHideNames?.checked || false
-      );
-      if (url) {
-        chrome.tabs.create({ url });
       }
     });
   }
