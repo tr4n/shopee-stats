@@ -612,8 +612,8 @@
 
   <!-- Actions Panel -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
-    <button id="btn-download-img" class="action-btn active">💾 Tải ảnh vuông</button>
-    <button id="btn-copy-img" class="action-btn">📋 Sao chép ảnh</button>
+    <button id="btn-download-img" class="action-btn active">💾 Tải ảnh</button>
+    <button id="btn-copy-img" class="action-btn">📋 Copy ảnh</button>
   </div>
 
   <!-- Toast Message -->
@@ -882,7 +882,7 @@
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
-              showToast("✓ Đã tải ảnh vuông thành công!");
+              showToast("✓ Đã tải ảnh thành công!");
             } catch (err) {
               console.error(err);
               showToast("❌ Lỗi khi tải ảnh");
