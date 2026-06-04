@@ -762,28 +762,30 @@ function setupShareButtons(d) {
 
   btnShare.addEventListener("click", () => {
     try {
-      const curYear = new Date().getFullYear();
       let finalTotal = d.t;
       let finalSaved = d.s;
-      
-      // Truncate top item name to max 18 characters to minimize URL length
-      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n.substring(0, 18).trim() : "";
+
+      // Truncate top item name to max 24 characters (V4: increased from 18)
+      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n.substring(0, 24).trim() : "";
       let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
 
-      const tsVal = Math.floor(Date.now() / 1000);
+      // V4: Use YYMMDD compact date (6 digits) instead of unix timestamp base36
+      const now = new Date();
+      const dateCode = (now.getFullYear() % 100) * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
 
-      // Base36 encoding for numbers to minimize URL length
-      const totalB36 = finalTotal < 0 ? "n" : finalTotal.toString(36);
-      const ordersB36 = d.o.toString(36);
-      const itemsB36 = d.ip.toString(36);
-      const savedB36 = finalSaved < 0 ? "n" : finalSaved.toString(36);
-      const tsB36 = tsVal.toString(36);
+      // Base36 encoding for numbers
+      const totalB36 = finalTotal < 0 ? "n" : Math.round(finalTotal).toString(36);
+      const ordersB36 = Math.round(d.o || 0).toString(36);
+      const itemsB36 = Math.round(d.ip || 0).toString(36);
+      const savedB36 = finalSaved < 0 ? "n" : Math.round(finalSaved).toString(36);
 
+      // V4: yd uses ":" and "," separators (shorter than "_")
+      // Format: shortYear:valB36,shortYear:valB36,...
       const ydStr = finalYd.map(([y, val]) => {
         const shortYear = String(y).slice(-2);
-        const valB36 = val < 0 ? "n" : val.toString(36);
-        return `${shortYear}_${valB36}`;
-      }).join('_');
+        const valB36 = (val == null || val < 0) ? "n" : Math.round(val).toString(36);
+        return `${shortYear}:${valB36}`;
+      }).join(',');
 
       const toBase64url = (str) => {
         try {
@@ -797,22 +799,23 @@ function setupShareButtons(d) {
 
       const topItemB64Url = finalTopItem ? toBase64url(finalTopItem) : '';
 
+      // Version 4 format: 4-{total}-{orders}-{items}-{saved}-{YYMMDD}-{yd}-{topItemB64}
       const encoded = [
-        3, // version 3 (Optimized raw delimited URL-safe format)
+        4, // version 4
         totalB36,
         ordersB36,
         itemsB36,
         savedB36,
-        tsB36,
+        dateCode,  // YYMMDD as plain number (smaller than unix ts base36)
         ydStr,
         topItemB64Url
       ].join('-');
-      
+
       let shareUrlBase = "https://tr4n.github.io/shopee-stats/share-page/";
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
         shareUrlBase = "../share-page/";
       }
-      
+
       const shareUrl = `${shareUrlBase}#s=${encoded}`;
       window.open(shareUrl, "_blank");
     } catch (err) {
