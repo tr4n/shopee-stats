@@ -765,28 +765,48 @@ function setupShareButtons(d) {
       const curYear = new Date().getFullYear();
       let finalTotal = d.t;
       let finalSaved = d.s;
-      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n : "";
+      
+      // Truncate top item name to max 18 characters to minimize URL length
+      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n.substring(0, 18).trim() : "";
       let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
 
-      const rankVal = d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4));
-      const beatVal = getBeat(d.t);
       const tsVal = Math.floor(Date.now() / 1000);
-      const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
 
-      const pipeStr = [
-        1, // version
-        rankVal,
-        beatVal,
-        finalTotal,
-        d.o,
-        d.ip,
-        finalSaved,
-        tsVal,
-        finalTopItem,
-        ydStr
-      ].join('|');
+      // Base36 encoding for numbers to minimize URL length
+      const totalB36 = finalTotal < 0 ? "n" : finalTotal.toString(36);
+      const ordersB36 = d.o.toString(36);
+      const itemsB36 = d.ip.toString(36);
+      const savedB36 = finalSaved < 0 ? "n" : finalSaved.toString(36);
+      const tsB36 = tsVal.toString(36);
 
-      const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
+      const ydStr = finalYd.map(([y, val]) => {
+        const shortYear = String(y).slice(-2);
+        const valB36 = val < 0 ? "n" : val.toString(36);
+        return `${shortYear}_${valB36}`;
+      }).join('_');
+
+      const toBase64url = (str) => {
+        try {
+          const utf8Bytes = unescape(encodeURIComponent(str));
+          const b64 = btoa(utf8Bytes);
+          return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        } catch (e) {
+          return '';
+        }
+      };
+
+      const topItemB64Url = finalTopItem ? toBase64url(finalTopItem) : '';
+
+      const encoded = [
+        3, // version 3 (Optimized raw delimited URL-safe format)
+        totalB36,
+        ordersB36,
+        itemsB36,
+        savedB36,
+        tsB36,
+        ydStr,
+        topItemB64Url
+      ].join('-');
       
       let shareUrlBase = "https://tr4n.github.io/shopee-stats/share-page/";
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {

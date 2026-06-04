@@ -901,30 +901,62 @@
         // 1. Try matching s= (new format)
         const matchS = location.hash.match(/[#&]s=([^&]+)/);
         if (matchS) {
-          const rawStr = decodeURIComponent(escape(atob(decodeURIComponent(matchS[1]))));
-          const parts = rawStr.split('|');
-          if (parts.length >= 9) {
-            const version = parseInt(parts[0], 10);
-            const rankVal = parseInt(parts[1], 10);
-            const beat = parseInt(parts[2], 10);
-            const finalTotal = parseFloat(parts[3]);
-            const totalOrders = parseInt(parts[4], 10);
-            const totalItems = parseInt(parts[5], 10);
-            const finalSaved = parseFloat(parts[6]);
-            const tsVal = parseInt(parts[7], 10);
+          const hashVal = decodeURIComponent(matchS[1]);
+          if (hashVal.startsWith('3-')) {
+            // Version 3 (Optimized raw delimited URL-safe format)
+            const parts = hashVal.split('-');
+            const finalTotal = parts[1] === 'n' ? -1 : parseInt(parts[1], 36);
+            const totalOrders = parseInt(parts[2], 36);
+            const totalItems = parseInt(parts[3], 36);
+            const finalSaved = parts[4] === 'n' ? -1 : parseInt(parts[4], 36);
+            const tsVal = parseInt(parts[5], 36);
 
-            // The last part is always ydStr
-            const ydStr = parts[parts.length - 1] || '';
-            // All parts in between (index 8 to parts.length - 2) belong to finalTopItem
-            const finalTopItem = parts.slice(8, parts.length - 1).join('|');
+            const ydStr = parts[6] || '';
+            const topItemB64Url = parts.slice(7).join('-');
+
+            let finalTopItem = '';
+            if (topItemB64Url) {
+              try {
+                let b64 = topItemB64Url.replace(/-/g, '+').replace(/_/g, '/');
+                while (b64.length % 4) b64 += '=';
+                finalTopItem = decodeURIComponent(escape(atob(b64)));
+              } catch (e) {
+                console.error("Failed to decode top item:", e);
+              }
+            }
 
             let yd = [];
             if (ydStr) {
-              yd = ydStr.split(';').map(item => {
-                const sub = item.split(',');
-                return [sub[0], parseFloat(sub[1])];
-              });
+              const ydParts = ydStr.split('_');
+              for (let i = 0; i < ydParts.length; i += 2) {
+                if (ydParts[i] && ydParts[i+1]) {
+                  const fullYear = parseInt(ydParts[i], 10) + 2000;
+                  const val = ydParts[i+1] === 'n' ? -1 : parseInt(ydParts[i+1], 36);
+                  yd.push([fullYear, val]);
+                }
+              }
             }
+
+            // Calculate rankVal and beatVal dynamically
+            const rankVal = finalTotal <= 10000000 ? 1 : (finalTotal <= 50000000 ? 2 : (finalTotal < 80000000 ? 3 : 4));
+            
+            const getBeat = (t) => {
+              const thresholds = [
+                { max: 1000000, beat: 20 },
+                { max: 5000000, beat: 45 },
+                { max: 15000000, beat: 65 },
+                { max: 35000000, beat: 80 },
+                { max: 70000000, beat: 90 },
+                { max: 120000000, beat: 95 },
+                { max: 250000000, beat: 98 },
+                { max: Infinity, beat: 99 }
+              ];
+              for (const item of thresholds) {
+                if (t <= item.max) return item.beat;
+              }
+              return 99;
+            };
+            const beat = getBeat(finalTotal);
 
             return {
               r: rankVal,
@@ -937,6 +969,80 @@
               ti: finalTopItem,
               yd: yd
             };
+          } else {
+            // Version 1 or 2 (Base64 encoded)
+            const rawStr = decodeURIComponent(escape(atob(hashVal)));
+            const parts = rawStr.split('|');
+            if (parts.length >= 9) {
+              const version = parseInt(parts[0], 10);
+              if (version === 2) {
+                const rankVal = parseInt(parts[1], 10);
+                const beat = parseInt(parts[2], 10);
+                
+                const finalTotal = parts[3] === 'n' ? -1 : parseInt(parts[3], 36);
+                const totalOrders = parseInt(parts[4], 36);
+                const totalItems = parseInt(parts[5], 36);
+                const finalSaved = parts[6] === 'n' ? -1 : parseInt(parts[6], 36);
+                const tsVal = parseInt(parts[7], 36);
+
+                const ydStr = parts[parts.length - 1] || '';
+                const finalTopItem = parts.slice(8, parts.length - 1).join('|');
+
+                let yd = [];
+                if (ydStr) {
+                  yd = ydStr.split(';').map(item => {
+                    const sub = item.split(',');
+                    const fullYear = parseInt(sub[0], 10) + 2000;
+                    const val = sub[1] === 'n' ? -1 : parseInt(sub[1], 36);
+                    return [fullYear, val];
+                  });
+                }
+
+                return {
+                  r: rankVal,
+                  p: beat,
+                  t: finalTotal,
+                  o: totalOrders,
+                  ip: totalItems,
+                  s: finalSaved,
+                  ts: tsVal,
+                  ti: finalTopItem,
+                  yd: yd
+                };
+              } else {
+                // Fallback for version 1 (Base10 delimited string)
+                const rankVal = parseInt(parts[1], 10);
+                const beat = parseInt(parts[2], 10);
+                const finalTotal = parseFloat(parts[3]);
+                const totalOrders = parseInt(parts[4], 10);
+                const totalItems = parseInt(parts[5], 10);
+                const finalSaved = parseFloat(parts[6]);
+                const tsVal = parseInt(parts[7], 10);
+
+                const ydStr = parts[parts.length - 1] || '';
+                const finalTopItem = parts.slice(8, parts.length - 1).join('|');
+
+                let yd = [];
+                if (ydStr) {
+                  yd = ydStr.split(';').map(item => {
+                    const sub = item.split(',');
+                    return [sub[0], parseFloat(sub[1])];
+                  });
+                }
+
+                return {
+                  r: rankVal,
+                  p: beat,
+                  t: finalTotal,
+                  o: totalOrders,
+                  ip: totalItems,
+                  s: finalSaved,
+                  ts: tsVal,
+                  ti: finalTopItem,
+                  yd: yd
+                };
+              }
+            }
           }
         }
 
