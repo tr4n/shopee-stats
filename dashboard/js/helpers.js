@@ -4,6 +4,9 @@
 ───────────────────────────────────────────────── */
 
 function fmtVND(n) {
+  if (window.currentDashData && window.currentDashData.hideAmount) {
+    return '***';
+  }
   n = Math.round(n || 0);
   if (n >= 1e9) return (n / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
   if (n >= 1e6) return (n / 1e6).toFixed(1).replace('.0', '') + 'tr';

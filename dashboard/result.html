@@ -556,6 +556,13 @@
               </select>
             </div>
             <div class="control-group" style="margin-top: 10px">
+              <label>Kích thước ảnh</label>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="share-ratio-story" class="pill active" style="flex: 1; margin: 0; padding: 8px; font-size: 12.5px; min-width: auto;">Story (9:16)</button>
+                <button type="button" id="share-ratio-square" class="pill" style="flex: 1; margin: 0; padding: 8px; font-size: 12.5px; min-width: auto; border-color: var(--border); color: var(--text); background: transparent;">Ảnh vuông (1:1)</button>
+              </div>
+            </div>
+            <div class="control-group" style="margin-top: 10px">
               <label class="checkbox-label">
                 <input type="checkbox" id="share-hide-amount" />
                 Ẩn số tiền chi tiết
@@ -565,18 +572,32 @@
                 Ẩn tên sản phẩm
               </label>
             </div>
-            <div class="control-actions">
-              <button id="btn-modal-copy" class="pill" style="
-                    border-color: var(--primary);
-                    color: var(--primary);
-                    flex: 1;
+            <div class="control-actions" style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <button id="btn-modal-copy" class="pill" style="
+                      border-color: var(--primary);
+                      color: var(--primary);
+                      flex: 1;
+                      margin: 0;
+                      padding: 10px;
+                      min-width: auto;
+                    ">
+                  📋 Copy Ảnh
+                </button>
+                <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px; min-width: auto;">
+                  📸 Tải Ảnh
+                </button>
+              </div>
+              <button id="btn-modal-copy-link" class="pill" style="
+                    border-color: var(--green);
+                    color: var(--green);
+                    width: 100%;
                     margin: 0;
                     padding: 10px;
+                    background: transparent;
+                    min-width: auto;
                   ">
-                📋 Copy
-              </button>
-              <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px">
-                📸 Tải Về
+                🔗 Copy Link Chia Sẻ Bảo Mật
               </button>
             </div>
           </div>

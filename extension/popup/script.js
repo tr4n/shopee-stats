@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
 
+  const btnPopupShareLink = document.getElementById('btn-popup-share-link');
+  const btnPopupShareDashboard = document.getElementById('btn-popup-share-dashboard');
+  const popupShareHideAmount = document.getElementById('popup-share-hide-amount');
+  const popupShareHideNames = document.getElementById('popup-share-hide-names');
+
   const stateInitial = document.getElementById('initial-state');
   const stateLoading = document.getElementById('loading-state');
   const stateResult = document.getElementById('result-state');
@@ -882,6 +887,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function buildPopupSharePageUrl(data, hideAmount, hideNames) {
+    if (!data) return '';
+    try {
+      const curYear = new Date().getFullYear();
+      let finalTotal = data.totalSpent;
+      let finalSaved = data.totalSaved;
+      let finalTopItem = data.topItems && data.topItems[0] ? data.topItems[0].name : '';
+      let finalYd = Object.entries(data.yearlyStats || {}).map(([y, v]) => [y, v.total.totalSpent]);
+
+      if (hideAmount) {
+        finalTotal = -1;
+        finalSaved = -1;
+        finalYd = finalYd.map(([y]) => [y, -1]);
+      }
+
+      if (hideNames) {
+        finalTopItem = 'Sản phẩm đã ẩn';
+      }
+
+      // get spending percentile
+      const annualSpent = data.yearlyStats && data.yearlyStats[curYear] 
+        ? data.yearlyStats[curYear].total.totalSpent 
+        : data.totalSpent;
+      const beat = getSpendingPercentile(annualSpent);
+
+      const sharePayload = {
+        r: data.totalSpent <= 10000000 ? 1 : (data.totalSpent <= 50000000 ? 2 : (data.totalSpent < 80000000 ? 3 : 4)),
+        p: beat,
+        t: finalTotal,
+        o: data.totalOrders,
+        ip: data.totalItems,
+        s: finalSaved,
+        ti: finalTopItem,
+        yd: finalYd,
+        ts: Math.floor(Date.now() / 1000)
+      };
+
+      const jsonStr = JSON.stringify(sharePayload);
+      const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+      return `https://tr4n.github.io/shopee-stats/share-page/#d=${encoded}`;
+    } catch (e) {
+      console.error('[Popup] Failed to build share page URL:', e);
+      return '';
+    }
+  }
+
   // === Open Dashboard ===
   if (btnOpenDashboard) {
     btnOpenDashboard.addEventListener('click', () => {
@@ -889,6 +940,45 @@ document.addEventListener('DOMContentLoaded', () => {
         openDashboardWithData(lastCompleteData);
       } else {
         chrome.tabs.create({ url: DASHBOARD_BASE + '/' });
+      }
+    });
+  }
+
+  // === Share Links from Popup ===
+  if (btnPopupShareLink) {
+    btnPopupShareLink.addEventListener('click', async () => {
+      if (!lastCompleteData) return;
+      const orig = btnPopupShareLink.innerHTML;
+      btnPopupShareLink.innerHTML = 'Đang tạo...';
+      try {
+        const url = buildPopupSharePageUrl(
+          lastCompleteData,
+          popupShareHideAmount?.checked || false,
+          popupShareHideNames?.checked || false
+        );
+        await navigator.clipboard.writeText(url);
+        btnPopupShareLink.innerHTML = '✓ Đã copy!';
+      } catch (err) {
+        console.error(err);
+        btnPopupShareLink.innerHTML = '❌ Lỗi';
+      } finally {
+        setTimeout(() => {
+          btnPopupShareLink.innerHTML = orig;
+        }, 2000);
+      }
+    });
+  }
+
+  if (btnPopupShareDashboard) {
+    btnPopupShareDashboard.addEventListener('click', () => {
+      if (!lastCompleteData) return;
+      const url = buildPopupSharePageUrl(
+        lastCompleteData,
+        popupShareHideAmount?.checked || false,
+        popupShareHideNames?.checked || false
+      );
+      if (url) {
+        chrome.tabs.create({ url });
       }
     });
   }

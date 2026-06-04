@@ -746,8 +746,11 @@ function setupShareButtons(d) {
   const hideNamesCb = document.getElementById("share-hide-names");
   const btnCopy = document.getElementById("btn-modal-copy");
   const btnDownload = document.getElementById("btn-modal-download");
+  const btnCopyLink = document.getElementById("btn-modal-copy-link");
+  const btnRatioStory = document.getElementById("share-ratio-story");
+  const btnRatioSquare = document.getElementById("share-ratio-square");
 
-  let currentOptions = { cardType: "overview" };
+  let currentOptions = { cardType: "overview", aspectRatio: "story" };
   let currentDataUrl = "";
 
   const getBeat = (t) => {
@@ -770,6 +773,39 @@ function setupShareButtons(d) {
     }
     return 99;
   };
+
+  function setRatioActive(ratio) {
+    if (!btnRatioStory || !btnRatioSquare) return;
+    if (ratio === "story") {
+      btnRatioStory.className = "pill active";
+      btnRatioStory.style.background = "";
+      btnRatioStory.style.color = "";
+      btnRatioStory.style.borderColor = "";
+
+      btnRatioSquare.className = "pill";
+      btnRatioSquare.style.background = "transparent";
+      btnRatioSquare.style.color = "var(--text)";
+      btnRatioSquare.style.borderColor = "var(--border)";
+      currentOptions.aspectRatio = "story";
+    } else {
+      btnRatioSquare.className = "pill active";
+      btnRatioSquare.style.background = "";
+      btnRatioSquare.style.color = "";
+      btnRatioSquare.style.borderColor = "";
+
+      btnRatioStory.className = "pill";
+      btnRatioStory.style.background = "transparent";
+      btnRatioStory.style.color = "var(--text)";
+      btnRatioStory.style.borderColor = "var(--border)";
+      currentOptions.aspectRatio = "square";
+    }
+    updatePreview();
+  }
+
+  if (btnRatioStory && btnRatioSquare) {
+    btnRatioStory.addEventListener("click", () => setRatioActive("story"));
+    btnRatioSquare.addEventListener("click", () => setRatioActive("square"));
+  }
 
   async function updatePreview() {
     if (!window.generateDashboardShareCard) return;
@@ -802,7 +838,18 @@ function setupShareButtons(d) {
   }
 
   function openModal(cardType, extraOpts = {}) {
-    currentOptions = { cardType, ...extraOpts };
+    currentOptions = { cardType, aspectRatio: "story", ...extraOpts };
+    if (btnRatioStory && btnRatioSquare) {
+      btnRatioStory.className = "pill active";
+      btnRatioStory.style.background = "";
+      btnRatioStory.style.color = "";
+      btnRatioStory.style.borderColor = "";
+
+      btnRatioSquare.className = "pill";
+      btnRatioSquare.style.background = "transparent";
+      btnRatioSquare.style.color = "var(--text)";
+      btnRatioSquare.style.borderColor = "var(--border)";
+    }
     modal.classList.add("active");
     updatePreview();
   }
@@ -855,6 +902,7 @@ function setupShareButtons(d) {
         new ClipboardItem({ "image/png": blob }),
       ]);
       btnCopy.innerHTML = "✓ Đã copy!";
+      showSupportToast("✓ Đã copy ảnh vào bộ nhớ tạm! Bạn có thể nhấn Ctrl+V để dán trực tiếp vào Zalo, Messenger, Facebook...", false);
     } catch (err) {
       console.error(err);
       btnCopy.innerHTML = "❌ Lỗi";
@@ -864,6 +912,60 @@ function setupShareButtons(d) {
       }, 2000);
     }
   });
+
+  if (btnCopyLink) {
+    btnCopyLink.addEventListener("click", async () => {
+      const orig = btnCopyLink.innerHTML;
+      btnCopyLink.innerHTML = "Đang tạo link...";
+      try {
+        const curYear = new Date().getFullYear();
+        const targetYear = currentOptions.year || curYear;
+        
+        let finalTotal = d.t;
+        let finalSaved = d.s;
+        let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n : "";
+        let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
+
+        // Hide values if selected
+        if (hideAmountCb.checked) {
+          finalTotal = -1;
+          finalSaved = -1;
+          finalYd = finalYd.map(([y]) => [y, -1]);
+        }
+
+        if (hideNamesCb.checked) {
+          finalTopItem = "Sản phẩm đã ẩn";
+        }
+
+        const sharePayload = {
+          r: d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4)),
+          p: getBeat(d.t),
+          t: finalTotal,
+          o: d.o,
+          ip: d.ip,
+          s: finalSaved,
+          ti: finalTopItem,
+          yd: finalYd,
+          ts: Math.floor(Date.now() / 1000)
+        };
+
+        const jsonStr = JSON.stringify(sharePayload);
+        const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+        const shareUrl = `https://tr4n.github.io/shopee-stats/share-page/#d=${encoded}`;
+
+        await navigator.clipboard.writeText(shareUrl);
+        btnCopyLink.innerHTML = "✓ Đã copy link!";
+        showSupportToast("✓ Đã copy link chia sẻ bảo mật thành công!", false);
+      } catch (err) {
+        console.error(err);
+        btnCopyLink.innerHTML = "❌ Lỗi";
+      } finally {
+        setTimeout(() => {
+          btnCopyLink.innerHTML = orig;
+        }, 2000);
+      }
+    });
+  }
 }
 
 /* ── Dashboard Rating Card ────────────────────── */
