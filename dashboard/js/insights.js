@@ -48,12 +48,14 @@ function computeYearlyInsights(yd, d) {
     if (Math.abs(spendGrowth) >= 5) {
       const spendIcon = spendGrowth >= 0 ? '📈' : '📉';
       const spendLabel = spendGrowth >= 0 ? 'tăng' : 'giảm';
-      const orderIcon = orderGrowth >= 0 ? '📦' : '📉';
       const orderLabel = orderGrowth >= 0 ? 'tăng' : 'giảm';
+      // Tính chi tiêu trung bình tháng của 2 năm để so sánh có ý nghĩa hơn
+      const avgMonthLast = lastData.t / 12;
+      const avgMonthPrev = prevData.t / 12;
       
       items.push({ 
         icon: spendIcon, 
-        text: `**${lastY} vs ${prevY}**: Chi tiêu **${spendLabel} ${Math.abs(spendGrowth).toFixed(1)}%**, đơn hàng **${orderLabel} ${Math.abs(orderGrowth).toFixed(1)}%**. Giá TB/đơn từ **${fmtVND(aovPrev)}** → **${fmtVND(aovLast)}** (**${aovGrowth >= 0 ? '+' : ''}${aovGrowth.toFixed(1)}%**).`
+        text: `**${lastY} vs ${prevY}**: Chi tiêu **${spendLabel} ${Math.abs(spendGrowth).toFixed(1)}%** (TB tháng: **${fmtVND(Math.round(avgMonthPrev))}** → **${fmtVND(Math.round(avgMonthLast))}**), số đơn **${orderLabel} ${Math.abs(orderGrowth).toFixed(1)}%**.`
       });
     }
 
@@ -93,10 +95,10 @@ function computeYearlyInsights(yd, d) {
 
   // ═══ PHÂN TÍCH HIỆU QUẢ TIẾT KIỆM NÂNG CAO ═══
   if (totalSpend > 0 && totalSaved > 0) {
-    const actualPaid = totalSpend;
     const originalPrice = totalSpend + totalSaved;
     const savingsRate = (totalSaved / originalPrice) * 100;
-    const avgSavingPerOrder = totalOrders > 0 ? totalSaved / totalOrders : 0;
+    // Quy về tiết kiệm TB tháng — có ý nghĩa hơn TB/đơn
+    const avgSavingPerMonth = totalSaved / (years.length * 12);
     
     let hunterLevel = '';
     let hunterIcon = '💡';
@@ -105,13 +107,13 @@ function computeYearlyInsights(yd, d) {
     if (savingsRate >= 25) {
       hunterLevel = `**Thợ Săn Voucher Huyền Thoại**: Tiết kiệm **${savingsRate.toFixed(1)}%** trên tổng giá gốc (**${fmtVND(totalSaved)}**/**${fmtVND(originalPrice)}**).`;
       hunterIcon = '🏆';
-      actionableAdvice = `Trung bình **${fmtVND(avgSavingPerOrder)}/đơn**. Bạn đã thành thạo nghệ thuật săn voucher!`;
+      actionableAdvice = `Tương đương **${fmtVND(Math.round(avgSavingPerMonth))}/tháng** — bạn đã thành thạo nghệ thuật săn voucher!`;
     } else if (savingsRate >= 15) {
-      hunterLevel = `**Săn Voucher Chuyên Nghiệp**: Giảm **${savingsRate.toFixed(1)}%** chi phí nhờ khuyến mãi.`;
+      hunterLevel = `**Săn Voucher Chuyên Nghiệp**: Giảm **${savingsRate.toFixed(1)}%** chi phí nhờ khuyến mãi (**${fmtVND(totalSaved)}** tiết kiệm được).`;
       hunterIcon = '⭐';
-      actionableAdvice = `Trung bình **${fmtVND(avgSavingPerOrder)}/đơn**. Thử kết hợp thêm cashback apps để tối ưu hơn.`;
+      actionableAdvice = `Thử kết hợp thêm cashback apps để tối ưu hơn.`;
     } else if (savingsRate >= 8) {
-      hunterLevel = `**Người mua thông minh**: Tiết kiệm **${savingsRate.toFixed(1)}%** qua các ưu đãi.`;
+      hunterLevel = `**Người mua thông minh**: Tiết kiệm **${savingsRate.toFixed(1)}%** qua các ưu đãi (**${fmtVND(totalSaved)}** tổng).`;
       hunterIcon = '💡';
       actionableAdvice = `Có thể cải thiện bằng cách theo dõi flash sale và stack nhiều mã giảm giá hơn.`;
     } else if (savingsRate >= 3) {
@@ -129,10 +131,11 @@ function computeYearlyInsights(yd, d) {
     // So sánh với benchmark
     if (totalOrders >= 20) {
       const orderFrequency = totalOrders / years.length;
+      const avgSpendPerYear = totalSpend / years.length;
       if (orderFrequency >= 50 && savingsRate >= 12) {
         items.push({ 
           icon: '🎯', 
-          text: `**Power User**: **${orderFrequency.toFixed(0)} đơn/năm** với tỷ lệ tiết kiệm **${savingsRate.toFixed(1)}%**. Bạn thuộc nhóm 10% người dùng hiệu quả nhất.`
+          text: `**Power User**: **${orderFrequency.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm**, tỷ lệ tiết kiệm **${savingsRate.toFixed(1)}%**. Bạn thuộc nhóm 10% người dùng hiệu quả nhất.`
         });
       } else if (orderFrequency >= 30 && savingsRate < 5) {
         items.push({ 
@@ -147,24 +150,27 @@ function computeYearlyInsights(yd, d) {
   if (totalOrders > 0 && years.length > 0) {
     const avgOrderValue = totalSpend / totalOrders;
     const ordersPerYear = totalOrders / years.length;
+    const avgSpendPerYear = totalSpend / years.length;
+    const avgSpendPerMonth = avgSpendPerYear / 12;
     
     let userProfile = '';
     let profileIcon = '';
     
     if (avgOrderValue >= 500000 && ordersPerYear >= 50) {
-      userProfile = `**Premium Shopper**: Giá TB/đơn **${fmtVND(avgOrderValue)}**, **${ordersPerYear.toFixed(0)} đơn/năm**. Bạn là khách hàng có giá trị cao.`;
+      // Profile cao cấp: dùng chi tiêu TB/năm và TB/tháng thay cho TB/đơn
+      userProfile = `**Premium Shopper**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${fmtVND(Math.round(avgSpendPerMonth))}/tháng**), **${ordersPerYear.toFixed(0)} đơn/năm**. Bạn là khách hàng có giá trị cao.`;
       profileIcon = '💎';
     } else if (avgOrderValue >= 200000 && ordersPerYear >= 30) {
-      userProfile = `**Active Shopper**: Giá TB/đơn **${fmtVND(avgOrderValue)}**, **${ordersPerYear.toFixed(0)} đơn/năm**. Thói quen mua sắm ổn định.`;
+      userProfile = `**Active Shopper**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${ordersPerYear.toFixed(0)} đơn/năm**). Thói quen mua sắm đều đặn, ổn định.`;
       profileIcon = '🛍️';
     } else if (ordersPerYear >= 100) {
-      userProfile = `**Frequent Buyer**: **${ordersPerYear.toFixed(0)} đơn/năm** nhưng giá TB/đơn khiêm tốn (**${fmtVND(avgOrderValue)}**). Bạn ưa chuộng mua sắm thường xuyên với giá trị nhỏ.`;
+      userProfile = `**Frequent Buyer**: **${ordersPerYear.toFixed(0)} đơn/năm** — mua sắm rất thường xuyên, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Bạn ưa chuộng mua sắm nhỏ lẻ liên tục.`;
       profileIcon = '📦';
     } else if (avgOrderValue >= 300000) {
-      userProfile = `**Selective Shopper**: Giá TB/đơn cao (**${fmtVND(avgOrderValue)}**) nhưng ít đơn (**${ordersPerYear.toFixed(0)}/năm**). Bạn cân nhắc kỹ trước khi mua.`;
+      userProfile = `**Selective Shopper**: Chỉ **${ordersPerYear.toFixed(0)} đơn/năm** nhưng mỗi đơn có giá trị cao — chi tiêu tập trung, cân nhắc kỹ trước khi mua.`;
       profileIcon = '🔍';
     } else {
-      userProfile = `**Casual Shopper**: Giá TB/đơn **${fmtVND(avgOrderValue)}**, **${ordersPerYear.toFixed(0)} đơn/năm**. Mua sắm vừa phải.`;
+      userProfile = `**Casual Shopper**: **${ordersPerYear.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Mua sắm vừa phải, không thường xuyên.`;
       profileIcon = '🙂';
     }
     
@@ -174,7 +180,7 @@ function computeYearlyInsights(yd, d) {
     if (avgOrderValue < 200000 && ordersPerYear >= 30) {
       items.push({ 
         icon: '💡', 
-        text: `**Tip tối ưu hóa**: Thử gộp đơn hoặc mua combo để tăng giá TB/đơn → nhận thêm voucher free ship và giảm phí vận chuyển.`
+        text: `**Tip tối ưu hóa**: Thử gộp đơn hoặc mua combo → nhận thêm voucher free ship và giảm phí vận chuyển, tiết kiệm đáng kể hơn mỗi tháng.`
       });
     } else if (avgOrderValue >= 400000 && ordersPerYear < 20) {
       items.push({ 
@@ -200,7 +206,7 @@ function computeMonthlyInsights(yd, year) {
   const peak = months.reduce((a, b) => a.v >= b.v ? a : b);
   const low = months.reduce((a, b) => a.v <= b.v ? a : b);
   const yearOrders = (yd || {})[year]?.o || 0;
-  const avgPerOrder = yearOrders > 0 ? Math.round(total / yearOrders) : 0;
+  const avgPerMonth = months.length > 0 ? Math.round(total / months.length) : 0;
 
   const MONTH_NAMES = ['', 'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
     'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
@@ -232,8 +238,8 @@ function computeMonthlyInsights(yd, year) {
     }
   }
 
-  if (yearOrders > 0 && avgPerOrder > 0) {
-    items.push({ text: `Năm ${year}: **${fmtNum(yearOrders)} đơn**, giá TB/đơn **${fmtVND(avgPerOrder)}**.` });
+  if (yearOrders > 0) {
+    items.push({ text: `Năm ${year}: **${fmtNum(yearOrders)} đơn**, chi tiêu TB **${fmtVND(avgPerMonth)}/tháng**.` });
   }
 
   return items.slice(0, 5);
