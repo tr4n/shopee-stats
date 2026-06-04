@@ -450,7 +450,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      z-index: 5;
+      z-index: 4;
       pointer-events: none;
       display: flex;
     }
@@ -467,6 +467,15 @@
       height: 100%;
       pointer-events: auto;
       cursor: e-resize;
+    }
+
+    /* Ensure interactive elements inside slides are above the nav overlay */
+    .cta-btn,
+    .story-footer,
+    .story-footer a,
+    .story-footer .brand-logo {
+      position: relative;
+      z-index: 6;
     }
 
     /* Error */
