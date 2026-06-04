@@ -1007,7 +1007,7 @@ function setupShareButtons(d) {
 
         await navigator.clipboard.writeText(finalShareUrl);
         btnCopyLink.innerHTML = isShortened ? "✓ Đã copy link rút gọn!" : "✓ Đã copy link!";
-        showSupportToast(isShortened ? "✓ Đã copy link rút gọn thành công!" : "✓ Đã copy link chia sẻ bảo mật thành công!", false);
+        showSupportToast(isShortened ? "✓ Đã copy link rút gọn thành công!" : "✓ Đã copy link chia sẻ thành công!", false);
       } catch (err) {
         console.error(err);
         btnCopyLink.innerHTML = "❌ Lỗi";

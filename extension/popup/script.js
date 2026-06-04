@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     "Thị phần mua sắm: Shopee hiện đang dẫn đầu thị trường TMĐT Việt Nam khi nắm giữ khoảng 56% tổng giá trị giao dịch toàn ngành.",
     "Xu hướng di động: Khoảng 73% giao dịch mua sắm trực tuyến của người Việt được thực hiện nhanh chóng thông qua các thiết bị di động.",
     "Phân khúc phổ biến: Các sản phẩm có tầm giá 100.000đ - 200.000đ là phân khúc được người tiêu dùng Shopee lựa chọn mua nhiều nhất.",
-    "Bảo mật tuyệt đối: Tiện ích chạy offline 100%, bảo mật dữ liệu tuyệt đối ngay trên thiết bị của bạn. An tâm trải nghiệm!"
+    "Trải nghiệm mượt mà: Tiện ích chạy offline 100% cục bộ ngay trên thiết bị của bạn."
   ];
 
   // === Run Lock ===
