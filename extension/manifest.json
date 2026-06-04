@@ -10,9 +10,6 @@
     "scripting",
     "storage"
   ],
-  "host_permissions": [
-    "https://is.gd/*"
-  ],
   "action": {
     "default_popup": "popup/index.html",
     "default_icon": {

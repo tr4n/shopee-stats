@@ -738,73 +738,21 @@ function setupSupportButton(d) {
 }
 
 /* ── Share Modal ─────────────────────────────── */
-function shortenUrlJsonp(longUrl, timeoutMs = 2500) {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'isgd_' + Math.random().toString(36).substring(2, 10);
-    let timer = null;
-    
-    const cleanup = () => {
-      if (timer) clearTimeout(timer);
-      delete window[callbackName];
-      const script = document.getElementById(callbackName);
-      if (script) script.remove();
-    };
-
-    window[callbackName] = function(data) {
-      cleanup();
-      if (data && data.shorturl) {
-        resolve(data.shorturl);
-      } else {
-        reject(new Error((data && data.errormessage) || 'Rút gọn link thất bại'));
-      }
-    };
-
-    const script = document.createElement('script');
-    script.id = callbackName;
-    script.src = `https://is.gd/create.php?format=json&callback=${callbackName}&url=${encodeURIComponent(longUrl)}`;
-    script.onerror = () => {
-      cleanup();
-      reject(new Error('Lỗi kết nối đến dịch vụ rút gọn'));
-    };
-
-    document.body.appendChild(script);
-
-    timer = setTimeout(() => {
-      cleanup();
-      reject(new Error('Quá thời gian kết nối (timeout)'));
-    }, timeoutMs);
-  });
-}
-
 function setupShareButtons(d) {
-  const modal = document.getElementById("share-modal");
-  const previewImg = document.getElementById("share-preview-img");
-  const themeSelect = document.getElementById("share-theme-select");
-  const hideAmountCb = document.getElementById("share-hide-amount");
-  const hideNamesCb = document.getElementById("share-hide-names");
-  const btnCopy = document.getElementById("btn-modal-copy");
-  const btnDownload = document.getElementById("btn-modal-download");
-  const btnCopyLink = document.getElementById("btn-modal-copy-link");
-  const btnRatioStory = document.getElementById("share-ratio-story");
-  const btnRatioSquare = document.getElementById("share-ratio-square");
-
-  let currentOptions = { cardType: "overview", aspectRatio: "story" };
-  let currentDataUrl = "";
+  const btnShare = document.querySelector(".btn-share-trigger"); // Only one left in overview
+  if (!btnShare) return;
 
   const getBeat = (t) => {
-    // CẬP NHẬT ĐỊNH KỲ (Cứ mỗi 6 tháng - Lần cuối: Tháng 5/2026)
-    // Nguồn dữ liệu tham khảo: Báo cáo TMĐT Việt Nam năm 2025/2026 (Metric, VECOM)
-    // Chi tiêu trung bình TMĐT đầu người khoảng 10.5M VNĐ/năm, trung vị khoảng 6.5M - 7M VNĐ/năm.
     const thresholds = [
-      { max: 1500000, beat: 15 },    // Nhóm mua sắm trải nghiệm / cực ít
-      { max: 4000000, beat: 35 },    // Nhóm mua sắm thỉnh thoảng
-      { max: 7000000, beat: 50 },    // Ngưỡng trung vị (Median Shopper)
-      { max: 15000000, beat: 65 },   // Bắt đầu chi tiêu nhiều (Beat ~65% Shopee VN)
-      { max: 35000000, beat: 80 },   // Tín đồ mua sắm thực thụ
-      { max: 70000000, beat: 90 },   // Siêu cấp chốt đơn
-      { max: 120000000, beat: 95 },  // Khách hàng VIP
-      { max: 250000000, beat: 98 },  // Siêu VIP
-      { max: Infinity, beat: 99 }    // Whale / Cổ Đông Chiến Lược
+      { max: 1500000, beat: 15 },
+      { max: 4000000, beat: 35 },
+      { max: 7000000, beat: 50 },
+      { max: 15000000, beat: 65 },
+      { max: 35000000, beat: 80 },
+      { max: 70000000, beat: 90 },
+      { max: 120000000, beat: 95 },
+      { max: 250000000, beat: 98 },
+      { max: Infinity, beat: 99 }
     ];
     for (const item of thresholds) {
       if (t <= item.max) return item.beat;
@@ -812,212 +760,45 @@ function setupShareButtons(d) {
     return 99;
   };
 
-  function setRatioActive(ratio) {
-    if (!btnRatioStory || !btnRatioSquare) return;
-    if (ratio === "story") {
-      btnRatioStory.className = "pill active";
-      btnRatioStory.style.background = "";
-      btnRatioStory.style.color = "";
-      btnRatioStory.style.borderColor = "";
-
-      btnRatioSquare.className = "pill";
-      btnRatioSquare.style.background = "transparent";
-      btnRatioSquare.style.color = "var(--text)";
-      btnRatioSquare.style.borderColor = "var(--border)";
-      currentOptions.aspectRatio = "story";
-    } else {
-      btnRatioSquare.className = "pill active";
-      btnRatioSquare.style.background = "";
-      btnRatioSquare.style.color = "";
-      btnRatioSquare.style.borderColor = "";
-
-      btnRatioStory.className = "pill";
-      btnRatioStory.style.background = "transparent";
-      btnRatioStory.style.color = "var(--text)";
-      btnRatioStory.style.borderColor = "var(--border)";
-      currentOptions.aspectRatio = "square";
-    }
-    updatePreview();
-  }
-
-  if (btnRatioStory && btnRatioSquare) {
-    btnRatioStory.addEventListener("click", () => setRatioActive("story"));
-    btnRatioSquare.addEventListener("click", () => setRatioActive("square"));
-  }
-
-  async function updatePreview() {
-    if (!window.generateDashboardShareCard) return;
-    const curYear = new Date().getFullYear();
-    const targetYear = currentOptions.year || curYear;
-    let yearlySpend = d.yd && d.yd[targetYear] ? d.yd[targetYear].t : d.t;
-    
-    // Extrapolate current year spending to get a fair percentile ranking
-    if (targetYear === curYear && d.yd && d.yd[curYear]) {
-      const monthsElapsed = new Date().getMonth() + 1;
-      yearlySpend = yearlySpend * (12 / monthsElapsed);
-    }
-
-    const opts = {
-      ...currentOptions,
-      theme: themeSelect.value,
-      hideAmount: hideAmountCb.checked,
-      hideNames: hideNamesCb.checked,
-      beat: getBeat(yearlySpend),
-      year: targetYear,
-    };
-    previewImg.style.opacity = "0.5";
+  btnShare.addEventListener("click", () => {
     try {
-      currentDataUrl = await window.generateDashboardShareCard(d, opts);
-      previewImg.src = currentDataUrl;
-    } catch (e) {
-      console.error(e);
-    }
-    previewImg.style.opacity = "1";
-  }
+      const curYear = new Date().getFullYear();
+      let finalTotal = d.t;
+      let finalSaved = d.s;
+      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n : "";
+      let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
 
-  function openModal(cardType, extraOpts = {}) {
-    currentOptions = { cardType, aspectRatio: "story", ...extraOpts };
-    if (btnRatioStory && btnRatioSquare) {
-      btnRatioStory.className = "pill active";
-      btnRatioStory.style.background = "";
-      btnRatioStory.style.color = "";
-      btnRatioStory.style.borderColor = "";
+      const rankVal = d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4));
+      const beatVal = getBeat(d.t);
+      const tsVal = Math.floor(Date.now() / 1000);
+      const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
 
-      btnRatioSquare.className = "pill";
-      btnRatioSquare.style.background = "transparent";
-      btnRatioSquare.style.color = "var(--text)";
-      btnRatioSquare.style.borderColor = "var(--border)";
-    }
-    modal.classList.add("active");
-    updatePreview();
-  }
+      const pipeStr = [
+        1, // version
+        rankVal,
+        beatVal,
+        finalTotal,
+        d.o,
+        d.ip,
+        finalSaved,
+        tsVal,
+        finalTopItem,
+        ydStr
+      ].join('|');
 
-  document.getElementById("btn-close-modal").addEventListener("click", () => {
-    modal.classList.remove("active");
-  });
-
-  themeSelect.addEventListener("change", updatePreview);
-  hideAmountCb.addEventListener("change", updatePreview);
-  hideNamesCb.addEventListener("change", updatePreview);
-
-  document.querySelectorAll(".btn-share-trigger").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const type = btn.getAttribute("data-type");
-      if (type === "monthly") {
-        const selYear = window.currentMonthlySelection.year;
-        let selMonth = window.currentMonthlySelection.month;
-        if (!selMonth && d.yd && d.yd[selYear] && d.yd[selYear].m) {
-          const topMonth = Object.entries(d.yd[selYear].m).sort(
-            (a, b) => b[1] - a[1],
-          )[0];
-          selMonth = topMonth ? topMonth[0] : null;
-        }
-        openModal(type, { month: selMonth, year: selYear });
-      } else {
-        openModal(type);
+      const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
+      
+      let shareUrlBase = "https://tr4n.github.io/shopee-stats/share-page/";
+      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:") {
+        shareUrlBase = "../share-page/";
       }
-    });
-  });
-
-  btnDownload.addEventListener("click", () => {
-    if (!currentDataUrl) return;
-    const link = document.createElement("a");
-    link.href = currentDataUrl;
-    link.download = `shopee-analytics-${currentOptions.cardType}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
-
-  btnCopy.addEventListener("click", async () => {
-    if (!currentDataUrl) return;
-    const orig = btnCopy.innerHTML;
-    btnCopy.innerHTML = "Đang copy...";
-    try {
-      const res = await fetch(currentDataUrl);
-      const blob = await res.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({ "image/png": blob }),
-      ]);
-      btnCopy.innerHTML = "✓ Đã copy!";
-      showSupportToast("✓ Đã copy ảnh vào bộ nhớ tạm! Bạn có thể nhấn Ctrl+V để dán trực tiếp vào Zalo, Messenger, Facebook...", false);
+      
+      const shareUrl = `${shareUrlBase}#s=${encoded}`;
+      window.open(shareUrl, "_blank");
     } catch (err) {
-      console.error(err);
-      btnCopy.innerHTML = "❌ Lỗi";
-    } finally {
-      setTimeout(() => {
-        btnCopy.innerHTML = orig;
-      }, 2000);
+      console.error("[Dashboard] Chia sẻ thất bại:", err);
     }
   });
-
-  if (btnCopyLink) {
-    btnCopyLink.addEventListener("click", async () => {
-      const orig = btnCopyLink.innerHTML;
-      btnCopyLink.innerHTML = "Đang rút gọn...";
-      try {
-        const curYear = new Date().getFullYear();
-        const targetYear = currentOptions.year || curYear;
-        
-        let finalTotal = d.t;
-        let finalSaved = d.s;
-        let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n : "";
-        let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
-
-        // Hide values if selected
-        if (hideAmountCb.checked) {
-          finalTotal = -1;
-          finalSaved = -1;
-          finalYd = finalYd.map(([y]) => [y, -1]);
-        }
-
-        if (hideNamesCb.checked) {
-          finalTopItem = "Sản phẩm đã ẩn";
-        }
-
-        const rankVal = d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4));
-        const beatVal = getBeat(d.t);
-        const tsVal = Math.floor(Date.now() / 1000);
-        const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
-
-        const pipeStr = [
-          1, // version
-          rankVal,
-          beatVal,
-          finalTotal,
-          d.o,
-          d.ip,
-          finalSaved,
-          tsVal,
-          finalTopItem,
-          ydStr
-        ].join('|');
-
-        const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
-        const shareUrl = `https://tr4n.github.io/shopee-stats/share-page/#s=${encoded}`;
-
-        let finalShareUrl = shareUrl;
-        let isShortened = false;
-        try {
-          finalShareUrl = await shortenUrlJsonp(shareUrl, 2500);
-          isShortened = true;
-        } catch (shortenErr) {
-          console.warn("Failed to shorten URL, using long URL instead:", shortenErr);
-        }
-
-        await navigator.clipboard.writeText(finalShareUrl);
-        btnCopyLink.innerHTML = isShortened ? "✓ Đã copy link rút gọn!" : "✓ Đã copy link!";
-        showSupportToast(isShortened ? "✓ Đã copy link rút gọn thành công!" : "✓ Đã copy link chia sẻ thành công!", false);
-      } catch (err) {
-        console.error(err);
-        btnCopyLink.innerHTML = "❌ Lỗi";
-      } finally {
-        setTimeout(() => {
-          btnCopyLink.innerHTML = orig;
-        }, 2000);
-      }
-    });
-  }
 }
 
 /* ── Dashboard Rating Card ────────────────────── */

@@ -60,7 +60,8 @@
     .story-container {
       width: 100%;
       max-width: 480px;
-      height: 100%;
+      height: calc(100% - 90px);
+      margin-bottom: 90px;
       background: rgba(15, 23, 42, 0.4);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -75,8 +76,9 @@
     @media (min-width: 480px) {
       .story-container {
         border-radius: 28px;
-        height: 92%;
-        max-height: 820px;
+        height: 84%;
+        max-height: 720px;
+        margin-bottom: 80px;
       }
     }
 
@@ -406,6 +408,83 @@
       pointer-events: none;
       z-index: 99;
     }
+    
+    /* Actions Bar */
+    .actions-panel {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px 16px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      width: calc(100% - 32px);
+      max-width: 440px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+    .action-btn:active {
+      transform: translateY(0);
+    }
+    .action-btn.active {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      border: none;
+      box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3);
+    }
+    .action-btn.active:hover {
+      box-shadow: 0 6px 20px rgba(238, 77, 45, 0.45);
+    }
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      width: calc(100% - 40px);
+      max-width: 400px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -434,13 +513,277 @@
     </div>
   </div>
 
+  <!-- Actions Panel -->
+  <div id="actions-panel" class="actions-panel" style="display: none;">
+    <button id="btn-download-img" class="action-btn active">💾 Tải ảnh vuông</button>
+    <button id="btn-copy-img" class="action-btn">📋 Sao chép ảnh</button>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="toast"></div>
+
   <div id="error-root" style="display: none; width: 100%; max-width: 480px;"></div>
 
   <script>
   (function () {
     /* ====================================================
-       Helpers
+       Helpers & Share Image Generation
      ==================================================== */
+    async function generateSquareShareCard(d) {
+      try { await document.fonts.ready; } catch (e) { }
+
+      const W = 1080;
+      const H = 1080; // Always square
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      const FONT = "Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      const PAD = 80;
+
+      // Dark Theme Colors
+      const tColors = {
+        bg: ['#0f172a', '#1e293b', '#020617'],
+        accent: '#ee4d2d',
+        secondary: '#5fe8cc',
+        surface: 'rgba(255,255,255,0.03)',
+        surfaceBorder: 'rgba(255,255,255,0.08)',
+        text: '#f8fafc',
+        textMuted: '#94a3b8',
+        textFaint: '#475569',
+        divider: 'rgba(255,255,255,0.05)',
+        shadow: 'rgba(0,0,0,0.2)'
+      };
+
+      // 1. Background
+      const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+      bgGrad.addColorStop(0, tColors.bg[0]);
+      bgGrad.addColorStop(0.5, tColors.bg[1]);
+      bgGrad.addColorStop(1, tColors.bg[2]);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Decorative Elements
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = tColors.surfaceBorder;
+      ctx.beginPath(); ctx.arc(W * 0.9, H * 0.1, 400, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(W * 0.1, H * 0.8, 300, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+
+      function txt(t, x, y, size, weight, color, align = 'left') {
+        ctx.font = `${weight} ${size}px ${FONT}`;
+        ctx.fillStyle = color || tColors.text;
+        ctx.textAlign = align;
+        ctx.fillText(t, x, y);
+      }
+
+      function roundedRectWithShadow(ctx, x, y, w, h, r, fillColor, shadowColor) {
+        if (shadowColor) {
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = 30;
+          ctx.shadowOffsetY = 15;
+        } else {
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
+        }
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+        ctx.closePath();
+        if (fillColor) {
+          ctx.fillStyle = fillColor;
+          ctx.fill();
+        }
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+      }
+
+      function truncate(str, maxLen) {
+        if (!str) return '';
+        const s = String(str);
+        return s.length > maxLen ? s.substring(0, maxLen - 1) + '…' : s;
+      }
+
+      function fmtVNDCanvas(n) {
+        if (n < 0) return '***';
+        n = Math.round(n || 0);
+        if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
+        if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+        return n.toLocaleString('vi-VN');
+      }
+
+      // 3. Header
+      const headY = 90;
+      txt('SHOPEE ANALYTICS', PAD, headY - 3, 24, '800', tColors.textMuted);
+      txt('Tổng Quan Chi Tiêu', PAD, headY + 70, 56, '900', tColors.text);
+
+      // Accent line
+      const lineGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+      lineGrad.addColorStop(0, tColors.accent);
+      lineGrad.addColorStop(0.5, tColors.divider);
+      lineGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = lineGrad;
+      ctx.fillRect(PAD, headY + 110, W - PAD * 2, 4);
+
+      // Two-column layout
+      const colW = 420;
+      const leftX = PAD;
+      const rightX = W - PAD - colW; // 580
+
+      // Amount Section
+      const amtY = headY + 170;
+      const amtStr = d.t < 0 ? '***' : fmtVNDCanvas(d.t) + 'đ';
+      const amtSize = amtStr.length > 14 ? 60 : 72;
+      txt('TỔNG CHI TIÊU', leftX, amtY - 50, 22, '700', tColors.textMuted);
+      txt(amtStr, leftX, amtY + 20, amtSize, '900', tColors.text);
+
+      const rankStr = RANKS[d.r] || RANKS[2];
+      ctx.font = `800 24px ${FONT}`;
+      const rankW = Math.min(ctx.measureText(rankStr).width + 50, colW);
+      roundedRectWithShadow(ctx, leftX, amtY + 50, rankW, 46, 23, tColors.surface, tColors.shadow);
+      ctx.strokeStyle = tColors.surfaceBorder;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(leftX, amtY + 50, rankW, 46, 23); ctx.stroke();
+      txt(rankStr, leftX + 25, amtY + 81, 20, '800', tColors.accent);
+
+      // Percentile Card
+      const pctY = amtY + 130;
+      roundedRectWithShadow(ctx, leftX, pctY, colW, 140, 24, tColors.surface, tColors.shadow);
+      ctx.strokeStyle = tColors.surfaceBorder;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(leftX, pctY, colW, 140, 24); ctx.stroke();
+
+      txt(`Hơn ${d.p}% người dùng VN`, leftX + 30, pctY + 45, 22, '700', tColors.text);
+      txt(`Hệ thống Shopee Analytics`, leftX + 30, pctY + 80, 16, '500', tColors.textMuted);
+
+      const barX = leftX + 30, barY2 = pctY + 105, barW = colW - 60, barH = 8;
+      roundedRectWithShadow(ctx, barX, barY2, barW, barH, 4, tColors.divider);
+      if (d.p > 0) {
+        const progGrad = ctx.createLinearGradient(barX, 0, barX + barW * (d.p / 100), 0);
+        progGrad.addColorStop(0, tColors.accent);
+        progGrad.addColorStop(1, tColors.secondary);
+        roundedRectWithShadow(ctx, barX, barY2, barW * (d.p / 100), barH, 4, progGrad);
+      }
+
+      // Top Item Card
+      const hasTopItem = typeof d.ti === 'string' && d.ti.length > 0 && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
+      if (hasTopItem) {
+        const topItemY = pctY + 175;
+        roundedRectWithShadow(ctx, leftX, topItemY, colW, 160, 24, tColors.surface, tColors.shadow);
+        ctx.strokeStyle = tColors.surfaceBorder;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(leftX, topItemY, colW, 160, 24); ctx.stroke();
+
+        txt('SẢN PHẨM MUA NHIỀU NHẤT', leftX + 30, topItemY + 40, 16, '700', tColors.textMuted);
+        const itemName = truncate(d.ti, 24);
+        txt(itemName, leftX + 30, topItemY + 85, 24, '800', tColors.text);
+        txt('Đã đồng hành cùng ví tiền của bạn!', leftX + 30, topItemY + 125, 16, '600', tColors.textMuted);
+      }
+
+      // Right Column (Stats Grid)
+      const drawStatBox = (x, y, w, h, label, val, valColor, icon) => {
+        roundedRectWithShadow(ctx, x, y, w, h, 24, tColors.surface, tColors.shadow);
+        ctx.strokeStyle = tColors.surfaceBorder;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(x, y, w, h, 24); ctx.stroke();
+
+        txt(icon, x + 30, y + 45, 28, '400', tColors.text);
+        txt(label, x + 30, y + 85, 16, '600', tColors.textMuted);
+        txt(val, x + 30, y + 130, 32, '800', valColor);
+      };
+
+      const boxH = 150;
+      const boxYStart = headY + 160;
+      
+      drawStatBox(rightX, boxYStart, colW, boxH, 'ĐƠN HÀNG', d.o.toLocaleString('vi-VN'), tColors.text, '📦');
+      drawStatBox(rightX, boxYStart + boxH + 20, colW, boxH, 'SẢN PHẨM', d.ip.toLocaleString('vi-VN'), tColors.text, '🛍️');
+      drawStatBox(rightX, boxYStart + (boxH + 20) * 2, colW, boxH, 'ĐÃ TIẾT KIỆM', d.s < 0 ? '***' : fmtVNDCanvas(d.s) + 'đ', tColors.accent, '💰');
+
+      // Footer
+      const footerY = H - 70;
+      const footerDivGrad = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+      footerDivGrad.addColorStop(0, 'transparent');
+      footerDivGrad.addColorStop(0.5, tColors.divider);
+      footerDivGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = footerDivGrad;
+      ctx.fillRect(PAD, footerY - 30, W - PAD * 2, 2);
+
+      txt('SHOPEE ANALYTICS', W / 2, footerY, 24, '800', tColors.textFaint, 'center');
+      const summary = `${d.o.toLocaleString('vi-VN')} đơn hàng  •  ${d.ip.toLocaleString('vi-VN')} sản phẩm`;
+      txt(summary, W / 2, footerY + 40, 20, '600', tColors.textFaint, 'center');
+
+      return canvas.toDataURL('image/png', 0.9);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    function setupActions(d) {
+      const btnDownload = document.getElementById("btn-download-img");
+      const btnCopy = document.getElementById("btn-copy-img");
+      const actionsPanel = document.getElementById("actions-panel");
+
+      if (actionsPanel) actionsPanel.style.display = "flex";
+
+      if (btnDownload) {
+        btnDownload.addEventListener("click", async () => {
+          btnDownload.disabled = true;
+          const origText = btnDownload.textContent;
+          btnDownload.textContent = "⌛ Đang tạo ảnh...";
+          try {
+            const dataUrl = await generateSquareShareCard(d);
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = `shopee-stats-overview.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("✓ Đã tải ảnh vuông thành công!");
+          } catch (err) {
+            console.error(err);
+            showToast("❌ Lỗi khi tải ảnh");
+          } finally {
+            btnDownload.disabled = false;
+            btnDownload.textContent = origText;
+          }
+        });
+      }
+
+      if (btnCopy) {
+        btnCopy.addEventListener("click", async () => {
+          btnCopy.disabled = true;
+          const origText = btnCopy.textContent;
+          btnCopy.textContent = "⌛ Đang copy...";
+          try {
+            const dataUrl = await generateSquareShareCard(d);
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            await navigator.clipboard.write([
+              new ClipboardItem({ "image/png": blob }),
+            ]);
+            showToast("✓ Đã copy ảnh vuông! Bạn có thể dán (Ctrl+V) để chia sẻ.");
+          } catch (err) {
+            console.error(err);
+            showToast("❌ Trình duyệt không hỗ trợ sao chép ảnh");
+          } finally {
+            btnCopy.disabled = false;
+            btnCopy.textContent = origText;
+          }
+        });
+      }
+    }
+
     const RANKS = {
       1: 'Khách Tập Sự 👶',
       2: 'Khách Quen 🤝',
@@ -907,6 +1250,7 @@
       renderError();
     } else {
       renderSlideshow(data);
+      setupActions(data);
     }
   })();
   </script>

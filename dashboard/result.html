@@ -167,11 +167,6 @@
           <h1 class="page-title">Chi Tiêu Theo Tháng</h1>
           <p class="page-subtitle">Chọn năm để xem biểu đồ chi tiết</p>
         </div>
-        <div style="display: flex; justify-content: flex-end">
-          <button class="btn-share btn-share-trigger" data-type="monthly">
-            ✨ Chia Sẻ Tháng
-          </button>
-        </div>
       </div>
       <div class="pill-row" id="year-pills"></div>
       <div class="card" id="card-monthly">
@@ -208,11 +203,6 @@
         <div>
           <h1 class="page-title">Top Sản Phẩm Chi Tiêu</h1>
           <p class="page-subtitle">Những sản phẩm bạn chi tiêu nhiều nhất</p>
-        </div>
-        <div style="display: flex; justify-content: flex-end">
-          <button class="btn-share btn-share-trigger" data-type="items">
-            ✨ Chia Sẻ Top SP
-          </button>
         </div>
       </div>
       <div class="insight-card items-insight-card" id="insight-items" style="display: none">
@@ -534,76 +524,7 @@
       </div>
     </div>
 
-    <!-- Share Modal -->
-    <div id="share-modal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>✨ Chia sẻ</h2>
-          <button id="btn-close-modal" class="btn-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-preview">
-            <img id="share-preview-img" src="" alt="Đang tạo ảnh..." />
-          </div>
-          <div class="modal-controls">
-            <div class="control-group">
-              <label>Giao diện (Theme)</label>
-              <select id="share-theme-select" class="limit-select" style="padding: 8px; font-size: 14px">
-                <option value="light">Trắng Sáng (Nổi Bật)</option>
-                <option value="minimal">Tối Giản</option>
-                <option value="orange">Shopee Cam</option>
-                <option value="dark">Đêm Huyền Bí</option>
-              </select>
-            </div>
-            <div class="control-group" style="margin-top: 10px">
-              <label>Kích thước ảnh</label>
-              <div style="display: flex; gap: 8px;">
-                <button type="button" id="share-ratio-story" class="pill active" style="flex: 1; margin: 0; padding: 8px; font-size: 12.5px; min-width: auto;">Story (9:16)</button>
-                <button type="button" id="share-ratio-square" class="pill" style="flex: 1; margin: 0; padding: 8px; font-size: 12.5px; min-width: auto; border-color: var(--border); color: var(--text); background: transparent;">Ảnh vuông (1:1)</button>
-              </div>
-            </div>
-            <div class="control-group" style="margin-top: 10px">
-              <label class="checkbox-label">
-                <input type="checkbox" id="share-hide-amount" />
-                Ẩn số tiền chi tiết
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="share-hide-names" />
-                Ẩn tên sản phẩm
-              </label>
-            </div>
-            <div class="control-actions" style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
-              <div style="display: flex; gap: 8px; width: 100%;">
-                <button id="btn-modal-copy" class="pill" style="
-                      border-color: var(--primary);
-                      color: var(--primary);
-                      flex: 1;
-                      margin: 0;
-                      padding: 10px;
-                      min-width: auto;
-                    ">
-                  📋 Copy Ảnh
-                </button>
-                <button id="btn-modal-download" class="pill active" style="flex: 1; margin: 0; padding: 10px; min-width: auto;">
-                  📸 Tải Ảnh
-                </button>
-              </div>
-              <button id="btn-modal-copy-link" class="pill" style="
-                    border-color: var(--green);
-                    color: var(--green);
-                    width: 100%;
-                    margin: 0;
-                    padding: 10px;
-                    background: transparent;
-                    min-width: auto;
-                  ">
-                🔗 Copy Link Chia Sẻ
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
 
     <!-- Support Modal -->
     <div id="support-modal" class="modal-overlay">
@@ -673,7 +594,6 @@
 
   <script src="../extension/config.js"></script>
   <script src="../extension/vn-time.js"></script>
-  <script src="share-card.js"></script>
   <script src="js/helpers.js"></script>
   <script src="js/cache.js"></script>
   <script src="js/insights.js"></script>
