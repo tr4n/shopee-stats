@@ -558,7 +558,7 @@
         // 1. Try matching s= (new format)
         const matchS = location.hash.match(/[#&]s=([^&]+)/);
         if (matchS) {
-          const rawStr = decodeURIComponent(escape(atob(matchS[1])));
+          const rawStr = decodeURIComponent(escape(atob(decodeURIComponent(matchS[1]))));
           const parts = rawStr.split('|');
           if (parts.length >= 9) {
             const version = parseInt(parts[0], 10);
