@@ -738,6 +738,44 @@ function setupSupportButton(d) {
 }
 
 /* ── Share Modal ─────────────────────────────── */
+function shortenUrlJsonp(longUrl, timeoutMs = 2500) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'isgd_' + Math.random().toString(36).substring(2, 10);
+    let timer = null;
+    
+    const cleanup = () => {
+      if (timer) clearTimeout(timer);
+      delete window[callbackName];
+      const script = document.getElementById(callbackName);
+      if (script) script.remove();
+    };
+
+    window[callbackName] = function(data) {
+      cleanup();
+      if (data && data.shorturl) {
+        resolve(data.shorturl);
+      } else {
+        reject(new Error((data && data.errormessage) || 'Rút gọn link thất bại'));
+      }
+    };
+
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src = `https://is.gd/create.php?format=json&callback=${callbackName}&url=${encodeURIComponent(longUrl)}`;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Lỗi kết nối đến dịch vụ rút gọn'));
+    };
+
+    document.body.appendChild(script);
+
+    timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Quá thời gian kết nối (timeout)'));
+    }, timeoutMs);
+  });
+}
+
 function setupShareButtons(d) {
   const modal = document.getElementById("share-modal");
   const previewImg = document.getElementById("share-preview-img");
@@ -916,7 +954,7 @@ function setupShareButtons(d) {
   if (btnCopyLink) {
     btnCopyLink.addEventListener("click", async () => {
       const orig = btnCopyLink.innerHTML;
-      btnCopyLink.innerHTML = "Đang tạo link...";
+      btnCopyLink.innerHTML = "Đang rút gọn...";
       try {
         const curYear = new Date().getFullYear();
         const targetYear = currentOptions.year || curYear;
@@ -937,25 +975,39 @@ function setupShareButtons(d) {
           finalTopItem = "Sản phẩm đã ẩn";
         }
 
-        const sharePayload = {
-          r: d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4)),
-          p: getBeat(d.t),
-          t: finalTotal,
-          o: d.o,
-          ip: d.ip,
-          s: finalSaved,
-          ti: finalTopItem,
-          yd: finalYd,
-          ts: Math.floor(Date.now() / 1000)
-        };
+        const rankVal = d.t <= 10000000 ? 1 : (d.t <= 50000000 ? 2 : (d.t < 80000000 ? 3 : 4));
+        const beatVal = getBeat(d.t);
+        const tsVal = Math.floor(Date.now() / 1000);
+        const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
 
-        const jsonStr = JSON.stringify(sharePayload);
-        const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
-        const shareUrl = `https://tr4n.github.io/shopee-stats/share-page/#d=${encoded}`;
+        const pipeStr = [
+          1, // version
+          rankVal,
+          beatVal,
+          finalTotal,
+          d.o,
+          d.ip,
+          finalSaved,
+          tsVal,
+          finalTopItem,
+          ydStr
+        ].join('|');
 
-        await navigator.clipboard.writeText(shareUrl);
-        btnCopyLink.innerHTML = "✓ Đã copy link!";
-        showSupportToast("✓ Đã copy link chia sẻ bảo mật thành công!", false);
+        const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
+        const shareUrl = `https://tr4n.github.io/shopee-stats/share-page/#s=${encoded}`;
+
+        let finalShareUrl = shareUrl;
+        let isShortened = false;
+        try {
+          finalShareUrl = await shortenUrlJsonp(shareUrl, 2500);
+          isShortened = true;
+        } catch (shortenErr) {
+          console.warn("Failed to shorten URL, using long URL instead:", shortenErr);
+        }
+
+        await navigator.clipboard.writeText(finalShareUrl);
+        btnCopyLink.innerHTML = isShortened ? "✓ Đã copy link rút gọn!" : "✓ Đã copy link!";
+        showSupportToast(isShortened ? "✓ Đã copy link rút gọn thành công!" : "✓ Đã copy link chia sẻ bảo mật thành công!", false);
       } catch (err) {
         console.error(err);
         btnCopyLink.innerHTML = "❌ Lỗi";

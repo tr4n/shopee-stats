@@ -912,25 +912,49 @@ document.addEventListener('DOMContentLoaded', () => {
         : data.totalSpent;
       const beat = getSpendingPercentile(annualSpent);
 
-      const sharePayload = {
-        r: data.totalSpent <= 10000000 ? 1 : (data.totalSpent <= 50000000 ? 2 : (data.totalSpent < 80000000 ? 3 : 4)),
-        p: beat,
-        t: finalTotal,
-        o: data.totalOrders,
-        ip: data.totalItems,
-        s: finalSaved,
-        ti: finalTopItem,
-        yd: finalYd,
-        ts: Math.floor(Date.now() / 1000)
-      };
+      const rankVal = data.totalSpent <= 10000000 ? 1 : (data.totalSpent <= 50000000 ? 2 : (data.totalSpent < 80000000 ? 3 : 4));
+      const tsVal = Math.floor(Date.now() / 1000);
+      const ydStr = finalYd.map(([y, val]) => `${y},${val}`).join(';');
 
-      const jsonStr = JSON.stringify(sharePayload);
-      const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
-      return `https://tr4n.github.io/shopee-stats/share-page/#d=${encoded}`;
+      const pipeStr = [
+        1, // version
+        rankVal,
+        beat,
+        finalTotal,
+        data.totalOrders,
+        data.totalItems,
+        finalSaved,
+        tsVal,
+        finalTopItem,
+        ydStr
+      ].join('|');
+
+      const encoded = btoa(unescape(encodeURIComponent(pipeStr)));
+      return `https://tr4n.github.io/shopee-stats/share-page/#s=${encoded}`;
     } catch (e) {
       console.error('[Popup] Failed to build share page URL:', e);
       return '';
     }
+  }
+
+  async function shortenUrlExtension(longUrl, timeoutMs = 2500) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`, {
+        signal: controller.signal
+      });
+      clearTimeout(id);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.shorturl) {
+          return data.shorturl;
+        }
+      }
+    } catch (err) {
+      console.warn('[Popup] Failed to shorten URL via fetch:', err);
+    }
+    return longUrl;
   }
 
   // === Open Dashboard ===
@@ -949,15 +973,25 @@ document.addEventListener('DOMContentLoaded', () => {
     btnPopupShareLink.addEventListener('click', async () => {
       if (!lastCompleteData) return;
       const orig = btnPopupShareLink.innerHTML;
-      btnPopupShareLink.innerHTML = 'Đang tạo...';
+      btnPopupShareLink.innerHTML = 'Đang rút gọn...';
       try {
         const url = buildPopupSharePageUrl(
           lastCompleteData,
           popupShareHideAmount?.checked || false,
           popupShareHideNames?.checked || false
         );
-        await navigator.clipboard.writeText(url);
-        btnPopupShareLink.innerHTML = '✓ Đã copy!';
+        let finalUrl = url;
+        let isShortened = false;
+        if (url) {
+          try {
+            finalUrl = await shortenUrlExtension(url, 2500);
+            isShortened = true;
+          } catch (shortenErr) {
+            console.warn('[Popup] Failed to shorten, using long URL:', shortenErr);
+          }
+        }
+        await navigator.clipboard.writeText(finalUrl);
+        btnPopupShareLink.innerHTML = isShortened ? '✓ Đã copy link rút gọn!' : '✓ Đã copy!';
       } catch (err) {
         console.error(err);
         btnPopupShareLink.innerHTML = '❌ Lỗi';
