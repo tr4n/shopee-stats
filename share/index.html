@@ -24,11 +24,11 @@
       --primary: #ee4d2d;
       --primary-light: #ff7555;
       --green: #26aa99;
-      --dark: #0f172a;
-      --card-bg: rgba(255, 255, 255, 0.08);
-      --surface: rgba(15, 23, 42, 0.8);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
+      --dark: #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.45);
+      --surface: rgba(255, 255, 255, 0.85);
+      --text: #0f172a;
+      --text-muted: #475569;
     }
 
     html,
@@ -49,14 +49,14 @@
       margin: 0;
     }
 
-    /* Animated background gradient */
+    /* Animated background gradient in Light Mode (Soft mesh style) */
     .fluid-bg {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311042, #ee4d2d, #f64f59);
+      background: linear-gradient(-45deg, #fffcfb, #ffece4, #eafbf7, #fcf4ff);
       background-size: 400% 400%;
       animation: fluidGrad 16s ease infinite;
       z-index: 0;
@@ -82,7 +82,7 @@
       max-width: 480px;
       height: calc(100% - 90px);
       margin-bottom: 90px;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(255, 255, 255, 0.4);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       position: relative;
@@ -90,8 +90,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 24px 64px rgba(238, 77, 45, 0.08);
     }
 
     @media (min-width: 480px) {
@@ -118,7 +118,7 @@
     .story-progress-segment {
       flex: 1;
       height: 4px;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.08);
       border-radius: 2px;
       overflow: hidden;
     }
@@ -126,7 +126,7 @@
     .story-progress-fill {
       height: 100%;
       width: 0%;
-      background: #ffffff;
+      background: var(--primary);
     }
 
     /* Slides Wrap */
@@ -166,27 +166,28 @@
 
     /* Glassmorphism Containers */
     .glass-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 24px;
       padding: 24px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 12px 32px rgba(238, 77, 45, 0.05);
     }
 
     /* Typography & Animations */
     .slide-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 1px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .slide-desc {
       font-size: 14px;
+      font-weight: 600;
       line-height: 1.5;
       color: var(--text-muted);
       margin-bottom: 20px;
@@ -195,23 +196,28 @@
     .huge-amount {
       font-size: clamp(36px, 9vw, 52px);
       font-weight: 900;
-      color: #ffffff;
+      color: var(--text);
       letter-spacing: -1.5px;
       margin: 12px 0;
-      text-shadow: 0 0 20px rgba(238, 77, 45, 0.4);
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff7a50 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(238, 77, 45, 0.15));
     }
 
     .rank-badge {
       display: inline-flex;
       align-items: center;
-      padding: 8px 16px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, rgba(238, 77, 45, 0.2) 0%, rgba(255, 117, 85, 0.2) 100%);
-      color: #ff8a6f;
-      font-size: 15px;
-      font-weight: 700;
-      border: 1px solid rgba(238, 77, 45, 0.3);
-      box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: #fff5f2;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 800;
+      border: 2px dashed rgba(238, 77, 45, 0.35);
+      box-shadow: 0 4px 12px rgba(238, 77, 45, 0.05);
+      transform: rotate(-1.5deg);
+      transition: all 0.2s;
     }
 
     /* Stats Grid */
@@ -223,38 +229,76 @@
     }
 
     .stat-box {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       border-radius: 16px;
       padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      transition: transform 0.2s;
+    }
+    .stat-box:hover {
+      transform: translateY(-2px);
     }
 
     .stat-val {
       font-size: 22px;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text);
     }
 
     .stat-val.green {
-      color: #5fe8cc;
+      color: var(--green);
     }
 
     .stat-lbl {
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 4px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    /* Top Item styling */
-    .top-item-highlight {
+    /* Polaroid Styled Product Card */
+    .polaroid-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      transform: rotate(2deg);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin: 15px auto;
+      max-width: 320px;
+      width: 100%;
+    }
+    .polaroid-card:hover {
+      transform: rotate(-1.5deg) scale(1.02);
+    }
+    .polaroid-photo-area {
+      background: #fafafa;
+      border: 1px solid #f2f2f2;
+      border-radius: 4px;
+      aspect-ratio: 4/3;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin: 20px 0;
-      text-align: center;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .polaroid-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: #ffd700;
+      color: #7c5e00;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transform: rotate(8deg);
     }
 
     .top-item-emoji {
@@ -277,33 +321,25 @@
       }
     }
 
-    .top-item-name {
-      font-size: 20px;
+    .polaroid-card-name {
+      font-size: 16px;
       font-weight: 800;
-      color: #ffffff;
+      color: #0f172a;
       line-height: 1.4;
+      text-align: center;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 8px;
     }
 
-    /* Percentile Bar */
-    .pct-bar-bg {
-      height: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 5px;
-      overflow: hidden;
-      margin: 16px 0;
-    }
-
-    .pct-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #5fe8cc, #26aa99);
-      width: 0%;
-      border-radius: 5px;
-      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    .polaroid-card-footer {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-align: center;
     }
 
     /* Year Chart */
@@ -322,35 +358,35 @@
 
     .year-label {
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       width: 45px;
       color: var(--text-muted);
     }
 
     .year-bar-track {
       flex: 1;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 5px;
       overflow: hidden;
     }
 
     .year-bar-fill {
       height: 100%;
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.1);
       width: 0%;
-      border-radius: 4px;
+      border-radius: 5px;
       transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .year-bar-fill.active-year {
-      background: linear-gradient(90deg, #5fe8cc, #26aa99);
+      background: linear-gradient(90deg, #ee4d2d, #ff8a5a);
     }
 
     .year-val {
       font-size: 13px;
-      font-weight: 700;
-      color: #ffffff;
+      font-weight: 800;
+      color: var(--text);
       min-width: 80px;
       text-align: right;
     }
@@ -370,10 +406,10 @@
       color: white !important;
       text-decoration: none;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 16px 28px;
       border-radius: 16px;
-      box-shadow: 0 10px 24px rgba(238, 77, 45, 0.4);
+      box-shadow: 0 10px 24px rgba(238, 77, 45, 0.15);
       transition: transform 0.2s, box-shadow 0.2s;
       width: 100%;
       justify-content: center;
@@ -381,7 +417,7 @@
 
     .cta-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(238, 77, 45, 0.5);
+      box-shadow: 0 12px 30px rgba(238, 77, 45, 0.25);
     }
 
     .cta-btn:active {
@@ -389,15 +425,16 @@
     }
 
     .sticker-slogan {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: #ffece4;
+      border: 2px dashed rgba(238, 77, 45, 0.35);
       border-radius: 12px;
-      padding: 8px 12px;
-      font-size: 13px;
-      color: #ffb86c;
-      font-weight: 700;
+      padding: 10px 16px;
+      font-size: 14px;
+      color: var(--primary);
+      font-weight: 800;
       margin: 10px 0;
       animation: rotateSticker 6s infinite ease-in-out;
+      box-shadow: 0 4px 10px rgba(238, 77, 45, 0.03);
     }
 
     @keyframes rotateSticker {
@@ -419,7 +456,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
       padding-top: 16px;
       margin-top: 20px;
     }
@@ -427,20 +464,21 @@
     .brand-logo {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: var(--text-muted);
       text-decoration: none;
     }
 
     .brand-logo:hover {
-      color: #ffffff;
+      color: var(--primary);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
 
     .brand-date {
       font-size: 10px;
-      color: rgba(255, 255, 255, 0.28);
+      font-weight: 700;
+      color: var(--text-muted);
     }
 
     /* Touch navigation overlay hint */
@@ -482,13 +520,13 @@
     .error-msg {
       text-align: center;
       padding: 60px 20px;
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--text-muted);
       position: relative;
       z-index: 10;
     }
 
     .error-msg h2 {
-      color: #fff;
+      color: var(--text);
       margin-bottom: 10px;
       font-size: 22px;
     }
@@ -513,13 +551,13 @@
       z-index: 100;
       display: flex;
       gap: 12px;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.7);
       padding: 10px 16px;
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(238, 77, 45, 0.08);
       width: calc(100% - 32px);
       max-width: 440px;
     }
@@ -529,11 +567,11 @@
       padding: 12px 16px;
       border-radius: 12px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.8);
+      color: #1e293b;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -543,8 +581,9 @@
     }
 
     .action-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 1);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
 
     .action-btn:active {
@@ -554,11 +593,12 @@
     .action-btn.active {
       background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
       border: none;
-      box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(238, 77, 45, 0.2);
     }
 
     .action-btn.active:hover {
-      box-shadow: 0 6px 20px rgba(238, 77, 45, 0.45);
+      box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
     }
 
     .toast {
@@ -659,31 +699,32 @@
         const tColors = {
           accent: '#ee4d2d',
           secondary: '#26aa99',
-          text: '#1a1a2e',
-          textMuted: '#6b7280',
-          textFaint: '#9ca3af',
+          text: '#0f172a',
+          textMuted: '#475569',
+          textFaint: '#94a3b8',
         };
 
-        // 1. Background: clean white-to-cream gradient
+        // 1. Background: soft light mesh style gradient
         const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-        bgGrad.addColorStop(0, '#ffffff');
-        bgGrad.addColorStop(0.55, '#fffaf8');
-        bgGrad.addColorStop(1, '#fff0ea');
+        bgGrad.addColorStop(0, '#fffcfb');
+        bgGrad.addColorStop(0.45, '#ffece4');
+        bgGrad.addColorStop(0.8, '#eafbf7');
+        bgGrad.addColorStop(1, '#fcf4ff');
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, W, H);
 
-        // 2. Decorative soft circles
-        ctx.globalAlpha = 0.18;
+        // 2. Decorative soft auras
+        ctx.globalAlpha = 0.25;
         const c1 = ctx.createRadialGradient(W * 0.94, H * 0.06, 0, W * 0.94, H * 0.06, 420);
-        c1.addColorStop(0, '#ffb8a0'); c1.addColorStop(1, 'transparent');
+        c1.addColorStop(0, '#ffccba'); c1.addColorStop(1, 'transparent');
         ctx.fillStyle = c1; ctx.beginPath(); ctx.arc(W * 0.94, H * 0.06, 420, 0, Math.PI * 2); ctx.fill();
         const c2 = ctx.createRadialGradient(W * 0.06, H * 0.92, 0, W * 0.06, H * 0.92, 280);
-        c2.addColorStop(0, '#ffb8a0'); c2.addColorStop(1, 'transparent');
+        c2.addColorStop(0, '#ffccba'); c2.addColorStop(1, 'transparent');
         ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(W * 0.06, H * 0.92, 280, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1;
 
         // 3. Subtle dot grid
-        ctx.globalAlpha = 0.035;
+        ctx.globalAlpha = 0.02;
         ctx.fillStyle = '#ee4d2d';
         for (let dx = 36; dx < W; dx += 44) {
           for (let dy = 36; dy < H; dy += 44) {
@@ -708,7 +749,7 @@
         }
 
         function rrectShadow(x, y, w, h, r, fill) {
-          ctx.shadowColor = 'rgba(238, 77, 45, 0.10)';
+          ctx.shadowColor = 'rgba(238, 77, 45, 0.06)';
           ctx.shadowBlur = 28; ctx.shadowOffsetY = 12;
           rrect(x, y, w, h, r, fill);
           ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
@@ -729,8 +770,8 @@
         }
 
         // ── HEADER ─────────────────────────────────────────────────
-        // White header strip
-        rrect(0, 0, W, 106, 0, '#ffffff');
+        // White header strip with soft glass transparent white
+        rrect(0, 0, W, 106, 0, 'rgba(255, 255, 255, 0.5)');
 
         // Brand logo
         ctx.font = `400 40px ${FONT}`;
@@ -762,14 +803,14 @@
         // Header bottom gradient line
         const hLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
         hLine.addColorStop(0, '#ee4d2d');
-        hLine.addColorStop(0.5, 'rgba(238,77,45,0.3)');
+        hLine.addColorStop(0.5, 'rgba(238,77,45,0.2)');
         hLine.addColorStop(1, 'transparent');
         ctx.fillStyle = hLine;
-        ctx.fillRect(PAD, 106, W - PAD * 2, 3.5);
+        ctx.fillRect(PAD, 106, W - PAD * 2, 2);
 
         // ── HERO AMOUNT ────────────────────────────────────────────
         const heroTop = 152;
-        txt('TỔNG CHI TIÊU CỦA TÔI', PAD, heroTop + 24, 17, '700', tColors.textMuted);
+        txt('TỔNG CHI TIÊU CỦA TÔI', PAD, heroTop + 24, 17, '800', tColors.textMuted);
 
         const amtRaw = d.t < 0 ? '***' : fmtC(d.t);
         const amtDisplay = amtRaw + 'đ';
@@ -791,9 +832,9 @@
         const rankY = amtBottom + 22;
         ctx.font = `700 18px ${FONT}`;
         const rbW = Math.min(ctx.measureText(rankStr).width + 44, W - PAD * 2);
-        rrectShadow(PAD, rankY, rbW, 44, 22, '#fff8f6');
-        rrect(PAD, rankY, rbW, 44, 22, null, 'rgba(238,77,45,0.25)', 1.5);
-        txt(rankStr, PAD + rbW / 2, rankY + 30, 18, '700', tColors.accent, 'center');
+        rrectShadow(PAD, rankY, rbW, 44, 12, '#fff5f2');
+        rrect(PAD, rankY, rbW, 44, 12, null, 'rgba(238,77,45,0.35)', 1.5);
+        txt(rankStr, PAD + rbW / 2, rankY + 28, 16, '800', tColors.accent, 'center');
 
         // ── STATS PILLS ROW ────────────────────────────────────────
         const statsTop = rankY + 44 + 40;
@@ -808,46 +849,44 @@
 
         statsArr.forEach((st, i) => {
           const sx = PAD + i * (statW + gutter);
-          rrectShadow(sx, statsTop, statW, 128, 20, '#ffffff');
-          rrect(sx, statsTop, statW, 128, 20, null, 'rgba(238,77,45,0.09)', 1.5);
-
-          // Top accent strip on each pill
-          const pillAccent = ctx.createLinearGradient(sx, statsTop, sx + statW, statsTop);
-          pillAccent.addColorStop(0, 'rgba(238,77,45,0.35)');
-          pillAccent.addColorStop(1, 'rgba(238,77,45,0.05)');
-          ctx.fillStyle = pillAccent;
-          ctx.beginPath(); ctx.roundRect(sx, statsTop, statW, 4, [20, 20, 0, 0]); ctx.fill();
+          rrectShadow(sx, statsTop, statW, 128, 20, 'rgba(255, 255, 255, 0.65)');
+          rrect(sx, statsTop, statW, 128, 20, null, 'rgba(255, 255, 255, 0.85)', 1.5);
 
           ctx.font = `400 28px ${FONT}`;
           ctx.textAlign = 'center';
           ctx.fillText(st.icon, sx + statW / 2, statsTop + 46);
           txt(st.val, sx + statW / 2, statsTop + 82, 24, '800', st.color, 'center');
-          txt(st.label, sx + statW / 2, statsTop + 110, 14, '600', tColors.textMuted, 'center');
+          txt(st.label, sx + statW / 2, statsTop + 110, 14, '700', tColors.textMuted, 'center');
         });
 
-        // ── TOP ITEM CARD ──────────────────────────────────────────
-        const topItemTop = statsTop + 128 + 36;
+        // ── TOP ITEM CARD (Polaroid style) ─────────────────────────
+        const topItemTop = statsTop + 128 + 44;
         const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
           && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
 
         if (hasTopItem) {
-          rrectShadow(PAD, topItemTop, W - PAD * 2, 136, 22, '#ffffff');
-          rrect(PAD, topItemTop, W - PAD * 2, 136, 22, null, 'rgba(238,77,45,0.1)', 1);
+          const cardH = 180;
+          rrectShadow(PAD, topItemTop, W - PAD * 2, cardH, 20, '#ffffff');
+          rrect(PAD, topItemTop, W - PAD * 2, cardH, 20, null, 'rgba(0,0,0,0.04)', 1.5);
 
-          // Left accent bar
-          const barGrad = ctx.createLinearGradient(0, topItemTop, 0, topItemTop + 136);
-          barGrad.addColorStop(0, '#ee4d2d');
-          barGrad.addColorStop(1, '#ff7a50');
-          ctx.fillStyle = barGrad;
-          ctx.beginPath(); ctx.roundRect(PAD, topItemTop, 6, 136, [22, 0, 0, 22]); ctx.fill();
+          // Draw the Polaroid Photo area inside canvas card
+          const px = PAD + 22;
+          const py = topItemTop + 22;
+          const pw = 136;
+          const ph = 136;
+          rrect(px, py, pw, ph, 10, '#fafafa', '#f0f0f0', 1.5);
 
-          ctx.font = `400 30px ${FONT}`;
-          ctx.textAlign = 'left';
-          ctx.fillText('👑', PAD + 22, topItemTop + 56);
-          txt('SẢN PHẨM MUA NHIỀU NHẤT', PAD + 66, topItemTop + 40, 14, '700', tColors.textMuted);
-          const itemName = truncate(d.ti, 46);
-          txt(itemName, PAD + 66, topItemTop + 82, 26, '800', tColors.text, 'left', W - PAD * 2 - 82);
-          txt('Đã đồng hành cùng ví tiền của bạn! ✨', PAD + 66, topItemTop + 116, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - 82);
+          // Crown Emoji inside photo area
+          ctx.font = `400 44px ${FONT}`;
+          ctx.textAlign = 'center';
+          ctx.fillText('👑', px + pw / 2, py + ph / 2 + 14);
+
+          // Text details on the right
+          const tx = px + pw + 24;
+          txt('SẢN PHẨM MUA NHIỀU NHẤT', tx, topItemTop + 54, 15, '800', tColors.accent);
+          const itemName = truncate(d.ti, 38);
+          txt(itemName, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
+          txt('Đã đồng hành cùng ví tiền của bạn! ✨', tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
         }
 
         // ── FOOTER ────────────────────────────────────────────────
@@ -855,11 +894,11 @@
 
         const fLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
         fLine.addColorStop(0, 'transparent');
-        fLine.addColorStop(0.35, 'rgba(238,77,45,0.18)');
-        fLine.addColorStop(0.65, 'rgba(238,77,45,0.18)');
+        fLine.addColorStop(0.35, 'rgba(238,77,45,0.1)');
+        fLine.addColorStop(0.65, 'rgba(238,77,45,0.1)');
         fLine.addColorStop(1, 'transparent');
         ctx.fillStyle = fLine;
-        ctx.fillRect(PAD, footerY - 18, W - PAD * 2, 1.5);
+        ctx.fillRect(PAD, footerY - 18, W - PAD * 2, 1);
 
         txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 6, 17, '600', tColors.textMuted, 'center');
         txt('tr4n.github.io/shopee-stats', W / 2, footerY + 38, 20, '800', tColors.accent, 'center');
@@ -1324,11 +1363,13 @@
             <div class="slide-title">Shopee Analytics</div>
             <div class="slide-desc">Chào mừng bạn đến với tổng kết chi tiêu!</div>
           </div>
-          <div class="glass-card" style="text-align: center; margin: auto 0;">
+          <div class="glass-card" style="text-align: center; margin: auto 0; padding: 36px 20px;">
             <div style="font-size: 56px; margin-bottom: 16px;">🛍️</div>
-            <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">Tổng Chi Tiêu Của Tôi</div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;">Tổng Chi Tiêu Của Tôi</div>
             <div class="huge-amount" id="welcome-spent">0đ</div>
-            <div class="rank-badge" style="margin-top: 10px;">${escHtml(rankLabel)}</div>
+            <div style="margin-top: 14px;">
+              <div class="rank-badge">${escHtml(rankLabel)}</div>
+            </div>
           </div>
           <div class="story-footer">
             <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
@@ -1344,19 +1385,24 @@
             <div class="slide-title">Xếp hạng của bạn</div>
             <div class="slide-desc">Bạn là chiến thần mua sắm cấp độ nào?</div>
           </div>
-          <div class="glass-card" style="margin: auto 0;">
+          <div class="glass-card" style="margin: auto 0; padding: 20px 16px;">
             <div class="stats-grid">
-              <div class="stat-box">
+              <div class="stat-box" style="text-align: center;">
+                <div style="font-size: 28px; margin-bottom: 6px;">📦</div>
                 <div class="stat-val" id="stat-orders">0</div>
                 <div class="stat-lbl">Đơn hàng</div>
               </div>
-              <div class="stat-box">
+              <div class="stat-box" style="text-align: center;">
+                <div style="font-size: 28px; margin-bottom: 6px;">🛒</div>
                 <div class="stat-val" id="stat-items">0</div>
                 <div class="stat-lbl">Sản phẩm</div>
               </div>
-              <div class="stat-box" style="grid-column: span 2;">
-                <div class="stat-val green" id="stat-saved">0đ</div>
-                <div class="stat-lbl">Tiết kiệm được</div>
+              <div class="stat-box" style="grid-column: span 2; text-align: center; display: flex; align-items: center; justify-content: center; gap: 16px; padding: 20px;">
+                <div style="font-size: 32px;">💰</div>
+                <div style="text-align: left;">
+                  <div class="stat-val green" id="stat-saved">0đ</div>
+                  <div class="stat-lbl">Tiết kiệm được</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1366,20 +1412,22 @@
           </div>
         </div>`;
 
-        // Slide 3: Top Item
+        // Slide 3: Top Item (Polaroid design)
         const topItemSlideHtml = `
         <div class="slide" id="slide-2">
           <div>
             <div class="slide-title">Mối tình đậm sâu</div>
             <div class="slide-desc">Sản phẩm gắn bó nhất cùng bạn trong hành trình qua</div>
           </div>
-          <div class="glass-card" style="margin: auto 0; text-align: center;">
-            <div class="top-item-highlight">
-              <div class="top-item-emoji">👑</div>
-              <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">Sản phẩm mua nhiều nhất</div>
-              <div class="top-item-name" style="margin: 8px 0;">${hasTopItem ? topName : 'Không có thông tin sản phẩm'}</div>
-              <div style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-top: 10px;">
-                Đã đồng hành cùng ví tiền của bạn!
+          <div style="margin: auto 0;">
+            <div class="polaroid-card">
+              <div class="polaroid-photo-area">
+                <span class="polaroid-badge">👑 Yêu Thích</span>
+                <div class="top-item-emoji">👑</div>
+              </div>
+              <div class="polaroid-card-name">${hasTopItem ? topName : 'Không có thông tin sản phẩm'}</div>
+              <div class="polaroid-card-footer">
+                Đã đồng hành cùng ví tiền của bạn! ✨
               </div>
             </div>
           </div>
@@ -1411,7 +1459,7 @@
             <div class="slide-title">Dòng chảy thời gian</div>
             <div class="slide-desc">Biến động chi tiêu của bạn qua các năm</div>
           </div>
-          <div class="glass-card" style="margin: auto 0;">
+          <div class="glass-card" style="margin: auto 0; padding: 24px 20px;">
             <div class="year-chart">
               ${chartRowsHtml}
             </div>
@@ -1438,10 +1486,10 @@
             <div class="slide-title">Đến lượt bạn</div>
             <div class="slide-desc">Khám phá và chia sẻ câu chuyện chi tiêu của riêng bạn</div>
           </div>
-          <div class="glass-card cta-card" style="margin: auto 0;">
+          <div class="glass-card cta-card" style="margin: auto 0; padding: 28px 20px;">
             <div class="sticker-slogan">${randomSlogan}</div>
-            <div style="font-size: 15px; font-weight: 600; line-height: 1.5; margin-bottom: 8px;">
-              Xem thống kê chi tiêu Shopee của bạn với tiện ích <strong>Shopee Analytics</strong> bảo mật 100% offline.
+            <div style="font-size: 14px; font-weight: 600; line-height: 1.6; color: var(--text); margin: 8px 0;">
+              Xem thống kê chi tiêu Shopee của bạn bảo mật 100% offline với tiện ích <strong>Shopee Analytics</strong>.
             </div>
             <a class="cta-btn" href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank">
               Cài Đặt Tiện Ích Miễn Phí
