@@ -592,6 +592,49 @@
       z-index: 99;
     }
 
+    /* Floating Music Button (top-right) */
+    #btn-music-float {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 200;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50px;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    #btn-music-float:hover {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+    #btn-music-float.active {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(238, 77, 45, 0.3);
+    }
+    [data-theme="dark"] #btn-music-float {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    [data-theme="dark"] #btn-music-float.active {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      color: #fff;
+    }
+
     /* Actions Bar */
     .actions-panel {
       position: fixed;
@@ -866,17 +909,19 @@
     </div>
   </div>
 
+  <!-- Floating Music Button -->
+  <button id="btn-music-float" id="btn-music" style="display: none;" title="Bật/tắt nhạc nền">
+    <span class="eq-bars" id="eq-bars">
+      <span class="eq-bar"></span>
+      <span class="eq-bar"></span>
+      <span class="eq-bar"></span>
+      <span class="eq-bar"></span>
+    </span>
+    <span id="music-btn-label">Nhạc</span>
+  </button>
+
   <!-- Actions Panel -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
-    <button id="btn-music" class="action-btn" title="Bật/tắt nhạc nền">
-      <span class="eq-bars" id="eq-bars">
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-        <span class="eq-bar"></span>
-      </span>
-      <span id="music-btn-label">Nhạc</span>
-    </button>
     <button id="btn-darkmode" class="action-btn" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode">
       <span id="darkmode-icon">🌙</span>
     </button>
@@ -1242,8 +1287,8 @@
           qrImage.onerror = resolve;
         });
 
-        const W = 720;
-        const H = 1280;
+        const W = 540;
+        const H = 960;
         const canvas = document.createElement("canvas");
         canvas.width = W;
         canvas.height = H;
@@ -1287,7 +1332,7 @@
         }
 
         const fps = 30;
-        const totalFrames = 600; // 5 slides * 4 seconds * 30fps
+        const totalFrames = 1050; // 5 slides * 7 seconds * 30fps
         
         const captureStreamFn = canvas.captureStream || canvas.mozCaptureStream || canvas.webkitCaptureStream;
         if (!captureStreamFn) {
@@ -1419,8 +1464,8 @@
           }
 
           // 4. Slide content drawing
-          const page = Math.floor(currentFrame / 120);
-          const pageFrame = currentFrame % 120;
+          const page = Math.floor(currentFrame / 210); // 7s * 30fps = 210 frames/slide
+          const pageFrame = currentFrame % 210;
 
           if (page === 0) {
             txt('Shopee Analytics', PAD, 180, 15, '800', tColors.accent);
@@ -1716,7 +1761,9 @@
           drawFrame(currentFrame);
 
           currentFrame++;
-          requestAnimationFrame(renderLoop);
+          // Use setTimeout for exact timing (33ms per frame = 30fps)
+          // requestAnimationFrame runs at monitor refresh (60hz) making video 2x too fast
+          setTimeout(renderLoop, 1000 / fps);
         }
 
         // Run the render loop
