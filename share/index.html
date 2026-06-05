@@ -910,7 +910,7 @@
   </div>
 
   <!-- Floating Music Button -->
-  <button id="btn-music-float" id="btn-music" style="display: none;" title="Bật/tắt nhạc nền">
+  <button id="btn-music-float" style="display: none;" title="Bật/tắt nhạc nền">
     <span class="eq-bars" id="eq-bars">
       <span class="eq-bar"></span>
       <span class="eq-bar"></span>
@@ -2040,7 +2040,7 @@
       })();
 
       function setupMusic() {
-        const btn = document.getElementById('btn-music');
+        const btn = document.getElementById('btn-music-float');
         const eqBars = document.getElementById('eq-bars');
         const label = document.getElementById('music-btn-label');
         if (!btn) return;
@@ -2106,6 +2106,10 @@
         const actionsPanel = document.getElementById("actions-panel");
 
         if (actionsPanel) actionsPanel.style.display = "flex";
+
+        // Show the floating music button
+        const musicFloatBtn = document.getElementById('btn-music-float');
+        if (musicFloatBtn) musicFloatBtn.style.display = 'inline-flex';
 
         if (btnDownload) {
           btnDownload.addEventListener("click", async () => {
@@ -2865,7 +2869,7 @@
 
         storyFrame.addEventListener("click", (e) => {
           // Ignore clicks on links, buttons, inputs, labels, and other interactive containers
-          if (e.target.closest("a, button, input, label, .cta-btn, .actions-panel, #actions-panel")) {
+          if (e.target.closest("a, button, input, label, .cta-btn, .actions-panel, #actions-panel, #btn-music-float")) {
             return;
           }
 
