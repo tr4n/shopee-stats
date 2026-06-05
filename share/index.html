@@ -29,6 +29,42 @@
       --surface: rgba(255, 255, 255, 0.85);
       --text: #0f172a;
       --text-muted: #475569;
+      /* Dark mode tokens */
+      --bg-fluid-1: #fffcfb;
+      --bg-fluid-2: #ffddd3;
+      --bg-fluid-3: #c8f5ed;
+      --bg-fluid-4: #f0e4ff;
+      --container-bg: rgba(255, 255, 255, 0.42);
+      --container-border: rgba(255, 255, 255, 0.7);
+      --glass-bg: rgba(255, 255, 255, 0.52);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --statbox-bg: rgba(255, 255, 255, 0.65);
+      --statbox-border: rgba(255, 255, 255, 0.85);
+      --footer-border: rgba(0, 0, 0, 0.05);
+      --brand-color: var(--text-muted);
+      --progress-bg: rgba(0, 0, 0, 0.08);
+    }
+
+    /* ── Dark Mode tokens ─────────────────────────────── */
+    [data-theme="dark"] {
+      --dark: #0d0d12;
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --surface: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --bg-fluid-1: #13111c;
+      --bg-fluid-2: #1e1120;
+      --bg-fluid-3: #0f1e1d;
+      --bg-fluid-4: #1a1128;
+      --container-bg: rgba(255, 255, 255, 0.07);
+      --container-border: rgba(255, 255, 255, 0.12);
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --statbox-bg: rgba(255, 255, 255, 0.08);
+      --statbox-border: rgba(255, 255, 255, 0.12);
+      --footer-border: rgba(255, 255, 255, 0.08);
+      --brand-color: #94a3b8;
+      --progress-bg: rgba(255, 255, 255, 0.12);
     }
 
     html,
@@ -49,17 +85,18 @@
       margin: 0;
     }
 
-    /* Animated background gradient in Light Mode (Soft mesh style) */
+    /* Animated background gradient */
     .fluid-bg {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(-45deg, #fffcfb, #ffece4, #eafbf7, #fcf4ff);
+      background: linear-gradient(-45deg, var(--bg-fluid-1), var(--bg-fluid-2), var(--bg-fluid-3), var(--bg-fluid-4));
       background-size: 400% 400%;
       animation: fluidGrad 16s ease infinite;
       z-index: 0;
+      transition: background 0.6s ease;
     }
 
     @keyframes fluidGrad {
@@ -82,7 +119,7 @@
       max-width: 480px;
       height: calc(100% - 90px);
       margin-bottom: 90px;
-      background: rgba(255, 255, 255, 0.4);
+      background: var(--container-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       position: relative;
@@ -90,8 +127,9 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--container-border);
       box-shadow: 0 24px 64px rgba(238, 77, 45, 0.08);
+      transition: background 0.5s ease, border-color 0.5s ease;
     }
 
     @media (min-width: 480px) {
@@ -118,9 +156,10 @@
     .story-progress-segment {
       flex: 1;
       height: 4px;
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--progress-bg);
       border-radius: 2px;
       overflow: hidden;
+      transition: background 0.4s ease;
     }
 
     .story-progress-fill {
@@ -166,13 +205,14 @@
 
     /* Glassmorphism Containers */
     .glass-card {
-      background: rgba(255, 255, 255, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.85);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
       border-radius: 24px;
       padding: 24px;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       box-shadow: 0 12px 32px rgba(238, 77, 45, 0.05);
+      transition: background 0.4s ease, border-color 0.4s ease;
     }
 
     /* Typography & Animations */
@@ -229,12 +269,12 @@
     }
 
     .stat-box {
-      background: rgba(255, 255, 255, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.85);
+      background: var(--statbox-bg);
+      border: 1px solid var(--statbox-border);
       border-radius: 16px;
       padding: 16px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
-      transition: transform 0.2s;
+      transition: transform 0.2s, background 0.4s ease, border-color 0.4s ease;
     }
     .stat-box:hover {
       transform: translateY(-2px);
@@ -456,23 +496,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      border-top: 1px solid var(--footer-border);
       padding-top: 16px;
       margin-top: 20px;
+      transition: border-color 0.4s ease;
     }
 
     .brand-logo {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-color);
       text-decoration: none;
+      transition: color 0.3s ease, opacity 0.3s ease;
     }
 
     .brand-logo:hover {
       color: var(--primary);
-      text-decoration: underline;
-      text-underline-offset: 3px;
+      opacity: 0.9;
+    }
+
+    .brand-logo-img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      object-fit: contain;
     }
 
     .brand-date {
@@ -559,7 +609,23 @@
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(238, 77, 45, 0.08);
       width: calc(100% - 32px);
-      max-width: 440px;
+      max-width: 480px;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    [data-theme="dark"] .actions-panel {
+      background: rgba(20, 18, 30, 0.75);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    [data-theme="dark"] .action-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="dark"] .action-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
     }
 
     .action-btn {
@@ -810,6 +876,9 @@
         <span class="eq-bar"></span>
       </span>
       <span id="music-btn-label">Nhạc</span>
+    </button>
+    <button id="btn-darkmode" class="action-btn" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode">
+      <span id="darkmode-icon">🌙</span>
     </button>
     <button id="btn-download-img" class="action-btn active">💾 Lưu ảnh</button>
     <button id="btn-download-vid" class="action-btn">🎥 Video</button>
@@ -1218,7 +1287,7 @@
         }
 
         const fps = 30;
-        const totalFrames = 300; // 5 slides * 2 seconds * 30fps
+        const totalFrames = 600; // 5 slides * 4 seconds * 30fps
         
         const captureStreamFn = canvas.captureStream || canvas.mozCaptureStream || canvas.webkitCaptureStream;
         if (!captureStreamFn) {
@@ -1350,8 +1419,8 @@
           }
 
           // 4. Slide content drawing
-          const page = Math.floor(currentFrame / 60);
-          const pageFrame = currentFrame % 60;
+          const page = Math.floor(currentFrame / 120);
+          const pageFrame = currentFrame % 120;
 
           if (page === 0) {
             txt('Shopee Analytics', PAD, 180, 15, '800', tColors.accent);
@@ -1952,6 +2021,38 @@
         });
       }
 
+      function setupDarkMode() {
+        const btn = document.getElementById('btn-darkmode');
+        const icon = document.getElementById('darkmode-icon');
+        const root = document.documentElement;
+        if (!btn) return;
+
+        // Restore preference from localStorage
+        const saved = localStorage.getItem('share-theme');
+        let isDark = saved === 'dark';
+        if (isDark) {
+          root.setAttribute('data-theme', 'dark');
+          icon.textContent = '☀️';
+          btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => {
+          isDark = !isDark;
+          if (isDark) {
+            root.setAttribute('data-theme', 'dark');
+            icon.textContent = '☀️';
+            btn.classList.add('active');
+            showToast('🌙 Dark mode đã bật');
+          } else {
+            root.removeAttribute('data-theme');
+            icon.textContent = '🌙';
+            btn.classList.remove('active');
+            showToast('☀️ Light mode đã bật');
+          }
+          localStorage.setItem('share-theme', isDark ? 'dark' : 'light');
+        });
+      }
+
       function setupActions(d) {
         const btnDownload = document.getElementById("btn-download-img");
         const btnDownloadVid = document.getElementById("btn-download-vid");
@@ -2398,7 +2499,10 @@
             </div>
           </div>
           <div class="story-footer">
-            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
+            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
+              <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+              <span>Shopee Analytics</span>
+            </a>
             <span class="brand-date">${fmtDate(d.ts)}</span>
           </div>
         </div>`;
@@ -2433,7 +2537,10 @@
             </div>
           </div>
           <div class="story-footer">
-            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
+            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
+              <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+              <span>Shopee Analytics</span>
+            </a>
             <span class="brand-date">${fmtDate(d.ts)}</span>
           </div>
         </div>`;
@@ -2467,7 +2574,10 @@
             ` : ''}
           </div>
           <div class="story-footer">
-            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
+            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
+              <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+              <span>Shopee Analytics</span>
+            </a>
             <span class="brand-date">${fmtDate(d.ts)}</span>
           </div>
         </div>`;
@@ -2500,7 +2610,10 @@
             </div>
           </div>
           <div class="story-footer">
-            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
+            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
+              <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+              <span>Shopee Analytics</span>
+            </a>
             <span class="brand-date">${fmtDate(d.ts)}</span>
           </div>
         </div>`;
@@ -2531,7 +2644,10 @@
             </a>
           </div>
           <div class="story-footer">
-            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
+            <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
+              <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+              <span>Shopee Analytics</span>
+            </a>
             <span class="brand-date">${fmtDate(d.ts)}</span>
           </div>
         </div>`;
@@ -2611,12 +2727,15 @@
         let progress = 0;
         let lastTime = performance.now();
         let isPaused = false;
-        const slideDuration = 5000;
+        const slideDuration = 7000;
         let animationFrameId = null;
 
         function showSlide(idx) {
           currentIdx = idx;
           progress = 0;
+
+          // Auto-pause briefly so new slide has time to animate in before counting down
+          isPaused = true;
 
           slides.forEach((slide, sIdx) => {
             slide.classList.toggle("active", sIdx === idx);
@@ -2631,6 +2750,12 @@
           });
 
           triggerSlideAnimations(idx);
+
+          // Resume after animations have had time to play (800ms grace period)
+          setTimeout(() => {
+            isPaused = false;
+            lastTime = performance.now();
+          }, 800);
         }
 
         function triggerSlideAnimations(idx) {
@@ -2718,7 +2843,7 @@
         storyFrame.addEventListener("touchend", pauseEnd);
 
         showSlide(0);
-        lastTime = performance.now();
+        // Note: isPaused will be reset to false by showSlide's setTimeout(800ms)
         animationFrameId = requestAnimationFrame(loop);
       }
 
@@ -2732,6 +2857,7 @@
         renderSlideshow(data);
         setupActions(data);
         setupMusic();
+        setupDarkMode();
       }
     })();
   </script>
