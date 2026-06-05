@@ -764,12 +764,9 @@ function setupShareButtons(d) {
     try {
       let finalTotal = d.t;
       let finalSaved = d.s;
-
-      // Truncate top item name to max 24 characters (V4: increased from 18)
-      let finalTopItem = d.ti && d.ti[0] ? d.ti[0].n.substring(0, 24).trim() : "";
       let finalYd = Object.entries(d.yd || {}).map(([y, v]) => [y, v.t]);
 
-      // V4: Use YYMMDD compact date (6 digits) instead of unix timestamp base36
+      // V5: Use YYMMDD compact date (6 digits)
       const now = new Date();
       const dateCode = (now.getFullYear() % 100) * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
 
@@ -779,36 +776,40 @@ function setupShareButtons(d) {
       const itemsB36 = Math.round(d.ip || 0).toString(36);
       const savedB36 = finalSaved < 0 ? "n" : Math.round(finalSaved).toString(36);
 
-      // V4: yd uses ":" and "," separators (shorter than "_")
-      // Format: shortYear:valB36,shortYear:valB36,...
+      // yd uses ":" and "," separators
       const ydStr = finalYd.map(([y, val]) => {
         const shortYear = String(y).slice(-2);
         const valB36 = (val == null || val < 0) ? "n" : Math.round(val).toString(36);
         return `${shortYear}:${valB36}`;
       }).join(',');
 
-      const toBase64url = (str) => {
-        try {
-          const utf8Bytes = unescape(encodeURIComponent(str));
-          const b64 = btoa(utf8Bytes);
-          return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-        } catch (e) {
-          return '';
-        }
-      };
+      // V5: encode archetype index (1 base36 char) from full personality analysis
+      const ARCH_KEYS = [
+        'reformed', 'night_owl', 'fashion_healer', 'bargain_hunter', 'emotional',
+        'premium_curator', 'rising_addict', 'morning_planner', 'seasonal',
+        'beauty_selfcare', 'tech_optimizer', 'home_nester', 'food_lover',
+        'family_center', 'free_spirit'
+      ];
+      let archIdxChar = 'e'; // default: free_spirit
+      try {
+        const profile = window.analyzeShoppingPersonality ? window.analyzeShoppingPersonality(d) : null;
+        const archKey = profile?.archetype?.key ?? '';
+        const archIdx = ARCH_KEYS.indexOf(archKey);
+        if (archIdx >= 0) archIdxChar = archIdx.toString(36);
+      } catch (e) {
+        console.warn('[Share] Could not resolve archetype, using default', e);
+      }
 
-      const topItemB64Url = finalTopItem ? toBase64url(finalTopItem) : '';
-
-      // Version 4 format: 4-{total}-{orders}-{items}-{saved}-{YYMMDD}-{yd}-{topItemB64}
+      // Version 5 format: 5-{total}-{orders}-{items}-{saved}-{YYMMDD}-{yd}-{archIdx}
       const encoded = [
-        4, // version 4
+        5, // version 5
         totalB36,
         ordersB36,
         itemsB36,
         savedB36,
-        dateCode,  // YYMMDD as plain number (smaller than unix ts base36)
+        dateCode,
         ydStr,
-        topItemB64Url
+        archIdxChar
       ].join('-');
 
       let shareUrlBase = "https://tr4n.github.io/shopee-stats/share/";

@@ -592,6 +592,166 @@
       z-index: 99;
     }
 
+    /* Theme toggle pill (top-left) */
+    .btn-theme-pill {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50px;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .btn-theme-pill:hover {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+    [data-theme="dark"] .btn-theme-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+    }
+    [data-theme="dark"] .btn-theme-pill:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* Personality card (Slide 3) */
+    .personality-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 28px 24px 24px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+    .personality-icon-wrap {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(238, 77, 45, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    [data-theme="dark"] .personality-icon-wrap {
+      background: rgba(238, 77, 45, 0.15);
+    }
+    .personality-icon {
+      font-size: 44px;
+      line-height: 1;
+      display: block;
+      animation: pulseEmoji 2s ease-in-out infinite;
+    }
+    .personality-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      margin-bottom: 14px;
+    }
+    [data-theme="dark"] .personality-badge {
+      filter: brightness(0.85) saturate(1.1);
+    }
+    .personality-desc {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin: 0 0 14px;
+      text-align: left;
+    }
+    .personality-slogan {
+      font-size: 13px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--primary);
+      text-align: center;
+      border-top: 1px solid var(--glass-border);
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+
+    /* Share popover */
+    .share-popover {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      background: var(--surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 16px;
+      width: calc(100% - 32px);
+      max-width: 480px;
+      box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12);
+    }
+    .share-popover-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .share-popover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .share-pop-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      outline: none;
+    }
+    .share-pop-btn:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+    .share-pop-icon {
+      font-size: 18px;
+    }
+    [data-theme="dark"] .share-pop-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="dark"] .share-pop-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
     /* Floating Music Button (top-right) */
     #btn-music-float {
       position: fixed;
@@ -696,14 +856,6 @@
       transition: all 0.2s;
       outline: none;
       white-space: nowrap;
-    }
-
-    /* Icon-only compact button (dark mode, video) */
-    .action-btn.btn-icon {
-      flex: 0 0 44px;
-      width: 44px;
-      padding: 11px 0;
-      font-size: 16px;
     }
 
     /* Primary share/save buttons */
@@ -816,71 +968,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    .polaroid-card-desc {
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 1.4;
-      color: #64748b;
-      text-align: center;
-      margin: 6px 0 10px 0;
-      display: none;
-    }
-
-    /* Privacy toggle button */
-    .privacy-toggle-container {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 16px;
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-    .privacy-toggle-container:hover {
-      background: rgba(255, 255, 255, 0.95);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(238, 77, 45, 0.08);
-    }
-    .privacy-toggle-container input[type="checkbox"] {
-      position: relative;
-      width: 34px;
-      height: 18px;
-      appearance: none;
-      background: #cbd5e1;
-      outline: none;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin: 0;
-    }
-    .privacy-toggle-container input[type="checkbox"]:checked {
-      background: var(--primary);
-    }
-    .privacy-toggle-container input[type="checkbox"]::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-      transition: transform 0.3s;
-    }
-    .privacy-toggle-container input[type="checkbox"]:checked::before {
-      transform: translateX(16px);
-    }
-    .privacy-toggle-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
   </style>
 </head>
 
@@ -948,7 +1035,13 @@
     </div>
   </div>
 
-  <!-- Floating Music Button -->
+  <!-- Theme Toggle (top-left) -->
+  <button id="btn-theme" class="btn-theme-pill" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode" style="display: none;">
+    <span id="theme-icon">🌙</span>
+    <span id="theme-label">Tối</span>
+  </button>
+
+  <!-- Floating Music Button (top-right) -->
   <button id="btn-music-float" style="display: none;" title="Bật/tắt nhạc nền">
     <span class="eq-bars" id="eq-bars">
       <span class="eq-bar"></span>
@@ -959,14 +1052,34 @@
     <span id="music-btn-label">Nhạc</span>
   </button>
 
-  <!-- Actions Panel -->
+  <!-- Actions Panel (bottom) -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
-    <button id="btn-darkmode" class="action-btn btn-icon" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode">
-      <span id="darkmode-icon">🌙</span>
-    </button>
-    <button id="btn-share-link" class="action-btn btn-primary" title="Chia sẻ link">🔗 Chia sẻ</button>
-    <button id="btn-download-img" class="action-btn" title="Lưu ảnh PNG">💾 Lưu ảnh</button>
-    <button id="btn-download-vid" class="action-btn btn-icon" title="Quay video">🎥</button>
+    <button id="btn-share-link" class="action-btn btn-primary" title="Chia sẻ">🔗 Chia sẻ</button>
+    <button id="btn-download-img" class="action-btn" title="Lưu ảnh PNG">💾 Ảnh</button>
+    <button id="btn-download-vid" class="action-btn" title="Quay video Story">🎥 Video</button>
+  </div>
+
+  <!-- Share Popover -->
+  <div id="share-popover" class="share-popover" style="display: none;">
+    <div class="share-popover-title">Chia sẻ với bạn bè</div>
+    <div class="share-popover-grid">
+      <button class="share-pop-btn" id="spop-copy">
+        <span class="share-pop-icon">📋</span>
+        <span>Sao chép link</span>
+      </button>
+      <button class="share-pop-btn" id="spop-fb">
+        <span class="share-pop-icon">📘</span>
+        <span>Facebook</span>
+      </button>
+      <button class="share-pop-btn" id="spop-zalo">
+        <span class="share-pop-icon">💬</span>
+        <span>Zalo</span>
+      </button>
+      <button class="share-pop-btn" id="spop-x">
+        <span class="share-pop-icon">🐦</span>
+        <span>X / Twitter</span>
+      </button>
+    </div>
   </div>
 
   <!-- Toast Message -->
@@ -979,66 +1092,41 @@
       /* ====================================================
          Helpers & Share Image Generation
        ==================================================== */
-      function calculateSharePersonality(d) {
-        const totalSpend = d.t || 0;
-        const totalOrders = d.o || 0;
-        const totalSaved = d.s || 0;
+      // 15 archetypes mirroring dashboard ARCHETYPE_DEFINITIONS
+      const SHARE_ARCHETYPES = [
+        { key: 'reformed',        label: 'Người Đang Tỉnh Ngộ',       icon: '🌱',   badgeBg: '#f0fdf4', badgeColor: '#16a34a', desc: 'Bạn đã bắt đầu kiểm soát chi tiêu tốt hơn. Mỗi đơn hàng giờ đây đều được cân nhắc kỹ lưỡng trước khi chốt — một bước tiến đáng tự hào!',      slogan: 'Tỉnh ngộ muộn còn hơn không! 🌱' },
+        { key: 'night_owl',       label: 'Tín Đồ Mua Khuya',          icon: '🦉',   badgeBg: '#f5f3ff', badgeColor: '#7c3aed', desc: 'Đêm xuống là lúc bạn lên đồ. Giỏ hàng của bạn được lấp đầy trong bóng tối khi lý trí đã nghỉ ngơi và đam mê mua sắm thức giấc.',       slogan: 'Đêm khuya, ví tiền rơi nhanh! 🌙' },
+        { key: 'fashion_healer',  label: 'Người Chữa Lành Cảm Xúc',  icon: '🌙',   badgeBg: '#fdf4ff', badgeColor: '#a21caf', desc: 'Với bạn, mua sắm không chỉ là nhu cầu — đó là liệu pháp. Mỗi món đồ mới là một cách tự thưởng, tự yêu thương bản thân sau ngày dài.',       slogan: 'Shopping là liệu pháp tâm hồn! 💫' },
+        { key: 'bargain_hunter',  label: 'Chiến Thần Săn Sale',        icon: '🎯',   badgeBg: '#f0fdf4', badgeColor: '#15803d', desc: 'Bạn không mua hàng — bạn chinh phục ưu đãi. Mã giảm giá, flash sale, miễn phí ship — không gì thoát khỏi tầm ngắm của bạn!',              slogan: 'Áp mã thành công, ví tiền nở hoa! 🌸' },
+        { key: 'emotional',       label: 'Người Mua Sắm Cảm Xúc',    icon: '🌊',   badgeBg: '#eff6ff', badgeColor: '#1d4ed8', desc: 'Cảm xúc là kim chỉ nam của giỏ hàng bạn. Vui hay buồn, căng thẳng hay hứng khởi — mọi trạng thái đều có thể dẫn đến một đơn hàng mới.',  slogan: 'Chốt đơn theo cảm xúc, không cần lý do! 🌊' },
+        { key: 'premium_curator', label: 'Người Mua Chọn Lọc',        icon: '💎',   badgeBg: '#eff6ff', badgeColor: '#1e40af', desc: 'Ít nhưng tinh. Bạn đầu tư vào chất lượng, không bị cám dỗ bởi đồ rẻ. Mỗi lần chốt đơn là một quyết định sáng suốt và kiên định.',          slogan: 'Chất lượng làm nên đẳng cấp! ✨' },
+        { key: 'rising_addict',   label: 'Người Đang "Bị Cuốn"',      icon: '📈',   badgeBg: '#fff7ed', badgeColor: '#c2410c', desc: 'Chi tiêu của bạn đang tăng tốc theo chiều hướng đáng chú ý. Shopee đã trở thành một phần không thể thiếu trong thói quen hàng ngày!',      slogan: 'Đang trên đà... không phanh được! 📈' },
+        { key: 'morning_planner', label: 'Người Mua Có Kế Hoạch',     icon: '📋',   badgeBg: '#f0f9ff', badgeColor: '#0369a1', desc: 'Bạn mua sắm như lên kế hoạch dự án: có mục tiêu, có ngân sách, không bốc đồng. Mỗi đơn hàng đều được cân nhắc từ sáng sớm.',             slogan: 'Kế hoạch rõ ràng, tài chính vững chắc! 📋' },
+        { key: 'seasonal',        label: 'Người Mua Theo Mùa',         icon: '🎄',   badgeBg: '#fefce8', badgeColor: '#a16207', desc: 'Bạn không mua quanh năm — bạn bùng phát theo mùa. Cuối năm, Tết, sale lớn — đó là những khoảnh khắc ví tiền bạn "tạm biệt" thế giới!', slogan: 'Sale mùa về, ví tiền ra đi! 🎄' },
+        { key: 'beauty_selfcare', label: 'Người Tự Yêu Thương',       icon: '✨',   badgeBg: '#fdf2f8', badgeColor: '#be185d', desc: 'Chăm sóc bản thân là ưu tiên hàng đầu của bạn. Mỗi sản phẩm làm đẹp, chăm sóc da là một cách bạn nói "Tôi xứng đáng được tốt nhất".',   slogan: 'Đầu tư cho nhan sắc, không bao giờ lỗ! 💅' },
+        { key: 'tech_optimizer',  label: 'Nhà Đầu Tư Hiệu Suất',      icon: '💻',   badgeBg: '#f0f9ff', badgeColor: '#0284c7', desc: 'Thiết bị tốt = làm việc tốt. Bạn luôn tìm kiếm công nghệ mới nhất để tối ưu hóa cuộc sống và công việc — dù ví tiền có mỏng thêm một chút.', slogan: 'Nâng cấp gear, nâng cấp cuộc sống! 💻' },
+        { key: 'home_nester',     label: 'Người Tạo Tổ Ấm',           icon: '🏡',   badgeBg: '#f0fdf4', badgeColor: '#15803d', desc: 'Ngôi nhà là thế giới của bạn và bạn không ngừng làm nó đẹp hơn. Mỗi góc nhỏ đều được chăm chút với tình yêu và những đơn hàng nội thất.',  slogan: 'Nhà đẹp là hạnh phúc mỗi ngày! 🏡' },
+        { key: 'food_lover',      label: 'Người Sống Để Ăn Ngon',     icon: '🍜',   badgeBg: '#fff7ed', badgeColor: '#ea580c', desc: 'Ẩm thực là niềm vui, là phần thưởng, là lý do để bạn mỉm cười sau ngày dài. Giỏ hàng của bạn luôn thơm mùi đồ ăn ngon!',                  slogan: 'Ăn ngon là quyền cơ bản của con người! 🍜' },
+        { key: 'family_center',   label: 'Người Mua Vì Gia Đình',     icon: '👨‍👩‍👧', badgeBg: '#fdf4ff', badgeColor: '#7e22ce', desc: 'Bạn không mua sắm cho bản thân — bạn mua vì những người thân yêu. Mỗi đơn hàng là một cử chỉ yêu thương gửi đến gia đình!',            slogan: 'Mua vì yêu, chi vì thương! 💝' },
+        { key: 'free_spirit',     label: 'Người Khám Phá Đa Dạng',   icon: '🛍️',  badgeBg: '#fff7ed', badgeColor: '#d97706', desc: 'Không theo khuôn mẫu, không theo xu hướng — bạn mua sắm tự do và đa dạng theo đúng cá tính độc đáo của mình. Giỏ hàng = bản sắc!',      slogan: 'Đa dạng không giới hạn, thích là chốt! 🛍️' }
+      ];
 
-        const avgOrder = totalOrders > 0 ? totalSpend / totalOrders : 0;
-        const savingsRate = totalSaved > 0 ? (totalSaved / (totalSpend + totalSaved)) : 0;
-
-        // 1. Premium Spender (Nhà Sưu Tầm Chọn Lọc)
-        if (avgOrder >= 400000) {
-          return {
-            title: "Nhà Sưu Tầm Chọn Lọc",
-            icon: "💎",
-            badge: "💎 Cao Cấp",
-            desc: "Bạn chú trọng chất lượng hơn số lượng. Mỗi đơn hàng chốt là một sự đầu tư chất lượng bền vững, kiên quyết nói không với đồ giá rẻ mau hỏng!",
-            slogan: "Chất lượng làm nên đẳng cấp! ✨"
-          };
+      // Resolve archetype from d.archIdx (v5) or fall back to basic stats heuristic (v4 and older)
+      function resolvePersonality(d) {
+        if (typeof d.archIdx === 'number' && d.archIdx >= 0 && d.archIdx < SHARE_ARCHETYPES.length) {
+          return SHARE_ARCHETYPES[d.archIdx];
         }
-
-        // 2. Bargain Hunter (Chiến Thần Săn Sale)
-        if (savingsRate >= 0.18) {
-          return {
-            title: "Chiến Thần Săn Sale",
-            icon: "🎯",
-            badge: "🎯 Thông Thái",
-            desc: "Bạn sở hữu tư duy tối ưu hóa bậc thầy, biến giỏ hàng thành bài toán tài chính hoàn hảo với tỷ lệ tiết kiệm đáng kinh ngạc từ các đợt sale.",
-            slogan: "Áp mã thành công, ví tiền nở hoa! 🌸"
-          };
-        }
-
-        // 3. Binge Buyer (Nhà Chi Tiêu Bùng Nổ)
-        if (totalOrders >= 80 || totalSpend >= 50000000) {
-          return {
-            title: "Nhà Chi Tiêu Bùng Nổ",
-            icon: "🚀",
-            badge: "🚀 Phóng Khoáng",
-            desc: "Năng lượng mua sắm của bạn dồi dào tựa thái dương. Bạn sẵn sàng chi tiêu để nâng cấp cuộc sống và mang niềm vui ngập tràn giỏ hàng.",
-            slogan: "Chốt đơn không lối thoát! 💸"
-          };
-        }
-
-        // 4. Practical Spender (Người Tiêu Dùng Thực Tế)
-        if (totalOrders >= 15 && avgOrder <= 150000) {
-          return {
-            title: "Người Tiêu Dùng Thực Tế",
-            icon: "📐",
-            badge: "📐 Kỷ Luật",
-            desc: "Bạn mua sắm thông minh dựa trên nhu cầu thực tế, không bị cuốn vào các trào lưu nhất thời hay chi tiêu bốc đồng quá giới hạn ví tiền.",
-            slogan: "Tiêu dùng thông minh, tài chính an toàn! 🛡️"
-          };
-        }
-
-        // Default: Free Spirit (Người Mua Sắm Tự Do)
-        return {
-          title: "Người Mua Sắm Tự Do",
-          icon: "🎈",
-          badge: "🎈 Ngẫu Hứng",
-          desc: "Bạn mua sắm theo cảm xúc và sở thích tự do của bản thân, biến mỗi đơn hàng thành một trải nghiệm thú vị ngập tràn sự ngẫu hứng.",
-          slogan: "Thích là chốt, vui là chính! 🎉"
-        };
+        // Fallback heuristic for legacy links (v4 and older)
+        const spend = d.t || 0;
+        const orders = d.o || 0;
+        const saved = d.s || 0;
+        const avg = orders > 0 ? spend / orders : 0;
+        const savingsRate = saved > 0 ? saved / (spend + saved) : 0;
+        if (avg >= 400000) return SHARE_ARCHETYPES[5];        // premium_curator
+        if (savingsRate >= 0.18) return SHARE_ARCHETYPES[3];  // bargain_hunter
+        if (orders >= 80 || spend >= 50000000) return SHARE_ARCHETYPES[6]; // rising_addict
+        if (orders >= 15 && avg <= 150000) return SHARE_ARCHETYPES[7];    // morning_planner
+        return SHARE_ARCHETYPES[14]; // free_spirit
       }
 
 
@@ -1228,52 +1316,29 @@
           txt(st.label, sx + statW / 2, statsTop + 110, 14, '700', tColors.textMuted, 'center');
         });
 
-        // ── PRIVACY / SHOPPING PERSONALITY OR TOP ITEM CARD (Polaroid style) ──
+        // ── SHOPPING PERSONALITY CARD ──
         const topItemTop = statsTop + 128 + 44;
-        const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
-          && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
-
-        const chkShowProduct = document.getElementById('chk-show-product');
-        const showProduct = hasTopItem && (!chkShowProduct || chkShowProduct.checked);
+        const persona = resolvePersonality(d);
 
         const cardH = 180;
         rrectShadow(PAD, topItemTop, W - PAD * 2, cardH, 20, '#ffffff');
         rrect(PAD, topItemTop, W - PAD * 2, cardH, 20, null, 'rgba(0,0,0,0.04)', 1.5);
 
-        // Draw the Polaroid Photo area inside canvas card
         const px = PAD + 22;
         const py = topItemTop + 22;
         const pw = 136;
         const ph = 136;
         rrect(px, py, pw, ph, 10, '#fafafa', '#f0f0f0', 1.5);
 
-        // Text details on the right
         const tx = px + pw + 24;
 
-        if (showProduct) {
-          // Crown Emoji inside photo area
-          ctx.font = `400 44px ${FONT}`;
-          ctx.textAlign = 'center';
-          ctx.fillText('👑', px + pw / 2, py + ph / 2 + 14);
+        ctx.font = `400 44px ${FONT}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(persona.icon, px + pw / 2, py + ph / 2 + 14);
 
-          txt('SẢN PHẨM MUA NHIỀU NHẤT', tx, topItemTop + 54, 15, '800', tColors.accent);
-          const itemName = truncate(d.ti, 38);
-          txt(itemName, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
-          txt('Đã đồng hành cùng ví tiền của bạn! ✨', tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
-        } else {
-          // Draw shopping personality instead!
-          const p = calculateSharePersonality(d);
-
-          // Personality Emoji inside photo area
-          ctx.font = `400 44px ${FONT}`;
-          ctx.textAlign = 'center';
-          ctx.fillText(p.icon, px + pw / 2, py + ph / 2 + 14);
-
-          // Badge title: e.g. "💎 CAO CẤP"
-          txt(p.badge.toUpperCase(), tx, topItemTop + 54, 15, '800', tColors.accent);
-          txt(p.title, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
-          txt(p.slogan, tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
-        }
+        txt('TÍNH CÁCH MUA SẮM', tx, topItemTop + 54, 15, '800', tColors.accent);
+        txt(persona.label, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
+        txt(persona.slogan, tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
 
         // ── FOOTER ────────────────────────────────────────────────
         const footerY = H - 76;
@@ -1381,19 +1446,16 @@
         }
         const stream = captureStreamFn.call(canvas, fps);
 
-        let mimeType = 'video/mp4';
+        let mimeType = 'video/webm;codecs=vp9';
         let recorder;
         try {
           if (typeof MediaRecorder === 'undefined') {
             throw new Error("MediaRecorder API không khả dụng.");
           }
           if (!MediaRecorder.isTypeSupported(mimeType)) {
-            mimeType = 'video/webm;codecs=vp9';
-          }
-          if (!MediaRecorder.isTypeSupported(mimeType)) {
             mimeType = 'video/webm';
           }
-          recorder = new MediaRecorder(stream, { mimeType: mimeType });
+          recorder = new MediaRecorder(stream, { mimeType });
         } catch (e) {
           console.warn("Failed to initialize MediaRecorder with custom mimeType, falling back to default:", e);
           try {
@@ -1423,8 +1485,7 @@
 
         const rankLabel = RANKS[d.r] || RANKS[2];
         const currentYear = new Date().getFullYear();
-        const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
-          && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
+        const videoPersona = resolvePersonality(d);
 
         const slogans = [
           "Kiếp này xin lỗi ví tiền! 💸",
@@ -1580,16 +1641,8 @@
             txt('Tiết kiệm được', bx3 + 100, by3 + 95, 12, '700', tColors.textMuted);
           }
           else if (page === 2) {
-            const chkShowProduct = document.getElementById('chk-show-product');
-            const showProduct = hasTopItem && (!chkShowProduct || chkShowProduct.checked);
-
-            if (showProduct) {
-              txt('Mối tình đậm sâu', PAD, 180, 15, '800', tColors.accent);
-              txt('Sản phẩm gắn bó nhất cùng bạn trong hành trình qua', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
-            } else {
-              txt('Tính cách mua sắm', PAD, 180, 15, '800', tColors.accent);
-              txt('Nhận xét phong cách chi tiêu độc bản của riêng bạn', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
-            }
+            txt('Tính cách mua sắm', PAD, 180, 15, '800', tColors.accent);
+            txt('Chân dung chi tiêu độc bản của riêng bạn', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
 
             const scale = Math.min(pageFrame / 20, 1);
             const rotateDeg = 2 + Math.sin(pageFrame * 0.05) * 1;
@@ -1608,73 +1661,40 @@
             const phH = 210;
             rrect(-phW / 2, -pH / 2 + 20, phW, phH, 6, '#fafafa', '#f2f2f2', 1.5);
 
-            if (showProduct) {
-              txt('👑', 0, -pH / 2 + 130, 56, '400', null, 'center');
+            txt(videoPersona.icon, 0, -pH / 2 + 130, 56, '400', null, 'center');
 
-              ctx.save();
-              ctx.translate(phW / 2 - 10, -pH / 2 + 20);
-              ctx.rotate(8 * Math.PI / 180);
-              rrect(-50, -14, 100, 28, 8, '#ffd700', 'rgba(0,0,0,0.08)', 1);
-              txt('👑 Yêu Thích', 0, 5, 11, '800', '#7c5e00', 'center');
-              ctx.restore();
+            ctx.save();
+            ctx.translate(phW / 2 - 10, -pH / 2 + 20);
+            ctx.rotate(8 * Math.PI / 180);
+            ctx.font = `800 11px ${FONT}`;
+            const badgeLabel = videoPersona.icon + ' ' + videoPersona.label;
+            const badgeW = ctx.measureText(badgeLabel).width + 16;
+            rrect(-badgeW / 2, -14, badgeW, 28, 8, videoPersona.badgeBg, 'rgba(0,0,0,0.08)', 1);
+            txt(badgeLabel, 0, 5, 11, '800', videoPersona.badgeColor, 'center');
+            ctx.restore();
 
-              txt(truncate(d.ti, 38), 0, pH / 2 - 90, 16, '800', '#0f172a', 'center', pW - 40);
-              txt('Đã đồng hành cùng ví tiền của bạn! ✨', 0, pH / 2 - 40, 12, '600', '#64748b', 'center');
-            } else {
-              const p = calculateSharePersonality(d);
-              txt(p.icon, 0, -pH / 2 + 130, 56, '400', null, 'center');
+            txt(videoPersona.label, 0, pH / 2 - 100, 18, '800', '#0f172a', 'center', pW - 40);
 
-              ctx.save();
-              ctx.translate(phW / 2 - 10, -pH / 2 + 20);
-              ctx.rotate(8 * Math.PI / 180);
-              
-              let badgeBg = '#ffd700';
-              let badgeFg = '#7c5e00';
-              if (p.title === "Nhà Sưu Tầm Chọn Lọc") {
-                badgeBg = "#e2f1ff"; badgeFg = "#0066cc";
-              } else if (p.title === "Chiến Thần Săn Sale") {
-                badgeBg = "#e6fcf5"; badgeFg = "#0ca678";
-              } else if (p.title === "Nhà Chi Tiêu Bùng Nổ") {
-                badgeBg = "#fff0f6"; badgeFg = "#d6336c";
-              } else if (p.title === "Người Tiêu Dùng Thực Tế") {
-                badgeBg = "#f4fce3"; badgeFg = "#5c940d";
+            const descWords = videoPersona.desc.split(' ');
+            let descLine = '';
+            const maxLineW = pW - 40;
+            let lineY = pH / 2 - 75;
+            ctx.font = `600 11px ${FONT}`;
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            for (let n = 0; n < descWords.length; n++) {
+              const testLine = descLine + descWords[n] + ' ';
+              if (ctx.measureText(testLine).width > maxLineW && n > 0) {
+                ctx.fillText(descLine, 0, lineY);
+                descLine = descWords[n] + ' ';
+                lineY += 16;
               } else {
-                badgeBg = "#fff4e6"; badgeFg = "#fd7e14";
+                descLine = testLine;
               }
-
-              const badgeText = p.badge;
-              ctx.font = `800 11px ${FONT}`;
-              const badgeW = ctx.measureText(badgeText).width + 16;
-
-              rrect(-badgeW / 2, -14, badgeW, 28, 8, badgeBg, 'rgba(0,0,0,0.08)', 1);
-              txt(badgeText, 0, 5, 11, '800', badgeFg, 'center');
-              ctx.restore();
-
-              txt(p.title, 0, pH / 2 - 100, 18, '800', '#0f172a', 'center', pW - 40);
-              
-              const descWords = p.desc.split(' ');
-              let line = '';
-              const maxLineW = pW - 40;
-              let lineY = pH / 2 - 75;
-              ctx.font = `600 11px ${FONT}`;
-              ctx.fillStyle = '#64748b';
-              ctx.textAlign = 'center';
-              for (let n = 0; n < descWords.length; n++) {
-                let testLine = line + descWords[n] + ' ';
-                let metrics = ctx.measureText(testLine);
-                let testWidth = metrics.width;
-                if (testWidth > maxLineW && n > 0) {
-                  ctx.fillText(line, 0, lineY);
-                  line = descWords[n] + ' ';
-                  lineY += 16;
-                } else {
-                  line = testLine;
-                }
-              }
-              ctx.fillText(line, 0, lineY);
-
-              txt(p.slogan, 0, pH / 2 - 22, 11, '800', tColors.accent, 'center');
             }
+            ctx.fillText(descLine, 0, lineY);
+
+            txt(videoPersona.slogan, 0, pH / 2 - 22, 11, '800', tColors.accent, 'center');
 
             ctx.restore();
           }
@@ -1754,21 +1774,21 @@
         const recordPromise = new Promise((resolve, reject) => {
           recorder.onstop = () => {
             try {
-              const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
               const blob = new Blob(chunks, { type: mimeType });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = `shopee-stats-wrapped.${ext}`;
+              a.download = 'shopee-stats-wrapped.webm';
               document.body.appendChild(a);
               a.click();
               document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              showToast("✓ Đã tải video Story thành công!");
+              // Delay revoke to avoid race condition with download
+              setTimeout(() => URL.revokeObjectURL(url), 2000);
+              showToast("✓ Đã tải video! Dùng VLC hoặc Chrome để mở file .webm");
               if (btnVid) {
                 btnVid.disabled = false;
                 btnVid.innerHTML = origHTML;
-                btnVid.title = 'Quay video';
+                btnVid.title = 'Quay video Story';
               }
               resolve();
             } catch (err) {
@@ -2112,34 +2132,35 @@
       }
 
       function setupDarkMode() {
-        const btn = document.getElementById('btn-darkmode');
-        const icon = document.getElementById('darkmode-icon');
+        const btn = document.getElementById('btn-theme');
+        const icon = document.getElementById('theme-icon');
+        const label = document.getElementById('theme-label');
         const root = document.documentElement;
         if (!btn) return;
 
-        // Restore preference from localStorage
-        const saved = localStorage.getItem('share-theme');
-        let isDark = saved === 'dark';
-        if (isDark) {
-          root.setAttribute('data-theme', 'dark');
-          icon.textContent = '☀️';
-          btn.classList.add('active');
-        }
+        btn.style.display = 'inline-flex';
 
-        btn.addEventListener('click', () => {
-          isDark = !isDark;
-          if (isDark) {
+        const applyTheme = (dark) => {
+          if (dark) {
             root.setAttribute('data-theme', 'dark');
             icon.textContent = '☀️';
-            btn.classList.add('active');
-            showToast('🌙 Dark mode đã bật');
+            label.textContent = 'Sáng';
           } else {
             root.removeAttribute('data-theme');
             icon.textContent = '🌙';
-            btn.classList.remove('active');
-            showToast('☀️ Light mode đã bật');
+            label.textContent = 'Tối';
           }
+        };
+
+        const saved = localStorage.getItem('share-theme');
+        let isDark = saved === 'dark';
+        applyTheme(isDark);
+
+        btn.addEventListener('click', () => {
+          isDark = !isDark;
+          applyTheme(isDark);
           localStorage.setItem('share-theme', isDark ? 'dark' : 'light');
+          showToast(isDark ? '🌙 Dark mode đã bật' : '☀️ Light mode đã bật');
         });
       }
 
@@ -2148,52 +2169,78 @@
         const btnDownloadVid = document.getElementById("btn-download-vid");
         const btnShareLink = document.getElementById("btn-share-link");
         const actionsPanel = document.getElementById("actions-panel");
+        const sharePopover = document.getElementById("share-popover");
 
         if (actionsPanel) actionsPanel.style.display = "flex";
 
-        // Show the floating music button
         const musicFloatBtn = document.getElementById('btn-music-float');
         if (musicFloatBtn) musicFloatBtn.style.display = 'inline-flex';
 
-        // Share link button — native share API → clipboard fallback
+        // Helper: copy URL to clipboard
+        const copyUrl = async (url) => {
+          try {
+            await navigator.clipboard.writeText(url);
+            showToast('✓ Đã sao chép link!');
+          } catch (_err) {
+            const ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            try { document.execCommand('copy'); showToast('✓ Đã sao chép link!'); }
+            catch (_e) { showToast('❌ Không sao chép được. Hãy chép thủ công.'); }
+            document.body.removeChild(ta);
+          }
+        };
+
+        // Share button: native API → custom popover
         if (btnShareLink) {
-          btnShareLink.addEventListener("click", async () => {
+          let popoverOpen = false;
+
+          const closePopover = () => {
+            if (sharePopover) sharePopover.style.display = 'none';
+            popoverOpen = false;
+          };
+
+          btnShareLink.addEventListener("click", async (e) => {
+            e.stopPropagation();
             const url = window.location.href;
-            const shareData = {
-              title: 'Thống kê chi tiêu Shopee của tôi 🛒',
-              text: `Tôi đã chi ${fmtVND(d.t > 0 ? d.t : 0)}đ trên Shopee! Xem thống kê của bạn với Shopee Analytics.`,
-              url: url
-            };
+            const shareText = `Tôi đã chi ${fmtVND(d.t > 0 ? d.t : 0)}đ trên Shopee! Xem thống kê của bạn với Shopee Analytics.`;
+            const shareData = { title: 'Thống kê chi tiêu Shopee 🛒', text: shareText, url };
 
             if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-              try {
-                await navigator.share(shareData);
-                return;
-              } catch (err) {
-                if (err.name === 'AbortError') return;
-                // Fall through to clipboard if share failed for other reasons
-              }
+              try { await navigator.share(shareData); return; }
+              catch (err) { if (err.name === 'AbortError') return; }
             }
 
-            // Clipboard fallback
-            try {
-              await navigator.clipboard.writeText(url);
-              showToast('✓ Đã sao chép link! Paste vào Facebook, Zalo hoặc bất kỳ đâu.');
-            } catch (_err) {
-              // Last resort: select + copy via execCommand
-              const textArea = document.createElement('textarea');
-              textArea.value = url;
-              textArea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
-              document.body.appendChild(textArea);
-              textArea.focus();
-              textArea.select();
-              try {
-                document.execCommand('copy');
-                showToast('✓ Đã sao chép link!');
-              } catch (_e) {
-                showToast('❌ Không thể sao chép. Hãy chép thủ công: ' + url.slice(0, 40) + '...');
-              }
-              document.body.removeChild(textArea);
+            // Show custom popover
+            if (sharePopover) {
+              if (popoverOpen) { closePopover(); return; }
+              sharePopover.style.display = 'block';
+              popoverOpen = true;
+
+              const encUrl = encodeURIComponent(url);
+              const encText = encodeURIComponent(shareText);
+
+              document.getElementById('spop-copy').onclick = () => { copyUrl(url); closePopover(); };
+              document.getElementById('spop-fb').onclick = () => {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encUrl}`, '_blank');
+                closePopover();
+              };
+              document.getElementById('spop-zalo').onclick = () => {
+                window.open(`https://zalo.me/share?url=${encUrl}`, '_blank');
+                closePopover();
+              };
+              document.getElementById('spop-x').onclick = () => {
+                window.open(`https://x.com/intent/tweet?text=${encText}&url=${encUrl}`, '_blank');
+                closePopover();
+              };
+            }
+          });
+
+          document.addEventListener('click', (e) => {
+            if (popoverOpen && sharePopover && !sharePopover.contains(e.target) && e.target !== btnShareLink) {
+              closePopover();
             }
           });
         }
@@ -2202,7 +2249,7 @@
           btnDownload.addEventListener("click", async () => {
             btnDownload.disabled = true;
             const origHTML = btnDownload.innerHTML;
-            btnDownload.innerHTML = '⌛ Đang tạo...';
+            btnDownload.innerHTML = '⌛';
             try {
               const dataUrl = await generateSquareShareCard(d);
               const link = document.createElement("a");
@@ -2229,8 +2276,7 @@
             } catch (err) {
               console.error(err);
               showToast(`❌ Lỗi khi quay video: ${err.message || err}`);
-              btnDownloadVid.disabled = false;
-              btnDownloadVid.innerHTML = '🎥';
+              if (btnDownloadVid) { btnDownloadVid.disabled = false; btnDownloadVid.innerHTML = '🎥 Video'; }
             }
           });
         }
@@ -2362,79 +2408,79 @@
           const matchS = location.hash.match(/[#&]s=([^&]+)/);
           if (matchS) {
             const hashVal = decodeURIComponent(matchS[1]);
-            if (hashVal.startsWith('4-')) {
-              // Version 4: YYMMDD date, comma-colon yd separators
-              // Format: 4-{totalB36}-{ordersB36}-{itemsB36}-{savedB36}-{YYMMDD}-{yd}-{topItemB64}
+
+            // Shared helper: parse yd string "24:3s13k0,25:1m48w"
+            const parseYd = (ydStr) => {
+              const yd = [];
+              if (!ydStr) return yd;
+              for (const entry of ydStr.split(',')) {
+                const colonIdx = entry.indexOf(':');
+                if (colonIdx > 0) {
+                  const fullYear = parseInt(entry.slice(0, colonIdx), 10) + 2000;
+                  const valPart = entry.slice(colonIdx + 1);
+                  yd.push([fullYear, valPart === 'n' ? -1 : parseInt(valPart, 36)]);
+                }
+              }
+              return yd;
+            };
+            const calcRank = (t) => t <= 10000000 ? 1 : (t <= 50000000 ? 2 : (t < 80000000 ? 3 : 4));
+            const calcBeat = (t) => {
+              for (const { max, beat } of [
+                { max: 1000000, beat: 20 }, { max: 5000000, beat: 45 },
+                { max: 15000000, beat: 65 }, { max: 35000000, beat: 80 },
+                { max: 70000000, beat: 90 }, { max: 120000000, beat: 95 },
+                { max: 250000000, beat: 98 }, { max: Infinity, beat: 99 }
+              ]) { if (t <= max) return beat; }
+              return 99;
+            };
+
+            if (hashVal.startsWith('5-')) {
+              // Version 5: same as v4 but last field is archIdx (1 base36 char) instead of topItemB64
+              // Format: 5-{totalB36}-{ordersB36}-{itemsB36}-{savedB36}-{YYMMDD}-{yd}-{archIdx}
               const parts = hashVal.split('-');
               const finalTotal = parts[1] === 'n' ? -1 : parseInt(parts[1], 36);
               const totalOrders = parseInt(parts[2], 36);
               const totalItems = parseInt(parts[3], 36);
               const finalSaved = parts[4] === 'n' ? -1 : parseInt(parts[4], 36);
-              const datecode = parseInt(parts[5], 10); // YYMMDD
-
-              // Parse yd: "24:3s13k0,25:1m48w" format
-              const ydStr = parts[6] || '';
-              const topItemB64Url = parts.slice(7).join('-');
-
-              let finalTopItem = '';
-              if (topItemB64Url) {
-                try {
-                  let b64 = topItemB64Url.replace(/-/g, '+').replace(/_/g, '/');
-                  while (b64.length % 4) b64 += '=';
-                  finalTopItem = decodeURIComponent(escape(atob(b64)));
-                } catch (e) {
-                  console.error("Failed to decode top item:", e);
-                }
-              }
-
-              let yd = [];
-              if (ydStr) {
-                const entries = ydStr.split(',');
-                for (const entry of entries) {
-                  const colonIdx = entry.indexOf(':');
-                  if (colonIdx > 0) {
-                    const shortYear = entry.slice(0, colonIdx);
-                    const valPart = entry.slice(colonIdx + 1);
-                    const fullYear = parseInt(shortYear, 10) + 2000;
-                    const val = valPart === 'n' ? -1 : parseInt(valPart, 36);
-                    yd.push([fullYear, val]);
-                  }
-                }
-              }
-
-              // Calculate rank and beat dynamically
-              const rankVal = finalTotal <= 10000000 ? 1 : (finalTotal <= 50000000 ? 2 : (finalTotal < 80000000 ? 3 : 4));
-              const getBeat = (t) => {
-                const thresholds = [
-                  { max: 1000000, beat: 20 },
-                  { max: 5000000, beat: 45 },
-                  { max: 15000000, beat: 65 },
-                  { max: 35000000, beat: 80 },
-                  { max: 70000000, beat: 90 },
-                  { max: 120000000, beat: 95 },
-                  { max: 250000000, beat: 98 },
-                  { max: Infinity, beat: 99 }
-                ];
-                for (const item of thresholds) {
-                  if (t <= item.max) return item.beat;
-                }
-                return 99;
-              };
-              const beat = getBeat(finalTotal);
+              const datecode = parseInt(parts[5], 10);
+              const yd = parseYd(parts[6] || '');
+              const archIdx = parts[7] ? parseInt(parts[7], 36) : 14; // default: free_spirit (14)
 
               return {
-                r: rankVal,
-                p: beat,
+                r: calcRank(finalTotal),
+                p: calcBeat(finalTotal),
                 t: finalTotal,
                 o: totalOrders,
                 ip: totalItems,
                 s: finalSaved,
-                ts: datecode, // YYMMDD integer
-                ti: finalTopItem,
+                ts: datecode,
+                archIdx: archIdx,
+                yd: yd
+              };
+            } else if (hashVal.startsWith('4-')) {
+              // Version 4: YYMMDD date — last field is topItemB64 (legacy, ignored for privacy)
+              const parts = hashVal.split('-');
+              const finalTotal = parts[1] === 'n' ? -1 : parseInt(parts[1], 36);
+              const totalOrders = parseInt(parts[2], 36);
+              const totalItems = parseInt(parts[3], 36);
+              const finalSaved = parts[4] === 'n' ? -1 : parseInt(parts[4], 36);
+              const datecode = parseInt(parts[5], 10);
+              const yd = parseYd(parts[6] || '');
+              // archIdx not present in v4 → will use calculateSharePersonality fallback
+
+              return {
+                r: calcRank(finalTotal),
+                p: calcBeat(finalTotal),
+                t: finalTotal,
+                o: totalOrders,
+                ip: totalItems,
+                s: finalSaved,
+                ts: datecode,
+                archIdx: null,
                 yd: yd
               };
             } else if (hashVal.startsWith('3-')) {
-              // Version 3 (Optimized raw delimited URL-safe format)
+              // Version 3 (legacy)
               const parts = hashVal.split('-');
               const finalTotal = parts[1] === 'n' ? -1 : parseInt(parts[1], 36);
               const totalOrders = parseInt(parts[2], 36);
@@ -2443,19 +2489,6 @@
               const tsVal = parseInt(parts[5], 36);
 
               const ydStr = parts[6] || '';
-              const topItemB64Url = parts.slice(7).join('-');
-
-              let finalTopItem = '';
-              if (topItemB64Url) {
-                try {
-                  let b64 = topItemB64Url.replace(/-/g, '+').replace(/_/g, '/');
-                  while (b64.length % 4) b64 += '=';
-                  finalTopItem = decodeURIComponent(escape(atob(b64)));
-                } catch (e) {
-                  console.error("Failed to decode top item:", e);
-                }
-              }
-
               let yd = [];
               if (ydStr) {
                 const ydParts = ydStr.split('_');
@@ -2468,36 +2501,15 @@
                 }
               }
 
-              // Calculate rankVal and beatVal dynamically
-              const rankVal = finalTotal <= 10000000 ? 1 : (finalTotal <= 50000000 ? 2 : (finalTotal < 80000000 ? 3 : 4));
-
-              const getBeat = (t) => {
-                const thresholds = [
-                  { max: 1000000, beat: 20 },
-                  { max: 5000000, beat: 45 },
-                  { max: 15000000, beat: 65 },
-                  { max: 35000000, beat: 80 },
-                  { max: 70000000, beat: 90 },
-                  { max: 120000000, beat: 95 },
-                  { max: 250000000, beat: 98 },
-                  { max: Infinity, beat: 99 }
-                ];
-                for (const item of thresholds) {
-                  if (t <= item.max) return item.beat;
-                }
-                return 99;
-              };
-              const beat = getBeat(finalTotal);
-
               return {
-                r: rankVal,
-                p: beat,
+                r: calcRank(finalTotal),
+                p: calcBeat(finalTotal),
                 t: finalTotal,
                 o: totalOrders,
                 ip: totalItems,
                 s: finalSaved,
                 ts: tsVal,
-                ti: finalTopItem,
+                archIdx: null,
                 yd: yd
               };
             } else {
@@ -2537,7 +2549,7 @@
                     ip: totalItems,
                     s: finalSaved,
                     ts: tsVal,
-                    ti: finalTopItem,
+                    archIdx: null,
                     yd: yd
                   };
                 } else {
@@ -2551,8 +2563,6 @@
                   const tsVal = parseInt(parts[7], 10);
 
                   const ydStr = parts[parts.length - 1] || '';
-                  const finalTopItem = parts.slice(8, parts.length - 1).join('|');
-
                   let yd = [];
                   if (ydStr) {
                     yd = ydStr.split(';').map(item => {
@@ -2569,7 +2579,7 @@
                     ip: totalItems,
                     s: finalSaved,
                     ts: tsVal,
-                    ti: finalTopItem,
+                    archIdx: null,
                     yd: yd
                   };
                 }
@@ -2614,11 +2624,6 @@
         const rankLabel = RANKS[d.r] || RANKS[2];
         const beat = d.p || 0;
         const currentYear = new Date().getFullYear();
-
-        // Top Item
-        const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
-          && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
-        const topName = d.ti ? escHtml(d.ti) : '';
 
         // Slide 1: Welcome & Total Spent
         const totalFmt = d.t < 0 ? '***' : fmtVND(d.t) + 'đ';
@@ -2683,33 +2688,23 @@
           </div>
         </div>`;
 
-        // Slide 3: Top Item (Polaroid design)
-        const topItemSlideHtml = `
+        // Slide 3: Personality / Archetype card
+        const persona = resolvePersonality(d);
+        const personalitySlideHtml = `
         <div class="slide" id="slide-2">
           <div>
-            <div class="slide-title">Mối tình đậm sâu</div>
-            <div class="slide-desc">Sản phẩm gắn bó nhất cùng bạn trong hành trình qua</div>
+            <div class="slide-title">Tính cách mua sắm</div>
+            <div class="slide-desc">Chân dung chi tiêu độc bản của riêng bạn</div>
           </div>
           <div style="margin: auto 0;">
-            <div class="polaroid-card">
-              <div class="polaroid-photo-area">
-                <span class="polaroid-badge" id="polaroid-badge-el">👑 Yêu Thích</span>
-                <div class="top-item-emoji" id="polaroid-emoji-el">👑</div>
+            <div class="personality-card">
+              <div class="personality-icon-wrap">
+                <span class="personality-icon">${escHtml(persona.icon)}</span>
               </div>
-              <div class="polaroid-card-name" id="polaroid-name-el">${hasTopItem ? topName : 'Không có thông tin sản phẩm'}</div>
-              <div class="polaroid-card-desc" id="polaroid-desc-el"></div>
-              <div class="polaroid-card-footer" id="polaroid-footer-el">
-                Đã đồng hành cùng ví tiền của bạn! ✨
-              </div>
+              <span class="personality-badge" style="background:${escHtml(persona.badgeBg)};color:${escHtml(persona.badgeColor)}">${escHtml(persona.icon)} ${escHtml(persona.label)}</span>
+              <div class="personality-desc">${escHtml(persona.desc)}</div>
+              <div class="personality-slogan">${escHtml(persona.slogan)}</div>
             </div>
-            ${hasTopItem ? `
-            <div class="privacy-control" style="margin-top: 20px; text-align: center;">
-              <label class="privacy-toggle-container">
-                <input type="checkbox" id="chk-show-product" checked>
-                <span class="privacy-toggle-label">Hiện tên sản phẩm</span>
-              </label>
-            </div>
-            ` : ''}
           </div>
           <div class="story-footer">
             <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
@@ -2791,70 +2786,7 @@
         </div>`;
 
         const slidesWrap = document.getElementById("slides-wrap");
-        slidesWrap.innerHTML = welcomeSlideHtml + statsSlideHtml + topItemSlideHtml + yearlySlideHtml + ctaSlideHtml;
-
-        // Toggle Privacy setup for Slide 3
-        function updateSlide3Mode(showProduct) {
-          const slideTitle = document.querySelector("#slide-2 .slide-title");
-          const slideDesc = document.querySelector("#slide-2 .slide-desc");
-          const badgeEl = document.getElementById("polaroid-badge-el");
-          const emojiEl = document.getElementById("polaroid-emoji-el");
-          const nameEl = document.getElementById("polaroid-name-el");
-          const descEl = document.getElementById("polaroid-desc-el");
-          const footerEl = document.getElementById("polaroid-footer-el");
-
-          if (!slideTitle || !slideDesc || !badgeEl || !emojiEl || !nameEl || !footerEl) return;
-
-          if (showProduct) {
-            slideTitle.textContent = "Mối tình đậm sâu";
-            slideDesc.textContent = "Sản phẩm gắn bó nhất cùng bạn trong hành trình qua";
-            badgeEl.textContent = "👑 Yêu Thích";
-            badgeEl.style.background = "#ffd700";
-            badgeEl.style.color = "#7c5e00";
-            emojiEl.textContent = "👑";
-            nameEl.textContent = topName;
-            if (descEl) descEl.style.display = "none";
-            footerEl.textContent = "Đã đồng hành cùng ví tiền của bạn! ✨";
-            footerEl.style.color = "#64748b";
-          } else {
-            const p = calculateSharePersonality(d);
-            slideTitle.textContent = "Tính cách mua sắm";
-            slideDesc.textContent = "Nhận xét phong cách chi tiêu độc bản của riêng bạn";
-            badgeEl.textContent = p.badge;
-            
-            // Color badge based on personality
-            if (p.title === "Nhà Sưu Tầm Chọn Lọc") {
-              badgeEl.style.background = "#e2f1ff"; badgeEl.style.color = "#0066cc";
-            } else if (p.title === "Chiến Thần Săn Sale") {
-              badgeEl.style.background = "#e6fcf5"; badgeEl.style.color = "#0ca678";
-            } else if (p.title === "Nhà Chi Tiêu Bùng Nổ") {
-              badgeEl.style.background = "#fff0f6"; badgeEl.style.color = "#d6336c";
-            } else if (p.title === "Người Tiêu Dùng Thực Tế") {
-              badgeEl.style.background = "#f4fce3"; badgeEl.style.color = "#5c940d";
-            } else {
-              badgeEl.style.background = "#fff4e6"; badgeEl.style.color = "#fd7e14";
-            }
-
-            emojiEl.textContent = p.icon;
-            nameEl.textContent = p.title;
-            if (descEl) {
-              descEl.textContent = p.desc;
-              descEl.style.display = "block";
-            }
-            footerEl.textContent = p.slogan;
-            footerEl.style.color = "var(--primary)";
-          }
-        }
-
-        const toggleChk = document.getElementById("chk-show-product");
-        if (toggleChk) {
-          toggleChk.addEventListener("change", (e) => {
-            updateSlide3Mode(e.target.checked);
-          });
-          updateSlide3Mode(toggleChk.checked);
-        } else {
-          updateSlide3Mode(false);
-        }
+        slidesWrap.innerHTML = welcomeSlideHtml + statsSlideHtml + personalitySlideHtml + yearlySlideHtml + ctaSlideHtml;
 
         // Slides logic
         const slides = Array.from(document.querySelectorAll(".slide"));
