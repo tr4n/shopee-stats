@@ -186,7 +186,7 @@ function computeYearlyInsights(yd, d) {
       if (orderFrequency >= 50 && savingsRate >= 12) {
         items.push({ 
           icon: '🎯', 
-          text: `**Power User**: **${orderFrequency.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm**, tỷ lệ tiết kiệm **${savingsRate.toFixed(1)}%**. Bạn thuộc nhóm 10% người dùng hiệu quả nhất.`
+          text: `**Chiến thần mua sắm**: **${orderFrequency.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm**, tỷ lệ tiết kiệm **${savingsRate.toFixed(1)}%**. Bạn thuộc nhóm 10% người dùng hiệu quả nhất.`
         });
       } else if (orderFrequency >= 30 && savingsRate < 5) {
         items.push({ 
@@ -213,19 +213,19 @@ function computeYearlyInsights(yd, d) {
     
     if (avgOrderValue >= 500000 && ordersPerYear >= 50) {
       // Profile cao cấp: dùng chi tiêu TB/năm và TB/tháng thay cho TB/đơn
-      userProfile = `**Premium Shopper**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${fmtVND(Math.round(avgSpendPerMonth))}/tháng**), **${ordersPerYear.toFixed(0)} đơn/năm**. Bạn là khách hàng có giá trị cao.`;
+      userProfile = `**Khách hàng cao cấp**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${fmtVND(Math.round(avgSpendPerMonth))}/tháng**), **${ordersPerYear.toFixed(0)} đơn/năm**. Bạn là khách hàng có giá trị cao.`;
       profileIcon = '💎';
     } else if (avgOrderValue >= 200000 && ordersPerYear >= 30) {
-      userProfile = `**Active Shopper**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${ordersPerYear.toFixed(0)} đơn/năm**). Thói quen mua sắm đều đặn, ổn định.`;
+      userProfile = `**Người mua năng động**: Chi tiêu TB **${fmtVND(Math.round(avgSpendPerYear))}/năm** (**${ordersPerYear.toFixed(0)} đơn/năm**). Thói quen mua sắm đều đặn, ổn định.`;
       profileIcon = '🛍️';
     } else if (ordersPerYear >= 100) {
-      userProfile = `**Frequent Buyer**: **${ordersPerYear.toFixed(0)} đơn/năm** — mua sắm rất thường xuyên, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Bạn ưa chuộng mua sắm nhỏ lẻ liên tục.`;
+      userProfile = `**Người mua thường xuyên**: **${ordersPerYear.toFixed(0)} đơn/năm** — mua sắm rất thường xuyên, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Bạn ưa chuộng mua sắm nhỏ lẻ liên tục.`;
       profileIcon = '📦';
     } else if (avgOrderValue >= 300000) {
-      userProfile = `**Selective Shopper**: Chỉ **${ordersPerYear.toFixed(0)} đơn/năm** nhưng mỗi đơn có giá trị cao — chi tiêu tập trung, cân nhắc kỹ trước khi mua.`;
+      userProfile = `**Người mua sắm chọn lọc**: Chỉ **${ordersPerYear.toFixed(0)} đơn/năm** nhưng mỗi đơn có giá trị cao — chi tiêu tập trung, cân nhắc kỹ trước khi mua.`;
       profileIcon = '🔍';
     } else {
-      userProfile = `**Casual Shopper**: **${ordersPerYear.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Mua sắm vừa phải, không thường xuyên.`;
+      userProfile = `**Người mua sắm ngẫu hứng**: **${ordersPerYear.toFixed(0)} đơn/năm**, chi tiêu TB **${fmtVND(Math.round(avgSpendPerMonth))}/tháng**. Mua sắm vừa phải, không thường xuyên.`;
       profileIcon = '🙂';
     }
     
@@ -451,13 +451,13 @@ function analyzeLifestyleFromCategories(categories, total) {
   
   if (dominant[1] >= 30) {
     const profiles = {
-      tech: { text: `**Tech Enthusiast**: ${dominant[1].toFixed(1)}% chi tiêu cho công nghệ — luôn cập nhật xu hướng tech mới.` },
-      fashion: { text: `**Fashion Forward**: ${dominant[1].toFixed(1)}% chi tiêu cho thời trang — quan tâm phong cách và xu hướng.` },
-      beauty: { text: `**Beauty Guru**: ${dominant[1].toFixed(1)}% chi tiêu cho làm đẹp — đầu tư nghiêm túc cho skincare.` },
-      home: { text: `**Homemaker**: ${dominant[1].toFixed(1)}% chi tiêu cho nhà cửa — coi trọng không gian sống.` },
-      food: { text: `**Foodie**: ${dominant[1].toFixed(1)}% chi tiêu cho thực phẩm — yêu thích ẩm thực chất lượng.` },
-      sport: { text: `**Active Lifestyle**: ${dominant[1].toFixed(1)}% chi tiêu cho thể thao — ưa tiên sức khỏe và vận động.` },
-      edu: { text: `**Lifelong Learner**: ${dominant[1].toFixed(1)}% chi tiêu cho giáo dục — đầu tư vào kiến thức bản thân.` }
+      tech: { text: `**Tín đồ công nghệ**: ${dominant[1].toFixed(1)}% chi tiêu cho công nghệ — luôn cập nhật xu hướng công nghệ mới.` },
+      fashion: { text: `**Tín đồ thời trang**: ${dominant[1].toFixed(1)}% chi tiêu cho thời trang — quan tâm phong cách và xu hướng.` },
+      beauty: { text: `**Chuyên gia làm đẹp**: ${dominant[1].toFixed(1)}% chi tiêu cho làm đẹp — đầu tư nghiêm túc cho việc chăm sóc bản thân.` },
+      home: { text: `**Người chăm chút tổ ấm**: ${dominant[1].toFixed(1)}% chi tiêu cho nhà cửa — coi trọng không gian sống.` },
+      food: { text: `**Tín đồ ẩm thực**: ${dominant[1].toFixed(1)}% chi tiêu cho thực phẩm — yêu thích ẩm thực chất lượng.` },
+      sport: { text: `**Lối sống năng động**: ${dominant[1].toFixed(1)}% chi tiêu cho thể thao — ưu tiên sức khỏe và vận động.` },
+      edu: { text: `**Người không ngừng học hỏi**: ${dominant[1].toFixed(1)}% chi tiêu cho giáo dục — đầu tư vào kiến thức bản thân.` }
     };
     return profiles[dominant[0]] || null;
   }
@@ -466,7 +466,7 @@ function analyzeLifestyleFromCategories(categories, total) {
   if (significant.length >= 2) {
     const labels = { tech: 'công nghệ', fashion: 'thời trang', beauty: 'làm đẹp', home: 'nhà cửa', food: 'thực phẩm', sport: 'thể thao', edu: 'giáo dục' };
     return {
-      text: `**Lifestyle đa chiều**: Cân bằng giữa ${significant.map(([k, v]) => `${labels[k] || k} (${v.toFixed(0)}%)`).join(', ')}.`
+      text: `**Phong cách sống đa chiều**: Cân bằng giữa ${significant.map(([k, v]) => `${labels[k] || k} (${v.toFixed(0)}%)`).join(', ')}.`
     };
   }
   

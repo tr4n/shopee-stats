@@ -856,253 +856,78 @@
      Pop nhẹ, catchy, procedurally generated
    ==================================================== */
   const MusicEngine = (function() {
-    let ctx = null;
-    let masterGain = null;
+    let audio = null;
     let isPlaying = false;
-    let schedulerTimer = null;
-    let nextNoteTime = 0.0;
-    let currentBeat = 0;
-    const TEMPO = 118; // BPM - pop upbeat
-    const BEAT_LEN = 60.0 / TEMPO;
-    const LOOP_BEATS = 16;
 
-    // Shopee-vibe melody (C major pentatonic, pop feel)
-    // Notes as semitone offsets from C4 (261.63Hz)
-    // Pattern: 16 beats with rests (-999)
-    const MELODY_PATTERN = [
-      // beat: 0  1  2  3  4   5   6   7   8   9  10  11  12  13  14  15
-               0, -999, 4, -999, 7, -999, 9, 7,  5, -999, 4, -999, 0, -999, 2, -999
-    ];
-    // Bass line (root notes, low octave)
-    const BASS_PATTERN = [
-      0, -999, -999, -999, 7, -999, -999, -999,
-      5, -999, -999, -999, 4, -999, -999, -999
-    ];
-    // Chord pads (adds warmth)
-    const CHORD_PATTERN = [
-      [0,4,7], null, null, null, [7,11,14], null, null, null,
-      [5,9,12], null, null, null, [4,7,11], null, null, null
-    ];
+    function initAudio() {
+      if (audio) return;
+      
+      // Try to load local file first, with fallback to online URL
+      audio = new Audio("bgm.mp3");
+      audio.loop = true;
+      audio.volume = 0.35;
 
-    function midiToFreq(semitone, octaveShift = 0) {
-      // C4 = 261.63 Hz, offset by semitone
-      return 261.63 * Math.pow(2, (semitone + octaveShift * 12) / 12);
-    }
-
-    function playKick(time) {
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.frequency.setValueAtTime(150, time);
-      osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.35);
-      gain.gain.setValueAtTime(0.9, time);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
-      osc.type = 'sine';
-      osc.start(time);
-      osc.stop(time + 0.35);
-    }
-
-    function playSnare(time) {
-      if (!ctx) return;
-      // Noise burst for snare
-      const bufSize = ctx.sampleRate * 0.15;
-      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'highpass';
-      filter.frequency.value = 1800;
-      src.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
-      gain.gain.setValueAtTime(0.5, time);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
-      src.start(time);
-      src.stop(time + 0.15);
-    }
-
-    function playHihat(time, accent) {
-      if (!ctx) return;
-      const bufSize = ctx.sampleRate * 0.04;
-      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'highpass';
-      filter.frequency.value = 8000;
-      src.connect(filter);
-      filter.connect(gain);
-      gain.connect(masterGain);
-      gain.gain.setValueAtTime(accent ? 0.18 : 0.08, time);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
-      src.start(time);
-      src.stop(time + 0.04);
-    }
-
-    function playMelodyNote(semitone, time, duration) {
-      if (!ctx || semitone === -999) return;
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      // Add slight vibrato
-      const vibrato = ctx.createOscillator();
-      const vibratoGain = ctx.createGain();
-      vibrato.frequency.value = 5.5;
-      vibratoGain.gain.value = 3;
-      vibrato.connect(vibratoGain);
-      vibratoGain.connect(osc.frequency);
-      osc.connect(gainNode);
-      gainNode.connect(masterGain);
-      osc.type = 'triangle';
-      osc.frequency.value = midiToFreq(semitone, 1);
-      gainNode.gain.setValueAtTime(0.001, time);
-      gainNode.gain.linearRampToValueAtTime(0.25, time + 0.02);
-      gainNode.gain.setValueAtTime(0.25, time + duration - 0.05);
-      gainNode.gain.linearRampToValueAtTime(0.001, time + duration);
-      vibrato.start(time);
-      osc.start(time);
-      osc.stop(time + duration);
-      vibrato.stop(time + duration);
-    }
-
-    function playBassNote(semitone, time, duration) {
-      if (!ctx || semitone === -999) return;
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(masterGain);
-      osc.type = 'sawtooth';
-      osc.frequency.value = midiToFreq(semitone, -1);
-      // Lowpass filter for warm bass
-      const lpf = ctx.createBiquadFilter();
-      lpf.type = 'lowpass';
-      lpf.frequency.value = 400;
-      lpf.Q.value = 1;
-      osc.disconnect();
-      osc.connect(lpf);
-      lpf.connect(gainNode);
-      gainNode.connect(masterGain);
-      gainNode.gain.setValueAtTime(0.001, time);
-      gainNode.gain.linearRampToValueAtTime(0.22, time + 0.03);
-      gainNode.gain.setValueAtTime(0.22, time + duration - 0.05);
-      gainNode.gain.linearRampToValueAtTime(0.001, time + duration);
-      osc.start(time);
-      osc.stop(time + duration);
-    }
-
-    function playChord(notes, time, duration) {
-      if (!ctx || !notes) return;
-      notes.forEach(semitone => {
-        const osc = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        osc.connect(gainNode);
-        gainNode.connect(masterGain);
-        osc.type = 'sine';
-        osc.frequency.value = midiToFreq(semitone, 0);
-        gainNode.gain.setValueAtTime(0.001, time);
-        gainNode.gain.linearRampToValueAtTime(0.06, time + 0.05);
-        gainNode.gain.setValueAtTime(0.06, time + duration - 0.1);
-        gainNode.gain.linearRampToValueAtTime(0.001, time + duration);
-        osc.start(time);
-        osc.stop(time + duration);
-      });
-    }
-
-    function scheduleBeat(beat, time) {
-      const b = beat % LOOP_BEATS;
-
-      // Drums
-      if (b % 4 === 0) playKick(time);           // kick on 1, 5, 9, 13
-      if (b === 4 || b === 6) playKick(time);    // extra kicks for groove
-      if (b === 4 || b === 12) playSnare(time);  // snare on 2, 4 (beats 4, 12)
-      playHihat(time, b % 2 === 0);              // hihat every beat, accent on even
-
-      // Melody
-      const melNote = MELODY_PATTERN[b];
-      if (melNote !== -999) {
-        const noteDur = BEAT_LEN * 1.8;
-        playMelodyNote(melNote, time, noteDur);
-      }
-
-      // Bass
-      const bassNote = BASS_PATTERN[b];
-      if (bassNote !== -999) {
-        const noteDur = BEAT_LEN * 3.8;
-        playBassNote(bassNote, time, noteDur);
-      }
-
-      // Chord pads (every 4 beats)
-      const chord = CHORD_PATTERN[b];
-      if (chord) {
-        playChord(chord, time, BEAT_LEN * 3.8);
-      }
-    }
-
-    const LOOKAHEAD = 0.1; // seconds
-    const SCHEDULE_INTERVAL = 50; // ms
-
-    function scheduler() {
-      if (!ctx || !isPlaying) return;
-      while (nextNoteTime < ctx.currentTime + LOOKAHEAD) {
-        scheduleBeat(currentBeat, nextNoteTime);
-        nextNoteTime += BEAT_LEN;
-        currentBeat++;
-      }
-      schedulerTimer = setTimeout(scheduler, SCHEDULE_INTERVAL);
+      // Listen for errors to fall back to the online viral stream
+      audio.addEventListener('error', function(e) {
+        console.warn("Local bgm.mp3 failed to load, falling back to online lofi stream...", e);
+        const wasPlaying = isPlaying;
+        if (isPlaying) {
+          audio.pause();
+        }
+        audio.src = "https://raw.githubusercontent.com/YoyoZhang24/RelaX50/main/RelaX50/audios/lofi.mp3";
+        audio.load();
+        if (wasPlaying) {
+          audio.play().catch(err => console.error("Fallback play failed:", err));
+        }
+      }, { once: true });
     }
 
     function start() {
-      if (isPlaying) return;
-      try {
-        ctx = new (window.AudioContext || window.webkitAudioContext)();
-        masterGain = ctx.createGain();
-        masterGain.gain.value = 0.55;
-        // Slight reverb-like effect using convolver would need impulse, skip for now
-        // Compressor for loudness
-        const comp = ctx.createDynamicsCompressor();
-        comp.threshold.value = -20;
-        comp.knee.value = 10;
-        comp.ratio.value = 4;
-        comp.attack.value = 0.002;
-        comp.release.value = 0.2;
-        masterGain.connect(comp);
-        comp.connect(ctx.destination);
-
-        isPlaying = true;
-        currentBeat = 0;
-        nextNoteTime = ctx.currentTime + 0.05;
-        scheduler();
-      } catch(e) {
-        console.error('MusicEngine start failed:', e);
-        return false;
-      }
+      initAudio();
+      isPlaying = true;
+      audio.play().catch(e => {
+        console.warn("Playback prevented:", e);
+        isPlaying = false;
+        
+        // Update floating music UI to off state when autoplay is blocked
+        const btn = document.getElementById('btn-music-float');
+        const eqBars = document.getElementById('eq-bars');
+        const label = document.getElementById('music-btn-label');
+        const icon = document.getElementById('music-icon');
+        if (btn) btn.classList.remove('active');
+        if (eqBars) {
+          eqBars.classList.remove('music-playing');
+          eqBars.style.display = 'none';
+        }
+        if (icon) {
+          icon.style.display = 'inline';
+          icon.textContent = '🔇';
+        }
+        if (label) label.textContent = 'Tắt nhạc';
+      });
       return true;
     }
 
     function stop() {
       isPlaying = false;
-      if (schedulerTimer) clearTimeout(schedulerTimer);
-      if (masterGain) {
-        masterGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+      if (audio) {
+        audio.pause();
       }
-      setTimeout(() => {
-        if (ctx) {
-          try { ctx.close(); } catch(e) {}
-          ctx = null;
-          masterGain = null;
-        }
-      }, 400);
     }
 
-    function toggle() { return isPlaying ? (stop(), false) : start(); }
-    function playing() { return isPlaying; }
+    function toggle() {
+      initAudio();
+      if (isPlaying) {
+        stop();
+        return false;
+      } else {
+        return start();
+      }
+    }
+
+    function playing() {
+      return isPlaying && audio && !audio.paused;
+    }
 
     return { start, stop, toggle, playing };
   })();
