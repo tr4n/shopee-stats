@@ -643,7 +643,7 @@
       transform: translateX(-50%);
       z-index: 100;
       display: flex;
-      gap: 12px;
+      gap: 8px;
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -670,12 +670,20 @@
     [data-theme="dark"] .action-btn:hover {
       background: rgba(255, 255, 255, 0.14);
     }
+    [data-theme="dark"] .action-btn.btn-primary {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      border-color: transparent;
+      color: #fff;
+    }
+    [data-theme="dark"] .action-btn.btn-primary:hover {
+      background: linear-gradient(135deg, #d94226 0%, #ff7542 100%);
+    }
 
     .action-btn {
       flex: 1;
-      padding: 12px 16px;
+      padding: 11px 14px;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       cursor: pointer;
       border: 1px solid rgba(0, 0, 0, 0.05);
@@ -684,15 +692,41 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.2s;
       outline: none;
+      white-space: nowrap;
+    }
+
+    /* Icon-only compact button (dark mode, video) */
+    .action-btn.btn-icon {
+      flex: 0 0 44px;
+      width: 44px;
+      padding: 11px 0;
+      font-size: 16px;
+    }
+
+    /* Primary share/save buttons */
+    .action-btn.btn-primary {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(238, 77, 45, 0.2);
+    }
+
+    .action-btn.btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
     }
 
     .action-btn:hover {
       background: rgba(255, 255, 255, 1);
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .action-btn.btn-primary:hover {
+      background: linear-gradient(135deg, #d94226 0%, #ff7542 100%);
+      transform: translateY(-1px);
     }
 
     .action-btn:active {
@@ -708,6 +742,11 @@
 
     .action-btn.active:hover {
       box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+    }
+
+    [data-theme="dark"] .action-btn.btn-primary {
+      background: linear-gradient(135deg, #ee4d2d 0%, #ff8a5a 100%);
+      color: #fff;
     }
 
     /* Music button equalizer animation */
@@ -922,11 +961,12 @@
 
   <!-- Actions Panel -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
-    <button id="btn-darkmode" class="action-btn" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode">
+    <button id="btn-darkmode" class="action-btn btn-icon" title="Chuyển Dark/Light Mode" aria-label="Toggle dark mode">
       <span id="darkmode-icon">🌙</span>
     </button>
-    <button id="btn-download-img" class="action-btn active">💾 Lưu ảnh</button>
-    <button id="btn-download-vid" class="action-btn">🎥 Video</button>
+    <button id="btn-share-link" class="action-btn btn-primary" title="Chia sẻ link">🔗 Chia sẻ</button>
+    <button id="btn-download-img" class="action-btn" title="Lưu ảnh PNG">💾 Lưu ảnh</button>
+    <button id="btn-download-vid" class="action-btn btn-icon" title="Quay video">🎥</button>
   </div>
 
   <!-- Toast Message -->
@@ -1268,10 +1308,11 @@
 
       async function recordStoryVideo(d) {
         const btnVid = document.getElementById("btn-download-vid");
-        const origText = btnVid ? btnVid.textContent : "🎥 Video";
+        const origHTML = btnVid ? btnVid.innerHTML : '🎥';
         if (btnVid) {
           btnVid.disabled = true;
-          btnVid.textContent = "⌛ Chuẩn bị...";
+          btnVid.innerHTML = '⌛';
+          btnVid.title = 'Đang chuẩn bị...';
         }
 
         try {
@@ -1726,7 +1767,8 @@
               showToast("✓ Đã tải video Story thành công!");
               if (btnVid) {
                 btnVid.disabled = false;
-                btnVid.textContent = origText;
+                btnVid.innerHTML = origHTML;
+                btnVid.title = 'Quay video';
               }
               resolve();
             } catch (err) {
@@ -1755,7 +1797,8 @@
 
           if (btnVid) {
             const progressPct = Math.round((currentFrame / totalFrames) * 100);
-            btnVid.textContent = `🎥 Ghi: ${progressPct}%`;
+            btnVid.innerHTML = `${progressPct}%`;
+            btnVid.title = `Đang ghi: ${progressPct}%`;
           }
 
           drawFrame(currentFrame);
@@ -2103,6 +2146,7 @@
       function setupActions(d) {
         const btnDownload = document.getElementById("btn-download-img");
         const btnDownloadVid = document.getElementById("btn-download-vid");
+        const btnShareLink = document.getElementById("btn-share-link");
         const actionsPanel = document.getElementById("actions-panel");
 
         if (actionsPanel) actionsPanel.style.display = "flex";
@@ -2111,11 +2155,54 @@
         const musicFloatBtn = document.getElementById('btn-music-float');
         if (musicFloatBtn) musicFloatBtn.style.display = 'inline-flex';
 
+        // Share link button — native share API → clipboard fallback
+        if (btnShareLink) {
+          btnShareLink.addEventListener("click", async () => {
+            const url = window.location.href;
+            const shareData = {
+              title: 'Thống kê chi tiêu Shopee của tôi 🛒',
+              text: `Tôi đã chi ${fmtVND(d.t > 0 ? d.t : 0)}đ trên Shopee! Xem thống kê của bạn với Shopee Analytics.`,
+              url: url
+            };
+
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+              try {
+                await navigator.share(shareData);
+                return;
+              } catch (err) {
+                if (err.name === 'AbortError') return;
+                // Fall through to clipboard if share failed for other reasons
+              }
+            }
+
+            // Clipboard fallback
+            try {
+              await navigator.clipboard.writeText(url);
+              showToast('✓ Đã sao chép link! Paste vào Facebook, Zalo hoặc bất kỳ đâu.');
+            } catch (_err) {
+              // Last resort: select + copy via execCommand
+              const textArea = document.createElement('textarea');
+              textArea.value = url;
+              textArea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              try {
+                document.execCommand('copy');
+                showToast('✓ Đã sao chép link!');
+              } catch (_e) {
+                showToast('❌ Không thể sao chép. Hãy chép thủ công: ' + url.slice(0, 40) + '...');
+              }
+              document.body.removeChild(textArea);
+            }
+          });
+        }
+
         if (btnDownload) {
           btnDownload.addEventListener("click", async () => {
             btnDownload.disabled = true;
-            const origText = btnDownload.textContent;
-            btnDownload.textContent = "⌛ Đang tạo ảnh...";
+            const origHTML = btnDownload.innerHTML;
+            btnDownload.innerHTML = '⌛ Đang tạo...';
             try {
               const dataUrl = await generateSquareShareCard(d);
               const link = document.createElement("a");
@@ -2130,7 +2217,7 @@
               showToast("❌ Lỗi khi tải ảnh");
             } finally {
               btnDownload.disabled = false;
-              btnDownload.textContent = origText;
+              btnDownload.innerHTML = origHTML;
             }
           });
         }
@@ -2143,7 +2230,7 @@
               console.error(err);
               showToast(`❌ Lỗi khi quay video: ${err.message || err}`);
               btnDownloadVid.disabled = false;
-              btnDownloadVid.textContent = "🎥 Video";
+              btnDownloadVid.innerHTML = '🎥';
             }
           });
         }

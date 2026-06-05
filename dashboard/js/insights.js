@@ -12,6 +12,16 @@ function computeYearlyInsights(yd, d) {
   const totalOrders = d.o || 0;
   const totalSaved = d.s || 0;
 
+  // Detect current (incomplete) year: compare last year in data vs scan year
+  const scanYear = d && d.ts ? new Date(d.ts * 1000).getFullYear() : new Date().getFullYear();
+  const lastYearInData = years[years.length - 1];
+  const isLastYearCurrent = (lastYearInData === scanYear);
+
+  // Count elapsed months for the current year
+  const elapsedMonthsCurrent = isLastYearCurrent
+    ? Object.values((yd[lastYearInData] || {}).m || {}).filter(v => v > 0).length
+    : 12;
+
   // ═══ PHÂN TÍCH SỰ THỐNG TRỊ CỦA CÁC NĂM ═══
   const yearSpends = years.map(y => ({ year: y, spend: yd[y].t || 0, orders: yd[y].o || 0 }));
   const maxSpendYear = yearSpends.reduce((a, b) => a.spend >= b.spend ? a : b);
@@ -20,10 +30,13 @@ function computeYearlyInsights(yd, d) {
   const maxSpendPct = totalSpend > 0 ? Math.round((maxSpendYear.spend / totalSpend) * 100) : 0;
   const maxOrderPct = totalOrders > 0 ? Math.round((maxOrderYear.orders / totalOrders) * 100) : 0;
 
+  const currentYearNote = isLastYearCurrent ? ` *(dữ liệu ${elapsedMonthsCurrent} tháng đầu năm)*` : '';
+
   if (maxSpendYear.year === maxOrderYear.year) {
+    const isMaxCurrent = (maxSpendYear.year === scanYear);
     items.push({ 
       icon: '👑', 
-      text: `**Năm ${maxSpendYear.year}** thống trị hoàn toàn: **${maxSpendPct}%** tổng chi tiêu (**${fmtVND(maxSpendYear.spend)}**) và **${maxOrderPct}%** tổng đơn hàng (**${fmtNum(maxOrderYear.orders)} đơn**).`
+      text: `**Năm ${maxSpendYear.year}**${isMaxCurrent ? currentYearNote : ''} thống trị hoàn toàn: **${maxSpendPct}%** tổng chi tiêu (**${fmtVND(maxSpendYear.spend)}**) và **${maxOrderPct}%** tổng đơn hàng (**${fmtNum(maxOrderYear.orders)} đơn**).`
     });
   } else {
     items.push({ 
@@ -38,9 +51,42 @@ function computeYearlyInsights(yd, d) {
     const prevY = years[years.length - 2];
     const lastData = yd[lastY];
     const prevData = yd[prevY];
-    
-    const spendGrowth = prevData.t > 0 ? ((lastData.t - prevData.t) / prevData.t) * 100 : 0;
-    const orderGrowth = prevData.o > 0 ? ((lastData.o - prevData.o) / prevData.o) * 100 : 0;
+
+    const isCurrentYear = (Number(lastY) === scanYear);
+
+    // For current (incomplete) year: use YTD comparison with same period of previous year
+    let spendGrowth, orderGrowth, avgMonthLast, avgMonthPrev, comparisonNote;
+
+    if (isCurrentYear && elapsedMonthsCurrent > 0 && prevData.m) {
+      // Find the latest month with data in current year to set the cutoff
+      const monthsWithData = Object.entries(lastData.m || {})
+        .filter(([, v]) => v > 0)
+        .map(([m]) => Number(m));
+      const latestMonth = monthsWithData.length > 0 ? Math.max(...monthsWithData) : elapsedMonthsCurrent;
+
+      // Sum the same months (YTD) from previous year for fair comparison
+      const ytdPrevSpend = Object.entries(prevData.m || {})
+        .filter(([m]) => Number(m) <= latestMonth)
+        .reduce((sum, [, v]) => sum + (v || 0), 0);
+
+      spendGrowth = ytdPrevSpend > 0 ? ((lastData.t - ytdPrevSpend) / ytdPrevSpend) * 100 : 0;
+      // Use proportional estimate for orders since monthly order breakdown is unavailable
+      const ordersRatioInPrevYear = prevData.t > 0 ? ytdPrevSpend / prevData.t : (latestMonth / 12);
+      const estimatedPrevOrders = Math.round((prevData.o || 0) * ordersRatioInPrevYear);
+      orderGrowth = estimatedPrevOrders > 0 ? ((lastData.o - estimatedPrevOrders) / estimatedPrevOrders) * 100 : 0;
+
+      avgMonthLast = lastData.t / Math.max(elapsedMonthsCurrent, 1);
+      avgMonthPrev = ytdPrevSpend > 0 ? ytdPrevSpend / Math.max(elapsedMonthsCurrent, 1) : (prevData.t / 12);
+
+      comparisonNote = ` *(${elapsedMonthsCurrent} tháng đầu năm, so cùng kỳ ${prevY})*`;
+    } else {
+      spendGrowth = prevData.t > 0 ? ((lastData.t - prevData.t) / prevData.t) * 100 : 0;
+      orderGrowth = prevData.o > 0 ? ((lastData.o - prevData.o) / prevData.o) * 100 : 0;
+      avgMonthLast = lastData.t / 12;
+      avgMonthPrev = prevData.t / 12;
+      comparisonNote = '';
+    }
+
     const aovLast = lastData.o > 0 ? lastData.t / lastData.o : 0;
     const aovPrev = prevData.o > 0 ? prevData.t / prevData.o : 0;
     const aovGrowth = aovPrev > 0 ? ((aovLast - aovPrev) / aovPrev) * 100 : 0;
@@ -49,22 +95,20 @@ function computeYearlyInsights(yd, d) {
       const spendIcon = spendGrowth >= 0 ? '📈' : '📉';
       const spendLabel = spendGrowth >= 0 ? 'tăng' : 'giảm';
       const orderLabel = orderGrowth >= 0 ? 'tăng' : 'giảm';
-      // Tính chi tiêu trung bình tháng của 2 năm để so sánh có ý nghĩa hơn
-      const avgMonthLast = lastData.t / 12;
-      const avgMonthPrev = prevData.t / 12;
       
       items.push({ 
         icon: spendIcon, 
-        text: `**${lastY} vs ${prevY}**: Chi tiêu **${spendLabel} ${Math.abs(spendGrowth).toFixed(1)}%** (TB tháng: **${fmtVND(Math.round(avgMonthPrev))}** → **${fmtVND(Math.round(avgMonthLast))}**), số đơn **${orderLabel} ${Math.abs(orderGrowth).toFixed(1)}%**.`
+        text: `**${lastY} vs ${prevY}**${comparisonNote}: Chi tiêu **${spendLabel} ${Math.abs(spendGrowth).toFixed(1)}%** (TB tháng: **${fmtVND(Math.round(avgMonthPrev))}** → **${fmtVND(Math.round(avgMonthLast))}**), số đơn **${orderLabel} ${Math.abs(Math.round(orderGrowth))}%**.`
       });
     }
 
-    // Phân tích độ ổn định chi tiêu
-    if (years.length >= 3) {
+    // Phân tích độ ổn định chi tiêu (bỏ qua năm hiện tại chưa kết thúc)
+    const yearsForStability = isCurrentYear ? years.slice(0, -1) : years;
+    if (yearsForStability.length >= 3) {
       const growthRates = [];
-      for (let i = 1; i < years.length; i++) {
-        const prevSpend = yd[years[i - 1]].t || 0;
-        const currSpend = yd[years[i]].t || 0;
+      for (let i = 1; i < yearsForStability.length; i++) {
+        const prevSpend = yd[yearsForStability[i - 1]].t || 0;
+        const currSpend = yd[yearsForStability[i]].t || 0;
         if (prevSpend > 0) growthRates.push(((currSpend - prevSpend) / prevSpend) * 100);
       }
       
@@ -73,10 +117,11 @@ function computeYearlyInsights(yd, d) {
         const growthVariance = growthRates.reduce((s, r) => s + Math.pow(r - avgGrowth, 2), 0) / growthRates.length;
         const growthStdDev = Math.sqrt(growthVariance);
 
+        const stableYearCount = yearsForStability.length;
         if (growthStdDev < 15 && Math.abs(avgGrowth) < 10) {
           items.push({ 
             icon: '⚖️', 
-            text: `**Tài chính ổn định**: Chi tiêu dao động nhẹ qua ${years.length} năm (độ lệch chuẩn ${growthStdDev.toFixed(1)}%), thể hiện khả năng quản lý ngân sách nhất quán.`
+            text: `**Tài chính ổn định**: Chi tiêu dao động nhẹ qua ${stableYearCount} năm (độ lệch chuẩn ${growthStdDev.toFixed(1)}%), thể hiện khả năng quản lý ngân sách nhất quán.`
           });
         } else if (growthStdDev > 40) {
           items.push({ 
@@ -86,7 +131,7 @@ function computeYearlyInsights(yd, d) {
         } else if (avgGrowth > 15) {
           items.push({ 
             icon: '🚀', 
-            text: `**Tăng trưởng mạnh**: Chi tiêu tăng trung bình **${avgGrowth.toFixed(1)}%/năm** qua ${years.length} năm. Theo dõi để đảm bảo phù hợp với thu nhập.`
+            text: `**Tăng trưởng mạnh**: Chi tiêu tăng trung bình **${avgGrowth.toFixed(1)}%/năm** qua ${stableYearCount} năm. Theo dõi để đảm bảo phù hợp với thu nhập.`
           });
         }
       }
@@ -97,8 +142,11 @@ function computeYearlyInsights(yd, d) {
   if (totalSpend > 0 && totalSaved > 0) {
     const originalPrice = totalSpend + totalSaved;
     const savingsRate = (totalSaved / originalPrice) * 100;
-    // Quy về tiết kiệm TB tháng — có ý nghĩa hơn TB/đơn
-    const avgSavingPerMonth = totalSaved / (years.length * 12);
+    // Quy về tiết kiệm TB tháng — dùng số tháng thực tế (năm hiện tại tính đến thời điểm hiện tại)
+    const totalMonths = isLastYearCurrent
+      ? (years.length - 1) * 12 + elapsedMonthsCurrent
+      : years.length * 12;
+    const avgSavingPerMonth = totalSaved / Math.max(totalMonths, 1);
     
     let hunterLevel = '';
     let hunterIcon = '💡';
@@ -128,10 +176,13 @@ function computeYearlyInsights(yd, d) {
 
     items.push({ icon: hunterIcon, text: `${hunterLevel} ${actionableAdvice}` });
 
-    // So sánh với benchmark
+    // So sánh với benchmark — dùng số tháng thực tế khi năm hiện tại chưa kết thúc
     if (totalOrders >= 20) {
-      const orderFrequency = totalOrders / years.length;
-      const avgSpendPerYear = totalSpend / years.length;
+      const totalMonthsBenchmark = isLastYearCurrent
+        ? (years.length - 1) * 12 + Math.max(elapsedMonthsCurrent, 1)
+        : years.length * 12;
+      const orderFrequency = (totalOrders / totalMonthsBenchmark) * 12;
+      const avgSpendPerYear = (totalSpend / totalMonthsBenchmark) * 12;
       if (orderFrequency >= 50 && savingsRate >= 12) {
         items.push({ 
           icon: '🎯', 
@@ -149,9 +200,13 @@ function computeYearlyInsights(yd, d) {
   // ═══ HIỆU QUẢ SỬ DỤNG PLATFORM ═══
   if (totalOrders > 0 && years.length > 0) {
     const avgOrderValue = totalSpend / totalOrders;
-    const ordersPerYear = totalOrders / years.length;
-    const avgSpendPerYear = totalSpend / years.length;
-    const avgSpendPerMonth = avgSpendPerYear / 12;
+    // Dùng số tháng thực tế để tính TB tháng chính xác hơn
+    const totalMonthsForPlatform = isLastYearCurrent
+      ? (years.length - 1) * 12 + Math.max(elapsedMonthsCurrent, 1)
+      : years.length * 12;
+    const ordersPerYear = (totalOrders / totalMonthsForPlatform) * 12;
+    const avgSpendPerYear = (totalSpend / totalMonthsForPlatform) * 12;
+    const avgSpendPerMonth = totalSpend / totalMonthsForPlatform;
     
     let userProfile = '';
     let profileIcon = '';
