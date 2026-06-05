@@ -131,9 +131,9 @@
       if (n < 0) return '***';
       n = Math.round(n || 0);
       if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
-      if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu';
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
       if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
-      return n.toLocaleString('vi-VN');
+      return n.toLocaleString('vi-VN') + 'đ';
     }
 
     // ── HEADER ─────────────────────────────────────────────────
@@ -180,7 +180,7 @@
     txt('TỔNG CHI TIÊU CỦA TÔI', PAD, heroTop + 24, 17, '800', tColors.textMuted);
 
     const amtRaw = d.t < 0 ? '***' : fmtC(d.t);
-    const amtDisplay = amtRaw + 'đ';
+    const amtDisplay = amtRaw;
     const amtSize = amtDisplay.length > 13 ? 72 : (amtDisplay.length > 10 ? 84 : 96);
 
     // Amount gradient text
@@ -196,7 +196,7 @@
 
     // Rank badge
     const rankStr = RANKS[d.r] || RANKS[2];
-    const rankY = amtBottom + 22;
+    const rankY = amtBottom + 20;
     ctx.font = `700 18px ${FONT}`;
     const rbW = Math.min(ctx.measureText(rankStr).width + 44, W - PAD * 2);
     rrectShadow(PAD, rankY, rbW, 44, 12, '#fff5f2');
@@ -204,14 +204,14 @@
     txt(rankStr, PAD + rbW / 2, rankY + 28, 16, '800', tColors.accent, 'center');
 
     // ── STATS PILLS ROW ────────────────────────────────────────
-    const statsTop = rankY + 44 + 40;
+    const statsTop = rankY + 44 + 32;
     const gutter = 14;
     const statW = Math.floor((W - PAD * 2 - gutter * 2) / 3);
 
     const statsArr = [
       { icon: '📦', label: 'Đơn hàng', val: (d.o || 0).toLocaleString('vi-VN'), color: tColors.text },
       { icon: '🛒', label: 'Sản phẩm', val: (d.ip || 0).toLocaleString('vi-VN'), color: tColors.text },
-      { icon: '💰', label: 'Tiết kiệm', val: d.s < 0 ? '***' : fmtC(d.s) + 'đ', color: tColors.secondary },
+      { icon: '💰', label: 'Tiết kiệm', val: fmtC(d.s), color: tColors.secondary },
     ];
 
     statsArr.forEach((st, i) => {
@@ -227,7 +227,7 @@
     });
 
     // ── SHOPPING PERSONALITY CARD ──
-    const topItemTop = statsTop + 128 + 44;
+    const topItemTop = statsTop + 128 + 32;
     const persona = resolvePersonality(d);
 
     const cardH = 180;
@@ -249,6 +249,67 @@
     txt('TÍNH CÁCH MUA SẮM', tx, topItemTop + 54, 15, '800', tColors.accent);
     txt(persona.label, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
     txt(persona.slogan, tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
+
+    // ── YEARLY SPENDING CARD (DÒNG CHẢY THỜI GIAN) ──
+    const yearlyChartTop = topItemTop + 180 + 24;
+    rrectShadow(PAD, yearlyChartTop, W - PAD * 2, 180, 20, '#ffffff');
+    rrect(PAD, yearlyChartTop, W - PAD * 2, 180, 20, null, 'rgba(0,0,0,0.04)', 1.5);
+
+    const yx = PAD + 22;
+    const yy = yearlyChartTop + 22;
+    const yw = 136;
+    const yh = 136;
+    rrect(yx, yy, yw, yh, 10, '#fafafa', '#f0f0f0', 1.5);
+
+    ctx.font = `400 44px ${FONT}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('📈', yx + yw / 2, yy + yh / 2 + 14);
+
+    const ytx = yx + yw + 24;
+    txt('DÒNG CHẢY THỜI GIAN', ytx, yearlyChartTop + 48, 15, '800', tColors.accent);
+
+    // Render yearly spending horizontal bar rows
+    const ydData = (d.yd || []).slice(-3);
+    if (ydData.length === 0) {
+      txt('Không có dữ liệu năm', ytx, yearlyChartTop + 104, 15, '600', tColors.textMuted);
+    } else {
+      const maxVal = Math.max(...ydData.map(([, v]) => v), 1);
+      const currentYear = new Date().getFullYear();
+
+      ydData.forEach(([year, val], idx) => {
+        const rowY = yearlyChartTop + 68 + idx * 30;
+
+        // Year text
+        txt(year.toString(), ytx, rowY + 12, 13, '800', tColors.textMuted);
+
+        // Bar Track
+        const barTrackX = ytx + 54;
+        const barTrackW = W - PAD - barTrackX - 170; // Allocates space dynamically
+        const barTrackH = 8;
+        rrect(barTrackX, rowY + 4, barTrackW, barTrackH, 4, 'rgba(0,0,0,0.04)');
+
+        // Bar Fill
+        const pct = val < 0 ? 0 : val / maxVal;
+        const barW = barTrackW * pct;
+        const isCurrent = Number(year) === currentYear;
+
+        if (barW > 0) {
+          const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+          if (isCurrent) {
+            barGrad.addColorStop(0, '#ee4d2d');
+            barGrad.addColorStop(1, '#ff8a5a');
+          } else {
+            barGrad.addColorStop(0, '#94a3b8');
+            barGrad.addColorStop(1, '#cbd5e1');
+          }
+          rrect(barTrackX, rowY + 4, barW, barTrackH, 4, barGrad);
+        }
+
+        // Amount Val
+        const valFmt = fmtC(val);
+        txt(valFmt, W - PAD - 22, rowY + 12, 13, '800', tColors.text, 'right');
+      });
+    }
 
     // ── FOOTER ────────────────────────────────────────────────
     const footerY = H - 76;
@@ -288,6 +349,22 @@
       btnVid.disabled = true;
       btnVid.innerHTML = '⌛';
       btnVid.title = 'Đang chuẩn bị...';
+    }
+
+    const videoOverlay = document.getElementById("video-recording-overlay");
+    const progressEl = document.getElementById("video-recording-progress");
+    const cancelBtn = document.getElementById("btn-video-cancel");
+
+    let isRecordingCancelled = false;
+    if (videoOverlay) videoOverlay.style.display = "flex";
+    if (progressEl) progressEl.textContent = "Đang quay video: 0%";
+
+    if (cancelBtn) {
+      cancelBtn.onclick = () => {
+        isRecordingCancelled = true;
+        if (videoOverlay) videoOverlay.style.display = "none";
+        showToast("❌ Đã hủy quay video");
+      };
     }
 
     try {
@@ -493,7 +570,7 @@
 
         const progress = Math.min(pageFrame / 40, 1);
         const currentTotal = d.t < 0 ? -1 : Math.round(d.t * progress);
-        const totalText = currentTotal < 0 ? '***' : fmtVND(currentTotal) + 'đ';
+        const totalText = fmtVND(currentTotal);
         txt(totalText, W / 2, cardY + 250, 48, '900', tColors.accent, 'center');
 
         if (pageFrame >= 20) {
@@ -546,7 +623,7 @@
         const boxW3 = W - PAD * 2 - innerPad * 2;
         rrect(bx3, by3, boxW3, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
         txt('💰', bx3 + 44, by3 + boxH / 2 + 10, 36, '400', null, 'left');
-        const savedText = currentSaved < 0 ? '***' : fmtVND(currentSaved) + 'đ';
+        const savedText = fmtVND(currentSaved);
         txt(savedText, bx3 + 100, by3 + 65, 26, '800', tColors.secondary);
         txt('Tiết kiệm được', bx3 + 100, by3 + 95, 12, '700', tColors.textMuted);
       }
@@ -642,7 +719,7 @@
           barGrad.addColorStop(1, '#ff8a5a');
           rrect(barTrackX, rowY + 14, barW, barTrackH, 5, barGrad);
 
-          const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
+          const valFmt = fmtVND(v);
           txt(valFmt, W - PAD - 24, rowY + 24, 13, '800', tColors.text, 'right');
         });
       }
@@ -700,6 +777,7 @@
             btnVid.innerHTML = origHTML;
             btnVid.title = 'Quay video Story';
           }
+          if (videoOverlay) videoOverlay.style.display = "none";
           resolve();
         } catch (err) {
           reject(err);
@@ -720,13 +798,32 @@
     let currentFrame = 0;
     
     function renderLoop() {
-      if (currentFrame >= totalFrames) {
-        recorder.stop();
+      if (isRecordingCancelled) {
+        try {
+          recorder.onstop = null; // Discard onstop logic (so no file download)
+          recorder.stop();
+          stream.getTracks().forEach(track => track.stop());
+        } catch(e) {}
+        if (btnVid) {
+          btnVid.disabled = false;
+          btnVid.innerHTML = origHTML;
+          btnVid.title = 'Quay video Story';
+        }
         return;
       }
 
+      if (currentFrame >= totalFrames) {
+        recorder.stop();
+        if (videoOverlay) videoOverlay.style.display = "none";
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
+      const progressPct = Math.round((currentFrame / totalFrames) * 100);
+      if (progressEl) {
+        progressEl.textContent = `Đang quay video: ${progressPct}%`;
+      }
       if (btnVid) {
-        const progressPct = Math.round((currentFrame / totalFrames) * 100);
         btnVid.innerHTML = `${progressPct}%`;
         btnVid.title = `Đang ghi: ${progressPct}%`;
       }
@@ -734,8 +831,6 @@
       drawFrame(currentFrame);
 
       currentFrame++;
-      // Use setTimeout for exact timing (33ms per frame = 30fps)
-      // requestAnimationFrame runs at monitor refresh (60hz) making video 2x too fast
       setTimeout(renderLoop, 1000 / fps);
     }
 
@@ -1223,9 +1318,9 @@
     if (n < 0) return '***';
     n = Math.round(n || 0);
     if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace('.0', '') + ' tỷ';
-    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + ' triệu';
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'tr';
     if (n >= 1000) return Math.round(n / 1000) + 'k';
-    return n.toLocaleString('vi-VN');
+    return n.toLocaleString('vi-VN') + 'đ';
   }
   function fmtNum(n) { return Math.round(n || 0).toLocaleString('vi-VN'); }
   function fmtDate(ts) {
@@ -1556,7 +1651,7 @@
     const currentYear = new Date().getFullYear();
 
     // Slide 1: Welcome & Total Spent
-    const totalFmt = d.t < 0 ? '***' : fmtVND(d.t) + 'đ';
+    const totalFmt = fmtVND(d.t);
     const welcomeSlideHtml = `
     <div class="slide" id="slide-0">
       <div>
@@ -1581,7 +1676,7 @@
     </div>`;
 
     // Slide 2: Percentile & Stats Grid
-    const savedFmt = d.s < 0 ? '***' : fmtVND(d.s) + 'đ';
+    const savedFmt = fmtVND(d.s);
     const statsSlideHtml = `
     <div class="slide" id="slide-1">
       <div>
@@ -1650,7 +1745,7 @@
     const chartRowsHtml = Array.isArray(d.yd) ? d.yd.map(([y, v]) => {
       const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
       const isCurrent = Number(y) === currentYear;
-      const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
+      const valFmt = fmtVND(v);
       return `
       <div class="year-row">
         <div class="year-label">${y}</div>
