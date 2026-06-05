@@ -662,9 +662,10 @@
 
   <!-- Actions Panel -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
-    <button id="btn-download-img" class="action-btn active">💾 Tải ảnh</button>
-    <button id="btn-copy-img" class="action-btn">📋 Copy ảnh</button>
-    <button id="btn-share-api" class="action-btn" style="display: none;">📤 Chia sẻ</button>
+    <button id="btn-download-img" class="action-btn active">💾 Lưu ảnh</button>
+    <button id="btn-copy-img" class="action-btn">📋 Copy</button>
+    <button id="btn-download-vid" class="action-btn">🎥 Video</button>
+    <button id="btn-share-api" class="action-btn" style="display: none;">📤 Share</button>
   </div>
 
   <!-- Toast Message -->
@@ -924,6 +925,404 @@
       }
 
 
+      async function recordStoryVideo(d) {
+        const btnVid = document.getElementById("btn-download-vid");
+        const origText = btnVid ? btnVid.textContent : "🎥 Video";
+        if (btnVid) {
+          btnVid.disabled = true;
+          btnVid.textContent = "⌛ Chuẩn bị...";
+        }
+
+        try {
+          await document.fonts.ready;
+        } catch (e) {}
+
+        // Preload QR image dynamically
+        const qrImage = new Image();
+        qrImage.crossOrigin = "anonymous";
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(window.location.href)}`;
+        await new Promise((resolve) => {
+          qrImage.onload = resolve;
+          qrImage.onerror = resolve;
+        });
+
+        const W = 720;
+        const H = 1280;
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+
+        const FONT = "Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        const PAD = 48;
+
+        const tColors = {
+          accent: '#ee4d2d',
+          secondary: '#26aa99',
+          text: '#0f172a',
+          textMuted: '#475569',
+          textFaint: '#94a3b8',
+        };
+
+        function txt(t, x, y, size, weight, color, align = 'left', maxW) {
+          ctx.font = `${weight} ${size}px ${FONT}`;
+          ctx.fillStyle = color;
+          ctx.textAlign = align;
+          if (maxW) ctx.fillText(t, x, y, maxW);
+          else ctx.fillText(t, x, y);
+        }
+
+        function rrect(x, y, w, h, r, fill, stroke, sw) {
+          ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.closePath();
+          if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+          if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 1.5; ctx.stroke(); }
+        }
+
+        function rrectShadow(x, y, w, h, r, fill) {
+          ctx.shadowColor = 'rgba(238, 77, 45, 0.05)';
+          ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+          rrect(x, y, w, h, r, fill);
+          ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        }
+
+        function truncate(str, maxLen) {
+          const s = String(str || '');
+          return s.length > maxLen ? s.substring(0, maxLen - 1) + '…' : s;
+        }
+
+        const fps = 30;
+        const totalFrames = 300; // 5 slides * 2 seconds * 30fps
+        const stream = canvas.captureStream(fps);
+
+        let mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp9';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
+
+        const chunks = [];
+        const recorder = new MediaRecorder(stream, { mimeType: mimeType });
+
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+
+        const dateStr = (() => {
+          if (!d.ts && d.ts !== 0) return '';
+          let dateObj;
+          if (typeof d.ts === 'string' || (d.ts > 0 && d.ts < 1000000)) {
+            const s = String(d.ts).padStart(6, '0');
+            dateObj = new Date(2000 + parseInt(s.slice(0, 2)), parseInt(s.slice(2, 4)) - 1, parseInt(s.slice(4, 6)));
+          } else {
+            dateObj = new Date(d.ts * 1000);
+          }
+          return `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+        })();
+
+        const rankLabel = RANKS[d.r] || RANKS[2];
+        const currentYear = new Date().getFullYear();
+        const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
+          && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
+
+        const slogans = [
+          "Kiếp này xin lỗi ví tiền! 💸",
+          "Mua sắm vì đam mê, không vì cần! 🛍️",
+          "Bàn tay vàng trong làng chốt đơn! 👑",
+          "Kiểm soát chi tiêu, làm chủ tương lai! 💎",
+          "Chốt đơn xuyên đêm, quên sầu ví rỗng! 🦉"
+        ];
+        const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)];
+
+        recorder.start();
+        let currentFrame = 0;
+
+        return new Promise((resolve) => {
+          function renderLoop() {
+            if (currentFrame >= totalFrames) {
+              recorder.stop();
+              recorder.onstop = () => {
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                const blob = new Blob(chunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `shopee-stats-wrapped.${ext}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("✓ Đã tải video Story thành công!");
+                if (btnVid) {
+                  btnVid.disabled = false;
+                  btnVid.textContent = origText;
+                }
+                resolve();
+              };
+              return;
+            }
+
+            if (btnVid) {
+              const progressPct = Math.round((currentFrame / totalFrames) * 100);
+              btnVid.textContent = `🎥 Ghi: ${progressPct}%`;
+            }
+
+            ctx.clearRect(0, 0, W, H);
+
+            // 1. Soft mesh style gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+            const shift1 = Math.sin(currentFrame * 0.04) * 0.08;
+            const shift2 = Math.cos(currentFrame * 0.04) * 0.08;
+            bgGrad.addColorStop(0, '#fffcfb');
+            bgGrad.addColorStop(0.45 + shift1, '#ffece4');
+            bgGrad.addColorStop(0.8 + shift2, '#eafbf7');
+            bgGrad.addColorStop(1, '#fcf4ff');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Subtle dot grid
+            ctx.globalAlpha = 0.015;
+            ctx.fillStyle = '#ee4d2d';
+            for (let dx = 24; dx < W; dx += 32) {
+              for (let dy = 24; dy < H; dy += 32) {
+                ctx.beginPath(); ctx.arc(dx, dy, 1.8, 0, Math.PI * 2); ctx.fill();
+              }
+            }
+            ctx.globalAlpha = 1;
+
+            // 2. Header
+            rrect(0, 0, W, 110, 0, 'rgba(255, 255, 255, 0.5)');
+            ctx.font = `400 36px ${FONT}`;
+            ctx.textAlign = 'left';
+            ctx.fillText('🛍️', PAD, 66);
+            txt('Shopee Analytics', PAD + 46, 48, 20, '800', tColors.accent);
+            txt('tr4n.github.io/shopee-stats', PAD + 46, 76, 13, '600', tColors.textMuted);
+
+            if (dateStr) {
+              ctx.font = `700 13px ${FONT}`;
+              const dw = ctx.measureText(`📅 ${dateStr}`).width + 24;
+              rrect(W - PAD - dw, 38, dw, 32, 16, '#fff5f2', 'rgba(238,77,45,0.2)', 1.2);
+              txt(`📅 ${dateStr}`, W - PAD - dw / 2, 58, 13, '700', tColors.accent, 'center');
+            }
+
+            const hLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+            hLine.addColorStop(0, '#ee4d2d');
+            hLine.addColorStop(0.5, 'rgba(238,77,45,0.2)');
+            hLine.addColorStop(1, 'transparent');
+            ctx.fillStyle = hLine;
+            ctx.fillRect(PAD, 110, W - PAD * 2, 1.5);
+
+            // 3. Footer
+            const footerY = H - 86;
+            const fLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+            fLine.addColorStop(0, 'transparent');
+            fLine.addColorStop(0.35, 'rgba(238,77,45,0.1)');
+            fLine.addColorStop(0.65, 'rgba(238,77,45,0.1)');
+            fLine.addColorStop(1, 'transparent');
+            ctx.fillStyle = fLine;
+            ctx.fillRect(PAD, footerY - 14, W - PAD * 2, 1);
+
+            if (qrImage.complete && qrImage.naturalWidth > 0) {
+              const qrx = W - PAD - 90;
+              const qry = footerY - 36;
+              rrect(qrx - 5, qry - 5, 100, 100, 8, '#ffffff', 'rgba(0,0,0,0.05)', 1);
+              ctx.drawImage(qrImage, qrx, qry, 90, 90);
+              txt('Quét để xem chi tiêu của bạn:', PAD, footerY + 16, 14, '700', tColors.textMuted);
+              txt('tr4n.github.io/shopee-stats', PAD, footerY + 42, 18, '800', tColors.accent);
+            } else {
+              txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 8, 15, '600', tColors.textMuted, 'center');
+              txt('tr4n.github.io/shopee-stats', W / 2, footerY + 34, 18, '800', tColors.accent, 'center');
+            }
+
+            // 4. Slide content drawing
+            const page = Math.floor(currentFrame / 60);
+            const pageFrame = currentFrame % 60;
+
+            if (page === 0) {
+              txt('Shopee Analytics', PAD, 180, 15, '800', tColors.accent);
+              txt('Chào mừng bạn đến với tổng kết chi tiêu!', PAD, 216, 19, '700', tColors.text);
+
+              const cardY = 320;
+              const cardH = 460;
+              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+              txt('🛍️', W / 2, cardY + 90, 56, '400', null, 'center');
+              txt('TỔNG CHI TIÊU CỦA TÔI', W / 2, cardY + 160, 14, '800', tColors.textMuted, 'center');
+
+              const progress = Math.min(pageFrame / 40, 1);
+              const currentTotal = d.t < 0 ? -1 : Math.round(d.t * progress);
+              const totalText = currentTotal < 0 ? '***' : fmtVND(currentTotal) + 'đ';
+              txt(totalText, W / 2, cardY + 250, 48, '900', tColors.accent, 'center');
+
+              if (pageFrame >= 20) {
+                const badgeProgress = Math.min((pageFrame - 20) / 10, 1);
+                ctx.save();
+                ctx.translate(W / 2, cardY + 330);
+                ctx.scale(badgeProgress, badgeProgress);
+                ctx.rotate(-1.5 * Math.PI / 180);
+                ctx.font = `800 15px ${FONT}`;
+                const rbW = ctx.measureText(rankLabel).width + 36;
+                rrectShadow(-rbW / 2, -22, rbW, 44, 12, '#fff5f2');
+                rrect(-rbW / 2, -22, rbW, 44, 12, null, 'rgba(238,77,45,0.35)', 1.5);
+                txt(rankLabel, 0, 6, 15, '800', tColors.accent, 'center');
+                ctx.restore();
+              }
+            }
+            else if (page === 1) {
+              txt('Xếp hạng của bạn', PAD, 180, 15, '800', tColors.accent);
+              txt('Bạn là chiến thần mua sắm cấp độ nào?', PAD, 216, 19, '700', tColors.text);
+
+              const cardY = 320;
+              const cardH = 460;
+              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+              const progress = Math.min(pageFrame / 40, 1);
+              const currentOrders = Math.round((d.o || 0) * progress);
+              const currentItems = Math.round((d.ip || 0) * progress);
+              const currentSaved = d.s < 0 ? -1 : Math.round((d.s || 0) * progress);
+
+              const innerPad = 24;
+              const boxW = (W - PAD * 2 - innerPad * 3) / 2;
+              const boxH = 140;
+
+              const bx1 = PAD + innerPad;
+              const by1 = cardY + innerPad + 20;
+              rrect(bx1, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+              txt('📦', bx1 + boxW / 2, by1 + 42, 28, '400', null, 'center');
+              txt(currentOrders.toString(), bx1 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
+              txt('Đơn hàng', bx1 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
+
+              const bx2 = bx1 + boxW + innerPad;
+              rrect(bx2, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+              txt('🛒', bx2 + boxW / 2, by1 + 42, 28, '400', null, 'center');
+              txt(currentItems.toString(), bx2 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
+              txt('Sản phẩm', bx2 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
+
+              const bx3 = PAD + innerPad;
+              const by3 = by1 + boxH + innerPad;
+              const boxW3 = W - PAD * 2 - innerPad * 2;
+              rrect(bx3, by3, boxW3, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+              txt('💰', bx3 + 44, by3 + boxH / 2 + 10, 36, '400', null, 'left');
+              const savedText = currentSaved < 0 ? '***' : fmtVND(currentSaved) + 'đ';
+              txt(savedText, bx3 + 100, by3 + 65, 26, '800', tColors.secondary);
+              txt('Tiết kiệm được', bx3 + 100, by3 + 95, 12, '700', tColors.textMuted);
+            }
+            else if (page === 2) {
+              txt('Mối tình đậm sâu', PAD, 180, 15, '800', tColors.accent);
+              txt('Sản phẩm gắn bó nhất cùng bạn trong hành trình qua', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
+
+              const scale = Math.min(pageFrame / 20, 1);
+              const rotateDeg = 2 + Math.sin(pageFrame * 0.05) * 1;
+
+              ctx.save();
+              ctx.translate(W / 2, 540);
+              ctx.scale(scale, scale);
+              ctx.rotate(rotateDeg * Math.PI / 180);
+
+              const pW = 320;
+              const pH = 380;
+              rrectShadow(-pW / 2, -pH / 2, pW, pH, 12, '#ffffff');
+              rrect(-pW / 2, -pH / 2, pW, pH, 12, null, 'rgba(0,0,0,0.04)', 1.5);
+
+              const phW = 280;
+              const phH = 210;
+              rrect(-phW / 2, -pH / 2 + 20, phW, phH, 6, '#fafafa', '#f2f2f2', 1.5);
+              txt('👑', 0, -pH / 2 + 130, 56, '400', null, 'center');
+
+              ctx.save();
+              ctx.translate(phW / 2 - 10, -pH / 2 + 20);
+              ctx.rotate(8 * Math.PI / 180);
+              rrect(-50, -14, 100, 28, 8, '#ffd700', 'rgba(0,0,0,0.08)', 1);
+              txt('👑 Yêu Thích', 0, 5, 11, '800', '#7c5e00', 'center');
+              ctx.restore();
+
+              txt(hasTopItem ? truncate(d.ti, 38) : 'Không có thông tin sản phẩm', 0, pH / 2 - 90, 16, '800', '#0f172a', 'center', pW - 40);
+              txt('Đã đồng hành cùng ví tiền của bạn! ✨', 0, pH / 2 - 40, 12, '600', '#64748b', 'center');
+              ctx.restore();
+            }
+            else if (page === 3) {
+              txt('Dòng chảy thời gian', PAD, 180, 15, '800', tColors.accent);
+              txt('Biến động chi tiêu của bạn qua các năm', PAD, 216, 19, '700', tColors.text);
+
+              const cardY = 320;
+              const cardH = 460;
+              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+              const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
+              const yd = Array.isArray(d.yd) ? d.yd.slice(0, 5) : [];
+
+              const progress = Math.min(pageFrame / 40, 1);
+              const startY = cardY + 50;
+              const rowH = 65;
+
+              yd.forEach(([y, v], i) => {
+                const rowY = startY + i * rowH;
+                txt(y.toString(), PAD + 24, rowY + 24, 14, '800', tColors.textMuted);
+
+                const barTrackX = PAD + 80;
+                const barTrackW = W - PAD * 2 - 200;
+                const barTrackH = 10;
+                rrect(barTrackX, rowY + 14, barTrackW, barTrackH, 5, 'rgba(0,0,0,0.05)');
+
+                const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
+                const isCurrent = Number(y) === currentYear;
+
+                const barW = barTrackW * (pct / 100) * progress;
+                const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+                barGrad.addColorStop(0, '#ee4d2d');
+                barGrad.addColorStop(1, '#ff8a5a');
+                rrect(barTrackX, rowY + 14, barW, barTrackH, 5, barGrad);
+
+                const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
+                txt(valFmt, W - PAD - 24, rowY + 24, 13, '800', tColors.text, 'right');
+              });
+            }
+            else if (page === 4) {
+              txt('Đến lượt bạn', PAD, 180, 15, '800', tColors.accent);
+              txt('Khám phá và chia sẻ câu chuyện chi tiêu của riêng bạn', PAD, 216, 18, '700', tColors.text, 'left', W - PAD * 2);
+
+              const cardY = 320;
+              const cardH = 460;
+              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+              ctx.save();
+              ctx.translate(W / 2, cardY + 90);
+              ctx.rotate(2 * Math.sin(pageFrame * 0.08) * Math.PI / 180);
+              ctx.font = `800 16px ${FONT}`;
+              const sw = ctx.measureText(randomSlogan).width + 36;
+              rrectShadow(-sw / 2, -24, sw, 48, 12, '#ffece4');
+              rrect(-sw / 2, -24, sw, 48, 12, null, 'rgba(238, 77, 45, 0.35)', 1.5);
+              txt(randomSlogan, 0, 6, 16, '800', tColors.accent, 'center');
+              ctx.restore();
+
+              txt('Xem thống kê chi tiêu Shopee của bạn', W / 2, cardY + 200, 15, '700', tColors.text, 'center');
+              txt('Bảo mật 100% offline với tiện ích Shopee Analytics', W / 2, cardY + 235, 13, '600', tColors.textMuted, 'center');
+
+              const btnW = W - PAD * 2 - 80;
+              const btnH = 60;
+              const btnX = PAD + 40;
+              const btnY = cardY + 310;
+              const btnGrad = ctx.createLinearGradient(btnX, 0, btnX + btnW, 0);
+              btnGrad.addColorStop(0, '#ee4d2d');
+              btnGrad.addColorStop(1, '#ff8a5a');
+              rrectShadow(btnX, btnY, btnW, btnH, 16, btnGrad);
+              txt('CÀI ĐẶT TIỆN ÍCH MIỄN PHÍ', W / 2, btnY + 36, 14, '800', '#ffffff', 'center');
+            }
+
+            currentFrame++;
+            requestAnimationFrame(renderLoop);
+          }
+
+          renderLoop();
+        });
+      }
+
+
       function showToast(msg) {
         const toast = document.getElementById("toast");
         if (!toast) return;
@@ -937,6 +1336,7 @@
       function setupActions(d) {
         const btnDownload = document.getElementById("btn-download-img");
         const btnCopy = document.getElementById("btn-copy-img");
+        const btnDownloadVid = document.getElementById("btn-download-vid");
         const btnShareApi = document.getElementById("btn-share-api");
         const actionsPanel = document.getElementById("actions-panel");
 
@@ -989,6 +1389,19 @@
             } finally {
               btnCopy.disabled = false;
               btnCopy.textContent = origText;
+            }
+          });
+        }
+
+        if (btnDownloadVid) {
+          btnDownloadVid.addEventListener("click", async () => {
+            try {
+              await recordStoryVideo(d);
+            } catch (err) {
+              console.error(err);
+              showToast("❌ Lỗi khi quay video");
+              btnDownloadVid.disabled = false;
+              btnDownloadVid.textContent = "🎥 Video";
             }
           });
         }
