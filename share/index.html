@@ -627,10 +627,109 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-  </style>
+
+    .polaroid-card-desc {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #64748b;
+      text-align: center;
+      margin: 6px 0 10px 0;
+      display: none;
+    }
+
+    /* Privacy toggle button */
+    .privacy-toggle-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .privacy-toggle-container:hover {
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(238, 77, 45, 0.08);
+    }
+    .privacy-toggle-container input[type="checkbox"] {
+      position: relative;
+      width: 34px;
+      height: 18px;
+      appearance: none;
+      background: #cbd5e1;
+      outline: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 0;
+    }
+    .privacy-toggle-container input[type="checkbox"]:checked {
+      background: var(--primary);
+    }
+    .privacy-toggle-container input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+    .privacy-toggle-container input[type="checkbox"]:checked::before {
+      transform: translateX(16px);
+    }
+    .privacy-toggle-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
 </head>
 
 <body>
+  <script>
+    window.addEventListener('error', function(e) {
+      var div = document.createElement('div');
+      div.style.position = 'fixed';
+      div.style.top = '0';
+      div.style.left = '0';
+      div.style.width = '100%';
+      div.style.background = 'rgba(255, 0, 0, 0.9)';
+      div.style.color = 'white';
+      div.style.padding = '15px';
+      div.style.zIndex = '999999';
+      div.style.fontSize = '14px';
+      div.style.fontFamily = 'monospace';
+      div.style.whiteSpace = 'pre-wrap';
+      div.innerHTML = '<strong>GLOBAL ERROR:</strong> ' + e.message + '<br>Stack: ' + (e.error ? e.error.stack : 'N/A');
+      document.body.appendChild(div);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      var div = document.createElement('div');
+      div.style.position = 'fixed';
+      div.style.top = '0';
+      div.style.left = '0';
+      div.style.width = '100%';
+      div.style.background = 'rgba(255, 100, 0, 0.9)';
+      div.style.color = 'white';
+      div.style.padding = '15px';
+      div.style.zIndex = '999999';
+      div.style.fontSize = '14px';
+      div.style.fontFamily = 'monospace';
+      div.style.whiteSpace = 'pre-wrap';
+      div.innerHTML = '<strong>UNHANDLED REJECTION:</strong> ' + e.reason + '<br>Stack: ' + (e.reason && e.reason.stack ? e.reason.stack : 'N/A');
+      document.body.appendChild(div);
+    });
+  </script>
   <div class="fluid-bg"></div>
   <canvas id="confetti-canvas"></canvas>
 
@@ -663,9 +762,7 @@
   <!-- Actions Panel -->
   <div id="actions-panel" class="actions-panel" style="display: none;">
     <button id="btn-download-img" class="action-btn active">💾 Lưu ảnh</button>
-    <button id="btn-copy-img" class="action-btn">📋 Copy</button>
     <button id="btn-download-vid" class="action-btn">🎥 Video</button>
-    <button id="btn-share-api" class="action-btn" style="display: none;">📤 Share</button>
   </div>
 
   <!-- Toast Message -->
@@ -678,6 +775,69 @@
       /* ====================================================
          Helpers & Share Image Generation
        ==================================================== */
+      function calculateSharePersonality(d) {
+        const totalSpend = d.t || 0;
+        const totalOrders = d.o || 0;
+        const totalSaved = d.s || 0;
+
+        const avgOrder = totalOrders > 0 ? totalSpend / totalOrders : 0;
+        const savingsRate = totalSaved > 0 ? (totalSaved / (totalSpend + totalSaved)) : 0;
+
+        // 1. Premium Spender (Nhà Sưu Tầm Chọn Lọc)
+        if (avgOrder >= 400000) {
+          return {
+            title: "Nhà Sưu Tầm Chọn Lọc",
+            icon: "💎",
+            badge: "💎 Cao Cấp",
+            desc: "Bạn chú trọng chất lượng hơn số lượng. Mỗi đơn hàng chốt là một sự đầu tư chất lượng bền vững, kiên quyết nói không với đồ giá rẻ mau hỏng!",
+            slogan: "Chất lượng làm nên đẳng cấp! ✨"
+          };
+        }
+
+        // 2. Bargain Hunter (Chiến Thần Săn Sale)
+        if (savingsRate >= 0.18) {
+          return {
+            title: "Chiến Thần Săn Sale",
+            icon: "🎯",
+            badge: "🎯 Thông Thái",
+            desc: "Bạn sở hữu tư duy tối ưu hóa bậc thầy, biến giỏ hàng thành bài toán tài chính hoàn hảo với tỷ lệ tiết kiệm đáng kinh ngạc từ các đợt sale.",
+            slogan: "Áp mã thành công, ví tiền nở hoa! 🌸"
+          };
+        }
+
+        // 3. Binge Buyer (Nhà Chi Tiêu Bùng Nổ)
+        if (totalOrders >= 80 || totalSpend >= 50000000) {
+          return {
+            title: "Nhà Chi Tiêu Bùng Nổ",
+            icon: "🚀",
+            badge: "🚀 Phóng Khoáng",
+            desc: "Năng lượng mua sắm của bạn dồi dào tựa thái dương. Bạn sẵn sàng chi tiêu để nâng cấp cuộc sống và mang niềm vui ngập tràn giỏ hàng.",
+            slogan: "Chốt đơn không lối thoát! 💸"
+          };
+        }
+
+        // 4. Practical Spender (Người Tiêu Dùng Thực Tế)
+        if (totalOrders >= 15 && avgOrder <= 150000) {
+          return {
+            title: "Người Tiêu Dùng Thực Tế",
+            icon: "📐",
+            badge: "📐 Kỷ Luật",
+            desc: "Bạn mua sắm thông minh dựa trên nhu cầu thực tế, không bị cuốn vào các trào lưu nhất thời hay chi tiêu bốc đồng quá giới hạn ví tiền.",
+            slogan: "Tiêu dùng thông minh, tài chính an toàn! 🛡️"
+          };
+        }
+
+        // Default: Free Spirit (Người Mua Sắm Tự Do)
+        return {
+          title: "Người Mua Sắm Tự Do",
+          icon: "🎈",
+          badge: "🎈 Ngẫu Hứng",
+          desc: "Bạn mua sắm theo cảm xúc và sở thích tự do của bản thân, biến mỗi đơn hàng thành một trải nghiệm thú vị ngập tràn sự ngẫu hứng.",
+          slogan: "Thích là chốt, vui là chính! 🎉"
+        };
+      }
+
+
       async function generateSquareShareCard(d) {
         try { await document.fonts.ready; } catch (e) { }
 
@@ -864,34 +1024,51 @@
           txt(st.label, sx + statW / 2, statsTop + 110, 14, '700', tColors.textMuted, 'center');
         });
 
-        // ── TOP ITEM CARD (Polaroid style) ─────────────────────────
+        // ── PRIVACY / SHOPPING PERSONALITY OR TOP ITEM CARD (Polaroid style) ──
         const topItemTop = statsTop + 128 + 44;
         const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
           && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
 
-        if (hasTopItem) {
-          const cardH = 180;
-          rrectShadow(PAD, topItemTop, W - PAD * 2, cardH, 20, '#ffffff');
-          rrect(PAD, topItemTop, W - PAD * 2, cardH, 20, null, 'rgba(0,0,0,0.04)', 1.5);
+        const chkShowProduct = document.getElementById('chk-show-product');
+        const showProduct = hasTopItem && (!chkShowProduct || chkShowProduct.checked);
 
-          // Draw the Polaroid Photo area inside canvas card
-          const px = PAD + 22;
-          const py = topItemTop + 22;
-          const pw = 136;
-          const ph = 136;
-          rrect(px, py, pw, ph, 10, '#fafafa', '#f0f0f0', 1.5);
+        const cardH = 180;
+        rrectShadow(PAD, topItemTop, W - PAD * 2, cardH, 20, '#ffffff');
+        rrect(PAD, topItemTop, W - PAD * 2, cardH, 20, null, 'rgba(0,0,0,0.04)', 1.5);
 
+        // Draw the Polaroid Photo area inside canvas card
+        const px = PAD + 22;
+        const py = topItemTop + 22;
+        const pw = 136;
+        const ph = 136;
+        rrect(px, py, pw, ph, 10, '#fafafa', '#f0f0f0', 1.5);
+
+        // Text details on the right
+        const tx = px + pw + 24;
+
+        if (showProduct) {
           // Crown Emoji inside photo area
           ctx.font = `400 44px ${FONT}`;
           ctx.textAlign = 'center';
           ctx.fillText('👑', px + pw / 2, py + ph / 2 + 14);
 
-          // Text details on the right
-          const tx = px + pw + 24;
           txt('SẢN PHẨM MUA NHIỀU NHẤT', tx, topItemTop + 54, 15, '800', tColors.accent);
           const itemName = truncate(d.ti, 38);
           txt(itemName, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
           txt('Đã đồng hành cùng ví tiền của bạn! ✨', tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
+        } else {
+          // Draw shopping personality instead!
+          const p = calculateSharePersonality(d);
+
+          // Personality Emoji inside photo area
+          ctx.font = `400 44px ${FONT}`;
+          ctx.textAlign = 'center';
+          ctx.fillText(p.icon, px + pw / 2, py + ph / 2 + 14);
+
+          // Badge title: e.g. "💎 CAO CẤP"
+          txt(p.badge.toUpperCase(), tx, topItemTop + 54, 15, '800', tColors.accent);
+          txt(p.title, tx, topItemTop + 96, 26, '800', tColors.text, 'left', W - PAD * 2 - pw - 60);
+          txt(p.slogan, tx, topItemTop + 134, 15, '600', tColors.textMuted, 'left', W - PAD * 2 - pw - 60);
         }
 
         // ── FOOTER ────────────────────────────────────────────────
@@ -992,19 +1169,37 @@
 
         const fps = 30;
         const totalFrames = 300; // 5 slides * 2 seconds * 30fps
-        const stream = canvas.captureStream(fps);
+        
+        const captureStreamFn = canvas.captureStream || canvas.mozCaptureStream || canvas.webkitCaptureStream;
+        if (!captureStreamFn) {
+          throw new Error("Trình duyệt không hỗ trợ Canvas captureStream.");
+        }
+        const stream = captureStreamFn.call(canvas, fps);
 
         let mimeType = 'video/mp4';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm;codecs=vp9';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm';
+        let recorder;
+        try {
+          if (typeof MediaRecorder === 'undefined') {
+            throw new Error("MediaRecorder API không khả dụng.");
+          }
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/webm;codecs=vp9';
+          }
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/webm';
+          }
+          recorder = new MediaRecorder(stream, { mimeType: mimeType });
+        } catch (e) {
+          console.warn("Failed to initialize MediaRecorder with custom mimeType, falling back to default:", e);
+          try {
+            recorder = new MediaRecorder(stream);
+            mimeType = recorder.mimeType || 'video/webm';
+          } catch (err) {
+            throw new Error(`MediaRecorder failed: ${err.message || err}`);
+          }
         }
 
         const chunks = [];
-        const recorder = new MediaRecorder(stream, { mimeType: mimeType });
-
         recorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) chunks.push(e.data);
         };
@@ -1035,201 +1230,180 @@
         ];
         const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)];
 
-        recorder.start();
-        let currentFrame = 0;
+        // Define drawing function
+        function drawFrame(currentFrame) {
+          ctx.clearRect(0, 0, W, H);
 
-        return new Promise((resolve) => {
-          function renderLoop() {
-            if (currentFrame >= totalFrames) {
-              recorder.stop();
-              recorder.onstop = () => {
-                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-                const blob = new Blob(chunks, { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `shopee-stats-wrapped.${ext}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast("✓ Đã tải video Story thành công!");
-                if (btnVid) {
-                  btnVid.disabled = false;
-                  btnVid.textContent = origText;
-                }
-                resolve();
-              };
-              return;
+          // 1. Soft mesh style gradient
+          const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+          const shift1 = Math.sin(currentFrame * 0.04) * 0.08;
+          const shift2 = Math.cos(currentFrame * 0.04) * 0.08;
+          bgGrad.addColorStop(0, '#fffcfb');
+          bgGrad.addColorStop(0.45 + shift1, '#ffece4');
+          bgGrad.addColorStop(0.8 + shift2, '#eafbf7');
+          bgGrad.addColorStop(1, '#fcf4ff');
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, W, H);
+
+          // Subtle dot grid
+          ctx.globalAlpha = 0.015;
+          ctx.fillStyle = '#ee4d2d';
+          for (let dx = 24; dx < W; dx += 32) {
+            for (let dy = 24; dy < H; dy += 32) {
+              ctx.beginPath(); ctx.arc(dx, dy, 1.8, 0, Math.PI * 2); ctx.fill();
             }
+          }
+          ctx.globalAlpha = 1;
 
-            if (btnVid) {
-              const progressPct = Math.round((currentFrame / totalFrames) * 100);
-              btnVid.textContent = `🎥 Ghi: ${progressPct}%`;
+          // 2. Header
+          rrect(0, 0, W, 110, 0, 'rgba(255, 255, 255, 0.5)');
+          ctx.font = `400 36px ${FONT}`;
+          ctx.textAlign = 'left';
+          ctx.fillText('🛍️', PAD, 66);
+          txt('Shopee Analytics', PAD + 46, 48, 20, '800', tColors.accent);
+          txt('tr4n.github.io/shopee-stats', PAD + 46, 76, 13, '600', tColors.textMuted);
+
+          if (dateStr) {
+            ctx.font = `700 13px ${FONT}`;
+            const dw = ctx.measureText(`📅 ${dateStr}`).width + 24;
+            rrect(W - PAD - dw, 38, dw, 32, 16, '#fff5f2', 'rgba(238,77,45,0.2)', 1.2);
+            txt(`📅 ${dateStr}`, W - PAD - dw / 2, 58, 13, '700', tColors.accent, 'center');
+          }
+
+          const hLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+          hLine.addColorStop(0, '#ee4d2d');
+          hLine.addColorStop(0.5, 'rgba(238,77,45,0.2)');
+          hLine.addColorStop(1, 'transparent');
+          ctx.fillStyle = hLine;
+          ctx.fillRect(PAD, 110, W - PAD * 2, 1.5);
+
+          // 3. Footer
+          const footerY = H - 86;
+          const fLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
+          fLine.addColorStop(0, 'transparent');
+          fLine.addColorStop(0.35, 'rgba(238,77,45,0.1)');
+          fLine.addColorStop(0.65, 'rgba(238,77,45,0.1)');
+          fLine.addColorStop(1, 'transparent');
+          ctx.fillStyle = fLine;
+          ctx.fillRect(PAD, footerY - 14, W - PAD * 2, 1);
+
+          if (qrImage.complete && qrImage.naturalWidth > 0) {
+            const qrx = W - PAD - 90;
+            const qry = footerY - 36;
+            rrect(qrx - 5, qry - 5, 100, 100, 8, '#ffffff', 'rgba(0,0,0,0.05)', 1);
+            ctx.drawImage(qrImage, qrx, qry, 90, 90);
+            txt('Quét để xem chi tiêu của bạn:', PAD, footerY + 16, 14, '700', tColors.textMuted);
+            txt('tr4n.github.io/shopee-stats', PAD, footerY + 42, 18, '800', tColors.accent);
+          } else {
+            txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 8, 15, '600', tColors.textMuted, 'center');
+            txt('tr4n.github.io/shopee-stats', W / 2, footerY + 34, 18, '800', tColors.accent, 'center');
+          }
+
+          // 4. Slide content drawing
+          const page = Math.floor(currentFrame / 60);
+          const pageFrame = currentFrame % 60;
+
+          if (page === 0) {
+            txt('Shopee Analytics', PAD, 180, 15, '800', tColors.accent);
+            txt('Chào mừng bạn đến với tổng kết chi tiêu!', PAD, 216, 19, '700', tColors.text);
+
+            const cardY = 320;
+            const cardH = 460;
+            rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+            rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+            txt('🛍️', W / 2, cardY + 90, 56, '400', null, 'center');
+            txt('TỔNG CHI TIÊU CỦA TÔI', W / 2, cardY + 160, 14, '800', tColors.textMuted, 'center');
+
+            const progress = Math.min(pageFrame / 40, 1);
+            const currentTotal = d.t < 0 ? -1 : Math.round(d.t * progress);
+            const totalText = currentTotal < 0 ? '***' : fmtVND(currentTotal) + 'đ';
+            txt(totalText, W / 2, cardY + 250, 48, '900', tColors.accent, 'center');
+
+            if (pageFrame >= 20) {
+              const badgeProgress = Math.min((pageFrame - 20) / 10, 1);
+              ctx.save();
+              ctx.translate(W / 2, cardY + 330);
+              ctx.scale(badgeProgress, badgeProgress);
+              ctx.rotate(-1.5 * Math.PI / 180);
+              ctx.font = `800 15px ${FONT}`;
+              const rbW = ctx.measureText(rankLabel).width + 36;
+              rrectShadow(-rbW / 2, -22, rbW, 44, 12, '#fff5f2');
+              rrect(-rbW / 2, -22, rbW, 44, 12, null, 'rgba(238,77,45,0.35)', 1.5);
+              txt(rankLabel, 0, 6, 15, '800', tColors.accent, 'center');
+              ctx.restore();
             }
+          }
+          else if (page === 1) {
+            txt('Xếp hạng của bạn', PAD, 180, 15, '800', tColors.accent);
+            txt('Bạn là chiến thần mua sắm cấp độ nào?', PAD, 216, 19, '700', tColors.text);
 
-            ctx.clearRect(0, 0, W, H);
+            const cardY = 320;
+            const cardH = 460;
+            rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+            rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
 
-            // 1. Soft mesh style gradient
-            const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-            const shift1 = Math.sin(currentFrame * 0.04) * 0.08;
-            const shift2 = Math.cos(currentFrame * 0.04) * 0.08;
-            bgGrad.addColorStop(0, '#fffcfb');
-            bgGrad.addColorStop(0.45 + shift1, '#ffece4');
-            bgGrad.addColorStop(0.8 + shift2, '#eafbf7');
-            bgGrad.addColorStop(1, '#fcf4ff');
-            ctx.fillStyle = bgGrad;
-            ctx.fillRect(0, 0, W, H);
+            const progress = Math.min(pageFrame / 40, 1);
+            const currentOrders = Math.round((d.o || 0) * progress);
+            const currentItems = Math.round((d.ip || 0) * progress);
+            const currentSaved = d.s < 0 ? -1 : Math.round((d.s || 0) * progress);
 
-            // Subtle dot grid
-            ctx.globalAlpha = 0.015;
-            ctx.fillStyle = '#ee4d2d';
-            for (let dx = 24; dx < W; dx += 32) {
-              for (let dy = 24; dy < H; dy += 32) {
-                ctx.beginPath(); ctx.arc(dx, dy, 1.8, 0, Math.PI * 2); ctx.fill();
-              }
-            }
-            ctx.globalAlpha = 1;
+            const innerPad = 24;
+            const boxW = (W - PAD * 2 - innerPad * 3) / 2;
+            const boxH = 140;
 
-            // 2. Header
-            rrect(0, 0, W, 110, 0, 'rgba(255, 255, 255, 0.5)');
-            ctx.font = `400 36px ${FONT}`;
-            ctx.textAlign = 'left';
-            ctx.fillText('🛍️', PAD, 66);
-            txt('Shopee Analytics', PAD + 46, 48, 20, '800', tColors.accent);
-            txt('tr4n.github.io/shopee-stats', PAD + 46, 76, 13, '600', tColors.textMuted);
+            const bx1 = PAD + innerPad;
+            const by1 = cardY + innerPad + 20;
+            rrect(bx1, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+            txt('📦', bx1 + boxW / 2, by1 + 42, 28, '400', null, 'center');
+            txt(currentOrders.toString(), bx1 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
+            txt('Đơn hàng', bx1 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
 
-            if (dateStr) {
-              ctx.font = `700 13px ${FONT}`;
-              const dw = ctx.measureText(`📅 ${dateStr}`).width + 24;
-              rrect(W - PAD - dw, 38, dw, 32, 16, '#fff5f2', 'rgba(238,77,45,0.2)', 1.2);
-              txt(`📅 ${dateStr}`, W - PAD - dw / 2, 58, 13, '700', tColors.accent, 'center');
-            }
+            const bx2 = bx1 + boxW + innerPad;
+            rrect(bx2, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+            txt('🛒', bx2 + boxW / 2, by1 + 42, 28, '400', null, 'center');
+            txt(currentItems.toString(), bx2 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
+            txt('Sản phẩm', bx2 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
 
-            const hLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
-            hLine.addColorStop(0, '#ee4d2d');
-            hLine.addColorStop(0.5, 'rgba(238,77,45,0.2)');
-            hLine.addColorStop(1, 'transparent');
-            ctx.fillStyle = hLine;
-            ctx.fillRect(PAD, 110, W - PAD * 2, 1.5);
+            const bx3 = PAD + innerPad;
+            const by3 = by1 + boxH + innerPad;
+            const boxW3 = W - PAD * 2 - innerPad * 2;
+            rrect(bx3, by3, boxW3, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
+            txt('💰', bx3 + 44, by3 + boxH / 2 + 10, 36, '400', null, 'left');
+            const savedText = currentSaved < 0 ? '***' : fmtVND(currentSaved) + 'đ';
+            txt(savedText, bx3 + 100, by3 + 65, 26, '800', tColors.secondary);
+            txt('Tiết kiệm được', bx3 + 100, by3 + 95, 12, '700', tColors.textMuted);
+          }
+          else if (page === 2) {
+            const chkShowProduct = document.getElementById('chk-show-product');
+            const showProduct = hasTopItem && (!chkShowProduct || chkShowProduct.checked);
 
-            // 3. Footer
-            const footerY = H - 86;
-            const fLine = ctx.createLinearGradient(PAD, 0, W - PAD, 0);
-            fLine.addColorStop(0, 'transparent');
-            fLine.addColorStop(0.35, 'rgba(238,77,45,0.1)');
-            fLine.addColorStop(0.65, 'rgba(238,77,45,0.1)');
-            fLine.addColorStop(1, 'transparent');
-            ctx.fillStyle = fLine;
-            ctx.fillRect(PAD, footerY - 14, W - PAD * 2, 1);
-
-            if (qrImage.complete && qrImage.naturalWidth > 0) {
-              const qrx = W - PAD - 90;
-              const qry = footerY - 36;
-              rrect(qrx - 5, qry - 5, 100, 100, 8, '#ffffff', 'rgba(0,0,0,0.05)', 1);
-              ctx.drawImage(qrImage, qrx, qry, 90, 90);
-              txt('Quét để xem chi tiêu của bạn:', PAD, footerY + 16, 14, '700', tColors.textMuted);
-              txt('tr4n.github.io/shopee-stats', PAD, footerY + 42, 18, '800', tColors.accent);
-            } else {
-              txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 8, 15, '600', tColors.textMuted, 'center');
-              txt('tr4n.github.io/shopee-stats', W / 2, footerY + 34, 18, '800', tColors.accent, 'center');
-            }
-
-            // 4. Slide content drawing
-            const page = Math.floor(currentFrame / 60);
-            const pageFrame = currentFrame % 60;
-
-            if (page === 0) {
-              txt('Shopee Analytics', PAD, 180, 15, '800', tColors.accent);
-              txt('Chào mừng bạn đến với tổng kết chi tiêu!', PAD, 216, 19, '700', tColors.text);
-
-              const cardY = 320;
-              const cardH = 460;
-              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
-              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
-
-              txt('🛍️', W / 2, cardY + 90, 56, '400', null, 'center');
-              txt('TỔNG CHI TIÊU CỦA TÔI', W / 2, cardY + 160, 14, '800', tColors.textMuted, 'center');
-
-              const progress = Math.min(pageFrame / 40, 1);
-              const currentTotal = d.t < 0 ? -1 : Math.round(d.t * progress);
-              const totalText = currentTotal < 0 ? '***' : fmtVND(currentTotal) + 'đ';
-              txt(totalText, W / 2, cardY + 250, 48, '900', tColors.accent, 'center');
-
-              if (pageFrame >= 20) {
-                const badgeProgress = Math.min((pageFrame - 20) / 10, 1);
-                ctx.save();
-                ctx.translate(W / 2, cardY + 330);
-                ctx.scale(badgeProgress, badgeProgress);
-                ctx.rotate(-1.5 * Math.PI / 180);
-                ctx.font = `800 15px ${FONT}`;
-                const rbW = ctx.measureText(rankLabel).width + 36;
-                rrectShadow(-rbW / 2, -22, rbW, 44, 12, '#fff5f2');
-                rrect(-rbW / 2, -22, rbW, 44, 12, null, 'rgba(238,77,45,0.35)', 1.5);
-                txt(rankLabel, 0, 6, 15, '800', tColors.accent, 'center');
-                ctx.restore();
-              }
-            }
-            else if (page === 1) {
-              txt('Xếp hạng của bạn', PAD, 180, 15, '800', tColors.accent);
-              txt('Bạn là chiến thần mua sắm cấp độ nào?', PAD, 216, 19, '700', tColors.text);
-
-              const cardY = 320;
-              const cardH = 460;
-              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
-              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
-
-              const progress = Math.min(pageFrame / 40, 1);
-              const currentOrders = Math.round((d.o || 0) * progress);
-              const currentItems = Math.round((d.ip || 0) * progress);
-              const currentSaved = d.s < 0 ? -1 : Math.round((d.s || 0) * progress);
-
-              const innerPad = 24;
-              const boxW = (W - PAD * 2 - innerPad * 3) / 2;
-              const boxH = 140;
-
-              const bx1 = PAD + innerPad;
-              const by1 = cardY + innerPad + 20;
-              rrect(bx1, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
-              txt('📦', bx1 + boxW / 2, by1 + 42, 28, '400', null, 'center');
-              txt(currentOrders.toString(), bx1 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
-              txt('Đơn hàng', bx1 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
-
-              const bx2 = bx1 + boxW + innerPad;
-              rrect(bx2, by1, boxW, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
-              txt('🛒', bx2 + boxW / 2, by1 + 42, 28, '400', null, 'center');
-              txt(currentItems.toString(), bx2 + boxW / 2, by1 + 88, 24, '800', tColors.text, 'center');
-              txt('Sản phẩm', bx2 + boxW / 2, by1 + 116, 11, '700', tColors.textMuted, 'center');
-
-              const bx3 = PAD + innerPad;
-              const by3 = by1 + boxH + innerPad;
-              const boxW3 = W - PAD * 2 - innerPad * 2;
-              rrect(bx3, by3, boxW3, boxH, 16, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.9)', 1.5);
-              txt('💰', bx3 + 44, by3 + boxH / 2 + 10, 36, '400', null, 'left');
-              const savedText = currentSaved < 0 ? '***' : fmtVND(currentSaved) + 'đ';
-              txt(savedText, bx3 + 100, by3 + 65, 26, '800', tColors.secondary);
-              txt('Tiết kiệm được', bx3 + 100, by3 + 95, 12, '700', tColors.textMuted);
-            }
-            else if (page === 2) {
+            if (showProduct) {
               txt('Mối tình đậm sâu', PAD, 180, 15, '800', tColors.accent);
               txt('Sản phẩm gắn bó nhất cùng bạn trong hành trình qua', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
+            } else {
+              txt('Tính cách mua sắm', PAD, 180, 15, '800', tColors.accent);
+              txt('Nhận xét phong cách chi tiêu độc bản của riêng bạn', PAD, 216, 17, '700', tColors.text, 'left', W - PAD * 2);
+            }
 
-              const scale = Math.min(pageFrame / 20, 1);
-              const rotateDeg = 2 + Math.sin(pageFrame * 0.05) * 1;
+            const scale = Math.min(pageFrame / 20, 1);
+            const rotateDeg = 2 + Math.sin(pageFrame * 0.05) * 1;
 
-              ctx.save();
-              ctx.translate(W / 2, 540);
-              ctx.scale(scale, scale);
-              ctx.rotate(rotateDeg * Math.PI / 180);
+            ctx.save();
+            ctx.translate(W / 2, 540);
+            ctx.scale(scale, scale);
+            ctx.rotate(rotateDeg * Math.PI / 180);
 
-              const pW = 320;
-              const pH = 380;
-              rrectShadow(-pW / 2, -pH / 2, pW, pH, 12, '#ffffff');
-              rrect(-pW / 2, -pH / 2, pW, pH, 12, null, 'rgba(0,0,0,0.04)', 1.5);
+            const pW = 320;
+            const pH = 380;
+            rrectShadow(-pW / 2, -pH / 2, pW, pH, 12, '#ffffff');
+            rrect(-pW / 2, -pH / 2, pW, pH, 12, null, 'rgba(0,0,0,0.04)', 1.5);
 
-              const phW = 280;
-              const phH = 210;
-              rrect(-phW / 2, -pH / 2 + 20, phW, phH, 6, '#fafafa', '#f2f2f2', 1.5);
+            const phW = 280;
+            const phH = 210;
+            rrect(-phW / 2, -pH / 2 + 20, phW, phH, 6, '#fafafa', '#f2f2f2', 1.5);
+
+            if (showProduct) {
               txt('👑', 0, -pH / 2 + 130, 56, '400', null, 'center');
 
               ctx.save();
@@ -1239,87 +1413,197 @@
               txt('👑 Yêu Thích', 0, 5, 11, '800', '#7c5e00', 'center');
               ctx.restore();
 
-              txt(hasTopItem ? truncate(d.ti, 38) : 'Không có thông tin sản phẩm', 0, pH / 2 - 90, 16, '800', '#0f172a', 'center', pW - 40);
+              txt(truncate(d.ti, 38), 0, pH / 2 - 90, 16, '800', '#0f172a', 'center', pW - 40);
               txt('Đã đồng hành cùng ví tiền của bạn! ✨', 0, pH / 2 - 40, 12, '600', '#64748b', 'center');
-              ctx.restore();
-            }
-            else if (page === 3) {
-              txt('Dòng chảy thời gian', PAD, 180, 15, '800', tColors.accent);
-              txt('Biến động chi tiêu của bạn qua các năm', PAD, 216, 19, '700', tColors.text);
-
-              const cardY = 320;
-              const cardH = 460;
-              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
-              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
-
-              const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
-              const yd = Array.isArray(d.yd) ? d.yd.slice(0, 5) : [];
-
-              const progress = Math.min(pageFrame / 40, 1);
-              const startY = cardY + 50;
-              const rowH = 65;
-
-              yd.forEach(([y, v], i) => {
-                const rowY = startY + i * rowH;
-                txt(y.toString(), PAD + 24, rowY + 24, 14, '800', tColors.textMuted);
-
-                const barTrackX = PAD + 80;
-                const barTrackW = W - PAD * 2 - 200;
-                const barTrackH = 10;
-                rrect(barTrackX, rowY + 14, barTrackW, barTrackH, 5, 'rgba(0,0,0,0.05)');
-
-                const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
-                const isCurrent = Number(y) === currentYear;
-
-                const barW = barTrackW * (pct / 100) * progress;
-                const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
-                barGrad.addColorStop(0, '#ee4d2d');
-                barGrad.addColorStop(1, '#ff8a5a');
-                rrect(barTrackX, rowY + 14, barW, barTrackH, 5, barGrad);
-
-                const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
-                txt(valFmt, W - PAD - 24, rowY + 24, 13, '800', tColors.text, 'right');
-              });
-            }
-            else if (page === 4) {
-              txt('Đến lượt bạn', PAD, 180, 15, '800', tColors.accent);
-              txt('Khám phá và chia sẻ câu chuyện chi tiêu của riêng bạn', PAD, 216, 18, '700', tColors.text, 'left', W - PAD * 2);
-
-              const cardY = 320;
-              const cardH = 460;
-              rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
-              rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+            } else {
+              const p = calculateSharePersonality(d);
+              txt(p.icon, 0, -pH / 2 + 130, 56, '400', null, 'center');
 
               ctx.save();
-              ctx.translate(W / 2, cardY + 90);
-              ctx.rotate(2 * Math.sin(pageFrame * 0.08) * Math.PI / 180);
-              ctx.font = `800 16px ${FONT}`;
-              const sw = ctx.measureText(randomSlogan).width + 36;
-              rrectShadow(-sw / 2, -24, sw, 48, 12, '#ffece4');
-              rrect(-sw / 2, -24, sw, 48, 12, null, 'rgba(238, 77, 45, 0.35)', 1.5);
-              txt(randomSlogan, 0, 6, 16, '800', tColors.accent, 'center');
+              ctx.translate(phW / 2 - 10, -pH / 2 + 20);
+              ctx.rotate(8 * Math.PI / 180);
+              
+              let badgeBg = '#ffd700';
+              let badgeFg = '#7c5e00';
+              if (p.title === "Nhà Sưu Tầm Chọn Lọc") {
+                badgeBg = "#e2f1ff"; badgeFg = "#0066cc";
+              } else if (p.title === "Chiến Thần Săn Sale") {
+                badgeBg = "#e6fcf5"; badgeFg = "#0ca678";
+              } else if (p.title === "Nhà Chi Tiêu Bùng Nổ") {
+                badgeBg = "#fff0f6"; badgeFg = "#d6336c";
+              } else if (p.title === "Người Tiêu Dùng Thực Tế") {
+                badgeBg = "#f4fce3"; badgeFg = "#5c940d";
+              } else {
+                badgeBg = "#fff4e6"; badgeFg = "#fd7e14";
+              }
+
+              const badgeText = p.badge;
+              ctx.font = `800 11px ${FONT}`;
+              const badgeW = ctx.measureText(badgeText).width + 16;
+
+              rrect(-badgeW / 2, -14, badgeW, 28, 8, badgeBg, 'rgba(0,0,0,0.08)', 1);
+              txt(badgeText, 0, 5, 11, '800', badgeFg, 'center');
               ctx.restore();
 
-              txt('Xem thống kê chi tiêu Shopee của bạn', W / 2, cardY + 200, 15, '700', tColors.text, 'center');
-              txt('Bảo mật 100% offline với tiện ích Shopee Analytics', W / 2, cardY + 235, 13, '600', tColors.textMuted, 'center');
+              txt(p.title, 0, pH / 2 - 100, 18, '800', '#0f172a', 'center', pW - 40);
+              
+              const descWords = p.desc.split(' ');
+              let line = '';
+              const maxLineW = pW - 40;
+              let lineY = pH / 2 - 75;
+              ctx.font = `600 11px ${FONT}`;
+              ctx.fillStyle = '#64748b';
+              ctx.textAlign = 'center';
+              for (let n = 0; n < descWords.length; n++) {
+                let testLine = line + descWords[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxLineW && n > 0) {
+                  ctx.fillText(line, 0, lineY);
+                  line = descWords[n] + ' ';
+                  lineY += 16;
+                } else {
+                  line = testLine;
+                }
+              }
+              ctx.fillText(line, 0, lineY);
 
-              const btnW = W - PAD * 2 - 80;
-              const btnH = 60;
-              const btnX = PAD + 40;
-              const btnY = cardY + 310;
-              const btnGrad = ctx.createLinearGradient(btnX, 0, btnX + btnW, 0);
-              btnGrad.addColorStop(0, '#ee4d2d');
-              btnGrad.addColorStop(1, '#ff8a5a');
-              rrectShadow(btnX, btnY, btnW, btnH, 16, btnGrad);
-              txt('CÀI ĐẶT TIỆN ÍCH MIỄN PHÍ', W / 2, btnY + 36, 14, '800', '#ffffff', 'center');
+              txt(p.slogan, 0, pH / 2 - 22, 11, '800', tColors.accent, 'center');
             }
 
-            currentFrame++;
-            requestAnimationFrame(renderLoop);
+            ctx.restore();
+          }
+          else if (page === 3) {
+            txt('Dòng chảy thời gian', PAD, 180, 15, '800', tColors.accent);
+            txt('Biến động chi tiêu của bạn qua các năm', PAD, 216, 19, '700', tColors.text);
+
+            const cardY = 320;
+            const cardH = 460;
+            rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+            rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+            const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
+            const yd = Array.isArray(d.yd) ? d.yd.slice(0, 5) : [];
+
+            const progress = Math.min(pageFrame / 40, 1);
+            const startY = cardY + 50;
+            const rowH = 65;
+
+            yd.forEach(([y, v], i) => {
+              const rowY = startY + i * rowH;
+              txt(y.toString(), PAD + 24, rowY + 24, 14, '800', tColors.textMuted);
+
+              const barTrackX = PAD + 80;
+              const barTrackW = W - PAD * 2 - 200;
+              const barTrackH = 10;
+              rrect(barTrackX, rowY + 14, barTrackW, barTrackH, 5, 'rgba(0,0,0,0.05)');
+
+              const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
+              const isCurrent = Number(y) === currentYear;
+
+              const barW = barTrackW * (pct / 100) * progress;
+              const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+              barGrad.addColorStop(0, '#ee4d2d');
+              barGrad.addColorStop(1, '#ff8a5a');
+              rrect(barTrackX, rowY + 14, barW, barTrackH, 5, barGrad);
+
+              const valFmt = v < 0 ? '***' : fmtVND(v) + 'đ';
+              txt(valFmt, W - PAD - 24, rowY + 24, 13, '800', tColors.text, 'right');
+            });
+          }
+          else if (page === 4) {
+            txt('Đến lượt bạn', PAD, 180, 15, '800', tColors.accent);
+            txt('Khám phá và chia sẻ câu chuyện chi tiêu của riêng bạn', PAD, 216, 18, '700', tColors.text, 'left', W - PAD * 2);
+
+            const cardY = 320;
+            const cardH = 460;
+            rrectShadow(PAD, cardY, W - PAD * 2, cardH, 24, 'rgba(255, 255, 255, 0.5)');
+            rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
+
+            ctx.save();
+            ctx.translate(W / 2, cardY + 90);
+            ctx.rotate(2 * Math.sin(pageFrame * 0.08) * Math.PI / 180);
+            ctx.font = `800 16px ${FONT}`;
+            const sw = ctx.measureText(randomSlogan).width + 36;
+            rrectShadow(-sw / 2, -24, sw, 48, 12, '#ffece4');
+            rrect(-sw / 2, -24, sw, 48, 12, null, 'rgba(238, 77, 45, 0.35)', 1.5);
+            txt(randomSlogan, 0, 6, 16, '800', tColors.accent, 'center');
+            ctx.restore();
+
+            txt('Xem thống kê chi tiêu Shopee của bạn', W / 2, cardY + 200, 15, '700', tColors.text, 'center');
+            txt('Bảo mật 100% offline với tiện ích Shopee Analytics', W / 2, cardY + 235, 13, '600', tColors.textMuted, 'center');
+
+            const btnW = W - PAD * 2 - 80;
+            const btnH = 60;
+            const btnX = PAD + 40;
+            const btnY = cardY + 310;
+            const btnGrad = ctx.createLinearGradient(btnX, 0, btnX + btnW, 0);
+            btnGrad.addColorStop(0, '#ee4d2d');
+            btnGrad.addColorStop(1, '#ff8a5a');
+            rrectShadow(btnX, btnY, btnW, btnH, 16, btnGrad);
+            txt('CÀI ĐẶT TIỆN ÍCH MIỄN PHÍ', W / 2, btnY + 36, 14, '800', '#ffffff', 'center');
+          }
+        }
+
+        // Setup onstop logic first to avoid race conditions
+        const recordPromise = new Promise((resolve, reject) => {
+          recorder.onstop = () => {
+            try {
+              const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+              const blob = new Blob(chunks, { type: mimeType });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `shopee-stats-wrapped.${ext}`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              showToast("✓ Đã tải video Story thành công!");
+              if (btnVid) {
+                btnVid.disabled = false;
+                btnVid.textContent = origText;
+              }
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          };
+          
+          recorder.onerror = (e) => {
+            reject(e.error || new Error("Lỗi MediaRecorder."));
+          };
+        });
+
+        // Draw the first frame immediately so canvas isn't blank
+        drawFrame(0);
+
+        // Start recording
+        recorder.start();
+
+        let currentFrame = 0;
+        
+        function renderLoop() {
+          if (currentFrame >= totalFrames) {
+            recorder.stop();
+            return;
           }
 
-          renderLoop();
-        });
+          if (btnVid) {
+            const progressPct = Math.round((currentFrame / totalFrames) * 100);
+            btnVid.textContent = `🎥 Ghi: ${progressPct}%`;
+          }
+
+          drawFrame(currentFrame);
+
+          currentFrame++;
+          requestAnimationFrame(renderLoop);
+        }
+
+        // Run the render loop
+        renderLoop();
+
+        return recordPromise;
       }
 
 
@@ -1335,16 +1619,10 @@
 
       function setupActions(d) {
         const btnDownload = document.getElementById("btn-download-img");
-        const btnCopy = document.getElementById("btn-copy-img");
         const btnDownloadVid = document.getElementById("btn-download-vid");
-        const btnShareApi = document.getElementById("btn-share-api");
         const actionsPanel = document.getElementById("actions-panel");
 
         if (actionsPanel) actionsPanel.style.display = "flex";
-
-        if (btnShareApi && navigator.share) {
-          btnShareApi.style.display = "inline-flex";
-        }
 
         if (btnDownload) {
           btnDownload.addEventListener("click", async () => {
@@ -1370,73 +1648,15 @@
           });
         }
 
-        if (btnCopy) {
-          btnCopy.addEventListener("click", async () => {
-            btnCopy.disabled = true;
-            const origText = btnCopy.textContent;
-            btnCopy.textContent = "⌛ Đang copy...";
-            try {
-              const dataUrl = await generateSquareShareCard(d);
-              const res = await fetch(dataUrl);
-              const blob = await res.blob();
-              await navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob }),
-              ]);
-              showToast("✓ Đã copy ảnh vuông! Bạn có thể dán (Ctrl+V) để chia sẻ.");
-            } catch (err) {
-              console.error(err);
-              showToast("❌ Trình duyệt không hỗ trợ sao chép ảnh");
-            } finally {
-              btnCopy.disabled = false;
-              btnCopy.textContent = origText;
-            }
-          });
-        }
-
         if (btnDownloadVid) {
           btnDownloadVid.addEventListener("click", async () => {
             try {
               await recordStoryVideo(d);
             } catch (err) {
               console.error(err);
-              showToast("❌ Lỗi khi quay video");
+              showToast(`❌ Lỗi khi quay video: ${err.message || err}`);
               btnDownloadVid.disabled = false;
               btnDownloadVid.textContent = "🎥 Video";
-            }
-          });
-        }
-
-        if (btnShareApi) {
-          btnShareApi.addEventListener("click", async () => {
-            btnShareApi.disabled = true;
-            const origText = btnShareApi.textContent;
-            btnShareApi.textContent = "⌛ Đang chia sẻ...";
-            try {
-              const dataUrl = await generateSquareShareCard(d);
-              const res = await fetch(dataUrl);
-              const blob = await res.blob();
-              const file = new File([blob], "shopee-stats.png", { type: "image/png" });
-
-              const shareData = {
-                title: "Shopee Stats Overview",
-                text: "Xem thống kê chi tiêu Shopee của tôi! Bạn đã chi bao nhiêu tiền?",
-                url: window.location.href,
-              };
-
-              if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                shareData.files = [file];
-              }
-
-              await navigator.share(shareData);
-              showToast("✓ Đã chia sẻ thành công!");
-            } catch (err) {
-              console.error(err);
-              if (err.name !== "AbortError") {
-                showToast("❌ Không thể chia sẻ");
-              }
-            } finally {
-              btnShareApi.disabled = false;
-              btnShareApi.textContent = origText;
             }
           });
         }
@@ -1822,7 +2042,8 @@
         const currentYear = new Date().getFullYear();
 
         // Top Item
-        const hasTopItem = !!d.ti;
+        const hasTopItem = typeof d.ti === 'string' && d.ti.trim().length > 0
+          && d.ti !== 'Không có thông tin sản phẩm' && d.ti !== 'Sản phẩm đã ẩn';
         const topName = d.ti ? escHtml(d.ti) : '';
 
         // Slide 1: Welcome & Total Spent
@@ -1892,14 +2113,23 @@
           <div style="margin: auto 0;">
             <div class="polaroid-card">
               <div class="polaroid-photo-area">
-                <span class="polaroid-badge">👑 Yêu Thích</span>
-                <div class="top-item-emoji">👑</div>
+                <span class="polaroid-badge" id="polaroid-badge-el">👑 Yêu Thích</span>
+                <div class="top-item-emoji" id="polaroid-emoji-el">👑</div>
               </div>
-              <div class="polaroid-card-name">${hasTopItem ? topName : 'Không có thông tin sản phẩm'}</div>
-              <div class="polaroid-card-footer">
+              <div class="polaroid-card-name" id="polaroid-name-el">${hasTopItem ? topName : 'Không có thông tin sản phẩm'}</div>
+              <div class="polaroid-card-desc" id="polaroid-desc-el"></div>
+              <div class="polaroid-card-footer" id="polaroid-footer-el">
                 Đã đồng hành cùng ví tiền của bạn! ✨
               </div>
             </div>
+            ${hasTopItem ? `
+            <div class="privacy-control" style="margin-top: 20px; text-align: center;">
+              <label class="privacy-toggle-container">
+                <input type="checkbox" id="chk-show-product" checked>
+                <span class="privacy-toggle-label">Hiện tên sản phẩm</span>
+              </label>
+            </div>
+            ` : ''}
           </div>
           <div class="story-footer">
             <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">tr4n.github.io/shopee-stats</a>
@@ -1973,6 +2203,69 @@
 
         const slidesWrap = document.getElementById("slides-wrap");
         slidesWrap.innerHTML = welcomeSlideHtml + statsSlideHtml + topItemSlideHtml + yearlySlideHtml + ctaSlideHtml;
+
+        // Toggle Privacy setup for Slide 3
+        function updateSlide3Mode(showProduct) {
+          const slideTitle = document.querySelector("#slide-2 .slide-title");
+          const slideDesc = document.querySelector("#slide-2 .slide-desc");
+          const badgeEl = document.getElementById("polaroid-badge-el");
+          const emojiEl = document.getElementById("polaroid-emoji-el");
+          const nameEl = document.getElementById("polaroid-name-el");
+          const descEl = document.getElementById("polaroid-desc-el");
+          const footerEl = document.getElementById("polaroid-footer-el");
+
+          if (!slideTitle || !slideDesc || !badgeEl || !emojiEl || !nameEl || !footerEl) return;
+
+          if (showProduct) {
+            slideTitle.textContent = "Mối tình đậm sâu";
+            slideDesc.textContent = "Sản phẩm gắn bó nhất cùng bạn trong hành trình qua";
+            badgeEl.textContent = "👑 Yêu Thích";
+            badgeEl.style.background = "#ffd700";
+            badgeEl.style.color = "#7c5e00";
+            emojiEl.textContent = "👑";
+            nameEl.textContent = topName;
+            if (descEl) descEl.style.display = "none";
+            footerEl.textContent = "Đã đồng hành cùng ví tiền của bạn! ✨";
+            footerEl.style.color = "#64748b";
+          } else {
+            const p = calculateSharePersonality(d);
+            slideTitle.textContent = "Tính cách mua sắm";
+            slideDesc.textContent = "Nhận xét phong cách chi tiêu độc bản của riêng bạn";
+            badgeEl.textContent = p.badge;
+            
+            // Color badge based on personality
+            if (p.title === "Nhà Sưu Tầm Chọn Lọc") {
+              badgeEl.style.background = "#e2f1ff"; badgeEl.style.color = "#0066cc";
+            } else if (p.title === "Chiến Thần Săn Sale") {
+              badgeEl.style.background = "#e6fcf5"; badgeEl.style.color = "#0ca678";
+            } else if (p.title === "Nhà Chi Tiêu Bùng Nổ") {
+              badgeEl.style.background = "#fff0f6"; badgeEl.style.color = "#d6336c";
+            } else if (p.title === "Người Tiêu Dùng Thực Tế") {
+              badgeEl.style.background = "#f4fce3"; badgeEl.style.color = "#5c940d";
+            } else {
+              badgeEl.style.background = "#fff4e6"; badgeEl.style.color = "#fd7e14";
+            }
+
+            emojiEl.textContent = p.icon;
+            nameEl.textContent = p.title;
+            if (descEl) {
+              descEl.textContent = p.desc;
+              descEl.style.display = "block";
+            }
+            footerEl.textContent = p.slogan;
+            footerEl.style.color = "var(--primary)";
+          }
+        }
+
+        const toggleChk = document.getElementById("chk-show-product");
+        if (toggleChk) {
+          toggleChk.addEventListener("change", (e) => {
+            updateSlide3Mode(e.target.checked);
+          });
+          updateSlide3Mode(toggleChk.checked);
+        } else {
+          updateSlide3Mode(false);
+        }
 
         // Slides logic
         const slides = Array.from(document.querySelectorAll(".slide"));
@@ -2064,8 +2357,8 @@
         const storyFrame = document.getElementById("story-frame");
 
         storyFrame.addEventListener("click", (e) => {
-          // Ignore clicks on links, buttons, and other interactive containers
-          if (e.target.closest("a, button, .cta-btn, .actions-panel, #actions-panel")) {
+          // Ignore clicks on links, buttons, inputs, labels, and other interactive containers
+          if (e.target.closest("a, button, input, label, .cta-btn, .actions-panel, #actions-panel")) {
             return;
           }
 
