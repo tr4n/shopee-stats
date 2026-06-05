@@ -268,47 +268,100 @@
     const ytx = yx + yw + 24;
     txt('DÒNG CHẢY THỜI GIAN', ytx, yearlyChartTop + 48, 15, '800', tColors.accent);
 
-    // Render yearly spending horizontal bar rows
-    const ydData = (d.yd || []).slice(-3);
+    // Render yearly spending horizontal bar rows (up to 12 years dynamically)
+    const ydData = (d.yd || []).slice(-12);
     if (ydData.length === 0) {
       txt('Không có dữ liệu năm', ytx, yearlyChartTop + 104, 15, '600', tColors.textMuted);
     } else {
       const maxVal = Math.max(...ydData.map(([, v]) => v), 1);
       const currentYear = new Date().getFullYear();
 
-      ydData.forEach(([year, val], idx) => {
-        const rowY = yearlyChartTop + 68 + idx * 30;
+      if (ydData.length <= 5) {
+        // Single column layout for up to 5 years
+        const rowH = ydData.length > 3 ? Math.floor(100 / ydData.length) : 32;
+        const startY = yearlyChartTop + 62 + Math.floor((104 - (ydData.length * rowH)) / 2);
+        const fontSize = ydData.length > 4 ? 11 : 13;
+        const barH = ydData.length > 4 ? 6 : 8;
 
-        // Year text
-        txt(year.toString(), ytx, rowY + 12, 13, '800', tColors.textMuted);
+        ydData.forEach(([year, val], idx) => {
+          const rowY = startY + idx * rowH;
 
-        // Bar Track
-        const barTrackX = ytx + 54;
-        const barTrackW = W - PAD - barTrackX - 170; // Allocates space dynamically
-        const barTrackH = 8;
-        rrect(barTrackX, rowY + 4, barTrackW, barTrackH, 4, 'rgba(0,0,0,0.04)');
+          // Year text
+          txt(year.toString(), ytx, rowY + 11, fontSize, '800', tColors.textMuted);
 
-        // Bar Fill
-        const pct = val < 0 ? 0 : val / maxVal;
-        const barW = barTrackW * pct;
-        const isCurrent = Number(year) === currentYear;
+          // Bar Track
+          const barTrackX = ytx + 54;
+          const barTrackW = W - PAD - barTrackX - 170;
+          rrect(barTrackX, rowY + 4, barTrackW, barH, 4, 'rgba(0,0,0,0.04)');
 
-        if (barW > 0) {
-          const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
-          if (isCurrent) {
-            barGrad.addColorStop(0, '#ee4d2d');
-            barGrad.addColorStop(1, '#ff8a5a');
-          } else {
-            barGrad.addColorStop(0, '#94a3b8');
-            barGrad.addColorStop(1, '#cbd5e1');
+          // Bar Fill
+          const pct = val < 0 ? 0 : val / maxVal;
+          const barW = barTrackW * pct;
+          const isCurrent = Number(year) === currentYear;
+
+          if (barW > 0) {
+            const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+            if (isCurrent) {
+              barGrad.addColorStop(0, '#ee4d2d');
+              barGrad.addColorStop(1, '#ff8a5a');
+            } else {
+              barGrad.addColorStop(0, '#94a3b8');
+              barGrad.addColorStop(1, '#cbd5e1');
+            }
+            rrect(barTrackX, rowY + 4, barW, barH, 4, barGrad);
           }
-          rrect(barTrackX, rowY + 4, barW, barTrackH, 4, barGrad);
-        }
 
-        // Amount Val
-        const valFmt = fmtC(val);
-        txt(valFmt, W - PAD - 22, rowY + 12, 13, '800', tColors.text, 'right');
-      });
+          // Amount Val
+          const valFmt = fmtC(val);
+          txt(valFmt, W - PAD - 22, rowY + 11, fontSize, '800', tColors.text, 'right');
+        });
+      } else {
+        // Two-column layout for 6 to 12 years
+        const leftColCount = Math.ceil(ydData.length / 2);
+        const rowH = Math.floor(106 / leftColCount);
+        const startY = yearlyChartTop + 58 + Math.floor((106 - (leftColCount * rowH)) / 2);
+        const col1X = ytx;
+        const totalW = W - PAD - 22 - col1X;
+        const colW = Math.floor((totalW - 40) / 2);
+        const col2X = col1X + colW + 40;
+
+        ydData.forEach(([year, val], idx) => {
+          const isLeft = idx < leftColCount;
+          const colIdx = isLeft ? idx : idx - leftColCount;
+          const rowY = startY + colIdx * rowH;
+          const startX = isLeft ? col1X : col2X;
+
+          // Year text
+          txt(year.toString(), startX, rowY + 10, 11, '800', tColors.textMuted);
+
+          // Bar Track
+          const barTrackX = startX + 40;
+          const barTrackW = colW - 40 - 85;
+          const barH = 6;
+          rrect(barTrackX, rowY + 3, barTrackW, barH, 3, 'rgba(0,0,0,0.04)');
+
+          // Bar Fill
+          const pct = val < 0 ? 0 : val / maxVal;
+          const barW = barTrackW * pct;
+          const isCurrent = Number(year) === currentYear;
+
+          if (barW > 0) {
+            const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+            if (isCurrent) {
+              barGrad.addColorStop(0, '#ee4d2d');
+              barGrad.addColorStop(1, '#ff8a5a');
+            } else {
+              barGrad.addColorStop(0, '#94a3b8');
+              barGrad.addColorStop(1, '#cbd5e1');
+            }
+            rrect(barTrackX, rowY + 3, barW, barH, 3, barGrad);
+          }
+
+          // Amount Val
+          const valFmt = fmtC(val);
+          txt(valFmt, startX + colW, rowY + 10, 11, '800', tColors.text, 'right');
+        });
+      }
     }
 
     // ── FOOTER ────────────────────────────────────────────────
@@ -695,32 +748,49 @@
         rrect(PAD, cardY, W - PAD * 2, cardH, 24, null, 'rgba(255, 255, 255, 0.85)', 1.5);
 
         const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
-        const yd = Array.isArray(d.yd) ? d.yd.slice(0, 5) : [];
+        const yd = Array.isArray(d.yd) ? d.yd.slice(-12) : [];
 
         const progress = Math.min(pageFrame / 40, 1);
-        const startY = cardY + 50;
-        const rowH = 65;
+        
+        // Dynamic Y spacing and font scale
+        const rowH = yd.length > 5 ? Math.floor(340 / yd.length) : 60;
+        const startY = cardY + 45 + Math.floor((340 - (yd.length * rowH)) / 2);
+        const fontSize = yd.length > 8 ? 10 : (yd.length > 5 ? 12 : 14);
+        const barH = yd.length > 8 ? 5 : (yd.length > 5 ? 7 : 10);
 
         yd.forEach(([y, v], i) => {
           const rowY = startY + i * rowH;
-          txt(y.toString(), PAD + 24, rowY + 24, 14, '800', tColors.textMuted);
+          const textY = rowY + Math.floor(rowH / 2) + Math.floor(fontSize / 3) + 1;
+          const barY = rowY + Math.floor((rowH - barH) / 2);
 
+          // Year text
+          txt(y.toString(), PAD + 24, textY, fontSize, '800', tColors.textMuted);
+
+          // Bar Track
           const barTrackX = PAD + 80;
           const barTrackW = W - PAD * 2 - 200;
-          const barTrackH = 10;
-          rrect(barTrackX, rowY + 14, barTrackW, barTrackH, 5, 'rgba(0,0,0,0.05)');
+          rrect(barTrackX, barY, barTrackW, barH, barH / 2, 'rgba(0,0,0,0.05)');
 
+          // Bar Fill
           const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
           const isCurrent = Number(y) === currentYear;
 
           const barW = barTrackW * (pct / 100) * progress;
-          const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
-          barGrad.addColorStop(0, '#ee4d2d');
-          barGrad.addColorStop(1, '#ff8a5a');
-          rrect(barTrackX, rowY + 14, barW, barTrackH, 5, barGrad);
+          if (barW > 0) {
+            const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+            if (isCurrent) {
+              barGrad.addColorStop(0, '#ee4d2d');
+              barGrad.addColorStop(1, '#ff8a5a');
+            } else {
+              barGrad.addColorStop(0, '#94a3b8');
+              barGrad.addColorStop(1, '#cbd5e1');
+            }
+            rrect(barTrackX, barY, barW, barH, barH / 2, barGrad);
+          }
 
+          // Amount Val
           const valFmt = fmtVND(v);
-          txt(valFmt, W - PAD - 24, rowY + 24, 13, '800', tColors.text, 'right');
+          txt(valFmt, W - PAD - 24, textY, fontSize - 1, '800', tColors.text, 'right');
         });
       }
       else if (page === 4) {
@@ -851,138 +921,7 @@
     }, 3000);
   }
 
-  /* ====================================================
-     🎵 Shopee-vibe Music Engine (Web Audio API)
-     Pop nhẹ, catchy, procedurally generated
-   ==================================================== */
-  const MusicEngine = (function() {
-    let audio = null;
-    let isPlaying = false;
 
-    function initAudio() {
-      if (audio) return;
-      
-      // Try to load local file first, with fallback to online URL
-      audio = new Audio("bgm.mp3");
-      audio.loop = true;
-      audio.volume = 0.35;
-
-      // Listen for errors to fall back to the online viral stream
-      audio.addEventListener('error', function(e) {
-        console.warn("Local bgm.mp3 failed to load, falling back to online lofi stream...", e);
-        const wasPlaying = isPlaying;
-        if (isPlaying) {
-          audio.pause();
-        }
-        audio.src = "https://raw.githubusercontent.com/YoyoZhang24/RelaX50/main/RelaX50/audios/lofi.mp3";
-        audio.load();
-        if (wasPlaying) {
-          audio.play().catch(err => console.error("Fallback play failed:", err));
-        }
-      }, { once: true });
-    }
-
-    function start() {
-      initAudio();
-      isPlaying = true;
-      audio.play().catch(e => {
-        console.warn("Playback prevented:", e);
-        isPlaying = false;
-        
-        // Update floating music UI to off state when autoplay is blocked
-        const btn = document.getElementById('btn-music-float');
-        const eqBars = document.getElementById('eq-bars');
-        const label = document.getElementById('music-btn-label');
-        const icon = document.getElementById('music-icon');
-        if (btn) btn.classList.remove('active');
-        if (eqBars) {
-          eqBars.classList.remove('music-playing');
-          eqBars.style.display = 'none';
-        }
-        if (icon) {
-          icon.style.display = 'inline';
-          icon.textContent = '🔇';
-        }
-        if (label) label.textContent = 'Tắt nhạc';
-      });
-      return true;
-    }
-
-    function stop() {
-      isPlaying = false;
-      if (audio) {
-        audio.pause();
-      }
-    }
-
-    function toggle() {
-      initAudio();
-      if (isPlaying) {
-        stop();
-        return false;
-      } else {
-        return start();
-      }
-    }
-
-    function playing() {
-      return isPlaying && audio && !audio.paused;
-    }
-
-    return { start, stop, toggle, playing };
-  })();
-
-  function setupMusic() {
-    const btn = document.getElementById('btn-music-float');
-    const eqBars = document.getElementById('eq-bars');
-    const label = document.getElementById('music-btn-label');
-    const icon = document.getElementById('music-icon');
-    if (!btn) return;
-
-    function updateMusicUI(on) {
-      if (on) {
-        btn.classList.add('active');
-        eqBars.classList.add('music-playing');
-        eqBars.style.display = 'inline-flex';
-        if (icon) icon.style.display = 'none';
-        label.textContent = 'Đang phát';
-      } else {
-        btn.classList.remove('active');
-        eqBars.classList.remove('music-playing');
-        eqBars.style.display = 'none';
-        if (icon) {
-          icon.style.display = 'inline';
-          icon.textContent = '🔇';
-        }
-        label.textContent = 'Tắt nhạc';
-      }
-    }
-
-    // Mặc định bật nhạc khi tải trang
-    setTimeout(() => {
-      if (MusicEngine && typeof MusicEngine.toggle === 'function') {
-        try {
-          const success = MusicEngine.toggle(); // toggle từ false → true
-          updateMusicUI(success);
-        } catch (e) {
-          console.warn('Auto-start music failed:', e);
-          updateMusicUI(false);
-        }
-      } else {
-        updateMusicUI(false);
-      }
-    }, 1500); // Delay để tránh autoplay policy
-
-    btn.addEventListener('click', () => {
-      const nowPlaying = MusicEngine.toggle();
-      updateMusicUI(nowPlaying);
-      if (nowPlaying) {
-        showToast('🎵 Nhạc nền đang phát!');
-      } else {
-        showToast('🔇 Đã tắt nhạc nền');
-      }
-    });
-  }
 
   function setupDarkMode() {
     const btn = document.getElementById('btn-theme');
@@ -1567,7 +1506,7 @@
 
     // Slide 4: Yearly Breakdown
     const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
-    const chartRowsHtml = Array.isArray(d.yd) ? d.yd.map(([y, v]) => {
+    const chartRowsHtml = Array.isArray(d.yd) ? d.yd.slice(-12).map(([y, v]) => {
       const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
       const isCurrent = Number(y) === currentYear;
       const valFmt = fmtVND(v);
@@ -1776,7 +1715,6 @@
   } else {
     renderSlideshow(data);
     setupActions(data);
-    setupMusic();
     setupDarkMode();
   }
 })();

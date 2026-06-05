@@ -372,8 +372,26 @@ body {
 .year-chart {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin: 20px 0;
+  gap: 12px;
+  margin: 16px 0;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+/* Webkit scrollbar styling */
+.year-chart::-webkit-scrollbar {
+  width: 4px;
+}
+.year-chart::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+}
+.year-chart::-webkit-scrollbar-thumb {
+  background: rgba(238, 77, 45, 0.25);
+  border-radius: 10px;
+}
+.year-chart::-webkit-scrollbar-thumb:hover {
+  background: rgba(238, 77, 45, 0.45);
 }
 
 .year-row {
@@ -702,7 +720,7 @@ body {
 .img-preview-frame {
   position: relative;
   width: 100%;
-  max-width: 340px;
+  max-width: 520px;
 }
 .img-preview-frame img {
   width: 100%;
@@ -736,7 +754,7 @@ body {
   display: flex;
   gap: 10px;
   width: 100%;
-  max-width: 340px;
+  max-width: 520px;
 }
 .img-action-btn {
   flex: 1;
