@@ -654,12 +654,6 @@
       </div>
     </div>
 
-    <!-- Navigation touch overlays -->
-    <div class="story-nav-overlay">
-      <div class="nav-zone-left" id="nav-left"></div>
-      <div class="nav-zone-right" id="nav-right"></div>
-    </div>
-
     <!-- Slides wrap -->
     <div class="slides-wrap" id="slides-wrap">
       <!-- Will be rendered dynamically via JS -->
@@ -670,6 +664,7 @@
   <div id="actions-panel" class="actions-panel" style="display: none;">
     <button id="btn-download-img" class="action-btn active">💾 Tải ảnh</button>
     <button id="btn-copy-img" class="action-btn">📋 Copy ảnh</button>
+    <button id="btn-share-api" class="action-btn" style="display: none;">📤 Chia sẻ</button>
   </div>
 
   <!-- Toast Message -->
@@ -684,6 +679,15 @@
        ==================================================== */
       async function generateSquareShareCard(d) {
         try { await document.fonts.ready; } catch (e) { }
+
+        // Load QR Code dynamically from api.qrserver.com
+        const qrImage = new Image();
+        qrImage.crossOrigin = "anonymous";
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(window.location.href)}`;
+        await new Promise((resolve) => {
+          qrImage.onload = resolve;
+          qrImage.onerror = resolve;
+        });
 
         const W = 1080;
         const H = 1080; // Always square
@@ -900,8 +904,21 @@
         ctx.fillStyle = fLine;
         ctx.fillRect(PAD, footerY - 18, W - PAD * 2, 1);
 
-        txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 6, 17, '600', tColors.textMuted, 'center');
-        txt('tr4n.github.io/shopee-stats', W / 2, footerY + 38, 20, '800', tColors.accent, 'center');
+        if (qrImage.complete && qrImage.naturalWidth > 0) {
+          const qrx = W - PAD - 100;
+          const qry = footerY - 42;
+          // Draw small white backing for QR
+          rrect(qrx - 6, qry - 6, 112, 112, 8, '#ffffff', 'rgba(0,0,0,0.05)', 1);
+          ctx.drawImage(qrImage, qrx, qry, 100, 100);
+
+          // Left align the footer brand text to balance
+          txt('Quét để xem chi tiêu của bạn:', PAD, footerY + 16, 16, '700', tColors.textMuted);
+          txt('tr4n.github.io/shopee-stats', PAD, footerY + 46, 20, '800', tColors.accent);
+        } else {
+          // Fallback center aligned brand text if QR code image failed to load
+          txt('Bạn chi tiêu bao nhiêu tiền trên Shopee?', W / 2, footerY + 6, 17, '600', tColors.textMuted, 'center');
+          txt('tr4n.github.io/shopee-stats', W / 2, footerY + 38, 20, '800', tColors.accent, 'center');
+        }
 
         return canvas.toDataURL('image/png', 0.92);
       }
@@ -920,9 +937,14 @@
       function setupActions(d) {
         const btnDownload = document.getElementById("btn-download-img");
         const btnCopy = document.getElementById("btn-copy-img");
+        const btnShareApi = document.getElementById("btn-share-api");
         const actionsPanel = document.getElementById("actions-panel");
 
         if (actionsPanel) actionsPanel.style.display = "flex";
+
+        if (btnShareApi && navigator.share) {
+          btnShareApi.style.display = "inline-flex";
+        }
 
         if (btnDownload) {
           btnDownload.addEventListener("click", async () => {
@@ -967,6 +989,41 @@
             } finally {
               btnCopy.disabled = false;
               btnCopy.textContent = origText;
+            }
+          });
+        }
+
+        if (btnShareApi) {
+          btnShareApi.addEventListener("click", async () => {
+            btnShareApi.disabled = true;
+            const origText = btnShareApi.textContent;
+            btnShareApi.textContent = "⌛ Đang chia sẻ...";
+            try {
+              const dataUrl = await generateSquareShareCard(d);
+              const res = await fetch(dataUrl);
+              const blob = await res.blob();
+              const file = new File([blob], "shopee-stats.png", { type: "image/png" });
+
+              const shareData = {
+                title: "Shopee Stats Overview",
+                text: "Xem thống kê chi tiêu Shopee của tôi! Bạn đã chi bao nhiêu tiền?",
+                url: window.location.href,
+              };
+
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+              }
+
+              await navigator.share(shareData);
+              showToast("✓ Đã chia sẻ thành công!");
+            } catch (err) {
+              console.error(err);
+              if (err.name !== "AbortError") {
+                showToast("❌ Không thể chia sẻ");
+              }
+            } finally {
+              btnShareApi.disabled = false;
+              btnShareApi.textContent = origText;
             }
           });
         }
@@ -1593,14 +1650,21 @@
 
         const storyFrame = document.getElementById("story-frame");
 
-        document.getElementById("nav-left").addEventListener("click", (e) => {
-          e.stopPropagation();
-          prevSlide();
-        });
+        storyFrame.addEventListener("click", (e) => {
+          // Ignore clicks on links, buttons, and other interactive containers
+          if (e.target.closest("a, button, .cta-btn, .actions-panel, #actions-panel")) {
+            return;
+          }
 
-        document.getElementById("nav-right").addEventListener("click", (e) => {
-          e.stopPropagation();
-          nextSlide();
+          const rect = storyFrame.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const width = rect.width;
+
+          if (clickX < width * 0.3) {
+            prevSlide();
+          } else {
+            nextSlide();
+          }
         });
 
         const pauseStart = () => { isPaused = true; };
