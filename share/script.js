@@ -276,92 +276,104 @@
       const maxVal = Math.max(...ydData.map(([, v]) => v), 1);
       const currentYear = new Date().getFullYear();
 
-      if (ydData.length <= 5) {
-        // Single column layout for up to 5 years
-        const rowH = ydData.length > 3 ? Math.floor(100 / ydData.length) : 32;
-        const startY = yearlyChartTop + 62 + Math.floor((104 - (ydData.length * rowH)) / 2);
-        const fontSize = ydData.length > 4 ? 11 : 13;
-        const barH = ydData.length > 4 ? 6 : 8;
-
-        ydData.forEach(([year, val], idx) => {
-          const rowY = startY + idx * rowH;
-
-          // Year text
-          txt(year.toString(), ytx, rowY + 11, fontSize, '800', tColors.textMuted);
-
-          // Bar Track
-          const barTrackX = ytx + 54;
-          const barTrackW = W - PAD - barTrackX - 170;
-          rrect(barTrackX, rowY + 4, barTrackW, barH, 4, 'rgba(0,0,0,0.04)');
-
-          // Bar Fill
-          const pct = val < 0 ? 0 : val / maxVal;
-          const barW = barTrackW * pct;
-          const isCurrent = Number(year) === currentYear;
-
-          if (barW > 0) {
-            const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
-            if (isCurrent) {
-              barGrad.addColorStop(0, '#ee4d2d');
-              barGrad.addColorStop(1, '#ff8a5a');
-            } else {
-              barGrad.addColorStop(0, '#94a3b8');
-              barGrad.addColorStop(1, '#cbd5e1');
-            }
-            rrect(barTrackX, rowY + 4, barW, barH, 4, barGrad);
-          }
-
-          // Amount Val
-          const valFmt = fmtC(val);
-          txt(valFmt, W - PAD - 22, rowY + 11, fontSize, '800', tColors.text, 'right');
-        });
-      } else {
-        // Two-column layout for 6 to 12 years
-        const leftColCount = Math.ceil(ydData.length / 2);
-        const rowH = Math.floor(106 / leftColCount);
-        const startY = yearlyChartTop + 58 + Math.floor((106 - (leftColCount * rowH)) / 2);
-        const col1X = ytx;
-        const totalW = W - PAD - 22 - col1X;
-        const colW = Math.floor((totalW - 40) / 2);
-        const col2X = col1X + colW + 40;
-
-        ydData.forEach(([year, val], idx) => {
-          const isLeft = idx < leftColCount;
-          const colIdx = isLeft ? idx : idx - leftColCount;
-          const rowY = startY + colIdx * rowH;
-          const startX = isLeft ? col1X : col2X;
-
-          // Year text
-          txt(year.toString(), startX, rowY + 10, 11, '800', tColors.textMuted);
-
-          // Bar Track
-          const barTrackX = startX + 40;
-          const barTrackW = colW - 40 - 85;
-          const barH = 6;
-          rrect(barTrackX, rowY + 3, barTrackW, barH, 3, 'rgba(0,0,0,0.04)');
-
-          // Bar Fill
-          const pct = val < 0 ? 0 : val / maxVal;
-          const barW = barTrackW * pct;
-          const isCurrent = Number(year) === currentYear;
-
-          if (barW > 0) {
-            const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
-            if (isCurrent) {
-              barGrad.addColorStop(0, '#ee4d2d');
-              barGrad.addColorStop(1, '#ff8a5a');
-            } else {
-              barGrad.addColorStop(0, '#94a3b8');
-              barGrad.addColorStop(1, '#cbd5e1');
-            }
-            rrect(barTrackX, rowY + 3, barW, barH, 3, barGrad);
-          }
-
-          // Amount Val
-          const valFmt = fmtC(val);
-          txt(valFmt, startX + colW, rowY + 10, 11, '800', tColors.text, 'right');
-        });
+      let numCols = 1;
+      if (ydData.length > 8) {
+        numCols = 3;
+      } else if (ydData.length > 4) {
+        numCols = 2;
       }
+
+      // Calculate sizes of each column dynamically to balance items
+      const colSizes = [];
+      let itemsLeft = ydData.length;
+      for (let c = 0; c < numCols; c++) {
+        const size = Math.ceil(itemsLeft / (numCols - c));
+        colSizes.push(size);
+        itemsLeft -= size;
+      }
+
+      const maxRows = colSizes[0];
+      const rowH = maxRows > 3 ? Math.floor(106 / maxRows) : 32;
+      const startY = yearlyChartTop + 58 + Math.floor((106 - (maxRows * rowH)) / 2);
+
+      const col1X = ytx;
+      const totalW = W - PAD - 22 - col1X; // 732px available
+      
+      let colW, gap;
+      let fontSize, barH;
+      let yearOffset, barOffset, valWidthOffset;
+
+      if (numCols === 1) {
+        colW = totalW;
+        gap = 0;
+        fontSize = ydData.length > 4 ? 11 : 13;
+        barH = ydData.length > 4 ? 6 : 8;
+        yearOffset = 54;
+        barOffset = 4;
+        valWidthOffset = 170;
+      } else if (numCols === 2) {
+        gap = 40;
+        colW = Math.floor((totalW - gap) / 2);
+        fontSize = 11;
+        barH = 6;
+        yearOffset = 40;
+        barOffset = 3;
+        valWidthOffset = 85;
+      } else {
+        gap = 24;
+        colW = Math.floor((totalW - 2 * gap) / 3);
+        fontSize = 10.5;
+        barH = 5;
+        yearOffset = 34;
+        barOffset = 3;
+        valWidthOffset = 76;
+      }
+
+      let currentCol = 0;
+      let colStartIdx = 0;
+
+      ydData.forEach(([year, val], idx) => {
+        if (idx >= colStartIdx + colSizes[currentCol]) {
+          colStartIdx += colSizes[currentCol];
+          currentCol++;
+        }
+        
+        const colIdx = idx - colStartIdx;
+        const rowY = startY + colIdx * rowH;
+        const startX = col1X + currentCol * (colW + gap);
+        
+        const textY = rowY + Math.floor(rowH / 2) + Math.floor(fontSize / 3) + 1;
+        const barY = rowY + Math.floor((rowH - barH) / 2);
+
+        // Year text
+        txt(year.toString(), startX, textY, fontSize, '800', tColors.textMuted);
+
+        // Bar Track
+        const barTrackX = startX + yearOffset;
+        const barTrackW = colW - yearOffset - valWidthOffset;
+        rrect(barTrackX, barY, barTrackW, barH, barH / 2, 'rgba(0,0,0,0.04)');
+
+        // Bar Fill
+        const pct = val < 0 ? 0 : val / maxVal;
+        const barW = barTrackW * pct;
+        const isCurrent = Number(year) === currentYear;
+
+        if (barW > 0) {
+          const barGrad = ctx.createLinearGradient(barTrackX, 0, barTrackX + barW, 0);
+          if (isCurrent) {
+            barGrad.addColorStop(0, '#ee4d2d');
+            barGrad.addColorStop(1, '#ff8a5a');
+          } else {
+            barGrad.addColorStop(0, '#94a3b8');
+            barGrad.addColorStop(1, '#cbd5e1');
+          }
+          rrect(barTrackX, barY, barW, barH, barH / 2, barGrad);
+        }
+
+        // Amount Val
+        const valFmt = fmtC(val);
+        txt(valFmt, startX + colW, textY, fontSize, '800', tColors.text, 'right');
+      });
     }
 
     // ── FOOTER ────────────────────────────────────────────────
