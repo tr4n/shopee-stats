@@ -764,23 +764,77 @@
 
         const progress = Math.min(pageFrame / 40, 1);
         
-        // Dynamic Y spacing and font scale
-        const rowH = yd.length > 5 ? Math.floor(340 / yd.length) : 60;
-        const startY = cardY + 45 + Math.floor((340 - (yd.length * rowH)) / 2);
-        const fontSize = yd.length > 8 ? 10 : (yd.length > 5 ? 12 : 14);
-        const barH = yd.length > 8 ? 5 : (yd.length > 5 ? 7 : 10);
+        let numCols = 1;
+        if (yd.length > 8) {
+          numCols = 3;
+        } else if (yd.length > 4) {
+          numCols = 2;
+        }
 
-        yd.forEach(([y, v], i) => {
-          const rowY = startY + i * rowH;
+        const colSizes = [];
+        let itemsLeft = yd.length;
+        for (let c = 0; c < numCols; c++) {
+          const size = Math.ceil(itemsLeft / (numCols - c));
+          colSizes.push(size);
+          itemsLeft -= size;
+        }
+
+        const maxRows = colSizes[0] || 1;
+        const rowH = Math.min(60, Math.floor(340 / maxRows));
+        const startY = cardY + 50 + Math.floor((340 - (maxRows * rowH)) / 2);
+
+        const col1X = PAD + 24;
+        const totalW = W - PAD * 2 - 48; // 396px available
+        
+        let colW, gap;
+        let fontSize, barH;
+        let yearOffset, valWidthOffset;
+
+        if (numCols === 1) {
+          colW = totalW;
+          gap = 0;
+          fontSize = 13;
+          barH = 8;
+          yearOffset = 54;
+          valWidthOffset = 150;
+        } else if (numCols === 2) {
+          gap = 24;
+          colW = Math.floor((totalW - gap) / 2);
+          fontSize = 11.5;
+          barH = 6;
+          yearOffset = 40;
+          valWidthOffset = 75;
+        } else {
+          gap = 14;
+          colW = Math.floor((totalW - 2 * gap) / 3);
+          fontSize = 10;
+          barH = 5;
+          yearOffset = 34;
+          valWidthOffset = 64;
+        }
+
+        let currentCol = 0;
+        let colStartIdx = 0;
+
+        yd.forEach(([y, v], idx) => {
+          if (idx >= colStartIdx + colSizes[currentCol]) {
+            colStartIdx += colSizes[currentCol];
+            currentCol++;
+          }
+          
+          const colIdx = idx - colStartIdx;
+          const rowY = startY + colIdx * rowH;
+          const startX = col1X + currentCol * (colW + gap);
+          
           const textY = rowY + Math.floor(rowH / 2) + Math.floor(fontSize / 3) + 1;
           const barY = rowY + Math.floor((rowH - barH) / 2);
 
           // Year text
-          txt(y.toString(), PAD + 24, textY, fontSize, '800', tColors.textMuted);
+          txt(y.toString(), startX, textY, fontSize, '800', tColors.textMuted);
 
           // Bar Track
-          const barTrackX = PAD + 80;
-          const barTrackW = W - PAD * 2 - 200;
+          const barTrackX = startX + yearOffset;
+          const barTrackW = colW - yearOffset - valWidthOffset;
           rrect(barTrackX, barY, barTrackW, barH, barH / 2, 'rgba(0,0,0,0.05)');
 
           // Bar Fill
@@ -802,7 +856,7 @@
 
           // Amount Val
           const valFmt = fmtVND(v);
-          txt(valFmt, W - PAD - 24, textY, fontSize - 1, '800', tColors.text, 'right');
+          txt(valFmt, startX + colW, textY, fontSize - 1, '800', tColors.text, 'right');
         });
       }
       else if (page === 4) {
@@ -1518,19 +1572,54 @@
 
     // Slide 4: Yearly Breakdown
     const maxVal = Array.isArray(d.yd) ? Math.max(...d.yd.map(([, v]) => v), 1) : 1;
-    const chartRowsHtml = Array.isArray(d.yd) ? d.yd.slice(-12).map(([y, v]) => {
-      const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
-      const isCurrent = Number(y) === currentYear;
-      const valFmt = fmtVND(v);
-      return `
-      <div class="year-row">
-        <div class="year-label">${y}</div>
-        <div class="year-bar-track">
-          <div class="year-bar-fill ${isCurrent ? 'active-year' : ''}" data-pct="${pct}"></div>
+    const ydData = Array.isArray(d.yd) ? d.yd.slice(-12) : [];
+    let chartRowsHtml = '';
+    let numCols = 1;
+    if (ydData.length > 8) {
+      numCols = 3;
+    } else if (ydData.length > 4) {
+      numCols = 2;
+    }
+
+    if (ydData.length === 0) {
+      chartRowsHtml = '<div style="text-align:center;color:var(--text-muted);">Không có dữ liệu năm</div>';
+    } else {
+      const colSizes = [];
+      let itemsLeft = ydData.length;
+      for (let c = 0; c < numCols; c++) {
+        const size = Math.ceil(itemsLeft / (numCols - c));
+        colSizes.push(size);
+        itemsLeft -= size;
+      }
+
+      let currentCol = 0;
+      let colStartIdx = 0;
+      const colsHtml = Array.from({ length: numCols }, () => []);
+
+      ydData.forEach(([y, v], idx) => {
+        if (idx >= colStartIdx + colSizes[currentCol]) {
+          colStartIdx += colSizes[currentCol];
+          currentCol++;
+        }
+        const pct = v < 0 ? 0 : Math.round((v / maxVal) * 100);
+        const isCurrent = Number(y) === currentYear;
+        const valFmt = fmtVND(v);
+        colsHtml[currentCol].push(`
+        <div class="year-row">
+          <div class="year-label">${y}</div>
+          <div class="year-bar-track">
+            <div class="year-bar-fill ${isCurrent ? 'active-year' : ''}" data-pct="${pct}"></div>
+          </div>
+          <div class="year-val">${valFmt}</div>
+        </div>`);
+      });
+
+      chartRowsHtml = colsHtml.map((colRows) => `
+        <div class="year-chart-col">
+          ${colRows.join('')}
         </div>
-        <div class="year-val">${valFmt}</div>
-      </div>`;
-    }).join('') : '<div style="text-align:center;color:var(--text-muted);">Không có dữ liệu năm</div>';
+      `).join('');
+    }
 
     const yearlySlideHtml = `
     <div class="slide" id="slide-3">

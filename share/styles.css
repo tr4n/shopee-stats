@@ -371,12 +371,19 @@ body {
 /* Year Chart */
 .year-chart {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16px;
   margin: 16px 0;
   max-height: 260px;
   overflow-y: auto;
   padding-right: 6px;
+}
+.year-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 /* Webkit scrollbar styling */
 .year-chart::-webkit-scrollbar {
@@ -397,21 +404,21 @@ body {
 .year-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .year-label {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 800;
-  width: 45px;
+  width: 32px;
   color: var(--text-muted);
 }
 
 .year-bar-track {
   flex: 1;
-  height: 10px;
+  height: 6px;
   background: rgba(0, 0, 0, 0.05);
-  border-radius: 5px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -419,7 +426,7 @@ body {
   height: 100%;
   background: rgba(0, 0, 0, 0.1);
   width: 0%;
-  border-radius: 5px;
+  border-radius: 3px;
   transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -428,10 +435,10 @@ body {
 }
 
 .year-val {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 800;
   color: var(--text);
-  min-width: 80px;
+  min-width: 42px;
   text-align: right;
 }
 
