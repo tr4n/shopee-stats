@@ -4020,73 +4020,92 @@ body {
 
 /* ── Tarot Share Preview Modal ── */
 .tarot-share-modal-content {
-  background: radial-gradient(ellipse at 30% 20%, #150e2e 0%, #0c071d 65%, #06030f 100%) !important;
-  border: 1px solid var(--tarot-border) !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
-  max-width: 480px !important;
+  background: radial-gradient(ellipse at 30% 10%, #13082e 0%, #090514 60%, #050210 100%) !important;
+  border: 1px solid rgba(200, 169, 110, 0.25) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(200,169,110,0.08) !important;
+  max-width: 540px !important;
   color: #fff !important;
 }
 
 .tarot-share-modal-content .modal-header {
-  border-bottom: 1px solid rgba(200, 169, 110, 0.15);
+  border-bottom: 1px solid rgba(200, 169, 110, 0.12);
+  padding-bottom: 14px;
 }
 
 .tarot-share-modal-content .modal-header h2 {
   color: var(--tarot-gold);
+  font-size: 16px;
+  letter-spacing: 0.5px;
 }
 
 .tarot-share-modal-content .btn-close {
   color: var(--tarot-gold-light);
-  opacity: 0.8;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
 }
 
 .tarot-share-modal-content .btn-close:hover {
   opacity: 1;
 }
 
+/* Format hint badge */
+.tarot-share-format-badge {
+  font-size: 11px;
+  color: rgba(200, 169, 110, 0.65);
+  letter-spacing: 0.8px;
+  text-align: center;
+  font-weight: 600;
+}
+
 .tarot-share-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
-  gap: 20px;
+  padding: 20px 24px 24px;
+  gap: 16px;
   overflow-y: auto;
   max-height: calc(90vh - 80px);
 }
 
+/* Preview container: 4:5 ratio */
 .tarot-share-preview-container {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   height: auto;
-  aspect-ratio: 9/16;
-  border-radius: 12px;
+  aspect-ratio: 4 / 5;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--tarot-border);
-  background: #0c071d;
+  background: #060310;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Neon glow border — color overridden per-archetype via inline style */
+  box-shadow:
+    0 0 0 1.5px rgba(200, 169, 110, 0.35),
+    0 0 28px 4px rgba(200, 169, 110, 0.12),
+    0 14px 40px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.4s ease;
 }
 
 .tarot-share-preview-container img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
 }
 
+/* Action buttons row */
 .tarot-share-actions {
   display: flex;
   gap: 12px;
   width: 100%;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .tarot-share-actions button {
-  min-width: 160px;
+  min-width: 150px;
   justify-content: center;
 }
