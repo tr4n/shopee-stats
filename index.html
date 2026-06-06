@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thống Kê Chi Tiêu Shopee - Shopee Analytics</title>
-  <meta name="description" content="Tính tổng tiền và thống kê chi tiết chi tiêu Shopee của bạn theo tháng/năm. Tích hợp AI phân tích thông minh, bảo mật 100% offline.">
+  <meta name="description" content="Nhìn lại hành trình chốt đơn Shopee của bạn với Shopee Wrapped. Biểu đồ chi tiêu trực quan, tự động phân loại ngành hàng, bảo mật và an toàn tuyệt đối.">
   <link rel="icon" type="image/png" href="extension/icons/icon128.png">
   
   <!-- Fonts -->
@@ -12,20 +12,20 @@
   
   <style>
     :root {
-      --bg: #f8fafc;
+      --bg: #fdfbf7; /* warmer, premium cream background */
       --card-bg: #ffffff;
-      --card-hover: #f1f5f9;
-      --border: #e2e8f0;
-      --border-hover: #cbd5e1;
-      --text: #0f172a;
-      --text-muted: #475569;
+      --card-hover: #faf8f5;
+      --border: #f3ede2; /* warmer borders */
+      --border-hover: #e8dfcd;
+      --text: #1e293b;
+      --text-muted: #64748b;
       
       --accent-orange: linear-gradient(135deg, #ff6b35 0%, #ee4d2d 100%);
-      --accent-orange-glow: rgba(238, 77, 45, 0.3);
+      --accent-orange-glow: rgba(238, 77, 45, 0.2);
       --accent-teal: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-      --accent-teal-glow: rgba(79, 172, 254, 0.3);
+      --accent-teal-glow: rgba(79, 172, 254, 0.2);
       --accent-purple: linear-gradient(135deg, #b06ab3 0%, #4568dc 100%);
-      --accent-purple-glow: rgba(69, 104, 220, 0.3);
+      --accent-purple-glow: rgba(69, 104, 220, 0.2);
       
       --font-display: Arial, Helvetica, sans-serif;
       --font-body: Arial, Helvetica, sans-serif;
@@ -55,7 +55,7 @@
       pointer-events: none;
       z-index: 0;
       filter: blur(150px);
-      opacity: 0.2;
+      opacity: 0.15;
     }
     
     .glow-orange {
@@ -68,14 +68,14 @@
       top: 500px;
       left: -200px;
       background: radial-gradient(circle, #00f2fe, transparent);
-      opacity: 0.15;
+      opacity: 0.1;
     }
 
     .glow-purple {
       bottom: -100px;
       right: 10%;
       background: radial-gradient(circle, #b06ab3, transparent);
-      opacity: 0.15;
+      opacity: 0.1;
     }
 
     /* Container */
@@ -89,13 +89,14 @@
 
     /* Header / Navbar */
     header {
-      padding: 24px 0;
+      padding: 20px 0;
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(248, 250, 252, 0.8);
+      background: rgba(253, 251, 247, 0.85);
+      transition: all 0.3s ease;
     }
 
     .nav-wrapper {
@@ -114,14 +115,14 @@
     .logo-section img {
       width: 40px;
       height: 40px;
-      filter: drop-shadow(0 4px 10px rgba(238, 77, 45, 0.2));
+      filter: drop-shadow(0 4px 10px rgba(238, 77, 45, 0.15));
     }
 
     .logo-section span {
       font-family: var(--font-display);
       font-weight: 800;
       font-size: 20px;
-      background: linear-gradient(135deg, #0f172a 50%, #475569 100%);
+      background: linear-gradient(135deg, #1e293b 50%, #475569 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.5px;
@@ -148,7 +149,7 @@
     .btn-install-sm {
       background: var(--accent-orange);
       color: #fff !important;
-      padding: 10px 20px;
+      padding: 10px 22px;
       border-radius: 99px;
       font-weight: 700 !important;
       font-size: 14px !important;
@@ -163,7 +164,7 @@
 
     /* Hero Section */
     .hero {
-      padding: 80px 0;
+      padding: 100px 0 80px 0;
       text-align: center;
       position: relative;
     }
@@ -172,24 +173,24 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
-      background: rgba(255, 107, 53, 0.1);
-      border: 1px solid rgba(255, 107, 53, 0.2);
+      padding: 8px 18px;
+      background: rgba(238, 77, 45, 0.08);
+      border: 1px solid rgba(238, 77, 45, 0.15);
       border-radius: 99px;
       color: #ee4d2d;
       font-size: 13px;
       font-weight: 700;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     h1 {
       font-family: var(--font-display);
-      font-size: 56px;
+      font-size: 54px;
       font-weight: 900;
-      line-height: 1.2;
-      letter-spacing: -1px;
+      line-height: 1.25;
+      letter-spacing: -1.5px;
       margin-bottom: 24px;
       color: #0f172a;
     }
@@ -201,10 +202,11 @@
     }
 
     .hero-desc {
-      font-size: 18px;
+      font-size: 19px;
       color: var(--text-muted);
-      max-width: 680px;
+      max-width: 720px;
       margin: 0 auto 40px auto;
+      line-height: 1.7;
     }
 
     .hero-actions {
@@ -220,7 +222,7 @@
       background: var(--accent-orange);
       color: #fff;
       text-decoration: none;
-      padding: 16px 36px;
+      padding: 18px 38px;
       border-radius: 99px;
       font-weight: 800;
       font-size: 16px;
@@ -242,7 +244,7 @@
       border: 1px solid var(--border);
       color: var(--text);
       text-decoration: none;
-      padding: 16px 36px;
+      padding: 18px 38px;
       border-radius: 99px;
       font-weight: 700;
       font-size: 16px;
@@ -260,14 +262,18 @@
     }
 
     .hero-image {
-      margin-top: 20px;
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 25px 60px -15px rgba(238, 77, 45, 0.08), 0 15px 30px -10px rgba(0, 0, 0, 0.04);
       border: 1px solid var(--border);
       background: var(--card-bg);
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
+      transition: transform 0.5s ease;
+    }
+
+    .hero-image:hover {
+      transform: scale(1.01);
     }
 
     .hero-image img {
@@ -276,21 +282,22 @@
       display: block;
     }
 
-    /* Features Showcase Section */
-    .showcase {
+    /* Features Grid Section */
+    .features-section {
       padding: 100px 0;
+      border-top: 1px solid var(--border);
     }
 
-    .section-title-wrapper {
+    .section-header {
       text-align: center;
-      margin-bottom: 80px;
+      margin-bottom: 60px;
     }
 
     .section-title {
       font-family: var(--font-display);
-      font-size: 40px;
+      font-size: 38px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.8px;
       margin-bottom: 16px;
       color: var(--text);
     }
@@ -298,163 +305,219 @@
     .section-desc {
       color: var(--text-muted);
       font-size: 18px;
-      max-width: 600px;
+      max-width: 640px;
       margin: 0 auto;
     }
 
-    .showcase-row {
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-hover);
+      box-shadow: 0 20px 40px -10px rgba(238, 77, 45, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.02);
+    }
+
+    .feature-content h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
       display: flex;
       align-items: center;
-      gap: 60px;
-      margin-bottom: 100px;
+      gap: 10px;
     }
 
-    .showcase-row:nth-child(even) {
-      flex-direction: row-reverse;
-    }
-
-    .showcase-content {
-      flex: 1;
-    }
-
-    .showcase-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      font-size: 24px;
+    .feature-content p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
       margin-bottom: 24px;
     }
-    
-    .badge-blue { background: rgba(0, 242, 254, 0.1); color: #00f2fe; }
-    .badge-orange { background: rgba(255, 107, 53, 0.1); color: #ff6b35; }
-    .badge-purple { background: rgba(176, 106, 179, 0.1); color: #b06ab3; }
-    .badge-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 
-    .showcase-content h3 {
-      font-family: var(--font-display);
-      font-size: 32px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text);
+    .feature-img-wrapper {
+      margin-top: auto;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #f1ece2;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      background: #fdfbf7;
     }
 
-    .showcase-content p {
-      font-size: 16px;
-      color: var(--text-muted);
-      line-height: 1.7;
-    }
-
-    .showcase-image {
-      flex: 1;
-      position: relative;
-    }
-
-    .showcase-image img {
+    .feature-img-wrapper img {
       width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
-      border: 1px solid var(--border);
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      height: auto;
+      display: block;
+      transition: transform 0.4s ease;
     }
 
-    .showcase-image:hover img {
-      transform: translateY(-8px);
-      box-shadow: 0 30px 50px -15px rgba(0,0,0,0.15);
+    .feature-card:hover .feature-img-wrapper img {
+      transform: scale(1.03);
     }
 
-    /* Privacy Highlight Section */
-    .privacy-focus {
+    /* Section divider decorating line */
+    .decor-line {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 0;
+      color: var(--border-hover);
+      font-size: 14px;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      user-select: none;
+    }
+
+    /* How It Works Section */
+    .how-it-works-section {
       padding: 100px 0;
-      background: radial-gradient(100% 100% at 50% 0%, rgba(255,107,53,0.05) 0%, transparent 100%);
+      background: radial-gradient(100% 100% at 50% 0%, rgba(238, 77, 45, 0.03) 0%, transparent 100%);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
 
-    .privacy-banner {
+    .how-it-works-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .how-it-works-grid .card-wide {
+      grid-column: span 2;
+    }
+
+    .how-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+    }
+
+    .how-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+    }
+
+    .how-card-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 60px;
-      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
     }
 
-    .privacy-content {
-      flex: 1 1 500px;
+    .how-card-header span {
+      font-size: 22px;
     }
 
-    .privacy-content h2 {
+    .how-card h4 {
       font-family: var(--font-display);
-      font-size: 40px;
+      font-size: 17px;
       font-weight: 800;
-      margin-bottom: 16px;
       color: var(--text);
     }
 
-    .privacy-content p {
+    .how-card p {
       color: var(--text-muted);
-      font-size: 16px;
-      margin-bottom: 24px;
-      line-height: 1.7;
+      font-size: 14.5px;
+      line-height: 1.6;
     }
 
-    .security-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 24px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      font-weight: 600;
-      font-size: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    /* 3 Steps Section */
+    .steps-section {
+      padding: 100px 0;
     }
 
-    .security-badge span {
-      color: #10b981;
-    }
-
-    .privacy-graphic {
-      flex: 1 1 400px;
-      display: flex;
-      justify-content: center;
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 48px;
       position: relative;
     }
 
-    .mockup-shield {
-      width: 240px;
-      height: 240px;
-      background: #ffffff;
-      border: 2px dashed var(--border-hover);
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+      transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+    }
+
+    .step-num {
+      width: 56px;
+      height: 56px;
+      background: rgba(238, 77, 45, 0.08);
+      border: 1px solid rgba(238, 77, 45, 0.15);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: rotateDash 40s linear infinite;
+      font-size: 22px;
+      color: #ee4d2d;
+      font-weight: 800;
+      margin: 0 auto 24px auto;
     }
 
-    .mockup-shield-inner {
-      width: 170px;
-      height: 170px;
-      border-radius: 50%;
-      background: var(--accent-orange);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 72px;
-      box-shadow: 0 10px 30px var(--accent-orange-glow);
+    .step-card h4 {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
     }
 
-    @keyframes rotateDash {
-      to { transform: rotate(360deg); }
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    .steps-cta {
+      margin-top: 60px;
+      text-align: center;
+    }
+
+    .steps-cta p {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-top: 16px;
+      font-weight: 600;
     }
 
     /* Footer */
     footer {
-      padding: 60px 0 40px 0;
+      padding: 80px 0 40px 0;
       background: #ffffff;
       border-top: 1px solid var(--border);
     }
@@ -465,17 +528,21 @@
       align-items: flex-start;
       gap: 40px;
       flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 50px;
     }
 
     .footer-brand {
-      max-width: 320px;
+      max-width: 360px;
+    }
+
+    .footer-brand .logo-section {
+      margin-bottom: 16px;
     }
 
     .footer-desc {
       color: var(--text-muted);
-      font-size: 14px;
-      margin-top: 16px;
+      font-size: 14.5px;
+      line-height: 1.6;
     }
 
     .footer-links {
@@ -486,8 +553,8 @@
     .footer-column h4 {
       font-family: var(--font-display);
       font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 16px;
+      font-weight: 800;
+      margin-bottom: 20px;
       color: var(--text);
     }
 
@@ -502,7 +569,7 @@
     .footer-column ul li a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 14px;
+      font-size: 14.5px;
       transition: color 0.3s;
     }
 
@@ -519,7 +586,7 @@
       flex-wrap: wrap;
       gap: 20px;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 13.5px;
     }
 
     .footer-bottom a {
@@ -531,34 +598,29 @@
       color: var(--text);
     }
 
-    /* Responsive */
+    /* Responsive adjustments */
     @media (max-width: 992px) {
-      h1 { font-size: 48px; }
-      .showcase-row, .showcase-row:nth-child(even) { flex-direction: column; gap: 40px; }
-      .privacy-banner { text-align: center; justify-content: center; }
-      .privacy-graphic { order: -1; }
+      h1 { font-size: 42px; }
+      .features-grid { grid-template-columns: 1fr; gap: 24px; }
+      .how-it-works-grid { grid-template-columns: 1fr; }
+      .how-it-works-grid .card-wide { grid-column: span 1; }
+      .steps-grid { grid-template-columns: 1fr; gap: 24px; }
     }
 
     @media (max-width: 768px) {
-      h1 { font-size: 36px; }
+      h1 { font-size: 34px; }
       .nav-links a:not(.btn-install-sm) { display: none; }
       .nav-links { gap: 12px; }
-      .logo-section span { font-size: 16px; }
-      .btn-install-sm { padding: 8px 16px; font-size: 12px !important; }
+      .logo-section span { font-size: 17px; }
+      .btn-install-sm { padding: 8px 18px; font-size: 13px !important; }
       
-      .hero { padding: 50px 0; }
+      .hero { padding: 60px 0 40px 0; }
       .hero-desc { font-size: 16px; margin-bottom: 32px; }
-      .hero-actions { flex-direction: column; width: 100%; gap: 16px; margin-bottom: 40px; }
+      .hero-actions { flex-direction: column; width: 100%; gap: 14px; margin-bottom: 40px; }
       .hero-actions a { width: 100%; justify-content: center; }
       
-      .section-title { font-size: 32px; }
-      .showcase { padding: 60px 0; }
-      .showcase-row { margin-bottom: 60px; }
-      
-      .privacy-focus { padding: 60px 0; }
-      .privacy-content h2 { font-size: 32px; }
-      .mockup-shield { width: 200px; height: 200px; }
-      .mockup-shield-inner { width: 140px; height: 140px; font-size: 56px; }
+      .section-title { font-size: 30px; }
+      .features-section, .how-it-works-section, .steps-section { padding: 60px 0; }
       
       .footer-top { flex-direction: column; gap: 32px; }
       .footer-links { flex-direction: column; gap: 24px; }
@@ -580,8 +642,9 @@
         <span>Shopee Analytics</span>
       </a>
       <nav class="nav-links">
-        <a href="#features">Tính Năng</a>
-        <a href="#privacy">Bảo Mật</a>
+        <a href="#features">Đặc Quyền</a>
+        <a href="#how-it-works">Cách Hoạt Động</a>
+        <a href="#steps">Cách Cài Đặt</a>
         <a href="https://tr4n.github.io/shopee-stats/PRIVACY_POLICY.html" target="_blank">Privacy Policy</a>
         <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" class="btn-install-sm">✨ Thêm vào Chrome</a>
       </nav>
@@ -591,17 +654,20 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <h1>Biến Lịch Sử Mua Sắm Shopee<br>Thành <span>Số Liệu Thống Kê Tuyệt Đẹp</span></h1>
+      <div class="badge-intro">🛍️ SHOPEE WRAPPED</div>
+      <h1>Nhìn Lại Hành Trình<br><span>Chốt Đơn Của Bạn</span></h1>
       <p class="hero-desc">
-        Xem ngay tổng chi tiêu, phân loại mặt hàng, tối ưu hóa giao dịch của bạn với tiện ích bảo mật, nhanh gọn, chạy 100% cục bộ trên thiết bị của bạn.
+        Bạn có bao giờ tò mò tổng số tiền mình đã dành cho Shopee là bao nhiêu? Hay món đồ nào đang chiếm sóng nhiều nhất trong ví của bạn?
+        <br><br>
+        Shopee Analytics giúp biến những con số khô khan thành một bức tranh tổng kết năm sinh động, trực quan và cá nhân hóa. Chỉ mất vài giây để hiểu rõ hơn về thói quen chi tiêu của chính mình.
       </p>
       
       <div class="hero-actions">
         <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" class="btn-primary-lg">
           🚀 Cài Đặt Tiện Ích Miễn Phí
         </a>
-        <a href="#features" class="btn-secondary-lg">
-          Khám Phá Tính Năng
+        <a href="#steps" class="btn-secondary-lg">
+          Xem 3 Bước Cài Đặt
         </a>
       </div>
       <div class="hero-image">
@@ -610,113 +676,167 @@
     </div>
   </section>
 
-  <!-- Showcase Section -->
-  <section id="features" class="showcase">
+  <div class="container">
+    <div class="decor-line">══════════════════════════════════════════</div>
+  </div>
+
+  <!-- Showcase Features Section -->
+  <section id="features" class="features-section">
     <div class="container">
-      <div class="section-title-wrapper">
-        <h2 class="section-title">Khám Phá Sức Mạnh Thực Sự</h2>
-        <p class="section-desc">Mọi thứ bạn cần để theo dõi, so sánh và hiểu rõ thói quen chi tiêu của bạn thông qua các thống kê trực quan và chính xác.</p>
+      <div class="section-header">
+        <h2 class="section-title">✨ NHỮNG ĐẶC QUYỀN TRẢI NGHIỆM DÀNH RIÊNG CHO BẠN</h2>
+        <p class="section-desc">Khám phá hành trình mua sắm Shopee của bạn thông qua hệ thống phân tích trực quan và sinh động.</p>
       </div>
 
-      <!-- Feature 1: Tổng Quan -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-blue">📊</div>
-          <h3>Thống Kê Tổng Quan Chi Tiết</h3>
-          <p>Nắm bắt ngay bức tranh toàn cảnh về tài chính của bạn trên Shopee với sự hỗ trợ của AI phân tích. Báo cáo cung cấp số tiền bạn đã tiêu, số lượng đơn hàng, số sản phẩm đã mua và đặc biệt là nhận định thông minh về các khoản tiết kiệm giúp bạn dễ dàng theo dõi.</p>
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-content">
+            <h3>📦 Biểu đồ chi tiêu trực quan</h3>
+            <p>Tự động gom gọn số tiền tích lũy, số lượng đơn hàng, phí ship và số tiền bạn đã săn sale tiết kiệm được.</p>
+          </div>
+          <div class="feature-img-wrapper">
+            <img src="images/tongquan.png" alt="Biểu đồ chi tiêu trực quan">
+          </div>
         </div>
-        <div class="showcase-image">
-          <img src="images/tongquan.png" alt="Thống kê tổng quan">
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-content">
+            <h3>📅 Dòng thời gian mua sắm</h3>
+            <p>Theo dõi biến động chi tiêu theo từng tháng, từng năm để dễ dàng cân đối ngân sách.</p>
+          </div>
+          <div class="feature-img-wrapper">
+            <img src="images/theothang.png" alt="Dòng thời gian mua sắm">
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-content">
+            <h3>🏷️ Tự động phân loại ngành hàng</h3>
+            <p>Hệ thống tự xếp nhóm các món đồ đã mua vào các tab Thời trang, Công nghệ, Thực phẩm... nhờ công nghệ trí tuệ nhân tạo chạy trực tiếp trên trình duyệt của bạn.</p>
+          </div>
+          <div class="feature-img-wrapper">
+            <img src="images/danhmuc.png" alt="Tự động phân loại ngành hàng">
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-content">
+            <h3>🃏 Nhận Thẻ danh hiệu độc quyền</h3>
+            <p>Tự động chấm điểm và tặng bạn những chiếc thẻ chia sẻ vui nhộn (Khách Tập Sự, Cổ Đông Chiến Lược...) để khoe nhanh cùng bạn bè.</p>
+          </div>
+          <div class="feature-img-wrapper">
+            <img src="images/share.png" alt="Nhận Thẻ danh hiệu độc quyền">
+          </div>
         </div>
       </div>
-
-      <!-- Feature 2: Theo Tháng -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-orange">📈</div>
-          <h3>Phân Tích Chi Tiêu Theo Tháng</h3>
-          <p>Biểu đồ cột sinh động hiển thị chính xác dòng tiền chi tiêu theo từng tháng trong năm. Được bổ trợ bởi AI thông minh giúp phân tích chu kỳ mua sắm, nhận biết các tháng cao điểm chi tiêu và hỗ trợ lập kế hoạch tài chính phù hợp cho tương lai.</p>
-        </div>
-        <div class="showcase-image">
-          <img src="images/theothang.png" alt="Phân tích theo tháng">
-        </div>
-      </div>
-
-      <!-- Feature 3: Top Sản Phẩm -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-purple">🏆</div>
-          <h3>Top Sản Phẩm Chi Tiêu Nhiều Nhất</h3>
-          <p>Liệt kê chi tiết những sản phẩm ngốn nhiều hầu bao của bạn nhất. Được hỗ trợ bởi công nghệ AI giúp lọc sạch từ khóa quảng cáo rác từ tiêu đề sản phẩm, giúp bạn dễ dàng kiểm tra lịch sử mua hàng và nhìn nhận đúng đắn về các khoản chi tiêu lớn.</p>
-        </div>
-        <div class="showcase-image">
-          <img src="images/topsp.png" alt="Top sản phẩm">
-        </div>
-      </div>
-
-      <!-- Feature 4: Danh Mục -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-green">🏷️</div>
-          <h3>Tự Động Phân Loại Danh Mục</h3>
-          <p>Hệ thống phân tích thông minh tích hợp công nghệ Chrome Built-in AI để tự động nhận dạng tên sản phẩm và gom nhóm chính xác các đơn hàng vào 5 danh mục chính: Công nghệ, Thể thao, Nhà cửa, Thời trang, Khác. Biểu đồ tròn trực quan giúp bạn hiểu rõ thói quen tiêu dùng cá nhân.</p>
-        </div>
-        <div class="showcase-image">
-          <img src="images/danhmuc.png" alt="Phân loại danh mục">
-        </div>
-      </div>
-
-      <!-- Feature 5: AI Analysis -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-orange">🤖</div>
-          <h3>Phân Tích Chuyên Gia Bằng AI</h3>
-          <p>Tích hợp công nghệ AI tiên tiến (Chrome Built-in AI/Gemini Nano) để mang đến những nhận xét chuyên sâu về thói quen chi tiêu của bạn. AI sẽ phân tích xu hướng, so sánh với chuẩn mực và đưa ra gợi ý tối ưu hóa ngân sách cá nhân một cách thông minh và cá nhân hóa.</p>
-          <ul style="margin-top: 16px; list-style: none; padding: 0;">
-            <li style="margin-bottom: 8px;">🎯 <strong>Phân loại thông minh:</strong> AI tự động nhận diện và phân loại sản phẩm chính xác hơn</li>
-            <li style="margin-bottom: 8px;">📊 <strong>Nhận xét chuyên gia:</strong> Phân tích xu hướng chi tiêu với góc nhìn chuyên môn</li>
-            <li style="margin-bottom: 8px;">💡 <strong>Gợi ý tối ưu:</strong> Đề xuất cải thiện thói quen tiêu dùng dựa trên dữ liệu thực</li>
-            <li>🔒 <strong>Bảo mật tuyệt đối:</strong> AI chạy hoàn toàn offline, không gửi dữ liệu ra ngoài</li>
-          </ul>
-        </div>
-        <div class="showcase-image">
-          <img src="images/ai-analysis.png" alt="Phân tích AI chuyên gia" onerror="this.src='images/extension.png'">
-        </div>
-      </div>
-
-      <!-- Feature 6: Chia sẻ -->
-      <div class="showcase-row">
-        <div class="showcase-content">
-          <div class="showcase-badge badge-blue">✨</div>
-          <h3>Dễ Dàng Chia Sẻ</h3>
-          <p>Tạo ra các bức ảnh tóm tắt (Wrapped Shareable Cards) cực kỳ bắt mắt chỉ với một thao tác. Bạn có thể dễ dàng lưu lại thành tích mua sắm của mình hoặc chia sẻ lên mạng xã hội để khoe với bạn bè một cách đầy phong cách.</p>
-        </div>
-        <div class="showcase-image">
-          <img src="images/share.png" alt="Dễ dàng chia sẻ">
-        </div>
-      </div>
-
     </div>
   </section>
 
-  <!-- Privacy Spotlight Section -->
-  <section id="privacy" class="privacy-focus">
-    <div class="container privacy-banner">
-      <div class="privacy-content">
-        <h2>Dữ Liệu Của Bạn,<br>Quyền Riêng Tư Tuyệt Đối</h2>
-        <p>
-          Shopee Analytics được thiết kế dựa trên tiêu chuẩn bảo mật tối đa. Tất cả các thao tác lấy dữ liệu giao dịch và phân tích chi tiêu đều được chạy cục bộ (100% locally) trên bộ cài tiện ích trong trình duyệt của bạn. <strong>Kể cả tính năng AI phân tích thông minh cũng hoạt động hoàn toàn offline</strong> nhờ công nghệ Chrome Built-in AI. Không một byte dữ liệu nào bị đẩy lên máy chủ bên ngoài.
-        </p>
-        <div class="security-badge">
-          🛡️ Bảo mật chuẩn: <span>Local + AI Offline</span>
+  <div class="container">
+    <div class="decor-line">══════════════════════════════════════════</div>
+  </div>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">🛡️ TIỆN ÍCH HOẠT ĐỘNG NHƯ THẾ NÀO?</h2>
+        <p class="section-desc">Công cụ được thiết kế theo tiêu chí minh bạch và tôn trọng quyền riêng tư cá nhân của bạn thông qua các chứng nhận uy tín</p>
+      </div>
+
+      <div class="how-it-works-grid">
+        <!-- Item 1 -->
+        <div class="how-card">
+          <div class="how-card-header">
+            <span>✅</span>
+            <h4>Được Google kiểm duyệt</h4>
+          </div>
+          <p>Tiện ích đã vượt qua quy trình kiểm tra nghiêm ngặt và được phát hành chính thức trên Chrome Web Store, đảm bảo an toàn khi cài đặt.</p>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="how-card">
+          <div class="how-card-header">
+            <span>🌐</span>
+            <h4>Mã nguồn mở trên GitHub</h4>
+          </div>
+          <p>Toàn bộ mã nguồn được công khai trên GitHub. Bất kỳ ai cũng có thể kiểm chứng cách thức hoạt động minh bạch của công cụ.</p>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="how-card">
+          <div class="how-card-header">
+            <span>🔒</span>
+            <h4>Riêng tư hoàn toàn</h4>
+          </div>
+          <p>Mọi dữ liệu chỉ được xử lý và hiển thị ngay trên màn hình máy tính của bạn. Tiện ích không có máy chủ trung gian và không gửi bất kỳ thông tin nào ra Internet.</p>
+        </div>
+
+        <!-- Item 4 (Wide) -->
+        <div class="how-card card-wide">
+          <div class="how-card-header">
+            <span>🔑</span>
+            <h4>Không cần đăng nhập phụ</h4>
+          </div>
+          <p>Bạn không cần cung cấp mật khẩu hay tạo tài khoản mới. Tiện ích chỉ hoạt động dựa trên trang Shopee bạn đang mở.</p>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="how-card">
+          <div class="how-card-header">
+            <span>🗑️</span>
+            <h4>Dễ dàng làm sạch</h4>
+          </div>
+          <p>Bạn có thể xóa toàn bộ dữ liệu lịch sử thống kê trên tiện ích bất cứ lúc nào chỉ với một cú click.</p>
         </div>
       </div>
-      <div class="privacy-graphic">
-        <div class="mockup-shield">
-          <div class="mockup-shield-inner">
-            🔒
-          </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="decor-line">══════════════════════════════════════════</div>
+  </div>
+
+  <!-- 3 Steps Section -->
+  <section id="steps" class="steps-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">💡 3 BƯỚC ĐỂ SỞ HỮU DASHBOARD CỦA RIÊNG BẠN</h2>
+        <p class="section-desc">Chỉ mất 10 giây để thiết lập và nhìn lại hành trình mua sắm của bạn.</p>
+      </div>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-num">1️⃣</div>
+          <h4>Cài đặt tiện ích</h4>
+          <p>Thêm tiện ích Shopee Analytics vào trình duyệt Chrome hoặc các trình duyệt nhân Chromium của bạn.</p>
         </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-num">2️⃣</div>
+          <h4>Mở Shopee.vn</h4>
+          <p>Mở trang Shopee.vn và đảm bảo bạn đã đăng nhập tài khoản mua hàng Shopee của mình.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-num">3️⃣</div>
+          <h4>Thưởng thức Dashboard</h4>
+          <p>Bấm vào biểu tượng tiện ích ở góc phải màn hình, chọn "Bắt đầu thống kê" và thưởng thức Dashboard Wrapped của riêng bạn.</p>
+        </div>
+      </div>
+
+      <div class="steps-cta">
+        <a href="https://chromewebstore.google.com/detail/shopee-analytics-pro-th%E1%BB%91n/jcflofioiopfchfelgbpbndplhpfeapm" target="_blank" class="btn-primary-lg">
+          🚀 Cài Đặt Ngay Hôm Nay
+        </a>
+        <p>Nhìn lại hành trình mua sắm và lên kế hoạch chi tiêu thông minh hơn! 💸💡</p>
       </div>
     </div>
   </section>
@@ -731,15 +851,16 @@
             <span>Shopee Analytics</span>
           </a>
           <p class="footer-desc">
-            Tiện ích phân tích mua sắm Shopee chuyên nghiệp, giúp bạn thông thái hơn mỗi ngày.
+            Tiện ích phân tích mua sắm Shopee chuyên nghiệp, giúp bạn nhìn lại hành trình chi tiêu để quản lý ngân sách cá nhân thông minh hơn.
           </p>
         </div>
         <div class="footer-links">
           <div class="footer-column">
             <h4>Tài Nguyên</h4>
             <ul>
-              <li><a href="#features">Tính năng</a></li>
-              <li><a href="#privacy">Bảo mật</a></li>
+              <li><a href="#features">Đặc quyền</a></li>
+              <li><a href="#how-it-works">Cách hoạt động</a></li>
+              <li><a href="#steps">Cách cài đặt</a></li>
               <li><a href="https://tr4n.github.io/shopee-stats/PRIVACY_POLICY.html" target="_blank">Chính sách bảo mật</a></li>
             </ul>
           </div>
