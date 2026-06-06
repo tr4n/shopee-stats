@@ -16,6 +16,24 @@ window.generateTarotShareImage = function(profile, cachedText) {
     btnShare.innerHTML = '⏳ Đang Tạo Ảnh...';
   }
 
+  // Open the preview modal immediately in loading state
+  const shareModal = document.getElementById('tarot-share-modal');
+  const loader = document.getElementById('tarot-share-loader');
+  const previewImg = document.getElementById('tarot-share-preview-img');
+  const btnDownload = document.getElementById('btn-tarot-download');
+  const btnCopy = document.getElementById('btn-tarot-copy');
+
+  if (shareModal) {
+    shareModal.classList.add('active');
+  }
+  if (loader) loader.style.display = 'block';
+  if (previewImg) {
+    previewImg.style.display = 'none';
+    previewImg.src = '';
+  }
+  if (btnDownload) btnDownload.disabled = true;
+  if (btnCopy) btnCopy.disabled = true;
+
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
   canvas.height = 1920;
@@ -84,7 +102,6 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Card Background (Ivory Cream #fffef9)
   ctx.fillStyle = '#fffef9';
-  // Round rect helper
   drawRoundRect(ctx, cardX, cardY, cardW, cardH, 20);
   ctx.fill();
 
@@ -108,9 +125,9 @@ window.generateTarotShareImage = function(profile, cachedText) {
   drawRoundRect(ctx, cardX + 16, cardY + 16, cardW - 32, cardH - 32, 10);
   ctx.stroke();
 
-  // Corner ornaments on card: ◈
+  // Corner ornaments on card: ◈ (Using Arial)
   ctx.fillStyle = '#e8d5a3';
-  ctx.font = 'bold 20px Georgia';
+  ctx.font = 'bold 20px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('◈', cardX + 35, cardY + 35);
@@ -118,9 +135,9 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fillText('◈', cardX + 35, cardY + cardH - 35);
   ctx.fillText('◈', cardX + cardW - 35, cardY + cardH - 35);
 
-  // Card Header: SHOPEE COSMIC TAROT
+  // Card Header: SHOPEE COSMIC TAROT (Using Arial)
   ctx.fillStyle = goldColor;
-  ctx.font = '900 12px Georgia';
+  ctx.font = 'bold 12px Arial';
   ctx.fillText('✦ SHOPEE COSMIC TAROT ✦', 540, cardY + 45);
 
   // Card Center Ornament Circles
@@ -146,12 +163,12 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.font = '85px Arial';
   ctx.fillText(profile.archetype.icon || '🔮', circleX, circleY + 5);
 
-  // Archetype Title
-  ctx.font = 'bold 30px Georgia';
+  // Archetype Title (Using Arial)
+  ctx.font = 'bold 30px Arial';
   ctx.fillStyle = goldColor;
   ctx.fillText((profile.archetype.label || 'TÌM KIẾM').toUpperCase(), 540, cardY + 520);
 
-  // Subtitle (English matching helpers.js subLabels)
+  // Subtitle (English matching helpers.js subLabels, using Arial)
   const subLabels = {
     reformed: 'THE REFORMED',
     night_owl: 'THE NIGHT OWL',
@@ -171,26 +188,25 @@ window.generateTarotShareImage = function(profile, cachedText) {
   };
   const subText = subLabels[profile.archetype.key] || 'THE SEEKER';
   ctx.fillStyle = '#7c6f9e';
-  ctx.font = '900 13px Georgia';
-  // Add letter spacing manually via text placement or simple spacing
+  ctx.font = 'bold 13px Arial';
   ctx.fillText(subText.split('').join(' '), 540, cardY + 575);
 
-  // Stars ornament: ✦ ✵ ✦
+  // Stars ornament: ✦ ✵ ✦ (Using Arial)
   ctx.fillStyle = goldColor;
-  ctx.font = '22px Georgia';
+  ctx.font = '22px Arial';
   ctx.fillText('✦  ✵  ✦', 540, cardY + 630);
 
-  // Card Footer: year
-  ctx.font = '900 12px Georgia';
+  // Card Footer: year (Using Arial)
+  ctx.font = 'bold 12px Arial';
   ctx.fillText(`✦  ${new Date().getFullYear()}  ✦`, 540, cardY + cardH - 45);
 
 
   // 4. Draw Stats & Text below card
   const contentY = cardY + cardH + 110;
 
-  // Stats Text: Dựa trên X đơn hàng
+  // Stats Text: Dựa trên X đơn hàng (Using Arial)
   ctx.fillStyle = '#e8d5a3';
-  ctx.font = '900 24px Georgia';
+  ctx.font = 'bold 24px Arial';
   ctx.fillText((profile.totalOrders > 0 
     ? `DỰA TRÊN ${profile.totalOrders.toLocaleString('vi-VN')} ĐƠN HÀNG` 
     : 'BẢN NGÃ MUA SẮM'
@@ -207,60 +223,124 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fillStyle = sepGrad;
   ctx.fillRect(sepX, sepY, sepW, 3);
 
-  // Section Title: VŨ TRỤ PHÁN
+  // Section Title: VŨ TRỤ PHÁN (Using Arial)
   ctx.fillStyle = goldColor;
-  ctx.font = '900 18px Georgia';
+  ctx.font = 'bold 18px Arial';
   ctx.fillText('✦   V Ũ   T R Ụ   P H Á N   ✦', 540, sepY + 70);
 
-  // Clean sentences & render wrapped
+  // Clean sentences & render wrapped (Using Arial with dynamic scaling)
   let insightText = cachedText || '';
-  // Clean potential HTML tags (like <span class='insight-ai-sentence'>)
+  // Clean potential HTML tags
   insightText = insightText.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '30px Arial'; // Increased font size for legibility
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
 
-  // Call text wrap helper
-  wrapCanvasText(ctx, insightText, 540, sepY + 120, 840, 48);
+  // Dynamic wrap and scale text
+  let startY = sepY + 120;
+  let maxWidth = 840;
+  let fontSize = 30;
+  let lineHeight = 45;
+  let finalLines = [];
+
+  while (fontSize >= 18) {
+    ctx.font = `normal ${fontSize}px Arial`;
+    const words = insightText.split(/\s+/);
+    let line = '';
+    const lines = [];
+
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        lines.push(line.trim());
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+
+    // Check if total height fits in the available space (450px max)
+    if (lines.length * lineHeight <= 450 || fontSize === 18) {
+      finalLines = lines;
+      break;
+    }
+
+    fontSize -= 2;
+    lineHeight = Math.round(fontSize * 1.5);
+  }
+
+  // Draw all lines without truncation
+  for (let i = 0; i < finalLines.length; i++) {
+    ctx.fillText(finalLines[i], 540, startY + (i * lineHeight));
+  }
 
 
-  // 5. Draw Footer Brand Watermark
+  // 5. Draw Footer Brand Watermark (Using Arial)
   ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-  ctx.font = '900 15px Georgia';
+  ctx.font = 'bold 15px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', 540, 1830);
 
 
-  // 6. Output to Blob & Download + Copy
+  // 6. Output to Blob & Update Modal Preview
   setTimeout(() => {
     canvas.toBlob(async (blob) => {
       if (!blob) {
         console.error('[Tarot Share] Failed to generate Blob');
         resetShareButton();
+        if (loader) loader.style.display = 'none';
         return;
       }
 
-      // Action 1: Auto-Download Image
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `shopee-stats-tarot-${profile.archetype.key}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Create preview object URL
+      const previewUrl = URL.createObjectURL(blob);
 
-      // Action 2: Write to Clipboard
-      try {
-        const item = new ClipboardItem({ 'image/png': blob });
-        await navigator.clipboard.write([item]);
-        showToast('Đã lưu ảnh & copy vào bộ nhớ tạm! Paste để chia sẻ ngay ✨');
-      } catch (err) {
-        console.warn('[Tarot Share] Clipboard write rejected or unsupported:', err);
-        showToast('Đã lưu ảnh Bản Ngã Tarot thành công! ✨');
+      // Display image in modal, hide loader
+      if (previewImg) {
+        previewImg.src = previewUrl;
+        previewImg.style.display = 'block';
+      }
+      if (loader) loader.style.display = 'none';
+
+      // Set up Actions for Download & Copy
+      if (btnDownload) {
+        btnDownload.disabled = false;
+        
+        // Remove old click listener by cloning
+        const freshDownload = btnDownload.cloneNode(true);
+        btnDownload.parentNode.replaceChild(freshDownload, btnDownload);
+        
+        freshDownload.addEventListener('click', () => {
+          const link = document.createElement('a');
+          link.href = previewUrl;
+          link.download = `shopee-stats-tarot-${profile.archetype.key}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        });
+      }
+
+      if (btnCopy) {
+        btnCopy.disabled = false;
+
+        // Remove old click listener by cloning
+        const freshCopy = btnCopy.cloneNode(true);
+        btnCopy.parentNode.replaceChild(freshCopy, btnCopy);
+
+        freshCopy.addEventListener('click', async () => {
+          try {
+            const item = new ClipboardItem({ 'image/png': blob });
+            await navigator.clipboard.write([item]);
+            showToast('Đã sao chép ảnh vào bộ nhớ tạm! Paste để chia sẻ ngay ✨');
+          } catch (err) {
+            console.warn('[Tarot Share] Clipboard copy failed:', err);
+            showToast('Đã lưu ảnh Bản Ngã Tarot thành công! ✨');
+          }
+        });
       }
 
       resetShareButton();
@@ -280,36 +360,6 @@ window.generateTarotShareImage = function(profile, cachedText) {
     c.lineTo(x, y + radius);
     c.quadraticCurveTo(x, y, x + radius, y);
     c.closePath();
-  }
-
-  function wrapCanvasText(c, text, x, y, maxWidth, lineHeight) {
-    const words = text.split(' ');
-    let line = '';
-    const lines = [];
-
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' ';
-      const metrics = c.measureText(testLine);
-      const testWidth = metrics.width;
-      if (testWidth > maxWidth && n > 0) {
-        lines.push(line.trim());
-        line = words[n] + ' ';
-      } else {
-        line = testLine;
-      }
-    }
-    lines.push(line.trim());
-
-    // Only render top 3 lines to fit nicely without overlap
-    const maxLines = Math.min(lines.length, 3);
-    for (let i = 0; i < maxLines; i++) {
-      // If we are on the third line and there's more text, append ellipsis
-      let displayLine = lines[i];
-      if (i === 2 && lines.length > 3) {
-        displayLine = displayLine.substring(0, displayLine.length - 3) + '...';
-      }
-      c.fillText(displayLine, x, y + (i * lineHeight));
-    }
   }
 
   function resetShareButton() {

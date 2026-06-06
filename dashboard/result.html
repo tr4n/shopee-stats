@@ -226,70 +226,76 @@
         <!-- PHASE 2 & 3 & 4: Focus area — appears after card selection -->
         <div class="tarot-focus-area" id="tarot-focus-area" style="display:none">
           <div class="tarot-layout">
-            <!-- Left: focused card with orbital ring -->
-            <div class="tarot-deck-area">
-              <div class="tarot-card-wrapper">
-                <!-- Orbital ring loader -->
-                <div class="tarot-orbital-ring" id="tarot-orbital-ring" style="display:none"></div>
-                <!-- The 3D Card -->
-                <div class="tarot-card" id="tarot-card-element">
-                  <!-- Card Back -->
-                  <div class="tarot-card-back">
-                    <div class="card-back-ornament">
-                      <div class="geometry-circle outer"></div>
-                      <div class="geometry-circle inner"></div>
-                      <div class="geometry-star">✦</div>
-                      <div class="card-back-logo">🛍️</div>
+            <!-- Top section: Card on left, Cosmic Judgment on right -->
+            <div class="tarot-main-row">
+              <!-- Left: focused card with orbital ring -->
+              <div class="tarot-deck-area">
+                <div class="tarot-card-wrapper">
+                  <!-- Orbital ring loader -->
+                  <div class="tarot-orbital-ring" id="tarot-orbital-ring" style="display:none"></div>
+                  <!-- The 3D Card -->
+                  <div class="tarot-card" id="tarot-card-element">
+                    <!-- Card Back -->
+                    <div class="tarot-card-back">
+                      <div class="card-back-ornament">
+                        <div class="geometry-circle outer"></div>
+                        <div class="geometry-circle inner"></div>
+                        <div class="geometry-star">✦</div>
+                        <div class="card-back-logo">🛍️</div>
+                      </div>
+                      <div class="card-back-title">SHOPEE TAROT</div>
                     </div>
-                    <div class="card-back-title">SHOPEE TAROT</div>
-                  </div>
-                  <!-- Card Front (populated by JS) -->
-                  <div class="tarot-card-front" id="tarot-card-ai">
-                    <div class="tarot-front-placeholder">
-                      <span style="font-size: 32px;">🔮</span>
-                      <p>Đang chuẩn bị thẻ bài...</p>
+                    <!-- Card Front (populated by JS) -->
+                    <div class="tarot-card-front" id="tarot-card-ai">
+                      <div class="tarot-front-placeholder">
+                        <span style="font-size: 32px;">🔮</span>
+                        <p>Đang chuẩn bị thẻ bài...</p>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- Action buttons -->
+                <div class="tarot-actions-row">
+                  <!-- Hidden trigger for JS compat -->
+                  <button type="button" class="tarot-btn-primary" id="btn-tarot-trigger" style="display:none">
+                    🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN
+                  </button>
+                  <!-- Sharing button enabled -->
+                  <button type="button" class="tarot-btn-share" id="btn-tarot-share" style="display: none">
+                    ✨ Chia Sẻ Bản Ngã
+                  </button>
+                </div>
               </div>
 
-              <!-- Action buttons -->
-              <div class="tarot-actions-row">
-                <!-- Hidden trigger for JS compat -->
-                <button type="button" class="tarot-btn-primary" id="btn-tarot-trigger" style="display:none">
-                  🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN
-                </button>
-                <!-- Sharing button enabled -->
-                <button type="button" class="tarot-btn-share" id="btn-tarot-share" style="display: none">
-                  ✨ Chia Sẻ Bản Ngã
-                </button>
+              <!-- Right: Glass result panel (Vũ Trụ Phán only) -->
+              <div class="tarot-details-area">
+                <div class="tarot-glass-panel" id="tarot-details-panel">
+                  <div class="tarot-details-empty">
+                    <div class="empty-icon">✨</div>
+                    <h3>Thông Điệp Từ Vũ Trụ</h3>
+                    <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
+                  </div>
+                  <div class="tarot-details-content" style="display: none">
+                    <div class="tarot-result-header">
+                      <div class="tarot-archetype-tag" id="tarot-res-archetype-tag"></div>
+                      <div class="tarot-orders-count" id="tarot-res-orders-count"></div>
+                    </div>
+                    <div class="tarot-section-divider"></div>
+                    <div class="tarot-narrative-section">
+                      <h4 class="tarot-section-title">🌌 VŨ TRỤ PHÁN</h4>
+                      <div class="tarot-narrative-text" id="tarot-res-narrative-text"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Right: Glass result panel -->
-            <div class="tarot-details-area">
-              <div class="tarot-glass-panel" id="tarot-details-panel">
-                <div class="tarot-details-empty">
-                  <div class="empty-icon">✨</div>
-                  <h3>Thông Điệp Từ Vũ Trụ</h3>
-                  <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
-                </div>
-                <div class="tarot-details-content" style="display: none">
-                  <div class="tarot-result-header">
-                    <div class="tarot-archetype-tag" id="tarot-res-archetype-tag"></div>
-                    <div class="tarot-orders-count" id="tarot-res-orders-count"></div>
-                  </div>
-                  <div class="tarot-section-divider"></div>
-                  <div class="tarot-traits-section">
-                    <h4 class="tarot-section-title">🌟 ĐẶC ĐIỂM NHẬN DIỆN</h4>
-                    <div class="tarot-traits-list" id="tarot-res-traits-list"></div>
-                  </div>
-                  <div class="tarot-section-divider"></div>
-                  <div class="tarot-narrative-section">
-                    <h4 class="tarot-section-title">🌌 VŨ TRỤ PHÁN</h4>
-                    <div class="tarot-narrative-text" id="tarot-res-narrative-text"></div>
-                  </div>
-                </div>
+            <!-- Bottom section: Identifying characteristics (Đặc điểm nhận diện) -->
+            <div class="tarot-bottom-row" id="tarot-bottom-row" style="display: none">
+              <div class="tarot-glass-panel tarot-traits-panel">
+                <h4 class="tarot-section-title">🌟 ĐẶC ĐIỂM NHẬN DIỆN</h4>
+                <div class="tarot-traits-list" id="tarot-res-traits-list"></div>
               </div>
             </div>
           </div>
@@ -746,6 +752,30 @@
   <div id="tarot-toast" class="tarot-toast hidden">
     <span class="toast-icon">✨</span>
     <span class="toast-message">Đã lưu ảnh và sao chép vào bộ nhớ tạm!</span>
+  </div>
+
+  <!-- Tarot Share Preview Modal -->
+  <div id="tarot-share-modal" class="modal-overlay">
+    <div class="modal-content tarot-share-modal-content">
+      <div class="modal-header">
+        <h2><span>✨</span> Xem Trước Ảnh Chia Sẻ</h2>
+        <button id="btn-close-tarot-share" class="btn-close">&times;</button>
+      </div>
+      <div class="tarot-share-body">
+        <div class="tarot-share-preview-container">
+          <div id="tarot-share-loader" class="btn-spinner" style="width: 40px; height: 40px; border-width: 4px; border-top-color: var(--tarot-gold);"></div>
+          <img id="tarot-share-preview-img" src="" alt="Bản Ngã Tarot Preview" style="display: none;" />
+        </div>
+        <div class="tarot-share-actions">
+          <button id="btn-tarot-download" class="tarot-btn-primary">
+            📥 Tải Ảnh Về Máy
+          </button>
+          <button id="btn-tarot-copy" class="tarot-btn-share">
+            📋 Sao Chép Ảnh
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="../extension/config.js"></script>

@@ -1775,17 +1775,19 @@ function initTarotTilt() {
 }
 
 /* ── Stagger animate details panel ── */
-function animateDetailsReveal(container) {
-  const header = container.querySelector('.tarot-result-header');
+function animateDetailsReveal() {
+  const focusArea = document.getElementById('tarot-focus-area');
+  if (!focusArea) return;
+  const header = focusArea.querySelector('.tarot-result-header');
   if (header) {
     header.style.cssText += 'opacity:0;transform:translateY(12px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1)';
     setTimeout(() => { header.style.opacity = '1'; header.style.transform = 'translateY(0)'; }, 60);
   }
-  container.querySelectorAll('.tarot-trait-row').forEach((t, i) => {
+  focusArea.querySelectorAll('.tarot-trait-row').forEach((t, i) => {
     t.style.cssText += 'opacity:0;transform:translateX(-14px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1)';
     setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateX(0)'; }, 180 + i * 90);
   });
-  container.querySelectorAll('.insight-ai-sentence').forEach((s, i) => {
+  focusArea.querySelectorAll('.insight-ai-sentence').forEach((s, i) => {
     s.style.cssText += 'opacity:0;transform:translateY(14px);transition:all 0.6s cubic-bezier(0.16,1,0.3,1)';
     setTimeout(() => { s.style.opacity = '1'; s.style.transform = 'translateY(0)'; }, 500 + i * 280);
   });
@@ -1927,9 +1929,15 @@ async function runTarotSequence(selectedPos) {
       if (emptyEl) emptyEl.style.display = 'none';
       if (contentEl) {
         contentEl.style.display = 'block';
-        animateDetailsReveal(contentEl);
       }
     }
+
+    const bottomRow = document.getElementById('tarot-bottom-row');
+    if (bottomRow) {
+      bottomRow.style.display = 'block';
+    }
+
+    animateDetailsReveal();
 
     const shareBtn = document.getElementById('btn-tarot-share');
     if (shareBtn) shareBtn.style.display = 'inline-flex';
@@ -1975,6 +1983,11 @@ function resetToFanSpread() {
       `;
     }
     if (contentEl) contentEl.style.display = 'none';
+  }
+
+  const bottomRow = document.getElementById('tarot-bottom-row');
+  if (bottomRow) {
+    bottomRow.style.display = 'none';
   }
 
   // Reset layout state to drawing mode
@@ -2037,6 +2050,8 @@ function initTarotViewEvents() {
   }
   if (focusArea) focusArea.style.display = 'none';
   if (shareBtnEl) shareBtnEl.style.display = 'none';
+  const bottomRow = document.getElementById('tarot-bottom-row');
+  if (bottomRow) bottomRow.style.display = 'none';
   if (card) {
     card.className = 'tarot-card';
     card.style.transform = '';
@@ -2128,8 +2143,12 @@ window.checkAndAutoShowTarot = function() {
       if (emptyEl) emptyEl.style.display = 'none';
       if (contentEl) {
         contentEl.style.display = 'block';
-        animateDetailsReveal(contentEl);
       }
+      const bottomRow = document.getElementById('tarot-bottom-row');
+      if (bottomRow) {
+        bottomRow.style.display = 'block';
+      }
+      animateDetailsReveal();
 
       const shareBtn = document.getElementById('btn-tarot-share');
       if (shareBtn) shareBtn.style.display = 'inline-flex';
@@ -2142,4 +2161,16 @@ window.checkAndAutoShowTarot = function() {
 };
 
 window.initTarotViewEvents = initTarotViewEvents;
+
+// Close tarot share modal listeners
+(function() {
+  const shareModal = document.getElementById('tarot-share-modal');
+  const closeShareBtn = document.getElementById('btn-close-tarot-share');
+  if (shareModal && closeShareBtn) {
+    closeShareBtn.addEventListener('click', () => shareModal.classList.remove('active'));
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) shareModal.classList.remove('active');
+    });
+  }
+})();
 
