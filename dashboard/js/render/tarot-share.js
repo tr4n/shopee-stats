@@ -1,0 +1,335 @@
+/**
+ * Shopee Stats — Tarot Share Image Generator (Canvas)
+ * Renders a high-resolution 1080x1920 image suitable for social sharing (Instagram/Facebook Stories)
+ */
+
+window.generateTarotShareImage = function(profile, cachedText) {
+  if (!profile || !profile.archetype) {
+    console.error('[Tarot Share] No profile data available');
+    return;
+  }
+
+  // Show a loading state if we want, or do it immediately
+  const btnShare = document.getElementById('btn-tarot-share');
+  if (btnShare) {
+    btnShare.disabled = true;
+    btnShare.innerHTML = '⏳ Đang Tạo Ảnh...';
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080;
+  canvas.height = 1920;
+  const ctx = canvas.getContext('2d');
+
+  // Ensure canvas rendering quality is set high
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // 1. Draw Background Gradient (Deep Cosmic Purple-Black)
+  const bgGrad = ctx.createLinearGradient(540, 0, 540, 1920);
+  bgGrad.addColorStop(0, '#0c071d');
+  bgGrad.addColorStop(0.5, '#190f33');
+  bgGrad.addColorStop(1, '#0b0618');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, 1080, 1920);
+
+  // 2. Draw Stars & Constellations
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  // Fixed seed positions so it's deterministic and doesn't jitter
+  const starSeeds = [
+    {x: 100, y: 150, r: 2}, {x: 880, y: 120, r: 1.5}, {x: 950, y: 300, r: 2.5},
+    {x: 200, y: 400, r: 1.5}, {x: 750, y: 500, r: 3}, {x: 150, y: 700, r: 2},
+    {x: 900, y: 850, r: 1}, {x: 120, y: 1000, r: 2.5}, {x: 960, y: 1150, r: 1.5},
+    {x: 80, y: 1300, r: 3}, {x: 850, y: 1450, r: 2}, {x: 200, y: 1600, r: 1.5},
+    {x: 920, y: 1750, r: 2.5}, {x: 500, y: 120, r: 2}, {x: 540, y: 1800, r: 1.5}
+  ];
+  starSeeds.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw a small cross glow on larger stars
+    if (s.r >= 2.5) {
+      ctx.strokeStyle = 'rgba(200, 169, 110, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(s.x - 12, s.y);
+      ctx.lineTo(s.x + 12, s.y);
+      ctx.moveTo(s.x, s.y - 12);
+      ctx.lineTo(s.x, s.y + 12);
+      ctx.stroke();
+    }
+  });
+
+  // Constellation faint lines
+  ctx.strokeStyle = 'rgba(155, 114, 207, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(100, 150); ctx.lineTo(200, 400); ctx.lineTo(150, 700);
+  ctx.moveTo(880, 120); ctx.lineTo(750, 500); ctx.lineTo(900, 850);
+  ctx.moveTo(850, 1450); ctx.lineTo(920, 1750);
+  ctx.stroke();
+
+  // 3. Draw Tarot Card Box
+  const cardW = 460;
+  const cardH = 780;
+  const cardX = (1080 - cardW) / 2;
+  const cardY = 240;
+
+  // Shadow for card
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 15;
+
+  // Card Background (Ivory Cream #fffef9)
+  ctx.fillStyle = '#fffef9';
+  // Round rect helper
+  drawRoundRect(ctx, cardX, cardY, cardW, cardH, 20);
+  ctx.fill();
+
+  // Reset shadow for subsequent drawings
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
+  // Gold Double Borders
+  const goldColor = '#c8a96e';
+  ctx.strokeStyle = goldColor;
+  
+  // Outer Border
+  ctx.lineWidth = 2;
+  drawRoundRect(ctx, cardX + 10, cardY + 10, cardW - 20, cardH - 20, 14);
+  ctx.stroke();
+
+  // Inner Border (Thicker)
+  ctx.lineWidth = 4;
+  drawRoundRect(ctx, cardX + 16, cardY + 16, cardW - 32, cardH - 32, 10);
+  ctx.stroke();
+
+  // Corner ornaments on card: ◈
+  ctx.fillStyle = '#e8d5a3';
+  ctx.font = 'bold 20px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('◈', cardX + 35, cardY + 35);
+  ctx.fillText('◈', cardX + cardW - 35, cardY + 35);
+  ctx.fillText('◈', cardX + 35, cardY + cardH - 35);
+  ctx.fillText('◈', cardX + cardW - 35, cardY + cardH - 35);
+
+  // Card Header: SHOPEE COSMIC TAROT
+  ctx.fillStyle = goldColor;
+  ctx.font = '900 12px Georgia';
+  ctx.fillText('✦ SHOPEE COSMIC TAROT ✦', 540, cardY + 45);
+
+  // Card Center Ornament Circles
+  const circleX = 540;
+  const circleY = cardY + 280;
+  const circleR = 90;
+
+  ctx.strokeStyle = 'rgba(200, 169, 110, 0.4)';
+  ctx.lineWidth = 1.5;
+  // Outer dashed circle
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]); // Reset dash
+
+  // Inner solid circle
+  ctx.beginPath();
+  ctx.arc(circleX, circleY, circleR - 22, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Archetype Emoji
+  ctx.font = '85px Arial';
+  ctx.fillText(profile.archetype.icon || '🔮', circleX, circleY + 5);
+
+  // Archetype Title
+  ctx.font = 'bold 30px Georgia';
+  ctx.fillStyle = goldColor;
+  ctx.fillText((profile.archetype.label || 'TÌM KIẾM').toUpperCase(), 540, cardY + 520);
+
+  // Subtitle (English matching helpers.js subLabels)
+  const subLabels = {
+    reformed: 'THE REFORMED',
+    night_owl: 'THE NIGHT OWL',
+    fashion_healer: 'THE EMOTIONAL HEALER',
+    bargain_hunter: 'THE BARGAIN HUNTER',
+    emotional: 'THE IMPULSIVE SOUL',
+    premium_curator: 'THE PREMIUM CURATOR',
+    rising_addict: 'THE SHOPPING ENTHUSIAST',
+    morning_planner: 'THE disciplined PLANNER',
+    seasonal: 'THE SEASONAL EXPLORER',
+    beauty_selfcare: 'THE SELF-CARE LOVER',
+    tech_optimizer: 'THE TECH OPTIMIZER',
+    home_nester: 'THE NEST BUILDER',
+    food_lover: 'THE CONNOISSEUR',
+    family_center: 'THE PROVIDER',
+    free_spirit: 'THE FREE SPIRIT'
+  };
+  const subText = subLabels[profile.archetype.key] || 'THE SEEKER';
+  ctx.fillStyle = '#7c6f9e';
+  ctx.font = '900 13px Georgia';
+  // Add letter spacing manually via text placement or simple spacing
+  ctx.fillText(subText.split('').join(' '), 540, cardY + 575);
+
+  // Stars ornament: ✦ ✵ ✦
+  ctx.fillStyle = goldColor;
+  ctx.font = '22px Georgia';
+  ctx.fillText('✦  ✵  ✦', 540, cardY + 630);
+
+  // Card Footer: year
+  ctx.font = '900 12px Georgia';
+  ctx.fillText(`✦  ${new Date().getFullYear()}  ✦`, 540, cardY + cardH - 45);
+
+
+  // 4. Draw Stats & Text below card
+  const contentY = cardY + cardH + 110;
+
+  // Stats Text: Dựa trên X đơn hàng
+  ctx.fillStyle = '#e8d5a3';
+  ctx.font = '900 24px Georgia';
+  ctx.fillText((profile.totalOrders > 0 
+    ? `DỰA TRÊN ${profile.totalOrders.toLocaleString('vi-VN')} ĐƠN HÀNG` 
+    : 'BẢN NGÃ MUA SẮM'
+  ).toUpperCase(), 540, contentY);
+
+  // Gradient Separator line
+  const sepW = 600;
+  const sepX = (1080 - sepW) / 2;
+  const sepY = contentY + 35;
+  const sepGrad = ctx.createLinearGradient(sepX, sepY, sepX + sepW, sepY);
+  sepGrad.addColorStop(0, 'rgba(200, 169, 110, 0)');
+  sepGrad.addColorStop(0.5, 'rgba(200, 169, 110, 0.45)');
+  sepGrad.addColorStop(1, 'rgba(200, 169, 110, 0)');
+  ctx.fillStyle = sepGrad;
+  ctx.fillRect(sepX, sepY, sepW, 3);
+
+  // Section Title: VŨ TRỤ PHÁN
+  ctx.fillStyle = goldColor;
+  ctx.font = '900 18px Georgia';
+  ctx.fillText('✦   V Ũ   T R Ụ   P H Á N   ✦', 540, sepY + 70);
+
+  // Clean sentences & render wrapped
+  let insightText = cachedText || '';
+  // Clean potential HTML tags (like <span class='insight-ai-sentence'>)
+  insightText = insightText.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '30px Arial'; // Increased font size for legibility
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+
+  // Call text wrap helper
+  wrapCanvasText(ctx, insightText, 540, sepY + 120, 840, 48);
+
+
+  // 5. Draw Footer Brand Watermark
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+  ctx.font = '900 15px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', 540, 1830);
+
+
+  // 6. Output to Blob & Download + Copy
+  setTimeout(() => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        console.error('[Tarot Share] Failed to generate Blob');
+        resetShareButton();
+        return;
+      }
+
+      // Action 1: Auto-Download Image
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `shopee-stats-tarot-${profile.archetype.key}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Action 2: Write to Clipboard
+      try {
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        showToast('Đã lưu ảnh & copy vào bộ nhớ tạm! Paste để chia sẻ ngay ✨');
+      } catch (err) {
+        console.warn('[Tarot Share] Clipboard write rejected or unsupported:', err);
+        showToast('Đã lưu ảnh Bản Ngã Tarot thành công! ✨');
+      }
+
+      resetShareButton();
+    }, 'image/png');
+  }, 100);
+
+  // Helpers inside function context
+  function drawRoundRect(c, x, y, width, height, radius) {
+    c.beginPath();
+    c.moveTo(x + radius, y);
+    c.lineTo(x + width - radius, y);
+    c.quadraticCurveTo(x + width, y, x + width, y + radius);
+    c.lineTo(x + width, y + height - radius);
+    c.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    c.lineTo(x + radius, y + height - radius);
+    c.quadraticCurveTo(x, y + height, x, y + height - radius);
+    c.lineTo(x, y + radius);
+    c.quadraticCurveTo(x, y, x + radius, y);
+    c.closePath();
+  }
+
+  function wrapCanvasText(c, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    const lines = [];
+
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      const metrics = c.measureText(testLine);
+      const testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        lines.push(line.trim());
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line.trim());
+
+    // Only render top 3 lines to fit nicely without overlap
+    const maxLines = Math.min(lines.length, 3);
+    for (let i = 0; i < maxLines; i++) {
+      // If we are on the third line and there's more text, append ellipsis
+      let displayLine = lines[i];
+      if (i === 2 && lines.length > 3) {
+        displayLine = displayLine.substring(0, displayLine.length - 3) + '...';
+      }
+      c.fillText(displayLine, x, y + (i * lineHeight));
+    }
+  }
+
+  function resetShareButton() {
+    if (btnShare) {
+      btnShare.disabled = false;
+      btnShare.innerHTML = '✨ Chia Sẻ Bản Ngã';
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('tarot-toast');
+    if (toast) {
+      if (message) {
+        const msgEl = toast.querySelector('.toast-message');
+        if (msgEl) msgEl.textContent = message;
+      }
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+  }
+};

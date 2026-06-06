@@ -1931,7 +1931,8 @@ async function runTarotSequence(selectedPos) {
       }
     }
 
-    if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+    const shareBtn = document.getElementById('btn-tarot-share');
+    if (shareBtn) shareBtn.style.display = 'inline-flex';
 
     // Activate tilt
     initTarotTilt();
@@ -2018,7 +2019,7 @@ function initTarotViewEvents() {
   // ── Always reset to fan spread when entering the view ──
   const fanSpread = _getFanSpread();
   const focusArea = _getFocusArea();
-  const rerunBtnEl = _getRerunBtn();
+  const shareBtnEl = document.getElementById('btn-tarot-share');
   const card = _getTarotCard();
 
   // Ensure correct visibility: fan spread shown, focus area hidden
@@ -2035,7 +2036,7 @@ function initTarotViewEvents() {
     });
   }
   if (focusArea) focusArea.style.display = 'none';
-  if (rerunBtnEl) rerunBtnEl.style.display = 'none';
+  if (shareBtnEl) shareBtnEl.style.display = 'none';
   if (card) {
     card.className = 'tarot-card';
     card.style.transform = '';
@@ -2055,19 +2056,21 @@ function initTarotViewEvents() {
   // Attach fan card click handlers
   initTarotFanDeck();
 
-  // Rerun button (re-bind fresh)
-  const rerunBtn = document.getElementById('btn-tarot-rerun');
-  if (rerunBtn) {
-    const freshRerun = rerunBtn.cloneNode(true);
-    rerunBtn.parentNode.replaceChild(freshRerun, rerunBtn);
-    freshRerun.addEventListener('click', async e => {
+  // Share button (re-bind fresh)
+  const shareBtn = document.getElementById('btn-tarot-share');
+  if (shareBtn) {
+    const freshShare = shareBtn.cloneNode(true);
+    shareBtn.parentNode.replaceChild(freshShare, shareBtn);
+    freshShare.addEventListener('click', e => {
       e.preventDefault();
-      // Clear AI cache so next read gives a fresh narrative
-      if (window.currentDashData && _dashCache) {
-        delete _dashCache.insights['insight-yearly-all'];
-        saveDashCache();
+      const profile = window._globalPersonalityProfile;
+      const ck = 'insight-yearly-all';
+      const cached = _getInsightText(ck);
+      if (typeof generateTarotShareImage === 'function') {
+        generateTarotShareImage(profile, cached);
+      } else {
+        console.error('[Tarot] generateTarotShareImage function not found');
       }
-      resetToFanSpread();
     });
   }
 }
@@ -2128,12 +2131,14 @@ window.checkAndAutoShowTarot = function() {
         animateDetailsReveal(contentEl);
       }
 
-      if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+      const shareBtn = document.getElementById('btn-tarot-share');
+      if (shareBtn) shareBtn.style.display = 'inline-flex';
 
       initTarotTilt();
+      return true;
     }
   }
-  // If no cache: fan spread stays visible (default)
+  return false;
 };
 
 window.initTarotViewEvents = initTarotViewEvents;

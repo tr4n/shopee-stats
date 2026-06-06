@@ -30,13 +30,15 @@ function switchView(name) {
     }, 0);
   }
 
-  // Setup Tarot card if switching to tarot view — always start with fan spread
+  // Setup Tarot card if switching to tarot view
   if (name === "tarot") {
-    if (typeof initTarotViewEvents === "function") {
+    let restored = false;
+    if (typeof checkAndAutoShowTarot === "function") {
+      restored = checkAndAutoShowTarot();
+    }
+    if (!restored && typeof initTarotViewEvents === "function") {
       initTarotViewEvents();
     }
-    // NOTE: Do NOT call checkAndAutoShowTarot here.
-    // The fan spread ritual must always run from scratch.
   }
 }
 window.switchView = switchView;

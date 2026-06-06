@@ -259,12 +259,9 @@
                 <button type="button" class="tarot-btn-primary" id="btn-tarot-trigger" style="display:none">
                   🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN
                 </button>
-                <!-- Sharing disabled -->
-                <button type="button" class="tarot-btn-secondary" id="btn-tarot-share" style="display: none !important">
-                  ✨ Chia Sẻ Quẻ Bói
-                </button>
-                <button type="button" class="tarot-btn-rerun" id="btn-tarot-rerun" style="display:none" title="Rút lại">
-                  ↺ &nbsp;Rút Lại
+                <!-- Sharing button enabled -->
+                <button type="button" class="tarot-btn-share" id="btn-tarot-share" style="display: none">
+                  ✨ Chia Sẻ Bản Ngã
                 </button>
               </div>
             </div>
@@ -746,12 +743,18 @@
     </div>
   </main>
 
+  <div id="tarot-toast" class="tarot-toast hidden">
+    <span class="toast-icon">✨</span>
+    <span class="toast-message">Đã lưu ảnh và sao chép vào bộ nhớ tạm!</span>
+  </div>
+
   <script src="../extension/config.js"></script>
   <script src="../extension/vn-time.js"></script>
   <script src="js/helpers.js"></script>
   <script src="js/cache.js"></script>
   <script src="js/insights.js"></script>
   <script src="js/classification.js"></script>
+  <script src="js/render/tarot-share.js"></script>
   <script src="js/ai-narrative.js"></script>
   <script src="js/render/overview.js"></script>
   <script src="js/render/monthly.js"></script>
