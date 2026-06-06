@@ -1627,34 +1627,44 @@ function burstTarotParticles() {
   container.style.zIndex = '100';
   parent.appendChild(container);
   
-  const colors = ['#ffd700', '#ffa500', '#ff4500', '#da70d6', '#87ceeb'];
+  const colors = ['#c39a43', '#d9a752', '#a855f7', '#ec4899', '#f97316', '#3b82f6'];
+  const symbols = ['✦', '✧', '★', '✨', '•'];
   
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 50; i++) {
     const p = document.createElement('div');
     p.className = 'tarot-sparkle-particle';
     
     const angle = Math.random() * Math.PI * 2;
-    const distance = 40 + Math.random() * 120;
+    const distance = 50 + Math.random() * 150;
     const x = Math.cos(angle) * distance;
     const y = Math.sin(angle) * distance;
     
     p.style.setProperty('--x', `${x}px`);
     p.style.setProperty('--y', `${y}px`);
-    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    const isSymbol = Math.random() > 0.4;
+    if (isSymbol) {
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      p.style.color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.fontSize = `${10 + Math.random() * 14}px`;
+      p.style.background = 'transparent';
+    } else {
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      const size = 4 + Math.random() * 6;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+    }
+    
     p.style.left = '50%';
     p.style.top = '50%';
-    
-    const size = 3 + Math.random() * 6;
-    p.style.width = `${size}px`;
-    p.style.height = `${size}px`;
-    p.style.animationDuration = `${0.6 + Math.random() * 0.6}s`;
+    p.style.animationDuration = `${0.8 + Math.random() * 0.8}s`;
     
     container.appendChild(p);
   }
   
   setTimeout(() => {
     container.remove();
-  }, 1500);
+  }, 2000);
 }
 
 function animateSentencesFadeUp(container) {
@@ -1667,6 +1677,44 @@ function animateSentencesFadeUp(container) {
       s.style.opacity = '1';
       s.style.transform = 'translateY(0)';
     }, idx * 450);
+  });
+}
+
+function animateDetailsReveal(container) {
+  // Animate archetype header
+  const header = container.querySelector('.tarot-result-header');
+  if (header) {
+    header.style.opacity = '0';
+    header.style.transform = 'translateY(10px)';
+    header.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => {
+      header.style.opacity = '1';
+      header.style.transform = 'translateY(0)';
+    }, 50);
+  }
+  
+  // Animate trait rows
+  const traits = container.querySelectorAll('.tarot-trait-row');
+  traits.forEach((t, idx) => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-12px)';
+    t.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => {
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(0)';
+    }, 150 + idx * 100);
+  });
+  
+  // Animate sentences
+  const sentences = container.querySelectorAll('.insight-ai-sentence');
+  sentences.forEach((s, idx) => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(12px)';
+    s.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => {
+      s.style.opacity = '1';
+      s.style.transform = 'translateY(0)';
+    }, 450 + idx * 300);
   });
 }
 
@@ -1769,14 +1817,14 @@ async function runTarotAnalysis() {
       detailsContent.style.display = 'block';
       const emptyEl = detailsPanel?.querySelector('.tarot-details-empty');
       if (emptyEl) emptyEl.style.display = 'none';
-      animateSentencesFadeUp(detailsContent);
+      animateDetailsReveal(detailsContent);
     }
     
     // Update buttons
     if (triggerBtn) {
       triggerBtn.style.display = 'none';
     }
-    if (shareBtn) shareBtn.style.display = 'inline-flex';
+    if (shareBtn) shareBtn.style.display = 'none'; // Keep share button hidden
     if (rerunBtn) rerunBtn.style.display = 'inline-flex';
     
   }, 1200);
@@ -1858,7 +1906,10 @@ window.checkAndAutoShowTarot = function() {
         const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
         const contentEl = detailsPanel.querySelector('.tarot-details-content');
         if (emptyEl) emptyEl.style.display = 'none';
-        if (contentEl) contentEl.style.display = 'block';
+        if (contentEl) {
+          contentEl.style.display = 'block';
+          animateDetailsReveal(contentEl);
+        }
         
         // Setup card visual state directly (flipped, glow)
         card.className = `tarot-card glow-${profile.archetype.key} flipped`;
@@ -1866,7 +1917,7 @@ window.checkAndAutoShowTarot = function() {
         
         // Update buttons
         if (triggerBtn) triggerBtn.style.display = 'none';
-        if (shareBtn) shareBtn.style.display = 'inline-flex';
+        if (shareBtn) shareBtn.style.display = 'none'; // Keep share button hidden
         if (rerunBtn) rerunBtn.style.display = 'inline-flex';
       }
     }
