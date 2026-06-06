@@ -25,8 +25,13 @@ chrome.runtime.onStartup.addListener(() => {
   console.log('[ShopeeAnalytics] Background started');
 });
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('[ShopeeAnalytics] Extension installed');
+chrome.runtime.onInstalled.addListener((details) => {
+  console.log('[ShopeeAnalytics] Extension installed:', details.reason);
+  if (details.reason === 'install') {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('welcome/index.html')
+    });
+  }
 });
 
 /**

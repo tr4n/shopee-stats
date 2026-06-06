@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Thống Kê Chi Tiêu Shopee - Shopee Analytics",
   "short_name": "Shopee Stats",
-  "version": "2.2.8",
-  "description": "Tính tổng tiền và thống kê chi tiết chi tiêu Shopee theo tháng/năm. Tích hợp AI phân loại thông minh, bảo mật 100% offline.",
+  "version": "2.3.0",
+  "description": "Tính tổng tiền và thống kê chi tiết chi tiêu Shopee theo tháng/năm.",
   "minimum_chrome_version": "95",
   "permissions": [
     "activeTab",
