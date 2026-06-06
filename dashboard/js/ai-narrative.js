@@ -1579,6 +1579,7 @@ window.enrichWithAI = enrichWithAI;
    ═══════════════════════════════════════════════════════════ */
 
 /* ── helpers ── */
+let _isTarotCardOpened = false;
 function _getTarotCard()    { return document.getElementById('tarot-card-element'); }
 function _getTarotFront()   { return document.getElementById('tarot-card-ai'); }
 function _getFanSpread()    { return document.getElementById('tarot-fan-spread'); }
@@ -1897,6 +1898,7 @@ async function runTarotSequence(selectedPos) {
   card.classList.remove('shake');
   const archKey = profile?.archetype?.key || 'free_spirit';
   card.classList.add(`glow-${archKey}`, 'flipped');
+  _isTarotCardOpened = true;
 
   // Add holographic shimmer sweep div (if not already)
   const front = card.querySelector('.tarot-card-front');
@@ -1963,6 +1965,7 @@ function resetToFanSpread() {
     card.className = 'tarot-card';
     card.style.transform = '';
   }
+  _isTarotCardOpened = false;
 
   // Reset front content
   if (aiEl) {
@@ -2092,6 +2095,8 @@ function initTarotViewEvents() {
 
 /* ── checkAndAutoShowTarot: restore result state from cache ── */
 window.checkAndAutoShowTarot = function() {
+  if (!_isTarotCardOpened) return false;
+
   const ck     = 'insight-yearly-all';
   const cached = _getInsightText(ck);
 
