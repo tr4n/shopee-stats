@@ -1574,315 +1574,452 @@ window.analyzeShoppingPersonality = analyzeShoppingPersonality;
 window.showProfileInsight = showProfileInsight;
 window.enrichWithAI = enrichWithAI;
 
-/* ── 🔮 Tarot Card Interactive Logic & Animations ── */
+/* ═══════════════════════════════════════════════════════════
+   🔮  Tarot — New Fan Spread + Orbital Ring + Reveal
+   ═══════════════════════════════════════════════════════════ */
 
-function initTarotTilt() {
-  const card = document.getElementById('tarot-card-element');
+/* ── helpers ── */
+function _getTarotCard()    { return document.getElementById('tarot-card-element'); }
+function _getTarotFront()   { return document.getElementById('tarot-card-ai'); }
+function _getFanSpread()    { return document.getElementById('tarot-fan-spread'); }
+function _getFocusArea()    { return document.getElementById('tarot-focus-area'); }
+function _getDetailsPanel() { return document.getElementById('tarot-details-panel'); }
+function _getOrbitalRing()  { return document.getElementById('tarot-orbital-ring'); }
+function _getRerunBtn()     { return document.getElementById('btn-tarot-rerun'); }
+
+/* ── Phase 1: Build fan spread UI & attach click handlers ── */
+function initTarotFanDeck() {
+  const fanCards = document.querySelectorAll('.tarot-fan-card');
+  if (!fanCards.length) return;
+
+  fanCards.forEach(card => {
+    // Remove previous listeners
+    const fresh = card.cloneNode(true);
+    card.parentNode.replaceChild(fresh, card);
+
+    fresh.addEventListener('click', () => {
+      const pos = fresh.dataset.pos;
+      runTarotSequence(pos);
+    });
+  });
+}
+
+/* ── Orbital ring: CSS + JS animated stars on an ellipse path ── */
+let _orbitalRAF = null;
+let _orbitalAngle = 0;
+
+function createOrbitalRing() {
+  const ring = _getOrbitalRing();
+  if (!ring) return;
+  ring.innerHTML = '';
+  ring.style.display = 'block';
+
+  const COUNT = 8;
+  const stars = [];
+  const symbols = ['✦', '✧', '✺', '★', '✦'];
+  const wrapper = ring.closest('.tarot-card-wrapper');
+  if (!wrapper) return;
+  const W = wrapper.offsetWidth  || 220;
+  const H = wrapper.offsetHeight || 370;
+  const CX = W / 2;
+  const CY = H / 2;
+  const RX = W / 2 + 36;  // ellipse x radius
+  const RY = H / 2 + 22;  // ellipse y radius
+
+  for (let i = 0; i < COUNT; i++) {
+    const s = document.createElement('span');
+    s.className = 'orbit-star';
+    s.textContent = symbols[i % symbols.length];
+    s.style.position  = 'absolute';
+    s.style.fontSize  = `${10 + (i % 3) * 2}px`;
+    s.style.color     = 'var(--tarot-gold)';
+    s.style.opacity   = `${0.55 + (i % 3) * 0.15}`;
+    s.style.transformOrigin = 'center center';
+    ring.appendChild(s);
+    stars.push(s);
+  }
+
+  function tick() {
+    _orbitalAngle += 2.2;
+    stars.forEach((s, i) => {
+      const angle = ((_orbitalAngle + i * (360 / COUNT)) % 360) * (Math.PI / 180);
+      const x = CX + RX * Math.cos(angle);
+      const y = CY + RY * Math.sin(angle);
+      s.style.left = `${x}px`;
+      s.style.top  = `${y}px`;
+      s.style.transform = `translate(-50%, -50%) rotate(${_orbitalAngle + i * 45}deg)`;
+      // depth effect: smaller + fade near bottom-right
+      const scale = 0.7 + 0.3 * ((Math.sin(angle) + 1) / 2);
+      s.style.transform += ` scale(${scale.toFixed(2)})`;
+    });
+    _orbitalRAF = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function destroyOrbitalRing(speedUp = true) {
+  return new Promise(resolve => {
+    const ring = _getOrbitalRing();
+    if (!ring) { resolve(); return; }
+
+    if (speedUp) {
+      // Speed-up burst: quickly increase rotation speed for 300ms
+      let fast = 0;
+      const fastTick = () => {
+        _orbitalAngle += 8;
+        fast++;
+        if (fast < 25) { requestAnimationFrame(fastTick); }
+        else {
+          cancelAnimationFrame(_orbitalRAF);
+          ring.style.transition = 'opacity 0.2s ease';
+          ring.style.opacity = '0';
+          setTimeout(() => {
+            ring.style.display = 'none';
+            ring.style.opacity = '1';
+            ring.innerHTML = '';
+            resolve();
+          }, 220);
+        }
+      };
+      cancelAnimationFrame(_orbitalRAF);
+      fastTick();
+    } else {
+      cancelAnimationFrame(_orbitalRAF);
+      ring.style.display = 'none';
+      ring.innerHTML = '';
+      resolve();
+    }
+  });
+}
+
+/* ── Confetti burst (60 particles, multi-color) ── */
+function burstTarotParticles() {
+  const card = _getTarotCard();
   if (!card) return;
-  
+  const parent = card.parentElement;
+
+  const container = document.createElement('div');
+  container.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:100;';
+  parent.appendChild(container);
+
+  const colors  = ['#c8a96e', '#d9b87a', '#a78bfa', '#f9a8d4', '#6ee7b7', '#fbbf24'];
+  const symbols = ['✦', '✧', '★', '✺', '·', '◆'];
+
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'tarot-sparkle-particle';
+
+    const angle    = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 180;
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
+    const dur = `${0.9 + Math.random() * 0.8}s`;
+    const rot = `${Math.random() > 0.5 ? 180 : -180}deg`;
+
+    p.style.setProperty('--x',   `${x}px`);
+    p.style.setProperty('--y',   `${y}px`);
+    p.style.setProperty('--dur', dur);
+    p.style.setProperty('--rot', rot);
+
+    const isSymbol = Math.random() > 0.35;
+    if (isSymbol) {
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      p.style.color    = colors[Math.floor(Math.random() * colors.length)];
+      p.style.fontSize = `${9 + Math.random() * 13}px`;
+    } else {
+      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      const size = `${3 + Math.random() * 6}px`;
+      p.style.width = size; p.style.height = size;
+      p.style.borderRadius = '50%';
+    }
+
+    p.style.left = '50%';
+    p.style.top  = '50%';
+    container.appendChild(p);
+  }
+
+  setTimeout(() => container.remove(), 2200);
+}
+
+/* ── 3D mouse tilt on flipped card ── */
+function initTarotTilt() {
+  const card = _getTarotCard();
+  if (!card) return;
+
   card.addEventListener('mousemove', e => {
     if (!card.classList.contains('flipped')) return;
-    
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
-    const xc = rect.width / 2;
-    const yc = rect.height / 2;
-    
-    const rotateY = ((x - xc) / xc) * 12;
-    const rotateX = -((y - yc) / yc) * 12;
-    
-    card.style.transform = `rotateY(${180 + rotateY}deg) rotateX(${rotateX}deg)`;
-    
+    const xc = rect.width / 2, yc = rect.height / 2;
+    const ry = ((x - xc) / xc) * 8;
+    const rx = -((y - yc) / yc) * 8;
+    card.style.transform = `rotateY(${180 + ry}deg) rotateX(${rx}deg)`;
+
+    // Holographic shimmer track
     const front = card.querySelector('.tarot-card-front');
     if (front) {
-      const px = (x / rect.width) * 100;
-      const py = (y / rect.height) * 100;
-      front.style.setProperty('background-position', `${px}% ${py}%`);
+      const holoSweep = front.querySelector('.holo-sweep');
+      if (holoSweep) {
+        const pct = (x / rect.width) * 100;
+        holoSweep.style.left = `${pct - 60}%`;
+      }
     }
   });
-  
+
   card.addEventListener('mouseleave', () => {
-    card.style.transform = 'rotateY(180deg) rotateX(0deg)';
-    
-    const front = card.querySelector('.tarot-card-front');
-    if (front) {
-      front.style.setProperty('background-position', '150% 0%');
-    }
+    if (!card.classList.contains('flipped')) return;
+    card.style.transform = 'rotateY(180deg)';
   });
 }
 
-function burstTarotParticles() {
-  const card = document.getElementById('tarot-card-element');
-  if (!card) return;
-  
-  const parent = card.parentElement;
-  
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.inset = '0';
-  container.style.pointerEvents = 'none';
-  container.style.overflow = 'visible';
-  container.style.zIndex = '100';
-  parent.appendChild(container);
-  
-  const colors = ['#c39a43', '#d9a752', '#a855f7', '#ec4899', '#f97316', '#3b82f6'];
-  const symbols = ['✦', '✧', '★', '✨', '•'];
-  
-  for (let i = 0; i < 50; i++) {
-    const p = document.createElement('div');
-    p.className = 'tarot-sparkle-particle';
-    
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 50 + Math.random() * 150;
-    const x = Math.cos(angle) * distance;
-    const y = Math.sin(angle) * distance;
-    
-    p.style.setProperty('--x', `${x}px`);
-    p.style.setProperty('--y', `${y}px`);
-    
-    const isSymbol = Math.random() > 0.4;
-    if (isSymbol) {
-      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      p.style.color = colors[Math.floor(Math.random() * colors.length)];
-      p.style.fontSize = `${10 + Math.random() * 14}px`;
-      p.style.background = 'transparent';
-    } else {
-      p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      const size = 4 + Math.random() * 6;
-      p.style.width = `${size}px`;
-      p.style.height = `${size}px`;
-    }
-    
-    p.style.left = '50%';
-    p.style.top = '50%';
-    p.style.animationDuration = `${0.8 + Math.random() * 0.8}s`;
-    
-    container.appendChild(p);
-  }
-  
-  setTimeout(() => {
-    container.remove();
-  }, 2000);
-}
-
-function animateSentencesFadeUp(container) {
-  const sentences = container.querySelectorAll('.insight-ai-sentence');
-  sentences.forEach((s, idx) => {
-    s.style.opacity = '0';
-    s.style.transform = 'translateY(12px)';
-    s.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-    setTimeout(() => {
-      s.style.opacity = '1';
-      s.style.transform = 'translateY(0)';
-    }, idx * 450);
-  });
-}
-
+/* ── Stagger animate details panel ── */
 function animateDetailsReveal(container) {
-  // Animate archetype header
   const header = container.querySelector('.tarot-result-header');
   if (header) {
-    header.style.opacity = '0';
-    header.style.transform = 'translateY(10px)';
-    header.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-    setTimeout(() => {
-      header.style.opacity = '1';
-      header.style.transform = 'translateY(0)';
-    }, 50);
+    header.style.cssText += 'opacity:0;transform:translateY(12px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1)';
+    setTimeout(() => { header.style.opacity = '1'; header.style.transform = 'translateY(0)'; }, 60);
   }
-  
-  // Animate trait rows
-  const traits = container.querySelectorAll('.tarot-trait-row');
-  traits.forEach((t, idx) => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-12px)';
-    t.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-    setTimeout(() => {
-      t.style.opacity = '1';
-      t.style.transform = 'translateX(0)';
-    }, 150 + idx * 100);
+  container.querySelectorAll('.tarot-trait-row').forEach((t, i) => {
+    t.style.cssText += 'opacity:0;transform:translateX(-14px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1)';
+    setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateX(0)'; }, 180 + i * 90);
   });
-  
-  // Animate sentences
-  const sentences = container.querySelectorAll('.insight-ai-sentence');
-  sentences.forEach((s, idx) => {
-    s.style.opacity = '0';
-    s.style.transform = 'translateY(12px)';
-    s.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-    setTimeout(() => {
-      s.style.opacity = '1';
-      s.style.transform = 'translateY(0)';
-    }, 450 + idx * 300);
+  container.querySelectorAll('.insight-ai-sentence').forEach((s, i) => {
+    s.style.cssText += 'opacity:0;transform:translateY(14px);transition:all 0.6s cubic-bezier(0.16,1,0.3,1)';
+    setTimeout(() => { s.style.opacity = '1'; s.style.transform = 'translateY(0)'; }, 500 + i * 280);
   });
 }
 
-async function runTarotAnalysis() {
-  const card = document.getElementById('tarot-card-element');
-  const triggerBtn = document.getElementById('btn-tarot-trigger');
-  const rerunBtn = document.getElementById('btn-tarot-rerun');
-  const shareBtn = document.getElementById('btn-tarot-share');
-  const detailsPanel = document.getElementById('tarot-details-panel');
-  
-  if (!card) return;
-  
-  // Reset glows from previous runs
-  card.className = 'tarot-card';
+/* ── Main sequence orchestrator ── */
+async function runTarotSequence(selectedPos) {
+  const fanSpread = _getFanSpread();
+  const focusArea = _getFocusArea();
+  const card      = _getTarotCard();
+  const detailsPanel = _getDetailsPanel();
+  const rerunBtn  = _getRerunBtn();
+
+  if (!card || !fanSpread || !focusArea) return;
+
+  /* ── Step 1: Fan cards fly away, then switch views [0–350ms] ── */
+  const fanCards = document.querySelectorAll('.tarot-fan-card');
+  fanCards.forEach(fc => {
+    const pos = fc.dataset.pos;
+    if (pos === selectedPos) {
+      fc.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease';
+      fc.style.transform  = 'translateY(-60px) scale(1.12)';
+      fc.style.opacity    = '0';
+    } else {
+      fc.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
+      fc.style.transform  = 'translateY(40px) scale(0.9)';
+      fc.style.opacity    = '0';
+    }
+  });
+
+  await new Promise(r => setTimeout(r, 380));
+  fanSpread.style.display = 'none';
+  focusArea.style.display = 'block';
+
+  // Fade focus area in
+  focusArea.style.opacity = '0';
+  focusArea.style.transition = 'opacity 0.4s ease';
+  requestAnimationFrame(() => { focusArea.style.opacity = '1'; });
+
+  /* ── Step 2: Show orbital ring + drawing state [400ms+] ── */
+  card.className = 'tarot-card is-drawing';
   card.style.transform = '';
-  
-  // 1. Set drawing state
-  card.classList.add('is-drawing');
-  if (triggerBtn) {
-    triggerBtn.disabled = true;
-    triggerBtn.style.display = 'inline-flex';
-    triggerBtn.innerHTML = `<span class="btn-spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px"></span> 🔮 ĐANG RÚT QUẺ...`;
-  }
-  if (rerunBtn) rerunBtn.style.display = 'none';
-  if (shareBtn) shareBtn.style.display = 'none';
-  
-  // Clear details content, show empty state with spinner
+
+  // Show loading text in panel
   if (detailsPanel) {
-    const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+    const emptyEl   = detailsPanel.querySelector('.tarot-details-empty');
     const contentEl = detailsPanel.querySelector('.tarot-details-content');
     if (emptyEl) {
       emptyEl.style.display = 'block';
       emptyEl.innerHTML = `
-        <div class="btn-spinner" style="width: 32px; height: 32px; border-width: 3px; margin-bottom: 16px; border-top-color: var(--tarot-gold);"></div>
+        <div class="btn-spinner" style="width:30px;height:30px;border-width:3px;margin-bottom:18px;border-top-color:var(--tarot-gold);"></div>
         <h3>Vũ Trụ Đang Phán Xét</h3>
-        <p>Lắng nghe sự rung động của các chòm sao chốt đơn và sắp xếp các thẻ bài tính cách...</p>
+        <p>Lắng nghe sự rung động từ tinh tú và sắp xếp thẻ bài...</p>
       `;
     }
     if (contentEl) contentEl.style.display = 'none';
   }
-  
-  // Ensure global personality profile is calculated
+
+  await new Promise(r => setTimeout(r, 200));
+  createOrbitalRing();
+
+  /* ── Step 3: Run AI analysis ── */
   if (window.currentDashData && !window._globalPersonalityProfile) {
     window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
       ? analyzeShoppingPersonality(window.currentDashData)
       : null;
   }
-  
+
   const profile = window._globalPersonalityProfile;
   if (!profile) {
-    card.classList.remove('is-drawing');
-    if (triggerBtn) {
-      triggerBtn.disabled = false;
-      triggerBtn.textContent = '🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN';
-    }
+    await destroyOrbitalRing(false);
+    card.className = 'tarot-card';
+    resetToFanSpread();
     return;
   }
-  
+
   const context = profile.aiContext;
   const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
-  const ck = "insight-yearly-all";
-  
-  _aiInsightCallArgs['tarot-card'] = {
-    context,
-    specificPrompt,
-    cacheKey: ck,
-    fallbackFn: null,
-    profile
-  };
-  
-  // Run or load from cache
+  const ck = 'insight-yearly-all';
+
+  _aiInsightCallArgs['tarot-card'] = { context, specificPrompt, cacheKey: ck, fallbackFn: null, profile };
+
   const cached = _getInsightText(ck);
   if (cached !== null) {
-    const aiEl = document.getElementById('tarot-card-ai');
-    if (aiEl) {
-      aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
-    }
+    const aiEl = _getTarotFront();
+    if (aiEl) aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
   } else {
     await _executeAIInsight('tarot-card');
   }
-  
-  // 3. Post-execution drawing transition
+
+  /* ── Step 4: Shake card ── */
+  card.classList.remove('is-drawing');
+  card.classList.add('shake');
+
+  /* ── Step 5: Orbital ring speed burst then vanish ── */
+  await new Promise(r => setTimeout(r, 350));
+  await destroyOrbitalRing(true);
+
+  /* ── Step 6: Flip card 3D ── */
+  await new Promise(r => setTimeout(r, 100));
+  card.classList.remove('shake');
+  const archKey = profile?.archetype?.key || 'free_spirit';
+  card.classList.add(`glow-${archKey}`, 'flipped');
+
+  // Add holographic shimmer sweep div (if not already)
+  const front = card.querySelector('.tarot-card-front');
+  if (front && !front.querySelector('.holo-sweep')) {
+    const sweep = document.createElement('div');
+    sweep.className = 'holo-sweep';
+    front.appendChild(sweep);
+    setTimeout(() => front.classList.add('do-shimmer'), 200);
+    setTimeout(() => front.classList.remove('do-shimmer'), 900);
+  }
+
+  /* ── Step 7: Confetti burst + reveal panel ── */
   setTimeout(() => {
-    // Remove drawing animation
-    card.classList.remove('is-drawing');
-    
-    // Add glow class based on archetype key
-    const archKey = profile?.archetype?.key || 'free_spirit';
-    card.classList.add(`glow-${archKey}`);
-    
-    // Flip card
-    card.classList.add('flipped');
-    
-    // Particles explosion
     burstTarotParticles();
-    
-    // Fade up details list
-    const detailsContent = detailsPanel?.querySelector('.tarot-details-content');
-    if (detailsContent) {
-      detailsContent.style.display = 'block';
-      const emptyEl = detailsPanel?.querySelector('.tarot-details-empty');
+
+    // Glow trait rows with archetype color
+    document.querySelectorAll('.tarot-trait-row').forEach(row => {
+      row.style.setProperty('--glow-color', `var(--glow-color, var(--tarot-gold))`);
+    });
+
+    if (detailsPanel) {
+      const emptyEl   = detailsPanel.querySelector('.tarot-details-empty');
+      const contentEl = detailsPanel.querySelector('.tarot-details-content');
       if (emptyEl) emptyEl.style.display = 'none';
-      animateDetailsReveal(detailsContent);
+      if (contentEl) {
+        contentEl.style.display = 'block';
+        animateDetailsReveal(contentEl);
+      }
     }
-    
-    // Update buttons
-    if (triggerBtn) {
-      triggerBtn.style.display = 'none';
-    }
-    if (shareBtn) shareBtn.style.display = 'none'; // Keep share button hidden
+
     if (rerunBtn) rerunBtn.style.display = 'inline-flex';
-    
-  }, 1200);
+
+    // Activate tilt
+    initTarotTilt();
+  }, 700);
 }
 
+/* ── Reset back to fan spread ── */
+function resetToFanSpread() {
+  const fanSpread = _getFanSpread();
+  const focusArea = _getFocusArea();
+  const card      = _getTarotCard();
+  const aiEl      = _getTarotFront();
+  const detailsPanel = _getDetailsPanel();
+  const rerunBtn  = _getRerunBtn();
+
+  if (rerunBtn) rerunBtn.style.display = 'none';
+
+  // Reset card state
+  if (card) {
+    card.className = 'tarot-card';
+    card.style.transform = '';
+  }
+
+  // Reset front content
+  if (aiEl) {
+    aiEl.innerHTML = '<div class="tarot-front-placeholder"><span style="font-size:32px">🔮</span><p>Đang chuẩn bị thẻ bài...</p></div>';
+    aiEl.className = 'tarot-card-front';
+  }
+
+  // Reset panel
+  if (detailsPanel) {
+    const emptyEl   = detailsPanel.querySelector('.tarot-details-empty');
+    const contentEl = detailsPanel.querySelector('.tarot-details-content');
+    if (emptyEl) {
+      emptyEl.style.display = 'block';
+      emptyEl.innerHTML = `
+        <div class="empty-icon">✨</div>
+        <h3>Thông Điệp Từ Vũ Trụ</h3>
+        <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
+      `;
+    }
+    if (contentEl) contentEl.style.display = 'none';
+  }
+
+  // Switch views
+  if (focusArea) focusArea.style.display = 'none';
+  if (fanSpread) {
+    fanSpread.style.display = 'flex';
+
+    // Reset fan cards with stagger animation
+    const fanCards = document.querySelectorAll('.tarot-fan-card');
+    fanCards.forEach((fc, i) => {
+      fc.style.transition = 'none';
+      fc.style.opacity    = '0';
+      const baseTransform = i === 0 ? 'rotate(-12deg) translateX(20px)'
+                          : i === 1 ? 'rotate(0deg) translateY(-22px)'
+                          : 'rotate(12deg) translateX(-20px)';
+      fc.style.transform = baseTransform + ' translateY(30px)';
+      setTimeout(() => {
+        fc.style.transition = 'transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease';
+        fc.style.opacity    = '1';
+        fc.style.transform  = baseTransform;
+      }, 80 + i * 60);
+    });
+
+    // Re-attach click handlers
+    setTimeout(initTarotFanDeck, 300);
+  }
+}
+
+/* ── runTarotAnalysis kept for backward compat (called nowhere new) ── */
+async function runTarotAnalysis() {
+  await runTarotSequence('center');
+}
+
+/* ── initTarotViewEvents: called by main.js on view switch ── */
 function initTarotViewEvents() {
-  const triggerBtn = document.getElementById('btn-tarot-trigger');
+  initTarotFanDeck();
+
+  // Rerun button
   const rerunBtn = document.getElementById('btn-tarot-rerun');
-  const shareBtn = document.getElementById('btn-tarot-share');
-  
-  if (!triggerBtn) return;
-  
-  // Remove existing listeners if any
-  const newTriggerBtn = triggerBtn.cloneNode(true);
-  triggerBtn.parentNode.replaceChild(newTriggerBtn, triggerBtn);
-  
-  newTriggerBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    await runTarotAnalysis();
-  });
-  
   if (rerunBtn) {
-    const newRerunBtn = rerunBtn.cloneNode(true);
-    rerunBtn.parentNode.replaceChild(newRerunBtn, rerunBtn);
-    
-    newRerunBtn.addEventListener('click', async (e) => {
+    const freshRerun = rerunBtn.cloneNode(true);
+    rerunBtn.parentNode.replaceChild(freshRerun, rerunBtn);
+    freshRerun.addEventListener('click', async e => {
       e.preventDefault();
-      if (window.currentDashData) {
-        const ck = "insight-yearly-all";
-        if (_dashCache) {
-          delete _dashCache.insights[ck];
-          saveDashCache();
-        }
+      // Clear AI cache for fresh reading
+      if (window.currentDashData && _dashCache) {
+        delete _dashCache.insights['insight-yearly-all'];
+        saveDashCache();
       }
-      await runTarotAnalysis();
+      resetToFanSpread();
     });
   }
-  
-  if (shareBtn) {
-    const newShareBtn = shareBtn.cloneNode(true);
-    shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
-    
-    newShareBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const btnShare = document.querySelector(".btn-share-trigger");
-      if (btnShare) {
-        btnShare.click();
-      }
-    });
-  }
-  
-  initTarotTilt();
 }
 
+/* ── checkAndAutoShowTarot: restore result state from cache ── */
 window.checkAndAutoShowTarot = function() {
-  const ck = "insight-yearly-all";
+  const ck     = 'insight-yearly-all';
   const cached = _getInsightText(ck);
-  
+
   if (cached !== null && window.currentDashData) {
     if (!window._globalPersonalityProfile) {
       window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
@@ -1890,71 +2027,50 @@ window.checkAndAutoShowTarot = function() {
         : null;
     }
     const profile = window._globalPersonalityProfile;
-    if (profile) {
-      const card = document.getElementById('tarot-card-element');
-      const aiEl = document.getElementById('tarot-card-ai');
-      const triggerBtn = document.getElementById('btn-tarot-trigger');
-      const rerunBtn = document.getElementById('btn-tarot-rerun');
-      const shareBtn = document.getElementById('btn-tarot-share');
-      const detailsPanel = document.getElementById('tarot-details-panel');
-      
-      if (card && aiEl && detailsPanel) {
-        // Render card front
-        aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
-        
-        // Show result content, hide empty state
-        const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
-        const contentEl = detailsPanel.querySelector('.tarot-details-content');
-        if (emptyEl) emptyEl.style.display = 'none';
-        if (contentEl) {
-          contentEl.style.display = 'block';
-          animateDetailsReveal(contentEl);
-        }
-        
-        // Setup card visual state directly (flipped, glow)
-        card.className = `tarot-card glow-${profile.archetype.key} flipped`;
-        card.style.transform = '';
-        
-        // Update buttons
-        if (triggerBtn) triggerBtn.style.display = 'none';
-        if (shareBtn) shareBtn.style.display = 'none'; // Keep share button hidden
-        if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+    if (!profile) return;
+
+    const fanSpread = _getFanSpread();
+    const focusArea = _getFocusArea();
+    const card      = _getTarotCard();
+    const aiEl      = _getTarotFront();
+    const detailsPanel = _getDetailsPanel();
+    const rerunBtn  = _getRerunBtn();
+
+    if (card && aiEl && detailsPanel && fanSpread && focusArea) {
+      // Switch to result view
+      fanSpread.style.display = 'none';
+      focusArea.style.display = 'block';
+
+      // Render card front
+      aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
+
+      // Add holo-sweep
+      const front = card.querySelector('.tarot-card-front');
+      if (front && !front.querySelector('.holo-sweep')) {
+        const sweep = document.createElement('div');
+        sweep.className = 'holo-sweep';
+        front.appendChild(sweep);
       }
-    }
-  } else {
-    // Reset view to original empty state if no cached data
-    const card = document.getElementById('tarot-card-element');
-    const triggerBtn = document.getElementById('btn-tarot-trigger');
-    const rerunBtn = document.getElementById('btn-tarot-rerun');
-    const shareBtn = document.getElementById('btn-tarot-share');
-    const detailsPanel = document.getElementById('tarot-details-panel');
-    
-    if (card) {
-      card.className = 'tarot-card';
-      card.style.transform = '';
-    }
-    if (triggerBtn) {
-      triggerBtn.style.display = 'inline-flex';
-      triggerBtn.disabled = false;
-      triggerBtn.textContent = '🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN';
-    }
-    if (rerunBtn) rerunBtn.style.display = 'none';
-    if (shareBtn) shareBtn.style.display = 'none';
-    
-    if (detailsPanel) {
-      const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+
+      // Set card state
+      const archKey = profile.archetype?.key || 'free_spirit';
+      card.className = `tarot-card glow-${archKey} flipped`;
+
+      // Show result content
+      const emptyEl   = detailsPanel.querySelector('.tarot-details-empty');
       const contentEl = detailsPanel.querySelector('.tarot-details-content');
-      if (emptyEl) {
-        emptyEl.style.display = 'block';
-        emptyEl.innerHTML = `
-          <div class="empty-icon">✨</div>
-          <h3>Thông Điệp Từ Vũ Trụ</h3>
-          <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
-        `;
+      if (emptyEl) emptyEl.style.display = 'none';
+      if (contentEl) {
+        contentEl.style.display = 'block';
+        animateDetailsReveal(contentEl);
       }
-      if (contentEl) contentEl.style.display = 'none';
+
+      if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+
+      initTarotTilt();
     }
   }
+  // If no cache: fan spread stays visible (default)
 };
 
 window.initTarotViewEvents = initTarotViewEvents;

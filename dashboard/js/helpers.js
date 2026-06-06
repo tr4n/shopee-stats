@@ -208,6 +208,7 @@ function renderAIInsight(text, cardId, profile) {
     const sub = subLabels[a.key] || 'THE SEEKER';
 
     return `
+      <div class="holo-sweep"></div>
       <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
       <div class="tarot-card-main">
         <div class="tarot-frame-outer">
@@ -216,9 +217,9 @@ function renderAIInsight(text, cardId, profile) {
         </div>
         <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
         <span class="tarot-card-subtitle">${sub}</span>
-        <div class="tarot-card-ornaments">✦ ✵ ✦</div>
+        <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
       </div>
-      <div class="tarot-card-footer">✦ EST. ${new Date().getFullYear()} ✦</div>
+      <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
     `;
   }
 
