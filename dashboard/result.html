@@ -176,6 +176,16 @@
           <h1 class="page-title">🔮 Bản Ngã Tarot & Vũ Trụ Phán</h1>
           <p class="page-subtitle">Giải mã tính cách mua sắm và thông điệp từ tinh tú</p>
         </div>
+        <div style="
+              display: flex;
+              gap: 10px;
+              flex-wrap: wrap;
+              justify-content: flex-end;
+            ">
+          <button type="button" class="tarot-btn-share" id="btn-tarot-share" style="display: none">
+            ✨ Chia Sẻ Bản Ngã
+          </button>
+        </div>
       </div>
 
       <div class="tarot-cosmos-container">
@@ -254,18 +264,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- Action buttons -->
-                <div class="tarot-actions-row">
-                  <!-- Hidden trigger for JS compat -->
-                  <button type="button" class="tarot-btn-primary" id="btn-tarot-trigger" style="display:none">
-                    🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN
-                  </button>
-                  <!-- Sharing button enabled -->
-                  <button type="button" class="tarot-btn-share" id="btn-tarot-share" style="display: none">
-                    ✨ Chia Sẻ Bản Ngã
-                  </button>
-                </div>
               </div>
 
               <!-- Right: Glass result panel (Vũ Trụ Phán only) -->
@@ -279,7 +277,6 @@
                   <div class="tarot-details-content" style="display: none">
                     <div class="tarot-result-header">
                       <div class="tarot-archetype-tag" id="tarot-res-archetype-tag"></div>
-                      <div class="tarot-orders-count" id="tarot-res-orders-count"></div>
                     </div>
                     <div class="tarot-section-divider"></div>
                     <div class="tarot-narrative-section">

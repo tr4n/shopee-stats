@@ -202,15 +202,7 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
 
   // 4. Draw Stats & Text below card
-  const contentY = cardY + cardH + 110;
-
-  // Stats Text: Dựa trên X đơn hàng (Using Arial)
-  ctx.fillStyle = '#e8d5a3';
-  ctx.font = 'bold 24px Arial';
-  ctx.fillText((profile.totalOrders > 0 
-    ? `DỰA TRÊN ${profile.totalOrders.toLocaleString('vi-VN')} ĐƠN HÀNG` 
-    : 'BẢN NGÃ MUA SẮM'
-  ).toUpperCase(), 540, contentY);
+  const contentY = cardY + cardH + 40;
 
   // Gradient Separator line
   const sepW = 600;
@@ -262,8 +254,8 @@ window.generateTarotShareImage = function(profile, cachedText) {
     }
     lines.push(line.trim());
 
-    // Check if total height fits in the available space (450px max)
-    if (lines.length * lineHeight <= 450 || fontSize === 18) {
+    // Check if total height fits in the available space (520px max)
+    if (lines.length * lineHeight <= 520 || fontSize === 18) {
       finalLines = lines;
       break;
     }

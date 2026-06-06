@@ -150,19 +150,13 @@ function renderAIInsight(text, cardId, profile) {
             tagEl.innerHTML = `<span style="font-size:22px;margin-right:8px">${escHtml(profile.archetype.icon)}</span><span>${escHtml(profile.archetype.label)}</span>`;
           }
           
-          // Set Orders count
-          const countEl = document.getElementById('tarot-res-orders-count');
-          if (countEl) {
-            countEl.textContent = profile.totalOrders > 0 ? `Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng` : '';
-          }
-          
           // Set Traits list
           const traitsEl = document.getElementById('tarot-res-traits-list');
           if (traitsEl && profile.traits) {
             traitsEl.innerHTML = profile.traits.map(t => `
               <div class="tarot-trait-row">
                 <span class="trait-icon">${escHtml(t.icon)}</span>
-                <div style="display:flex; flex-direction:column">
+                <div class="trait-content-wrap">
                   <span class="trait-text">${escHtml(t.description || t.label)}</span>
                   <span class="trait-evidence">· ${escHtml(t.evidence)}</span>
                 </div>
