@@ -14,15 +14,21 @@
     "default_popup": "popup/index.html",
     "default_icon": {
       "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
       "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "96": "icons/icon96.png",
+      "128": "icons/icon128.png",
+      "256": "icons/icon256.png"
     },
     "default_title": "Shopee Analytics"
   },
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "96": "icons/icon96.png",
+    "128": "icons/icon128.png",
+    "256": "icons/icon256.png"
   },
   "background": {
     "service_worker": "background.js"

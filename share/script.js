@@ -1498,7 +1498,7 @@
       </div>
       <div class="story-footer">
         <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
-          <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+          <span style="font-size: 16px; margin-right: 6px; line-height: 1;">🛍️</span>
           <span>Shopee Analytics</span>
         </a>
         <span class="brand-date">${fmtDate(d.ts)}</span>
@@ -1536,7 +1536,7 @@
       </div>
       <div class="story-footer">
         <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
-          <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+          <span style="font-size: 16px; margin-right: 6px; line-height: 1;">🛍️</span>
           <span>Shopee Analytics</span>
         </a>
         <span class="brand-date">${fmtDate(d.ts)}</span>
@@ -1563,7 +1563,7 @@
       </div>
       <div class="story-footer">
         <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
-          <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+          <span style="font-size: 16px; margin-right: 6px; line-height: 1;">🛍️</span>
           <span>Shopee Analytics</span>
         </a>
         <span class="brand-date">${fmtDate(d.ts)}</span>
@@ -1634,7 +1634,7 @@
       </div>
       <div class="story-footer">
         <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
-          <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+          <span style="font-size: 16px; margin-right: 6px; line-height: 1;">🛍️</span>
           <span>Shopee Analytics</span>
         </a>
         <span class="brand-date">${fmtDate(d.ts)}</span>
@@ -1668,7 +1668,7 @@
       </div>
       <div class="story-footer">
         <a class="brand-logo" href="https://tr4n.github.io/shopee-stats" target="_blank" rel="noopener">
-          <img src="../extension/icons/icon128.png" alt="Logo" class="brand-logo-img">
+          <span style="font-size: 16px; margin-right: 6px; line-height: 1;">🛍️</span>
           <span>Shopee Analytics</span>
         </a>
         <span class="brand-date">${fmtDate(d.ts)}</span>
