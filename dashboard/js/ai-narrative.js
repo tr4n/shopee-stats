@@ -1573,3 +1573,338 @@ function showProfileInsight(cardId, profile, sectionType) {
 window.analyzeShoppingPersonality = analyzeShoppingPersonality;
 window.showProfileInsight = showProfileInsight;
 window.enrichWithAI = enrichWithAI;
+
+/* ── 🔮 Tarot Card Interactive Logic & Animations ── */
+
+function initTarotTilt() {
+  const card = document.getElementById('tarot-card-element');
+  if (!card) return;
+  
+  card.addEventListener('mousemove', e => {
+    if (!card.classList.contains('flipped')) return;
+    
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const xc = rect.width / 2;
+    const yc = rect.height / 2;
+    
+    const rotateY = ((x - xc) / xc) * 12;
+    const rotateX = -((y - yc) / yc) * 12;
+    
+    card.style.transform = `rotateY(${180 + rotateY}deg) rotateX(${rotateX}deg)`;
+    
+    const front = card.querySelector('.tarot-card-front');
+    if (front) {
+      const px = (x / rect.width) * 100;
+      const py = (y / rect.height) * 100;
+      front.style.setProperty('background-position', `${px}% ${py}%`);
+    }
+  });
+  
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'rotateY(180deg) rotateX(0deg)';
+    
+    const front = card.querySelector('.tarot-card-front');
+    if (front) {
+      front.style.setProperty('background-position', '150% 0%');
+    }
+  });
+}
+
+function burstTarotParticles() {
+  const card = document.getElementById('tarot-card-element');
+  if (!card) return;
+  
+  const parent = card.parentElement;
+  
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.inset = '0';
+  container.style.pointerEvents = 'none';
+  container.style.overflow = 'visible';
+  container.style.zIndex = '100';
+  parent.appendChild(container);
+  
+  const colors = ['#ffd700', '#ffa500', '#ff4500', '#da70d6', '#87ceeb'];
+  
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'tarot-sparkle-particle';
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 40 + Math.random() * 120;
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
+    
+    p.style.setProperty('--x', `${x}px`);
+    p.style.setProperty('--y', `${y}px`);
+    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    p.style.left = '50%';
+    p.style.top = '50%';
+    
+    const size = 3 + Math.random() * 6;
+    p.style.width = `${size}px`;
+    p.style.height = `${size}px`;
+    p.style.animationDuration = `${0.6 + Math.random() * 0.6}s`;
+    
+    container.appendChild(p);
+  }
+  
+  setTimeout(() => {
+    container.remove();
+  }, 1500);
+}
+
+function animateSentencesFadeUp(container) {
+  const sentences = container.querySelectorAll('.insight-ai-sentence');
+  sentences.forEach((s, idx) => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(12px)';
+    s.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+    setTimeout(() => {
+      s.style.opacity = '1';
+      s.style.transform = 'translateY(0)';
+    }, idx * 450);
+  });
+}
+
+async function runTarotAnalysis() {
+  const card = document.getElementById('tarot-card-element');
+  const triggerBtn = document.getElementById('btn-tarot-trigger');
+  const rerunBtn = document.getElementById('btn-tarot-rerun');
+  const shareBtn = document.getElementById('btn-tarot-share');
+  const detailsPanel = document.getElementById('tarot-details-panel');
+  
+  if (!card) return;
+  
+  // Reset glows from previous runs
+  card.className = 'tarot-card';
+  card.style.transform = '';
+  
+  // 1. Set drawing state
+  card.classList.add('is-drawing');
+  if (triggerBtn) {
+    triggerBtn.disabled = true;
+    triggerBtn.style.display = 'inline-flex';
+    triggerBtn.innerHTML = `<span class="btn-spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px"></span> 🔮 ĐANG RÚT QUẺ...`;
+  }
+  if (rerunBtn) rerunBtn.style.display = 'none';
+  if (shareBtn) shareBtn.style.display = 'none';
+  
+  // Clear details content, show empty state with spinner
+  if (detailsPanel) {
+    const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+    const contentEl = detailsPanel.querySelector('.tarot-details-content');
+    if (emptyEl) {
+      emptyEl.style.display = 'block';
+      emptyEl.innerHTML = `
+        <div class="btn-spinner" style="width: 32px; height: 32px; border-width: 3px; margin-bottom: 16px; border-top-color: var(--tarot-gold);"></div>
+        <h3>Vũ Trụ Đang Phán Xét</h3>
+        <p>Lắng nghe sự rung động của các chòm sao chốt đơn và sắp xếp các thẻ bài tính cách...</p>
+      `;
+    }
+    if (contentEl) contentEl.style.display = 'none';
+  }
+  
+  // Ensure global personality profile is calculated
+  if (window.currentDashData && !window._globalPersonalityProfile) {
+    window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
+      ? analyzeShoppingPersonality(window.currentDashData)
+      : null;
+  }
+  
+  const profile = window._globalPersonalityProfile;
+  if (!profile) {
+    card.classList.remove('is-drawing');
+    if (triggerBtn) {
+      triggerBtn.disabled = false;
+      triggerBtn.textContent = '🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN';
+    }
+    return;
+  }
+  
+  const context = profile.aiContext;
+  const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
+  const ck = "insight-yearly-all";
+  
+  _aiInsightCallArgs['tarot-card'] = {
+    context,
+    specificPrompt,
+    cacheKey: ck,
+    fallbackFn: null,
+    profile
+  };
+  
+  // Run or load from cache
+  const cached = _getInsightText(ck);
+  if (cached !== null) {
+    const aiEl = document.getElementById('tarot-card-ai');
+    if (aiEl) {
+      aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
+    }
+  } else {
+    await _executeAIInsight('tarot-card');
+  }
+  
+  // 3. Post-execution drawing transition
+  setTimeout(() => {
+    // Remove drawing animation
+    card.classList.remove('is-drawing');
+    
+    // Add glow class based on archetype key
+    const archKey = profile?.archetype?.key || 'free_spirit';
+    card.classList.add(`glow-${archKey}`);
+    
+    // Flip card
+    card.classList.add('flipped');
+    
+    // Particles explosion
+    burstTarotParticles();
+    
+    // Fade up details list
+    const detailsContent = detailsPanel?.querySelector('.tarot-details-content');
+    if (detailsContent) {
+      detailsContent.style.display = 'block';
+      const emptyEl = detailsPanel?.querySelector('.tarot-details-empty');
+      if (emptyEl) emptyEl.style.display = 'none';
+      animateSentencesFadeUp(detailsContent);
+    }
+    
+    // Update buttons
+    if (triggerBtn) {
+      triggerBtn.style.display = 'none';
+    }
+    if (shareBtn) shareBtn.style.display = 'inline-flex';
+    if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+    
+  }, 1200);
+}
+
+function initTarotViewEvents() {
+  const triggerBtn = document.getElementById('btn-tarot-trigger');
+  const rerunBtn = document.getElementById('btn-tarot-rerun');
+  const shareBtn = document.getElementById('btn-tarot-share');
+  
+  if (!triggerBtn) return;
+  
+  // Remove existing listeners if any
+  const newTriggerBtn = triggerBtn.cloneNode(true);
+  triggerBtn.parentNode.replaceChild(newTriggerBtn, triggerBtn);
+  
+  newTriggerBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    await runTarotAnalysis();
+  });
+  
+  if (rerunBtn) {
+    const newRerunBtn = rerunBtn.cloneNode(true);
+    rerunBtn.parentNode.replaceChild(newRerunBtn, rerunBtn);
+    
+    newRerunBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (window.currentDashData) {
+        const ck = "insight-yearly-all";
+        if (_dashCache) {
+          delete _dashCache.insights[ck];
+          saveDashCache();
+        }
+      }
+      await runTarotAnalysis();
+    });
+  }
+  
+  if (shareBtn) {
+    const newShareBtn = shareBtn.cloneNode(true);
+    shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
+    
+    newShareBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const btnShare = document.querySelector(".btn-share-trigger");
+      if (btnShare) {
+        btnShare.click();
+      }
+    });
+  }
+  
+  initTarotTilt();
+}
+
+window.checkAndAutoShowTarot = function() {
+  const ck = "insight-yearly-all";
+  const cached = _getInsightText(ck);
+  
+  if (cached !== null && window.currentDashData) {
+    if (!window._globalPersonalityProfile) {
+      window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
+        ? analyzeShoppingPersonality(window.currentDashData)
+        : null;
+    }
+    const profile = window._globalPersonalityProfile;
+    if (profile) {
+      const card = document.getElementById('tarot-card-element');
+      const aiEl = document.getElementById('tarot-card-ai');
+      const triggerBtn = document.getElementById('btn-tarot-trigger');
+      const rerunBtn = document.getElementById('btn-tarot-rerun');
+      const shareBtn = document.getElementById('btn-tarot-share');
+      const detailsPanel = document.getElementById('tarot-details-panel');
+      
+      if (card && aiEl && detailsPanel) {
+        // Render card front
+        aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
+        
+        // Show result content, hide empty state
+        const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+        const contentEl = detailsPanel.querySelector('.tarot-details-content');
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'block';
+        
+        // Setup card visual state directly (flipped, glow)
+        card.className = `tarot-card glow-${profile.archetype.key} flipped`;
+        card.style.transform = '';
+        
+        // Update buttons
+        if (triggerBtn) triggerBtn.style.display = 'none';
+        if (shareBtn) shareBtn.style.display = 'inline-flex';
+        if (rerunBtn) rerunBtn.style.display = 'inline-flex';
+      }
+    }
+  } else {
+    // Reset view to original empty state if no cached data
+    const card = document.getElementById('tarot-card-element');
+    const triggerBtn = document.getElementById('btn-tarot-trigger');
+    const rerunBtn = document.getElementById('btn-tarot-rerun');
+    const shareBtn = document.getElementById('btn-tarot-share');
+    const detailsPanel = document.getElementById('tarot-details-panel');
+    
+    if (card) {
+      card.className = 'tarot-card';
+      card.style.transform = '';
+    }
+    if (triggerBtn) {
+      triggerBtn.style.display = 'inline-flex';
+      triggerBtn.disabled = false;
+      triggerBtn.textContent = '🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN';
+    }
+    if (rerunBtn) rerunBtn.style.display = 'none';
+    if (shareBtn) shareBtn.style.display = 'none';
+    
+    if (detailsPanel) {
+      const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+      const contentEl = detailsPanel.querySelector('.tarot-details-content');
+      if (emptyEl) {
+        emptyEl.style.display = 'block';
+        emptyEl.innerHTML = `
+          <div class="empty-icon">✨</div>
+          <h3>Thông Điệp Từ Vũ Trụ</h3>
+          <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
+        `;
+      }
+      if (contentEl) contentEl.style.display = 'none';
+    }
+  }
+};
+
+window.initTarotViewEvents = initTarotViewEvents;
+

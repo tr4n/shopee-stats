@@ -39,6 +39,9 @@
       <button class="nav-item" data-view="orders">
         <span class="ni">🛍️</span> Thống Kê Sale
       </button>
+      <button class="nav-item" data-view="tarot">
+        <span class="ni">🔮</span> Bản Ngã Tarot
+      </button>
       <div class="nav-support-divider"></div>
 
       <button class="nav-item nav-item--support" id="btn-support">
@@ -147,7 +150,13 @@
             <ul class="insight-list" id="insight-yearly-list"></ul>
           </div>
           <div class="overview-insight-right">
-            <div class="insight-ai" id="insight-yearly-ai" style="display: none"></div>
+            <div class="tarot-teaser-card">
+              <div class="teaser-cosmic-bg"></div>
+              <div class="teaser-icon">🔮</div>
+              <h3>Bản Ngã Tarot</h3>
+              <p>Khám phá bản ngã chốt đơn ẩn giấu và nghe Vũ trụ phán về thói quen chi tiêu của bạn!</p>
+              <button type="button" class="teaser-btn" onclick="switchView('tarot')">Giải Mã Ngay ✨</button>
+            </div>
           </div>
         </div>
       </div>
@@ -157,6 +166,88 @@
           🛒 Top Sản Phẩm Năm
         </div>
         <div class="top-list" id="yearly-items-list"></div>
+      </div>
+    </div>
+
+    <!-- Tarot View -->
+    <div id="view-tarot" class="view">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">🔮 Bản Ngã Tarot & Vũ Trụ Phán</h1>
+          <p class="page-subtitle">Giải mã tính cách mua sắm và thông điệp từ tinh tú</p>
+        </div>
+      </div>
+
+      <div class="tarot-cosmos-container">
+        <!-- Floating space particles background -->
+        <div class="cosmos-stars"></div>
+        
+        <div class="tarot-layout">
+          <!-- Left side: The mystical 3D Card Deck -->
+          <div class="tarot-deck-area">
+            <div class="tarot-card-wrapper">
+              <div class="tarot-card" id="tarot-card-element">
+                <!-- Card Back (Sacred Geometry & Cosmic Design) -->
+                <div class="tarot-card-back">
+                  <div class="card-back-ornament">
+                    <div class="geometry-circle outer"></div>
+                    <div class="geometry-circle inner"></div>
+                    <div class="geometry-star">✦</div>
+                    <div class="card-back-logo">🛍️</div>
+                  </div>
+                  <div class="card-back-title">SHOPEE TAROT</div>
+                </div>
+                <!-- Card Front (Determined by Archetype) -->
+                <div class="tarot-card-front" id="tarot-card-ai">
+                  <div class="tarot-front-placeholder">
+                    <span style="font-size: 32px;">🔮</span>
+                    <p>Đang chuẩn bị thẻ bài...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Interact Buttons -->
+            <div class="tarot-actions-row">
+              <button type="button" class="tarot-btn-primary" id="btn-tarot-trigger">
+                🔮 GIẢI MÃ BẢN NGÃ CHỐT ĐƠN
+              </button>
+              <button type="button" class="tarot-btn-secondary" id="btn-tarot-share" style="display: none">
+                ✨ Chia Sẻ Quẻ Bói
+              </button>
+              <button type="button" class="tarot-btn-icon" id="btn-tarot-rerun" style="display: none" title="Giải mã lại">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right side: The Reveal & Details -->
+          <div class="tarot-details-area">
+            <div class="tarot-glass-panel" id="tarot-details-panel">
+              <div class="tarot-details-empty">
+                <div class="empty-icon">✨</div>
+                <h3>Thông Điệp Từ Vũ Trụ</h3>
+                <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
+              </div>
+              <div class="tarot-details-content" style="display: none">
+                <div class="tarot-result-header">
+                  <div class="tarot-archetype-tag" id="tarot-res-archetype-tag"></div>
+                  <div class="tarot-orders-count" id="tarot-res-orders-count"></div>
+                </div>
+                <div class="tarot-section-divider"></div>
+                <div class="tarot-traits-section">
+                  <h4 class="tarot-section-title">🌟 ĐẶC ĐIỂM NHẬN DIỆN</h4>
+                  <div class="tarot-traits-list" id="tarot-res-traits-list"></div>
+                </div>
+                <div class="tarot-section-divider"></div>
+                <div class="tarot-narrative-section">
+                  <h4 class="tarot-section-title">🌌 VŨ TRỤ PHÁN</h4>
+                  <div class="tarot-narrative-text" id="tarot-res-narrative-text"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

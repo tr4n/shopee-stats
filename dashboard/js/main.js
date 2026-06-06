@@ -29,7 +29,18 @@ function switchView(name) {
       applyFiltersAndRender();
     }, 0);
   }
+
+  // Setup Tarot card if switching to tarot view
+  if (name === "tarot") {
+    if (typeof initTarotViewEvents === "function") {
+      initTarotViewEvents();
+    }
+    if (typeof checkAndAutoShowTarot === "function") {
+      checkAndAutoShowTarot();
+    }
+  }
 }
+window.switchView = switchView;
 
 navBtns.forEach((btn) =>
   btn.addEventListener("click", () =>

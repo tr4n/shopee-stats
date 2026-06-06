@@ -132,6 +132,96 @@ function renderSentencesHTML(text) {
 // text: AI narrative string | null
 // profile: PersonalityProfile | null
 function renderAIInsight(text, cardId, profile) {
+  if (cardId === 'tarot-card') {
+    // 1. Populate the details panel
+    const detailsPanel = document.getElementById('tarot-details-panel');
+    if (detailsPanel) {
+      if (profile) {
+        // Show result content, hide empty state
+        const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+        const contentEl = detailsPanel.querySelector('.tarot-details-content');
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (contentEl) {
+          contentEl.style.display = 'block';
+          
+          // Set Archetype tag
+          const tagEl = document.getElementById('tarot-res-archetype-tag');
+          if (tagEl) {
+            tagEl.innerHTML = `<span style="font-size:22px;margin-right:8px">${escHtml(profile.archetype.icon)}</span><span>${escHtml(profile.archetype.label)}</span>`;
+          }
+          
+          // Set Orders count
+          const countEl = document.getElementById('tarot-res-orders-count');
+          if (countEl) {
+            countEl.textContent = profile.totalOrders > 0 ? `Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng` : '';
+          }
+          
+          // Set Traits list
+          const traitsEl = document.getElementById('tarot-res-traits-list');
+          if (traitsEl && profile.traits) {
+            traitsEl.innerHTML = profile.traits.map(t => `
+              <div class="tarot-trait-row">
+                <span class="trait-icon">${escHtml(t.icon)}</span>
+                <div style="display:flex; flex-direction:column">
+                  <span class="trait-text">${escHtml(t.description || t.label)}</span>
+                  <span class="trait-evidence">· ${escHtml(t.evidence)}</span>
+                </div>
+              </div>
+            `).join('');
+          }
+          
+          // Set Narrative (Vũ trụ phán)
+          const narrativeEl = document.getElementById('tarot-res-narrative-text');
+          if (narrativeEl) {
+            if (text) {
+              narrativeEl.innerHTML = renderSentencesHTML(text);
+            } else {
+              narrativeEl.innerHTML = '<span class="ai-narrative-loading">Đang lắng nghe thông điệp từ vũ trụ...</span>';
+            }
+          }
+        }
+      }
+    }
+    
+    // 2. Return card front content
+    if (!profile || !profile.archetype) return '';
+    const a = profile.archetype;
+    
+    // Define sub-labels in English for a premium tarot feeling
+    const subLabels = {
+      reformed: 'THE REFORMED',
+      night_owl: 'THE NIGHT OWL',
+      fashion_healer: 'THE EMOTIONAL HEALER',
+      bargain_hunter: 'THE BARGAIN HUNTER',
+      emotional: 'THE IMPULSIVE SOUL',
+      premium_curator: 'THE PREMIUM CURATOR',
+      rising_addict: 'THE SHOPPING ENTHUSIAST',
+      morning_planner: 'THE disciplined PLANNER',
+      seasonal: 'THE SEASONAL EXPLORER',
+      beauty_selfcare: 'THE SELF-CARE LOVER',
+      tech_optimizer: 'THE TECH OPTIMIZER',
+      home_nester: 'THE NEST BUILDER',
+      food_lover: 'THE CONNOISSEUR',
+      family_center: 'THE PROVIDER',
+      free_spirit: 'THE FREE SPIRIT'
+    };
+    const sub = subLabels[a.key] || 'THE SEEKER';
+
+    return `
+      <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
+      <div class="tarot-card-main">
+        <div class="tarot-frame-outer">
+          <div class="tarot-frame-glow"></div>
+          <span class="tarot-card-emoji">${escHtml(a.icon)}</span>
+        </div>
+        <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
+        <span class="tarot-card-subtitle">${sub}</span>
+        <div class="tarot-card-ornaments">✦ ✵ ✦</div>
+      </div>
+      <div class="tarot-card-footer">✦ EST. ${new Date().getFullYear()} ✦</div>
+    `;
+  }
+
   const copyBtn = (cardId && text)
     ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép nhận xét">
         <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
