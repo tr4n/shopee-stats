@@ -600,10 +600,8 @@
       };
 
       console.log('[ShopeeAnalytics] Hoàn thành! Đang áp dụng thiết lập...');
-      // Save the aggregated purchase stats payload to chrome.storage.local cache.
-      // This caches order history to allow instant future loads, reducing API queries next time.
-      // The cache lives 100% on the user's hard drive and is never uploaded.
-      chrome.storage.local.set({ shopee_cache: cachePayload }, () => {
+      const cacheKey = `shopee_cache_${LIMIT_YEARS}`;
+      chrome.storage.local.set({ [cacheKey]: cachePayload }, () => {
         chrome.storage.local.get(['shopee_analysis_lock'], (r) => {
           const existingLock = r.shopee_analysis_lock;
           if (existingLock && existingLock.nonce === runNonce) {

@@ -5,12 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelProgress = document.getElementById('btn-cancel-progress');
   const btnClearCache = document.getElementById('btn-clear-cache');
   const btnOpenDashboard = document.getElementById('btn-open-dashboard');
+  const btnGoToShopee = document.getElementById('btn-go-to-shopee');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
 
 
 
   const stateInitial = document.getElementById('initial-state');
+  const stateNoShopee = document.getElementById('no-shopee-state');
   const stateLoading = document.getElementById('loading-state');
   const stateResult = document.getElementById('result-state');
 
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBarFill = document.getElementById('progress-bar-fill');
   const cacheInfo = document.getElementById('cache-info');
   const cacheBadgeText = document.getElementById('cache-badge-text');
+  const cacheTip = document.getElementById('cache-tip');
   const loadingTitle = document.querySelector('.loading-title');
   const spinnerCenter = document.querySelector('.spinner-center');
 
@@ -135,6 +138,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // === Helpers ===
+  function checkIfOnShopee() {
+    return new Promise((resolve) => {
+      try {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (chrome.runtime.lastError) {
+            resolve(false);
+            return;
+          }
+          const tab = tabs[0];
+          const isOnShopee = !!(tab && tab.url && tab.url.includes('shopee.vn'));
+          resolve(isOnShopee);
+        });
+      } catch (e) {
+        resolve(false);
+      }
+    });
+  }
+
   function pxgPrice(number) {
     if (isNaN(number)) return 0;
     const n = Math.round(number);
@@ -317,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('active');
         const limitYears = btn.getAttribute('data-value');
         chrome.storage.local.set({ shopee_limit_years: limitYears }, () => {
-          updateCacheStatus(3, false);
+          updateCacheStatus(3, true);
         });
       });
     });
@@ -326,27 +347,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Cache Management ===
   const CURRENT_EXT_VERSION = chrome.runtime?.getManifest?.()?.version || '';
 
-  function isCacheValid(cache) {
+  function isCacheStructurallyValid(cache) {
     if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
     // Invalidate cache schema v2 and below (missing ots field)
     if ((cache.v || 0) < 3) return false;
     // Invalidate caches built by an older version of the extension
     if (CURRENT_EXT_VERSION && cache.ev !== CURRENT_EXT_VERSION) return false;
-    // Invalidate cache if the selected time limit doesn't match the cache's limit
-    if (cache.limitYears !== getSelectedLimitYears()) return false;
-    // Cache is only valid for up to 24 hours (86400 seconds) to avoid stale data
-    const ageSec = Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated || 0);
-    if (ageSec > 86400) return false;
     // Require il field (item list) on cached orders so period filter works without re-stat.
     // Old cache format (with sl/shop data) is automatically invalidated here.
     if (cache.miniOrders.length > 0 && !cache.miniOrders.some(o => Array.isArray(o.il))) return false;
     return true;
   }
 
+  function isCacheValid(cache) {
+    if (!isCacheStructurallyValid(cache)) return false;
+    // Cache must match the selected time limit
+    if (cache.limitYears !== getSelectedLimitYears()) return false;
+    return true;
+  }
+
   function updateCacheStatus(listType, autoRender = false) {
     return new Promise((resolve) => {
-      chrome.storage.local.get(['shopee_cache'], (result) => {
-        const cache = result.shopee_cache;
+      const limitYears = getSelectedLimitYears();
+      const cacheKey = `shopee_cache_${limitYears}`;
+      chrome.storage.local.get([cacheKey], (result) => {
+        const cache = result[cacheKey];
         if (cache && cache.listType === listType && isCacheValid(cache)) {
           cacheData = cache;
           const elapsedMin = Math.round((Date.now() / 1000 - (cache.fetchTime || cache.lastUpdated)) / 60);
@@ -356,16 +381,26 @@ document.addEventListener('DOMContentLoaded', () => {
           else timeStr = `${Math.round(elapsedMin / 1440)} ngày trước`;
           cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
           cacheInfo.classList.remove('hidden');
+          if (cacheTip) cacheTip.classList.remove('hidden');
 
           if (autoRender) {
             const completeData = getCachedCompleteData(cache);
             renderResults(completeData);
           }
         } else {
-          // Silently drop old-format cache so next run does a full re-fetch
-          if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
+          // Silently drop structurally invalid cache so next run does a full re-fetch
+          if (cache && !isCacheStructurallyValid(cache)) {
+            chrome.storage.local.remove([cacheKey]);
+          }
           cacheData = null;
           cacheInfo.classList.add('hidden');
+          if (cacheTip) cacheTip.classList.add('hidden');
+
+          if (autoRender) {
+            checkIfOnShopee().then((isOnShopee) => {
+              showState(isOnShopee ? stateInitial : stateNoShopee);
+            });
+          }
         }
         resolve();
       });
@@ -375,7 +410,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // === Unified Initialization ===
   function initializeApp() {
     const listType = 3;
-    chrome.storage.local.get(['shopee_cache', 'shopee_analysis_lock', 'theme', 'shopee_limit_years'], (res) => {
+    chrome.storage.local.get([
+      'shopee_cache',
+      'shopee_cache_3',
+      'shopee_cache_5',
+      'shopee_cache_all',
+      'shopee_analysis_lock',
+      'theme',
+      'shopee_limit_years'
+    ], (res) => {
       // Initialize time limit buttons
       let limitYears = res.shopee_limit_years || '3';
       if (limitYears !== '3' && limitYears !== '5' && limitYears !== 'all') {
@@ -389,8 +432,25 @@ document.addEventListener('DOMContentLoaded', () => {
       // 1. Apply Theme
       applyTheme(res.theme === 'dark');
 
-      // 2. Parse Cache Info
-      const cache = res.shopee_cache;
+      // 2. Backward Compatibility & Migration
+      const legacyCache = res.shopee_cache;
+      if (legacyCache) {
+        if (isCacheStructurallyValid(legacyCache)) {
+          const cacheLimit = legacyCache.limitYears || '3';
+          const targetKey = `shopee_cache_${cacheLimit}`;
+          chrome.storage.local.set({ [targetKey]: legacyCache }, () => {
+            chrome.storage.local.remove(['shopee_cache']);
+          });
+          // Update in-memory res so we can load it next
+          res[targetKey] = legacyCache;
+        } else {
+          chrome.storage.local.remove(['shopee_cache']);
+        }
+      }
+
+      // 3. Parse Cache Info
+      const cacheKey = `shopee_cache_${limitYears}`;
+      const cache = res[cacheKey];
       let hasValidCache = false;
       if (cache && cache.listType === listType && isCacheValid(cache)) {
         cacheData = cache;
@@ -401,14 +461,18 @@ document.addEventListener('DOMContentLoaded', () => {
         else timeStr = `${Math.round(elapsedMin / 1440)} ngày trước`;
         cacheBadgeText.textContent = `${cache.miniOrders.length.toLocaleString()} đơn · ${timeStr}`;
         cacheInfo.classList.remove('hidden');
+        if (cacheTip) cacheTip.classList.remove('hidden');
         hasValidCache = true;
       } else {
-        if (cache && !isCacheValid(cache)) chrome.storage.local.remove(['shopee_cache']);
+        if (cache && !isCacheStructurallyValid(cache)) {
+          chrome.storage.local.remove([cacheKey]);
+        }
         cacheData = null;
         cacheInfo.classList.add('hidden');
+        if (cacheTip) cacheTip.classList.add('hidden');
       }
 
-      // 3. Check Lock State
+      // 4. Check Lock State
       const lock = res.shopee_analysis_lock;
       if (lock) {
         if (lock.status === 'completed') {
@@ -435,7 +499,9 @@ document.addEventListener('DOMContentLoaded', () => {
               if (hasValidCache) {
                 renderResults(getCachedCompleteData(cacheData));
               } else {
-                showState(stateInitial);
+                checkIfOnShopee().then((isOnShopee) => {
+                  showState(isOnShopee ? stateInitial : stateNoShopee);
+                });
               }
             } else {
               // Another run is confirmed active — show loading state
@@ -453,11 +519,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 4. Default View (if no active lock)
+      // 5. Default View (if no active lock)
       if (hasValidCache) {
         renderResults(getCachedCompleteData(cacheData));
       } else {
-        showState(stateInitial);
+        checkIfOnShopee().then((isOnShopee) => {
+          showState(isOnShopee ? stateInitial : stateNoShopee);
+        });
       }
     });
   }
@@ -465,9 +533,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
   setupRangeButtons();
   btnClearCache.addEventListener('click', () => {
-    chrome.storage.local.remove(['shopee_cache'], () => {
+    chrome.storage.local.remove(['shopee_cache_3', 'shopee_cache_5', 'shopee_cache_all', 'shopee_cache'], () => {
       cacheData = null;
       cacheInfo.classList.add('hidden');
+      if (cacheTip) cacheTip.classList.add('hidden');
+      checkIfOnShopee().then((isOnShopee) => {
+        showState(isOnShopee ? stateInitial : stateNoShopee);
+      });
     });
   });
 
@@ -517,6 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showState(stateEl) {
     stateInitial.classList.remove('active');
+    stateNoShopee.classList.remove('active');
     stateLoading.classList.remove('active');
     stateResult.classList.remove('active');
     stateEl.classList.add('active');
@@ -566,7 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function cancelRunningAnalysisNoSignal() {
     clearAnalysisLock();
-    showState(stateInitial);
+    checkIfOnShopee().then((isOnShopee) => {
+      showState(isOnShopee ? stateInitial : stateNoShopee);
+    });
     updateCacheStatus(getSelectedListType(), false);
   }
 
@@ -584,10 +659,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnRestart.addEventListener('click', () => {
-    showState(stateInitial);
-    updateCacheStatus(getSelectedListType(), false);
-    errorMessage.textContent = '';
+    checkIfOnShopee().then((isOnShopee) => {
+      showState(isOnShopee ? stateInitial : stateNoShopee);
+      updateCacheStatus(getSelectedListType(), false);
+      errorMessage.textContent = '';
+    });
   });
+
+  if (btnGoToShopee) {
+    btnGoToShopee.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://shopee.vn' });
+    });
+  }
 
   // === Dashboard URL ===
   const DASHBOARD_BASE = 'https://tr4n.github.io/shopee-stats/dashboard';
@@ -950,9 +1033,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (linkClearCache) {
           linkClearCache.addEventListener('click', (e) => {
             e.preventDefault();
-            chrome.storage.local.remove(['shopee_cache'], () => {
+            chrome.storage.local.remove(['shopee_cache_3', 'shopee_cache_5', 'shopee_cache_all', 'shopee_cache'], () => {
               cacheData = null;
               cacheInfo.classList.add('hidden');
+              if (cacheTip) cacheTip.classList.add('hidden');
               linkClearCache.outerHTML = '<span style="color: var(--green); font-weight: bold;">đã xóa dữ liệu thành công!</span>';
             });
           });
@@ -1108,7 +1192,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (debugStatus) debugStatus.textContent = 'Hoàn thành thành công!';
 
       if (message.data && message.data.cachePayload) {
-        chrome.storage.local.set({ shopee_cache: message.data.cachePayload }, () => {
+        const cacheLimit = message.data.cachePayload.limitYears || '3';
+        const cacheKey = `shopee_cache_${cacheLimit}`;
+        chrome.storage.local.set({ [cacheKey]: message.data.cachePayload }, () => {
           if (chrome.runtime.lastError) console.warn('Cache save failed:', chrome.runtime.lastError.message);
           updateCacheStatus(getSelectedListType(), false);
         });

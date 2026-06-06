@@ -98,9 +98,9 @@ function renderAnalyzeButton(cardId) {
         <path d="M19 3 L19.8 5.2 L22 6 L19.8 6.8 L19 9 L18.2 6.8 L16 6 L18.2 5.2 Z"></path>
         <path d="M5 17 L5.5 18.5 L7 19 L5.5 19.5 L5 21 L4.5 19.5 L3 19 L4.5 18.5 Z"></path>
       </svg>
-      TÍNH CÁCH
+      🔮 BẢN NGÃ CHỐT ĐƠN
     </button>
-    <span class="ai-analyze-hint">Khám phá tâm lý mua sắm của bạn nhé</span>
+    <span class="ai-analyze-hint">Giải mã "bản ngã" và tâm lý mua sắm ẩn giấu của bạn</span>
   </div>`;
 }
 
@@ -146,7 +146,7 @@ function renderAIInsight(text, cardId, profile) {
 
   // Legacy layout: no profile, just text
   if (!profile) {
-    return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Phân tích tính cách</span>${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
+    return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Giải mã Bản Ngã Chốt Đơn</span>${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
   }
 
   const a = profile.archetype;
@@ -169,7 +169,7 @@ function renderAIInsight(text, cardId, profile) {
     ? `<div class="ai-order-note">Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng</div>`
     : '';
 
-  const header = `<div class="insight-ai-header insight-ai-header--full"><span class="insight-ai-badge">${_AI_ICON_SVG}Tính Cách</span>${orderNote}${copyBtn}${refreshBtn}</div>`;
+  const header = `<div class="insight-ai-header insight-ai-header--full"><span class="insight-ai-badge">${_AI_ICON_SVG}Bản Ngã Chốt Đơn</span>${orderNote}${copyBtn}${refreshBtn}</div>`;
 
   return `${header}${archetypeHtml}${traitsHtml}${narrativeHtml}`;
 }
@@ -188,7 +188,7 @@ function renderCompactProfile(profile) {
     }</div>`
     : '';
 
-  return `<div class="insight-ai-header insight-ai-header--compact"><span class="insight-ai-badge insight-ai-badge--rule">${_AI_ICON_SVG}Tính cách</span></div>${archetypeHtml}${traitsHtml}`;
+  return `<div class="insight-ai-header insight-ai-header--compact"><span class="insight-ai-badge insight-ai-badge--rule">${_AI_ICON_SVG}Bản ngã chốt đơn</span></div>${archetypeHtml}${traitsHtml}`;
 }
 
 // Shell rendered immediately when streaming starts (legacy no-profile path)

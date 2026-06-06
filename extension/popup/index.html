@@ -48,8 +48,48 @@
           <button id="btn-clear-cache" class="btn-cache-clear">Xóa</button>
         </div>
 
+        <p id="cache-tip" class="cache-tip hidden" style="font-size: 11.5px; color: var(--text-muted); text-align: left; width: 100%; margin-top: -8px; margin-bottom: 12px; line-height: 1.4;">
+          💡 <strong>Mẹo:</strong> Xóa cache cũ để quét lại từ đầu.
+        </p>
+
         <button id="btn-start" class="btn-primary">Bắt đầu thống kê ngay</button>
         <p id="error-message" class="error-text"></p>
+      </div>
+
+      <!-- No Shopee State (Onboarding Guide) -->
+      <div id="no-shopee-state" class="state-view">
+        <div class="hero-icon" style="font-size: 44px; margin: 12px 0 8px;">🛍️</div>
+        <h2 class="hero-title" style="font-size: 18px; margin-bottom: 6px;">Mở Shopee để bắt đầu</h2>
+        <p class="description" style="font-size: 13px; margin-bottom: 8px; line-height: 1.4;">Tiện ích chỉ hoạt động khi bạn đang mở trang Shopee.vn và đã đăng nhập tài khoản.</p>
+
+        <!-- Mock Browser Illustration -->
+        <div class="mock-browser">
+          <div class="mock-browser-header">
+            <div class="mock-browser-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="mock-browser-address">shopee.vn</div>
+            <div class="mock-browser-toolbar">
+              <span class="toolbar-btn">🧩</span>
+              <span class="toolbar-btn pulse-orange">🛍️</span>
+            </div>
+          </div>
+          <div class="mock-browser-body">
+            <div class="mock-popup-arrow"></div>
+            <div class="mock-popup-content">
+              <div class="mock-popup-title">Shopee Analytics 🛍️</div>
+              <button class="mock-popup-btn" style="pointer-events: none;">Bắt đầu thống kê</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-tip" style="width: 100%; margin-bottom: 12px; margin-top: 4px; padding-top: 8px; font-size: 11.5px; line-height: 1.4;">
+          💡 <strong>Mẹo nhỏ:</strong> Nếu không thấy biểu tượng 🛍️, hãy bấm vào nút mảnh ghép 🧩 (Extensions) và ghim (pin) Shopee Analytics ra ngoài nhé!
+        </div>
+
+        <button id="btn-go-to-shopee" class="btn-primary">Mở trang Shopee.vn ngay</button>
       </div>
 
       <!-- Loading State -->
