@@ -503,6 +503,145 @@
       line-height: 1.6;
     }
 
+    /* Mock Browser inside step-card */
+    .mock-browser {
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      border-radius: 12px;
+      max-width: 260px;
+      margin: 20px auto 12px auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .mock-browser-header {
+      background: #f5f0e6;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+
+    .mock-browser-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .mock-browser-dots .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .mock-browser-dots .red { background: #ff5f56; }
+    .mock-browser-dots .yellow { background: #ffbd2e; }
+    .mock-browser-dots .green { background: #27c93f; }
+
+    .mock-browser-address {
+      background: #ffffff;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-grow: 1;
+      text-align: center;
+      color: var(--text-muted);
+      border: 1px solid #e8dfcd;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .mock-browser-toolbar {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .toolbar-btn {
+      font-size: 12px;
+    }
+
+    .pulse-orange {
+      animation: pulseGlow 1.5s infinite alternate;
+      padding: 2px;
+      background: rgba(238, 77, 45, 0.1);
+      border-radius: 4px;
+      display: inline-block;
+      line-height: 1;
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 0 0px rgba(238, 77, 45, 0.5); }
+      to { box-shadow: 0 0 0 6px rgba(238, 77, 45, 0); }
+    }
+
+    .mock-browser-body {
+      padding: 12px;
+      position: relative;
+      background: #fdfbf7;
+      display: flex;
+      justify-content: flex-end;
+      min-height: 75px;
+    }
+
+    .mock-popup-content {
+      background: #ffffff;
+      border: 1px solid #ee4d2d;
+      border-radius: 6px;
+      padding: 8px;
+      box-shadow: 0 4px 15px rgba(238, 77, 45, 0.08);
+      width: 140px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .mock-popup-arrow {
+      position: absolute;
+      top: 6px;
+      right: 15px;
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-left: 1px solid #ee4d2d;
+      border-top: 1px solid #ee4d2d;
+      transform: rotate(45deg);
+      z-index: 1;
+    }
+
+    .mock-popup-title {
+      font-size: 10px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      text-align: center;
+      color: var(--text);
+    }
+
+    .mock-popup-btn {
+      background: var(--accent-orange);
+      color: white;
+      border: none;
+      font-size: 9px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .step-tip {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--border);
+      padding-top: 10px;
+      text-align: left;
+      line-height: 1.5;
+    }
+
     .steps-cta {
       margin-top: 60px;
       text-align: center;
@@ -827,8 +966,35 @@
         <!-- Step 3 -->
         <div class="step-card">
           <div class="step-num">3️⃣</div>
-          <h4>Thưởng thức Dashboard</h4>
-          <p>Bấm vào biểu tượng tiện ích ở góc phải màn hình, chọn "Bắt đầu thống kê" và thưởng thức Dashboard Wrapped của riêng bạn.</p>
+          <h4>Mở tiện ích trên Shopee</h4>
+          <p>Khi đang ở trang Shopee.vn, bấm vào biểu tượng tiện ích ở góc phải trình duyệt để kích hoạt bảng điều khiển và chọn "Bắt đầu thống kê".</p>
+          
+          <!-- Mock Browser Illustration -->
+          <div class="mock-browser">
+            <div class="mock-browser-header">
+              <div class="mock-browser-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <div class="mock-browser-address">shopee.vn</div>
+              <div class="mock-browser-toolbar">
+                <span class="toolbar-btn">🧩</span>
+                <span class="toolbar-btn pulse-orange">🛍️</span>
+              </div>
+            </div>
+            <div class="mock-browser-body">
+              <div class="mock-popup-arrow"></div>
+              <div class="mock-popup-content">
+                <div class="mock-popup-title">Shopee Analytics 🛍️</div>
+                <button class="mock-popup-btn">Bắt đầu thống kê</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="step-tip">
+            💡 <strong>Mẹo nhỏ:</strong> Nếu không thấy biểu tượng 🛍️, hãy bấm vào nút mảnh ghép 🧩 (Extensions) và ghim (pin) Shopee Analytics ra ngoài nhé!
+          </div>
         </div>
       </div>
 
