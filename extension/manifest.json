@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Shopee Analytics",
   "short_name": "Shopee Analytics",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Tính tổng tiền và thống kê chi tiết chi tiêu Shopee theo tháng/năm.",
   "minimum_chrome_version": "95",
   "permissions": [
