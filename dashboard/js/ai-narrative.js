@@ -1586,6 +1586,7 @@ function _getFocusArea()    { return document.getElementById('tarot-focus-area')
 function _getDetailsPanel() { return document.getElementById('tarot-details-panel'); }
 function _getOrbitalRing()  { return document.getElementById('tarot-orbital-ring'); }
 function _getRerunBtn()     { return document.getElementById('btn-tarot-rerun'); }
+function _getTarotLayout()  { return document.querySelector('.tarot-layout'); }
 
 /* ── Phase 1: Build fan spread UI & attach click handlers ── */
 function initTarotFanDeck() {
@@ -1819,6 +1820,12 @@ async function runTarotSequence(selectedPos) {
   fanSpread.style.display = 'none';
   focusArea.style.display = 'block';
 
+  // Set drawing mode to center card and hide panel initially
+  const layout = _getTarotLayout();
+  if (layout) {
+    layout.classList.add('is-drawing-mode');
+  }
+
   // Fade focus area in
   focusArea.style.opacity = '0';
   focusArea.style.transition = 'opacity 0.4s ease';
@@ -1908,6 +1915,12 @@ async function runTarotSequence(selectedPos) {
       row.style.setProperty('--glow-color', `var(--glow-color, var(--tarot-gold))`);
     });
 
+    // Remove drawing mode to slide details in & shift card left
+    const layout = _getTarotLayout();
+    if (layout) {
+      layout.classList.remove('is-drawing-mode');
+    }
+
     if (detailsPanel) {
       const emptyEl   = detailsPanel.querySelector('.tarot-details-empty');
       const contentEl = detailsPanel.querySelector('.tarot-details-content');
@@ -1963,6 +1976,12 @@ function resetToFanSpread() {
     if (contentEl) contentEl.style.display = 'none';
   }
 
+  // Reset layout state to drawing mode
+  const layout = _getTarotLayout();
+  if (layout) {
+    layout.classList.add('is-drawing-mode');
+  }
+
   // Switch views
   if (focusArea) focusArea.style.display = 'none';
   if (fanSpread) {
@@ -1996,16 +2015,54 @@ async function runTarotAnalysis() {
 
 /* ── initTarotViewEvents: called by main.js on view switch ── */
 function initTarotViewEvents() {
+  // ── Always reset to fan spread when entering the view ──
+  const fanSpread = _getFanSpread();
+  const focusArea = _getFocusArea();
+  const rerunBtnEl = _getRerunBtn();
+  const card = _getTarotCard();
+
+  // Ensure correct visibility: fan spread shown, focus area hidden
+  if (fanSpread) {
+    fanSpread.style.display = 'flex';
+    fanSpread.style.opacity = '1';
+    // Reset fan card positions (in case they were mid-animation)
+    document.querySelectorAll('.tarot-fan-card').forEach((fc, i) => {
+      fc.style.transition = 'none';
+      fc.style.opacity    = '1';
+      fc.style.transform  = i === 0 ? 'rotate(-12deg) translateX(20px)'
+                          : i === 1 ? 'rotate(0deg) translateY(-22px)'
+                          : 'rotate(12deg) translateX(-20px)';
+    });
+  }
+  if (focusArea) focusArea.style.display = 'none';
+  if (rerunBtnEl) rerunBtnEl.style.display = 'none';
+  if (card) {
+    card.className = 'tarot-card';
+    card.style.transform = '';
+  }
+
+  // Ensure drawing mode layout is reset
+  const layout = _getTarotLayout();
+  if (layout) {
+    layout.classList.add('is-drawing-mode');
+  }
+
+  // Also cancel any running orbital ring from previous visits
+  cancelAnimationFrame(_orbitalRAF);
+  const ring = _getOrbitalRing();
+  if (ring) { ring.style.display = 'none'; ring.innerHTML = ''; }
+
+  // Attach fan card click handlers
   initTarotFanDeck();
 
-  // Rerun button
+  // Rerun button (re-bind fresh)
   const rerunBtn = document.getElementById('btn-tarot-rerun');
   if (rerunBtn) {
     const freshRerun = rerunBtn.cloneNode(true);
     rerunBtn.parentNode.replaceChild(freshRerun, rerunBtn);
     freshRerun.addEventListener('click', async e => {
       e.preventDefault();
-      // Clear AI cache for fresh reading
+      // Clear AI cache so next read gives a fresh narrative
       if (window.currentDashData && _dashCache) {
         delete _dashCache.insights['insight-yearly-all'];
         saveDashCache();
@@ -2040,6 +2097,12 @@ window.checkAndAutoShowTarot = function() {
       // Switch to result view
       fanSpread.style.display = 'none';
       focusArea.style.display = 'block';
+
+      // Remove drawing mode since we are displaying the cached result immediately
+      const layout = _getTarotLayout();
+      if (layout) {
+        layout.classList.remove('is-drawing-mode');
+      }
 
       // Render card front
       aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
