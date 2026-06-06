@@ -857,7 +857,13 @@ function renderSalesProductList(filteredYearOrders) {
     if (ordersActiveType !== 'all' && typeLabels[ordersActiveType]) parts.push(typeLabels[ordersActiveType]);
     if (ordersActiveHour && HOUR_LABELS[ordersActiveHour]) parts.push(HOUR_LABELS[ordersActiveHour]);
     if (ordersActiveCat) parts.push(ordersActiveCat);
-    titleEl.textContent = parts.join(' · ');
+    titleEl.innerHTML = `
+      <span>${escHtml(parts.join(' · '))}</span>
+      <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('sales-products-list', this)" title="Sao chép toàn bộ tên sản phẩm đang hiển thị" style="margin-left: auto;">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        Copy tên SP
+      </button>
+    `;
   }
 
   if (products.length === 0) {

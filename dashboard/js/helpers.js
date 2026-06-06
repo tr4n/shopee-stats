@@ -431,3 +431,26 @@ function formatItemNameForDisplay(name) {
   s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
   return s.replace(/\s+/g, ' ').trim();
 }
+
+window.copyListProductNames = function(listId, btn) {
+  const listEl = document.getElementById(listId);
+  if (!listEl) return;
+  const nameEls = listEl.querySelectorAll('.top-name');
+  if (nameEls.length === 0) return;
+  
+  const names = Array.from(nameEls).map(el => el.getAttribute('title') || el.textContent).filter(Boolean);
+  const textToCopy = names.join('\n');
+  
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg> Đã chép!`;
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+      btn.classList.remove('copied');
+    }, 1800);
+  }).catch(err => {
+    console.error('Failed to copy list: ', err);
+  });
+};
+
