@@ -81,11 +81,16 @@ function bindCatItemsEvents() {
   const sortSelect = document.getElementById('cat-items-sort-select');
   const loadMoreBtn = document.getElementById('cat-items-load-more');
   
+  let searchDebounceTimeout = null;
   searchInput?.addEventListener('input', (e) => {
     catItemsSearchQuery = e.target.value || "";
     if (searchClear) searchClear.style.display = catItemsSearchQuery ? 'block' : 'none';
-    catItemsLimit = 15;
-    renderCatItemsList();
+    
+    clearTimeout(searchDebounceTimeout);
+    searchDebounceTimeout = setTimeout(() => {
+      catItemsLimit = 15;
+      renderCatItemsList();
+    }, 200);
   });
   
   searchClear?.addEventListener('click', () => {

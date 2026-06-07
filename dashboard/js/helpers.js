@@ -21,14 +21,17 @@ function fmtDate(ts) {
 }
 
 // Shopee buyer create_time stores standard Unix UTC timestamps — use local methods to read VN wall-clock.
+const vnPartsCacheHelpers = new Map();
 function toVnParts(tsSec) {
   if (typeof VnTime !== 'undefined') return VnTime.toVnParts(tsSec);
   const ts = Number(tsSec) || 0;
   if (ts <= 0) {
     return { year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, weekday: 0 };
   }
+  const cached = vnPartsCacheHelpers.get(ts);
+  if (cached) return cached;
   const d = new Date(ts * 1000);
-  return {
+  const parts = {
     year: d.getFullYear(),
     month: d.getMonth() + 1,
     day: d.getDate(),
@@ -37,6 +40,8 @@ function toVnParts(tsSec) {
     second: d.getSeconds(),
     weekday: d.getDay()
   };
+  vnPartsCacheHelpers.set(ts, parts);
+  return parts;
 }
 
 function isVnBlackFriday(tsSec) {
@@ -516,26 +521,30 @@ const HOMOGLYPH_MAP = {
 // Pre-compile regex for fast detection of homoglyphs, zero-width spaces, math script, fullwidth characters, etc.
 const SPECIAL_CHAR_REGEX = /[\u0370-\u03FF\u0400-\u04FF\u13A0-\u13FF\u200B-\u200D\uFEFF\u200E\u200F\u2060\u2100-\u214F\uFF00-\uFFEF]|\ud835[\udc00-\udfff]/;
 
+const cleanHomoglyphsCache = new Map();
 function cleanHomoglyphsAndFonts(text) {
   if (!text) return '';
+  const cached = cleanHomoglyphsCache.get(text);
+  if (cached !== undefined) return cached;
 
+  let result;
   // Fast path: if the text doesn't contain any target bypass characters, skip normalization & translation entirely.
   // This is a major optimization for Vietnamese text because normalize("NFKD") decomposes accents,
   // which takes significant CPU time when done on thousands of items.
   if (!SPECIAL_CHAR_REGEX.test(text)) {
-    return text;
+    result = text;
+  } else {
+    const decomp = text.normalize("NFKD");
+    let temp = '';
+    for (const char of decomp) {
+      temp += HOMOGLYPH_MAP[char] || char;
+    }
+    temp = temp.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u2060]/g, '');
+    result = temp.normalize("NFC");
   }
 
-  const decomp = text.normalize("NFKD");
-
-  let result = '';
-  for (const char of decomp) {
-    result += HOMOGLYPH_MAP[char] || char;
-  }
-
-  result = result.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u2060]/g, '');
-
-  return result.normalize("NFC");
+  cleanHomoglyphsCache.set(text, result);
+  return result;
 }
 
 function formatItemNameForDisplay(name) {

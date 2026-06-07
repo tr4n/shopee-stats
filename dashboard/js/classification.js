@@ -368,6 +368,9 @@ async function classifyKharItems(ti, d) {
           if (_dashCache && _dashCache.insights) {
             _dashCache.insights = {};
           }
+          if (window.resolveCategoryCache) {
+            window.resolveCategoryCache.clear();
+          }
           saveDashCache();
 
           // Render UI updates progressively per batch (immediate feedback)

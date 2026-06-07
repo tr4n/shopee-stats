@@ -4,13 +4,18 @@
  * Using JavaScript Date local methods automatically formats and parses 
  * timestamps according to the client browser's local timezone (Vietnam Time). */
 (function (root) {
+  const vnPartsCache = new Map();
+
   function toVnParts(tsSec) {
     const ts = Number(tsSec) || 0;
     if (ts <= 0) {
       return { year: 0, month: 0, day: 0, hour: 0, minute: 0, second: 0, weekday: 0 };
     }
+    const cached = vnPartsCache.get(ts);
+    if (cached) return cached;
+
     const d = new Date(ts * 1000);
-    return {
+    const parts = {
       year: d.getFullYear(),
       month: d.getMonth() + 1,
       day: d.getDate(),
@@ -19,6 +24,8 @@
       second: d.getSeconds(),
       weekday: d.getDay()
     };
+    vnPartsCache.set(ts, parts);
+    return parts;
   }
 
   function isVnBlackFriday(tsSec) {

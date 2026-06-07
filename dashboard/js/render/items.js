@@ -10,6 +10,10 @@ let itemsEventsInitialized = false;
 let itemsSearchQuery = "";
 let itemsLimit = 25;
 
+let lastAggregatedMinTs = null;
+let lastAggregatedMaxTs = null;
+let cachedAggregatedItems = null;
+
 function resolveCategory(itemName, rawCatId) {
   if (typeof resolveItemCategory === 'function') {
     return resolveItemCategory(itemName, rawCatId);
@@ -41,6 +45,10 @@ function renderTopItems(ti) {
   currentTopItems = ti || [];
   itemsLimit = 25;
   itemsSearchQuery = "";
+  
+  lastAggregatedMinTs = null;
+  lastAggregatedMaxTs = null;
+  cachedAggregatedItems = null;
   
   const searchInput = document.getElementById('items-search-input');
   if (searchInput) searchInput.value = "";
@@ -238,6 +246,14 @@ function initItemsEvents() {
     renderTopItemsList();
   };
   
+  let filterDebounceTimeout = null;
+  const triggerReRenderDebounced = () => {
+    clearTimeout(filterDebounceTimeout);
+    filterDebounceTimeout = setTimeout(() => {
+      triggerReRender();
+    }, 200);
+  };
+  
   catSelect?.addEventListener('change', triggerReRender);
   sortSelect?.addEventListener('change', triggerReRender);
 
@@ -258,22 +274,22 @@ function initItemsEvents() {
   priceMin?.addEventListener('input', () => {
     clearQuickPricePills();
     updateSliderTracks();
-    triggerReRender();
+    triggerReRenderDebounced();
   });
   priceMax?.addEventListener('input', () => {
     clearQuickPricePills();
     updateSliderTracks();
-    triggerReRender();
+    triggerReRenderDebounced();
   });
   dateMin?.addEventListener('input', () => {
     clearQuickDatePills();
     updateSliderTracks();
-    triggerReRender();
+    triggerReRenderDebounced();
   });
   dateMax?.addEventListener('input', () => {
     clearQuickDatePills();
     updateSliderTracks();
-    triggerReRender();
+    triggerReRenderDebounced();
   });
 
   // Bind Quick Select Price Pills
@@ -447,7 +463,14 @@ function getFilteredAndAggregatedItems() {
     // If the slider is at the default bounds, we do not need to filter/aggregate by date.
     // We return the complete currentTopItems directly to prevent incorrect stats from incomplete orders list.
     if (minTs === minLimit && maxTs === maxLimit) {
+      lastAggregatedMinTs = minTs;
+      lastAggregatedMaxTs = maxTs;
+      cachedAggregatedItems = currentTopItems;
       return currentTopItems;
+    }
+    
+    if (lastAggregatedMinTs === minTs && lastAggregatedMaxTs === maxTs && cachedAggregatedItems !== null) {
+      return cachedAggregatedItems;
     }
     
     const filteredOrders = orders.filter(o => o.t && o.t >= minTs && o.t <= maxTs && o.f > 0);
@@ -480,7 +503,12 @@ function getFilteredAndAggregatedItems() {
         map[key].op = o.r || o.f;
       }
     }
-    return Object.values(map);
+    
+    const result = Object.values(map);
+    lastAggregatedMinTs = minTs;
+    lastAggregatedMaxTs = maxTs;
+    cachedAggregatedItems = result;
+    return result;
   }
   
   return currentTopItems;

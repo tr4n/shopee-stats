@@ -6,6 +6,9 @@
    Depends on helpers.js.
 ───────────────────────────────────────────────── */
 
+const resolveCategoryCache = new Map();
+window.resolveCategoryCache = resolveCategoryCache;
+
 let currentOrders = [];
 let ordersActiveYear = 'all';
 let ordersActiveType = 'all'; // 'all', 'double', 'mid', 'end', 'regular'
@@ -113,28 +116,43 @@ function resolveItemCategory(itemName, rawCatId) {
     return resolveCatLabel({ id: rawCatId, name: rawCatId });
   }
 
+  const cacheKey = `${itemName}::${rawCatId || ""}`;
+  if (resolveCategoryCache.has(cacheKey)) {
+    return resolveCategoryCache.get(cacheKey);
+  }
+
   const key = itemName.toLowerCase().substring(0, 120);
   const key40 = itemName.toLowerCase().substring(0, 40);
 
+  let result = null;
+
   // 1. Check cached classification (from previous sessions or AI)
   if (_dashCache && _dashCache.cats) {
-    if (_dashCache.cats[key]) return _dashCache.cats[key];
-    if (_dashCache.cats[key40]) return _dashCache.cats[key40];
+    if (_dashCache.cats[key]) result = _dashCache.cats[key];
+    else if (_dashCache.cats[key40]) result = _dashCache.cats[key40];
   }
 
   // 2. Try keyword classification
-  if (typeof classifyByNameSync === 'function') {
+  if (!result && typeof classifyByNameSync === 'function') {
     const kwCat = classifyByNameSync(itemName);
-    if (kwCat && kwCat !== '🏷️ Khác' && kwCat !== 'Khác') return kwCat;
+    if (kwCat && kwCat !== '🏷️ Khác' && kwCat !== 'Khác') result = kwCat;
   }
 
   // 3. Fall back to raw category ID label
-  return resolveCatLabel({ id: rawCatId, name: rawCatId });
+  if (!result) {
+    result = resolveCatLabel({ id: rawCatId, name: rawCatId });
+  }
+
+  resolveCategoryCache.set(cacheKey, result);
+  return result;
 }
 
 window.resolveItemCategory = resolveItemCategory;
 
 function renderOrders(ol) {
+  if (window.resolveCategoryCache) {
+    window.resolveCategoryCache.clear();
+  }
   currentOrders = (ol || []).map(o => ({
     ...o,
     t: o.ot || o.t
@@ -1403,11 +1421,16 @@ function bindOrdersFiltersEvents(filteredYearOrders) {
   const searchClear = document.getElementById('orders-search-clear');
   const catSelect = document.getElementById('orders-cat-select');
   
+  let searchDebounceTimeout = null;
   searchInput?.addEventListener('input', (e) => {
     ordersSearchQuery = e.target.value || "";
     if (searchClear) searchClear.style.display = ordersSearchQuery ? 'block' : 'none';
-    ordersCurrentPage = 1;
-    renderSaleDaysTable(filteredYearOrders);
+    
+    clearTimeout(searchDebounceTimeout);
+    searchDebounceTimeout = setTimeout(() => {
+      ordersCurrentPage = 1;
+      renderSaleDaysTable(filteredYearOrders);
+    }, 250);
   });
   
   searchClear?.addEventListener('click', () => {
