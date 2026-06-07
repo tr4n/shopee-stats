@@ -4,18 +4,18 @@
  * Design: Luminous Tarot Card — archetype-specific gradient card panel + cosmic stars.
  */
 
-window.generateTarotShareImage = function(profile, cachedText) {
+window.generateTarotShareImage = function (profile, cachedText) {
   const btnShare = document.getElementById('btn-tarot-share');
   if (btnShare) {
     btnShare.disabled = true;
     btnShare.innerHTML = '⏳';
   }
 
-  const shareModal   = document.getElementById('tarot-share-modal');
-  const loader       = document.getElementById('tarot-share-loader');
-  const previewImg   = document.getElementById('tarot-share-preview-img');
-  const btnDownload  = document.getElementById('btn-tarot-download');
-  const btnCopy      = document.getElementById('btn-tarot-copy');
+  const shareModal = document.getElementById('tarot-share-modal');
+  const loader = document.getElementById('tarot-share-loader');
+  const previewImg = document.getElementById('tarot-share-preview-img');
+  const btnDownload = document.getElementById('btn-tarot-download');
+  const btnCopy = document.getElementById('btn-tarot-copy');
 
   if (!profile || !profile.archetype) {
     console.error('[Tarot Share] No profile data available');
@@ -26,15 +26,15 @@ window.generateTarotShareImage = function(profile, cachedText) {
   }
 
   if (shareModal) shareModal.classList.add('active');
-  if (loader)     loader.style.display = 'block';
+  if (loader) loader.style.display = 'block';
   if (previewImg) { previewImg.style.display = 'none'; previewImg.src = ''; }
   if (btnDownload) btnDownload.disabled = true;
-  if (btnCopy)     btnCopy.disabled    = true;
+  if (btnCopy) btnCopy.disabled = true;
 
   // ─── Canvas: 1080 × 1350 (4:5) ───────────────────────────────────────────
   const W = 1080, H = 1350;
   const canvas = document.createElement('canvas');
-  canvas.width  = W;
+  canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = true;
@@ -42,41 +42,41 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // ─── Archetype colour palettes ────────────────────────────────────────────
   const palettes = {
-    reformed:        { top: '#0d2a3e', mid: '#0d4a5e', bot: '#093040', glow: '#00c8b4', accent: '#5ee8d8' },
-    night_owl:       { top: '#160d30', mid: '#2a1055', bot: '#0e0822', glow: '#8b5cf6', accent: '#c084fc' },
-    fashion_healer:  { top: '#2a0d22', mid: '#5a1040', bot: '#1a0516', glow: '#ec4899', accent: '#f9a8d4' },
-    bargain_hunter:  { top: '#2a1200', mid: '#5a2800', bot: '#1a0c00', glow: '#f97316', accent: '#fdba74' },
-    emotional:       { top: '#001e2a', mid: '#003a50', bot: '#00131c', glow: '#06b6d4', accent: '#67e8f9' },
+    reformed: { top: '#0d2a3e', mid: '#0d4a5e', bot: '#093040', glow: '#00c8b4', accent: '#5ee8d8' },
+    night_owl: { top: '#160d30', mid: '#2a1055', bot: '#0e0822', glow: '#8b5cf6', accent: '#c084fc' },
+    fashion_healer: { top: '#2a0d22', mid: '#5a1040', bot: '#1a0516', glow: '#ec4899', accent: '#f9a8d4' },
+    bargain_hunter: { top: '#2a1200', mid: '#5a2800', bot: '#1a0c00', glow: '#f97316', accent: '#fdba74' },
+    emotional: { top: '#001e2a', mid: '#003a50', bot: '#00131c', glow: '#06b6d4', accent: '#67e8f9' },
     premium_curator: { top: '#1a1200', mid: '#3d2c00', bot: '#0e0900', glow: '#eab308', accent: '#fde047' },
-    rising_addict:   { top: '#2a0000', mid: '#5a0a00', bot: '#180000', glow: '#ef4444', accent: '#fca5a5' },
+    rising_addict: { top: '#2a0000', mid: '#5a0a00', bot: '#180000', glow: '#ef4444', accent: '#fca5a5' },
     morning_planner: { top: '#001030', mid: '#00205c', bot: '#000a1e', glow: '#3b82f6', accent: '#93c5fd' },
-    seasonal:        { top: '#1e1200', mid: '#3d2600', bot: '#120d00', glow: '#f59e0b', accent: '#fcd34d' },
+    seasonal: { top: '#1e1200', mid: '#3d2600', bot: '#120d00', glow: '#f59e0b', accent: '#fcd34d' },
     beauty_selfcare: { top: '#1a0030', mid: '#380060', bot: '#0e001e', glow: '#a855f7', accent: '#d8b4fe' },
-    tech_optimizer:  { top: '#001e1e', mid: '#003d3d', bot: '#001212', glow: '#14b8a6', accent: '#5eead4' },
-    home_nester:     { top: '#0a1e00', mid: '#1a3d00', bot: '#051200', glow: '#84cc16', accent: '#bef264' },
-    food_lover:      { top: '#2a0010', mid: '#5a0022', bot: '#1a000c', glow: '#e11d48', accent: '#fda4af' },
-    family_center:   { top: '#002210', mid: '#004522', bot: '#00140a', glow: '#22c55e', accent: '#86efac' },
-    free_spirit:     { top: '#0d1520', mid: '#1e2d44', bot: '#080e18', glow: '#64748b', accent: '#94a3b8' },
+    tech_optimizer: { top: '#001e1e', mid: '#003d3d', bot: '#001212', glow: '#14b8a6', accent: '#5eead4' },
+    home_nester: { top: '#0a1e00', mid: '#1a3d00', bot: '#051200', glow: '#84cc16', accent: '#bef264' },
+    food_lover: { top: '#2a0010', mid: '#5a0022', bot: '#1a000c', glow: '#e11d48', accent: '#fda4af' },
+    family_center: { top: '#002210', mid: '#004522', bot: '#00140a', glow: '#22c55e', accent: '#86efac' },
+    free_spirit: { top: '#0d1520', mid: '#1e2d44', bot: '#080e18', glow: '#64748b', accent: '#94a3b8' },
   };
   const pal = palettes[profile.archetype.key] || palettes.free_spirit;
 
   // ─── Sub-labels (English archetype subtitle) ──────────────────────────────
   const subLabels = {
-    reformed:        'THE REFORMED',
-    night_owl:       'THE NIGHT OWL',
-    fashion_healer:  'THE EMOTIONAL HEALER',
-    bargain_hunter:  'THE BARGAIN HUNTER',
-    emotional:       'THE IMPULSIVE SOUL',
+    reformed: 'THE REFORMED',
+    night_owl: 'THE NIGHT OWL',
+    fashion_healer: 'THE EMOTIONAL HEALER',
+    bargain_hunter: 'THE BARGAIN HUNTER',
+    emotional: 'THE IMPULSIVE SOUL',
     premium_curator: 'THE PREMIUM CURATOR',
-    rising_addict:   'THE SHOPPING ENTHUSIAST',
+    rising_addict: 'THE SHOPPING ENTHUSIAST',
     morning_planner: 'THE DISCIPLINED PLANNER',
-    seasonal:        'THE SEASONAL EXPLORER',
+    seasonal: 'THE SEASONAL EXPLORER',
     beauty_selfcare: 'THE SELF-CARE LOVER',
-    tech_optimizer:  'THE TECH OPTIMIZER',
-    home_nester:     'THE NEST BUILDER',
-    food_lover:      'THE CONNOISSEUR',
-    family_center:   'THE PROVIDER',
-    free_spirit:     'THE FREE SPIRIT',
+    tech_optimizer: 'THE TECH OPTIMIZER',
+    home_nester: 'THE NEST BUILDER',
+    food_lover: 'THE CONNOISSEUR',
+    family_center: 'THE PROVIDER',
+    free_spirit: 'THE FREE SPIRIT',
   };
   const subText = subLabels[profile.archetype.key] || 'THE SEEKER';
 
@@ -97,11 +97,11 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   function setGlow(color, blur) {
     ctx.shadowColor = color;
-    ctx.shadowBlur  = blur;
+    ctx.shadowBlur = blur;
   }
   function clearGlow() {
     ctx.shadowColor = 'transparent';
-    ctx.shadowBlur  = 0;
+    ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
   }
@@ -129,25 +129,25 @@ window.generateTarotShareImage = function(profile, cachedText) {
   // 1. GLOBAL BACKGROUND — deep space black
   // ═══════════════════════════════════════════════════════════════════════════
   const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-  bgGrad.addColorStop(0,   '#060310');
+  bgGrad.addColorStop(0, '#060310');
   bgGrad.addColorStop(0.5, '#09050f');
-  bgGrad.addColorStop(1,   '#040208');
+  bgGrad.addColorStop(1, '#040208');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
   // Subtle atmospheric glow blob behind card
   const glowBlob = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
-  glowBlob.addColorStop(0,   pal.glow + '25');
+  glowBlob.addColorStop(0, pal.glow + '25');
   glowBlob.addColorStop(0.5, pal.glow + '0a');
-  glowBlob.addColorStop(1,   'transparent');
+  glowBlob.addColorStop(1, 'transparent');
   ctx.fillStyle = glowBlob;
   ctx.fillRect(0, 0, W, H);
 
   // Ambient constellation dots & faint lines across the background
   const dots = [
-    {x: 0.1, y: 0.12}, {x: 0.18, y: 0.35}, {x: 0.08, y: 0.65}, {x: 0.15, y: 0.88},
-    {x: 0.9, y: 0.15}, {x: 0.82, y: 0.38}, {x: 0.92, y: 0.62}, {x: 0.85, y: 0.85},
-    {x: 0.32, y: 0.06}, {x: 0.68, y: 0.05}, {x: 0.45, y: 0.95}, {x: 0.58, y: 0.94}
+    { x: 0.1, y: 0.12 }, { x: 0.18, y: 0.35 }, { x: 0.08, y: 0.65 }, { x: 0.15, y: 0.88 },
+    { x: 0.9, y: 0.15 }, { x: 0.82, y: 0.38 }, { x: 0.92, y: 0.62 }, { x: 0.85, y: 0.85 },
+    { x: 0.32, y: 0.06 }, { x: 0.68, y: 0.05 }, { x: 0.45, y: 0.95 }, { x: 0.58, y: 0.94 }
   ];
   ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
   for (const d of dots) {
@@ -177,29 +177,29 @@ window.generateTarotShareImage = function(profile, cachedText) {
   // Card outer glow
   setGlow(pal.glow, 45);
   ctx.strokeStyle = pal.glow + '66';
-  ctx.lineWidth   = 3;
+  ctx.lineWidth = 3;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.stroke();
   clearGlow();
 
   // Card background gradient
   const cardGrad = ctx.createLinearGradient(CARD_X, CARD_Y, CARD_X, CARD_Y + CARD_H);
-  cardGrad.addColorStop(0,    pal.top);
+  cardGrad.addColorStop(0, pal.top);
   cardGrad.addColorStop(0.45, pal.mid);
-  cardGrad.addColorStop(1,    pal.bot);
+  cardGrad.addColorStop(1, pal.bot);
   ctx.fillStyle = cardGrad;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.fill();
 
   // Outer gold border (thick)
   ctx.strokeStyle = '#c8a96e';
-  ctx.lineWidth   = 3.5;
+  ctx.lineWidth = 3.5;
   roundRect(CARD_X + 16, CARD_Y + 16, CARD_W - 32, CARD_H - 32, CARD_R - 5);
   ctx.stroke();
 
   // Inner gold border (thin)
   ctx.strokeStyle = '#c8a96e55';
-  ctx.lineWidth   = 1.5;
+  ctx.lineWidth = 1.5;
   roundRect(CARD_X + 22, CARD_Y + 22, CARD_W - 44, CARD_H - 44, CARD_R - 7);
   ctx.stroke();
 
@@ -220,12 +220,12 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Card Header: "✦ SHOPEE COSMIC TAROT ✦"
   ctx.fillStyle = '#c8a96ecc';
-  ctx.font      = 'bold 13px Georgia, serif';
-  ctx.fillText('✦   S H O P E E   C O S M I C   T A R O T   ✦', W / 2, CARD_Y + 52);
+  ctx.font = 'bold 13px "Times New Roman", Times, Georgia, serif';
+  ctx.fillText('✦  S H O P E E  C O S M I C  T A R O T ✦', W / 2, CARD_Y + 52);
 
   // Thin header divider line
   ctx.strokeStyle = '#c8a96e33';
-  ctx.lineWidth   = 1;
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(CARD_X + 35, CARD_Y + 68);
   ctx.lineTo(CARD_X + CARD_W - 35, CARD_Y + 68);
@@ -233,7 +233,7 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Emoji circular dashed frame & glow halo
   const emojiY = CARD_Y + 240;
-  
+
   // Dashed frame outer circle
   ctx.strokeStyle = '#c8a96e';
   ctx.lineWidth = 1.5;
@@ -253,8 +253,8 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fill();
 
   // Archetype Emoji
-  ctx.font         = '110px Arial';
-  ctx.textAlign    = 'center';
+  ctx.font = '110px Arial';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   setGlow(pal.glow, 25);
   ctx.fillText(profile.archetype.icon || '🔮', W / 2, emojiY);
@@ -262,22 +262,22 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Archetype Title
   const archetypeName = (profile.archetype.label || 'BẢN NGÃ').toUpperCase();
-  ctx.fillStyle    = '#c8a96e';
-  ctx.font         = 'bold 44px Georgia, serif';
+  ctx.fillStyle = '#c8a96e';
+  ctx.font = 'bold 44px "Times New Roman", Times, Georgia, serif';
   setGlow('#c8a96e', 14);
   ctx.fillText(archetypeName, W / 2, CARD_Y + 430);
   clearGlow();
 
   // Archetype Subtitle (spaced out English name)
   ctx.fillStyle = pal.accent;
-  ctx.font      = 'bold 15px Arial';
+  ctx.font = 'bold 15px Arial';
   setGlow(pal.glow, 8);
   ctx.fillText(subText.split('').join('\u200A'), W / 2, CARD_Y + 482);
   clearGlow();
 
   // Subtitle separator ornament
   ctx.fillStyle = '#c8a96ecc';
-  ctx.font      = '16px Arial';
+  ctx.font = '16px Arial';
   ctx.fillText('✦   ✵   ✦', W / 2, CARD_Y + 528);
 
   // ── Narrative text (Vũ Trụ Phán) ──────────────────────────────────────────
@@ -289,14 +289,14 @@ window.generateTarotShareImage = function(profile, cachedText) {
   if (summaryText) {
     const maxTextW = CARD_W - 160; // 540px width (margins of 80px on both sides)
     const maxTextH = 430; // max height for narrative zone
-    
+
     let fontSize = 28;
     let lineH = 46;
     let lines = [];
 
     // Auto-scale font size
     while (fontSize >= 18) {
-      ctx.font = `italic ${fontSize}px Georgia, Arial`;
+      ctx.font = `italic ${fontSize}px "Times New Roman", Times, Georgia, Arial, sans-serif`;
       lineH = Math.round(fontSize * 1.65);
       lines = wrapText(summaryText, maxTextW, ctx.font);
       if (lines.length * lineH <= maxTextH) {
@@ -305,10 +305,10 @@ window.generateTarotShareImage = function(profile, cachedText) {
       fontSize -= 1;
     }
 
-    ctx.fillStyle    = '#e8e0f0';
-    ctx.textAlign    = 'center';
+    ctx.fillStyle = '#e8e0f0';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    
+
     // Vertically center the lines inside the narrative zone
     const startY = CARD_Y + 575 + (maxTextH - lines.length * lineH) / 2;
     for (let i = 0; i < lines.length; i++) {
@@ -318,23 +318,23 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Footer divider line
   ctx.strokeStyle = '#c8a96e33';
-  ctx.lineWidth   = 1;
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(CARD_X + 35, CARD_Y + CARD_H - 58);
   ctx.lineTo(CARD_X + CARD_W - 35, CARD_Y + CARD_H - 58);
   ctx.stroke();
 
   // Card Footer: "✦ 2026 ✦"
-  ctx.fillStyle    = '#c8a96e99';
-  ctx.font         = 'bold 12px Georgia, serif';
+  ctx.fillStyle = '#c8a96e99';
+  ctx.font = 'bold 12px "Times New Roman", Times, Georgia, serif';
   ctx.textBaseline = 'middle';
   ctx.fillText(`✦   ${new Date().getFullYear()}   ✦`, W / 2, CARD_Y + CARD_H - 33);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 3. IMAGE WATERMARK FOOTER (outside card)
   // ═══════════════════════════════════════════════════════════════════════════
-  ctx.fillStyle    = 'rgba(255,255,255,0.28)';
-  ctx.font         = 'bold 14px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.28)';
+  ctx.font = 'bold 14px Arial';
   ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', W / 2, H - 36);
 
   // ─── Output ───────────────────────────────────────────────────────────────
@@ -370,7 +370,7 @@ window.generateTarotShareImage = function(profile, cachedText) {
         btnDownload.parentNode.replaceChild(freshDownload, btnDownload);
         freshDownload.addEventListener('click', () => {
           const link = document.createElement('a');
-          link.href     = previewUrl;
+          link.href = previewUrl;
           link.download = `shopee-banga-tarot-${profile.archetype.key}.png`;
           document.body.appendChild(link);
           link.click();

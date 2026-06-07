@@ -3776,7 +3776,7 @@ body {
 }
 .tarot-card-emoji { font-size: 38px; z-index: 2; filter: drop-shadow(0 3px 8px rgba(38,32,59,0.12)); }
 .tarot-card-title {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Times New Roman', Times, Georgia, serif;
   font-size: 13.5px; font-weight: 700;
   color: var(--tarot-gold);
   letter-spacing: 1.2px;
@@ -3793,7 +3793,7 @@ body {
   color: var(--tarot-gold); margin: 6px 0 0; opacity: 0.65;
 }
 .tarot-card-narrative {
-  font-family: Georgia, serif;
+  font-family: 'Times New Roman', Times, Georgia, serif;
   font-size: 9.5px;
   font-style: italic;
   line-height: 1.55;
@@ -3809,7 +3809,7 @@ body {
   -webkit-box-orient: vertical;
 }
 .tarot-card-header, .tarot-card-footer {
-  font-family: Georgia, serif;
+  font-family: 'Times New Roman', Times, Georgia, serif;
   font-size: 8.5px; font-weight: 700;
   color: var(--tarot-gold); letter-spacing: 2.5px; text-align: center; opacity: 0.78;
 }
