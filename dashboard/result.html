@@ -657,56 +657,7 @@
         <div id="sales-products-list"></div>
       </div>
 
-      <div class="card" id="card-orders">
-        <div class="card-title"
-          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-          <span id="sales-detail-title">📅 Chi Tiết Từng Đợt Sale</span>
-          <div style="display: flex; gap: 8px;">
-            <select id="orders-limit-select" class="limit-select" style="height: 32px;">
-              <option value="10" selected>Hiện 10 ngày</option>
-              <option value="20">Hiện 20 ngày</option>
-              <option value="50">Hiện 50 ngày</option>
-              <option value="100">Hiện 100 ngày</option>
-            </select>
-          </div>
-        </div>
 
-        <!-- Orders Table Filters (Product Search and Category Filter) -->
-        <div id="orders-filters-row" class="filter-container"
-          style="display: none; margin-bottom: 15px; background: transparent; padding: 0; border: none;">
-          <div class="filter-main-row" style="gap: 8px; flex-wrap: wrap;">
-            <div class="filter-search-box" style="flex: 1; min-width: 140px;">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="orders-search-input" placeholder="Tìm sản phẩm săn sale..." />
-              <button id="orders-search-clear"
-                style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
-            </div>
-            <div class="select-wrapper">
-              <span class="select-icon">🏷️</span>
-              <select id="orders-cat-select" class="limit-select">
-                <option value="all">Tất cả danh mục</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="table-wrap" id="orders-table-wrap">
-          <table class="table" id="orders-table">
-            <thead>
-              <tr>
-                <th>Ngày / Đợt Sale</th>
-                <th style="text-align: right">Số Đơn Hàng</th>
-                <th style="text-align: right">Thực Chi</th>
-                <th style="text-align: right; color: var(--green);">Tiết Kiệm</th>
-                <th style="text-align: right">Hiệu Quả</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="orders-pagination" class="orders-pagination"
-          style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
-      </div>
     </div>
 
 
