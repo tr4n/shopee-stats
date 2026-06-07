@@ -132,136 +132,155 @@ function renderSentencesHTML(text) {
 // text: AI narrative string | null
 // profile: PersonalityProfile | null
 function renderAIInsight(text, cardId, profile) {
-  if (cardId === 'tarot-card') {
-    // 1. Populate the details panel
-    const detailsPanel = document.getElementById('tarot-details-panel');
-    if (detailsPanel) {
-      if (profile) {
-        // Show result content, hide empty state
-        const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
-        const contentEl = detailsPanel.querySelector('.tarot-details-content');
-        if (emptyEl) emptyEl.style.display = 'none';
-        if (contentEl) {
-          contentEl.style.display = 'block';
-          
-          // Set Archetype tag
-          const tagEl = document.getElementById('tarot-res-archetype-tag');
-          if (tagEl) {
-            tagEl.innerHTML = `<span style="font-size:22px;margin-right:8px">${escHtml(profile.archetype.icon)}</span><span>${escHtml(profile.archetype.label)}</span>`;
-          }
-          
-          // Set Traits list
-          const traitsEl = document.getElementById('tarot-res-traits-list');
-          if (traitsEl && profile.traits) {
-            traitsEl.innerHTML = profile.traits.map(t => `
-              <div class="tarot-trait-row">
-                <span class="trait-icon">${escHtml(t.icon)}</span>
-                <div class="trait-content-wrap">
-                  <span class="trait-text">${escHtml(t.description || t.label)}</span>
-                  <span class="trait-evidence">· ${escHtml(t.evidence)}</span>
+  try {
+    if (cardId === 'tarot-card') {
+      // 1. Populate the details panel
+      const detailsPanel = document.getElementById('tarot-details-panel');
+      if (detailsPanel) {
+        if (profile) {
+          // Show result content, hide empty state
+          const emptyEl = detailsPanel.querySelector('.tarot-details-empty');
+          const contentEl = detailsPanel.querySelector('.tarot-details-content');
+          if (emptyEl) emptyEl.style.display = 'none';
+          if (contentEl) {
+            contentEl.style.display = 'block';
+            
+            // Set Archetype tag
+            const tagEl = document.getElementById('tarot-res-archetype-tag');
+            if (tagEl) {
+              tagEl.innerHTML = `<span style="font-size:22px;margin-right:8px">${escHtml(profile.archetype.icon)}</span><span>${escHtml(profile.archetype.label)}</span>`;
+            }
+            
+            // Set Traits list
+            const traitsEl = document.getElementById('tarot-res-traits-list');
+            if (traitsEl && profile.traits) {
+              traitsEl.innerHTML = profile.traits.map(t => `
+                <div class="tarot-trait-row">
+                  <span class="trait-icon">${escHtml(t.icon)}</span>
+                  <div class="trait-content-wrap">
+                    <span class="trait-text">${escHtml(t.description || t.label)}</span>
+                    <span class="trait-evidence">· ${escHtml(t.evidence)}</span>
+                  </div>
                 </div>
-              </div>
-            `).join('');
-          }
-          
-          // Set Narrative (Vũ trụ phán)
-          const narrativeEl = document.getElementById('tarot-res-narrative-text');
-          if (narrativeEl) {
-            if (text) {
-              narrativeEl.innerHTML = renderSentencesHTML(text);
-            } else {
-              narrativeEl.innerHTML = '<span class="ai-narrative-loading">Đang lắng nghe thông điệp từ vũ trụ...</span>';
+              `).join('');
+            }
+            
+            // Set Narrative (Vũ trụ phán)
+            const narrativeEl = document.getElementById('tarot-res-narrative-text');
+            if (narrativeEl) {
+              if (text) {
+                narrativeEl.innerHTML = renderSentencesHTML(text);
+              } else {
+                narrativeEl.innerHTML = '<span class="ai-narrative-loading">Đang lắng nghe thông điệp từ vũ trụ...</span>';
+              }
             }
           }
         }
       }
-    }
-    
-    // 2. Return card front content
-    if (!profile || !profile.archetype) return '';
-    const a = profile.archetype;
-    
-    // Define sub-labels in English for a premium tarot feeling
-    const subLabels = {
-      reformed: 'THE REFORMED',
-      night_owl: 'THE NIGHT OWL',
-      fashion_healer: 'THE EMOTIONAL HEALER',
-      bargain_hunter: 'THE BARGAIN HUNTER',
-      emotional: 'THE IMPULSIVE SOUL',
-      premium_curator: 'THE PREMIUM CURATOR',
-      rising_addict: 'THE SHOPPING ENTHUSIAST',
-      morning_planner: 'THE disciplined PLANNER',
-      seasonal: 'THE SEASONAL EXPLORER',
-      beauty_selfcare: 'THE SELF-CARE LOVER',
-      tech_optimizer: 'THE TECH OPTIMIZER',
-      home_nester: 'THE NEST BUILDER',
-      food_lover: 'THE CONNOISSEUR',
-      family_center: 'THE PROVIDER',
-      free_spirit: 'THE FREE SPIRIT'
-    };
-    const sub = subLabels[a.key] || 'THE SEEKER';
+      
+      // 2. Return card front content
+      if (!profile || !profile.archetype) return '';
+      const a = profile.archetype;
+      
+      // Define sub-labels in English for a premium tarot feeling
+      const subLabels = {
+        reformed: 'THE REFORMED',
+        night_owl: 'THE NIGHT OWL',
+        fashion_healer: 'THE EMOTIONAL HEALER',
+        bargain_hunter: 'THE BARGAIN HUNTER',
+        emotional: 'THE IMPULSIVE SOUL',
+        premium_curator: 'THE PREMIUM CURATOR',
+        rising_addict: 'THE SHOPPING ENTHUSIAST',
+        morning_planner: 'THE disciplined PLANNER',
+        seasonal: 'THE SEASONAL EXPLORER',
+        beauty_selfcare: 'THE SELF-CARE LOVER',
+        tech_optimizer: 'THE TECH OPTIMIZER',
+        home_nester: 'THE NEST BUILDER',
+        food_lover: 'THE CONNOISSEUR',
+        family_center: 'THE PROVIDER',
+        free_spirit: 'THE FREE SPIRIT'
+      };
+      const sub = subLabels[a.key] || 'THE SEEKER';
 
-    const summaryText = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[a.key])
-      ? window.ARCHETYPE_CARD_SUMMARIES[a.key]
-      : (text ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
+      const summaryText = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[a.key])
+        ? window.ARCHETYPE_CARD_SUMMARIES[a.key]
+        : (text ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
 
-    return `
-      <div class="holo-sweep"></div>
-      <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
-      <div class="tarot-card-main">
-        <div class="tarot-frame-outer">
-          <div class="tarot-frame-glow"></div>
-          <span class="tarot-card-emoji">${escHtml(a.icon)}</span>
+      return `
+        <div class="holo-sweep"></div>
+        <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
+        <div class="tarot-card-main">
+          <div class="tarot-frame-outer">
+            <div class="tarot-frame-glow"></div>
+            <span class="tarot-card-emoji">${escHtml(a.icon)}</span>
+          </div>
+          <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
+          <span class="tarot-card-subtitle">${sub}</span>
+          <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
+          <div class="tarot-card-narrative">"${escHtml(summaryText)}"</div>
         </div>
-        <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
-        <span class="tarot-card-subtitle">${sub}</span>
-        <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
-        <div class="tarot-card-narrative">"${escHtml(summaryText)}"</div>
-      </div>
-      <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
-    `;
+        <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
+      `;
+    }
+
+    const copyBtn = (cardId && text)
+      ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép nhận xét">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+         </button>`
+      : '';
+
+    const refreshBtn = cardId
+      ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Phân tích lại" style="display:none">
+          <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+         </button>`
+      : '';
+
+    // Legacy layout: no profile, just text
+    if (!profile) {
+      return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Giải mã Bản Ngã Chốt Đơn</span>${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
+    }
+
+    const a = profile.archetype;
+    const archetypeHtml = a
+      ? `<div class="ai-archetype"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`
+      : '';
+
+    const traitsHtml = (profile.traits && profile.traits.length > 0)
+      ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${profile.traits.map(t =>
+        `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.description || (t.label + ' · ' + t.evidence))}</span></div>`
+      ).join('')
+      }</div>`
+      : '';
+
+    const narrativeHtml = (text && text.trim())
+      ? `<div class="ai-narrative"><div class="ai-narrative-label">Vũ trụ phán</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`
+      : '';
+
+    const orderNote = profile.totalOrders > 0
+      ? `<div class="ai-order-note">Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng</div>`
+      : '';
+
+    const header = `<div class="insight-ai-header insight-ai-header--full"><span class="insight-ai-badge">${_AI_ICON_SVG}Bản Ngã Chốt Đơn</span>${orderNote}${copyBtn}${refreshBtn}</div>`;
+
+    return `${header}${archetypeHtml}${traitsHtml}${narrativeHtml}`;
+  } catch (err) {
+    console.error('[renderAIInsight Error]:', err);
+    if (cardId === 'tarot-card') {
+      return `
+        <div class="holo-sweep"></div>
+        <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
+        <div class="tarot-card-main">
+          <div class="tarot-frame-outer"><span class="tarot-card-emoji">🔮</span></div>
+          <h3 class="tarot-card-title">BẢN NGÃ</h3>
+          <span class="tarot-card-subtitle">THE SEEKER</span>
+          <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
+          <div class="tarot-card-narrative">"Không thể hiển thị thông điệp vũ trụ."</div>
+        </div>
+        <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
+      `;
+    }
+    return `<div class="insight-ai-body">Có lỗi xảy ra khi giải mã bản ngã.</div>`;
   }
-
-  const copyBtn = (cardId && text)
-    ? `<button type="button" class="ai-copy-btn" onclick="copyAIInsight('${escHtml(cardId)}')" title="Sao chép nhận xét">
-        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-       </button>`
-    : '';
-
-  const refreshBtn = cardId
-    ? `<button type="button" class="ai-refresh-btn" data-ai-card="${escHtml(cardId)}" data-ai-action="rerun" title="Phân tích lại" style="display:none">
-        <svg class="refresh-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-       </button>`
-    : '';
-
-  // Legacy layout: no profile, just text
-  if (!profile) {
-    return `<div class="insight-ai-header"><span class="insight-ai-badge">${_AI_ICON_SVG}AI Insight</span><span class="insight-ai-title">Giải mã Bản Ngã Chốt Đơn</span>${copyBtn}${refreshBtn}</div><div class="insight-ai-body">${renderSentencesHTML(text || '')}</div>`;
-  }
-
-  const a = profile.archetype;
-  const archetypeHtml = a
-    ? `<div class="ai-archetype"><span class="ai-archetype-icon">${escHtml(a.icon)}</span><span class="ai-archetype-label">${escHtml(a.label)}</span></div>`
-    : '';
-
-  const traitsHtml = (profile.traits && profile.traits.length > 0)
-    ? `<div class="ai-traits-label">Đặc điểm nhận ra</div><div class="ai-traits">${profile.traits.map(t =>
-      `<div class="ai-trait-item"><span class="ai-trait-icon">${escHtml(t.icon)}</span><span class="ai-trait-label">${escHtml(t.description || (t.label + ' · ' + t.evidence))}</span></div>`
-    ).join('')
-    }</div>`
-    : '';
-
-  const narrativeHtml = (text && text.trim())
-    ? `<div class="ai-narrative"><div class="ai-narrative-label">Vũ trụ phán</div><div class="ai-narrative-body">${renderSentencesHTML(text)}</div></div>`
-    : '';
-
-  const orderNote = profile.totalOrders > 0
-    ? `<div class="ai-order-note">Dựa trên ${profile.totalOrders.toLocaleString('vi-VN')} đơn hàng</div>`
-    : '';
-
-  const header = `<div class="insight-ai-header insight-ai-header--full"><span class="insight-ai-badge">${_AI_ICON_SVG}Bản Ngã Chốt Đơn</span>${orderNote}${copyBtn}${refreshBtn}</div>`;
-
-  return `${header}${archetypeHtml}${traitsHtml}${narrativeHtml}`;
 }
 
 // renderCompactProfile(profile) — compact card for non-AI sections (monthly, categories, sales, items)

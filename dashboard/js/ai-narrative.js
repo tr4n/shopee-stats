@@ -1857,32 +1857,42 @@ async function runTarotSequence(selectedPos) {
   createOrbitalRing();
 
   /* ── Step 3: Run AI analysis ── */
-  if (window.currentDashData && !window._globalPersonalityProfile) {
-    window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
-      ? analyzeShoppingPersonality(window.currentDashData)
-      : null;
-  }
+  let profile = window._globalPersonalityProfile;
+  try {
+    if (window.currentDashData && !profile) {
+      profile = typeof analyzeShoppingPersonality === 'function'
+        ? analyzeShoppingPersonality(window.currentDashData)
+        : null;
+      window._globalPersonalityProfile = profile;
+    }
 
-  const profile = window._globalPersonalityProfile;
-  if (!profile) {
-    await destroyOrbitalRing(false);
-    card.className = 'tarot-card';
-    resetToFanSpread();
-    return;
-  }
+    if (!profile) {
+      await destroyOrbitalRing(false);
+      card.className = 'tarot-card';
+      resetToFanSpread();
+      return;
+    }
 
-  const context = profile.aiContext;
-  const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
-  const ck = 'insight-yearly-all';
+    const context = profile.aiContext;
+    const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
+    const ck = 'insight-yearly-all';
 
-  _aiInsightCallArgs['tarot-card'] = { context, specificPrompt, cacheKey: ck, fallbackFn: null, profile };
+    _aiInsightCallArgs['tarot-card'] = { context, specificPrompt, cacheKey: ck, fallbackFn: null, profile };
 
-  const cached = _getInsightText(ck);
-  if (cached !== null) {
+    const cached = _getInsightText(ck);
+    if (cached !== null) {
+      const aiEl = _getTarotFront();
+      if (aiEl) aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
+    } else {
+      await _executeAIInsight('tarot-card');
+    }
+  } catch (err) {
+    console.error('[Tarot Sequence Step 3 Error]:', err);
+    // Render fallback on card front so it stops spinning and flips
     const aiEl = _getTarotFront();
-    if (aiEl) aiEl.innerHTML = renderAIInsight(cached, 'tarot-card', profile);
-  } else {
-    await _executeAIInsight('tarot-card');
+    if (aiEl) {
+      aiEl.innerHTML = renderAIInsight(null, 'tarot-card', profile || { archetype: { key: 'free_spirit', label: 'Bản ngã', icon: '🔮' }, traits: [] });
+    }
   }
 
   /* ── Step 4: Shake card ── */
