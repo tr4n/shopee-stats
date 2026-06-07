@@ -85,9 +85,13 @@
       <div id="sidebar-rating-thankyou" class="sr-thankyou hidden">
         🎉 Cảm ơn bạn rất nhiều! Đang mở...
       </div>
-      <div id="sidebar-rating-feedback" class="sr-feedback hidden" style="line-height: 1.5; font-size: 12px; margin-top: 8px;">
-        Có điều gì chưa tốt sao? 😢<br/>
-        Ghi nhận góp ý qua <a href="#" id="btn-rating-support-trigger" style="text-decoration: underline; color: var(--primary); font-weight: bold;">biểu mẫu</a> hoặc <a href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank" style="text-decoration: underline; color: var(--primary); font-weight: bold;">email</a> nhé!
+      <div id="sidebar-rating-feedback" class="sr-feedback hidden"
+        style="line-height: 1.5; font-size: 12px; margin-top: 8px;">
+        Có điều gì chưa tốt sao? 😢<br />
+        Ghi nhận góp ý qua <a href="#" id="btn-rating-support-trigger"
+          style="text-decoration: underline; color: var(--primary); font-weight: bold;">biểu mẫu</a> hoặc <a
+          href="mailto:quanghuytran.hust@gmail.com?subject=Góp ý Shopee Analytics" target="_blank"
+          style="text-decoration: underline; color: var(--primary); font-weight: bold;">email</a> nhé!
       </div>
     </div>
 
@@ -272,7 +276,8 @@
                   <div class="tarot-details-empty">
                     <div class="empty-icon">✨</div>
                     <h3>Thông Điệp Từ Vũ Trụ</h3>
-                    <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên trong con người bạn.</p>
+                    <p>Hãy tập trung tâm trí và nhấn nút giải mã để bắt đầu rút thẻ bài bản ngã chi tiêu ẩn giấu bên
+                      trong con người bạn.</p>
                   </div>
                   <div class="tarot-details-content" style="display: none">
                     <div class="tarot-result-header">
@@ -330,8 +335,14 @@
             ">
           <span id="monthly-items-title">🏆 Top Sản Phẩm Trong Tháng</span>
           <div style="display: flex; gap: 8px;">
-            <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('monthly-items-list', this)" title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <button type="button" class="btn-copy-list"
+              onclick="window.copyListProductNames('monthly-items-list', this)"
+              title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
             </button>
             <select id="monthly-limit-select" class="limit-select">
               <option value="10">Top 10</option>
@@ -401,8 +412,13 @@
                   </select>
                 </div>
 
-                <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('items-list', this)" title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('items-list', this)"
+                  title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
                 </button>
 
                 <button type="button" id="btn-toggle-advanced" class="filter-toggle-btn btn-advanced-toggle">
@@ -420,17 +436,17 @@
                     <span class="slider-title">Khoảng giá trị mua</span>
                     <span id="price-range-label">0đ - 10trđ</span>
                   </div>
-                  
+
                   <!-- Dynamic Histogram -->
                   <div id="price-histogram" class="histogram-container"></div>
-                  
+
                   <div class="double-slider-wrap">
                     <div class="slider-track"></div>
                     <div id="price-slider-range" class="slider-range"></div>
                     <input type="range" id="price-min-input" min="0" max="5000000" value="0" step="10000" />
                     <input type="range" id="price-max-input" min="0" max="5000000" value="5000000" step="10000" />
                   </div>
-                  
+
                   <!-- Quick Select Price Pills -->
                   <div class="quick-pills-row">
                     <span class="quick-pill active" data-price-range="all">Tất cả</span>
@@ -447,17 +463,17 @@
                     <span class="slider-title">Khoảng thời gian mua</span>
                     <span id="date-range-label">--/--/---- - --/--/----</span>
                   </div>
-                  
+
                   <!-- Dynamic Histogram -->
                   <div id="date-histogram" class="histogram-container"></div>
-                  
+
                   <div class="double-slider-wrap">
                     <div class="slider-track"></div>
                     <div id="date-slider-range" class="slider-range"></div>
                     <input type="range" id="date-min-input" min="0" max="100" value="0" step="1" />
                     <input type="range" id="date-max-input" min="0" max="100" value="100" step="1" />
                   </div>
-                  
+
                   <!-- Quick Select Date Pills -->
                   <div class="quick-pills-row">
                     <span class="quick-pill active" data-date-range="all">Tất cả</span>
@@ -471,10 +487,12 @@
           </div>
 
           <div class="top-list" id="items-list"></div>
-          
+
           <!-- Load More Button -->
           <div class="load-more-wrap" style="text-align: center; margin-top: 20px;">
-            <button id="items-load-more" class="pill" style="display: none; padding: 8px 24px; min-width: 140px; margin: 0 auto; cursor: pointer; outline: none; border-radius: 20px;">Xem thêm</button>
+            <button id="items-load-more" class="pill"
+              style="display: none; padding: 8px 24px; min-width: 140px; margin: 0 auto; cursor: pointer; outline: none; border-radius: 20px;">Xem
+              thêm</button>
           </div>
         </div>
       </div>
@@ -520,17 +538,19 @@
           <div class="chart-wrap tall"><canvas id="chart-cat-trend"></canvas></div>
         </div>
         <div class="card" id="card-cat-items" style="margin-bottom: 0;">
-          <div class="card-title" id="cat-items-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+          <div class="card-title" id="cat-items-title"
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
             <span>🏷️ Sản Phẩm Danh Mục</span>
           </div>
-          
+
           <!-- Compact Filters for Category Items -->
           <div class="filter-container" style="margin-bottom: 15px; background: transparent; padding: 0; border: none;">
             <div class="filter-main-row" style="gap: 8px; flex-wrap: wrap;">
               <div class="filter-search-box" style="flex: 1; min-width: 140px;">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="cat-items-search-input" placeholder="Tìm sản phẩm..." />
-                <button id="cat-items-search-clear" style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
+                <button id="cat-items-search-clear"
+                  style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
               </div>
               <div class="select-wrapper">
                 <span class="select-icon">⚡</span>
@@ -541,17 +561,24 @@
                   <option value="save_desc">Tiết kiệm ↓</option>
                 </select>
               </div>
-              <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('cat-items-list', this)" title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <button type="button" class="btn-copy-list" onclick="window.copyListProductNames('cat-items-list', this)"
+                title="Sao chép toàn bộ tên sản phẩm đang hiển thị">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
               </button>
             </div>
           </div>
-          
+
           <div class="top-list" id="cat-items-list"></div>
-          
+
           <!-- Load More Button for Category Items -->
           <div class="load-more-wrap" style="text-align: center; margin-top: 15px;">
-            <button id="cat-items-load-more" class="pill" style="display: none; padding: 6px 20px; border-radius: 20px; cursor: pointer; outline: none;">Xem thêm</button>
+            <button id="cat-items-load-more" class="pill"
+              style="display: none; padding: 6px 20px; border-radius: 20px; cursor: pointer; outline: none;">Xem
+              thêm</button>
           </div>
         </div>
       </div>
@@ -567,10 +594,10 @@
       </div>
       <div class="orders-help-banner">
         <span class="oh-icon">💡</span>
-        <span class="oh-text">Quy luật phân loại ngày sale Shopee: 
-          <span class="oh-tag tag-double">Ngày Đôi</span> (trùng ngày/tháng & Black Friday) · 
-          <span class="oh-tag tag-mid">Giữa Tháng</span> (ngày 15 hàng tháng) · 
-          <span class="oh-tag tag-end">Lương Về</span> (từ ngày 25 đến cuối tháng) · 
+        <span class="oh-text">Quy luật phân loại ngày sale Shopee:
+          <span class="oh-tag tag-double">Ngày Đôi</span> (trùng ngày/tháng & Black Friday) ·
+          <span class="oh-tag tag-mid">Giữa Tháng</span> (ngày 15 hàng tháng) ·
+          <span class="oh-tag tag-end">Lương Về</span> (từ ngày 25 đến cuối tháng) ·
           <span class="oh-tag tag-regular">Ngày Thường</span> (các ngày còn lại)
         </span>
       </div>
@@ -631,7 +658,8 @@
       </div>
 
       <div class="card" id="card-orders">
-        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+        <div class="card-title"
+          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
           <span id="sales-detail-title">📅 Chi Tiết Từng Đợt Sale</span>
           <div style="display: flex; gap: 8px;">
             <select id="orders-limit-select" class="limit-select" style="height: 32px;">
@@ -644,12 +672,14 @@
         </div>
 
         <!-- Orders Table Filters (Product Search and Category Filter) -->
-        <div id="orders-filters-row" class="filter-container" style="display: none; margin-bottom: 15px; background: transparent; padding: 0; border: none;">
+        <div id="orders-filters-row" class="filter-container"
+          style="display: none; margin-bottom: 15px; background: transparent; padding: 0; border: none;">
           <div class="filter-main-row" style="gap: 8px; flex-wrap: wrap;">
             <div class="filter-search-box" style="flex: 1; min-width: 140px;">
               <span class="search-icon">🔍</span>
               <input type="text" id="orders-search-input" placeholder="Tìm sản phẩm săn sale..." />
-              <button id="orders-search-clear" style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
+              <button id="orders-search-clear"
+                style="display: none; background: none; border: none; cursor: pointer; color: var(--muted);">✕</button>
             </div>
             <div class="select-wrapper">
               <span class="select-icon">🏷️</span>
@@ -674,7 +704,8 @@
             <tbody></tbody>
           </table>
         </div>
-        <div id="orders-pagination" class="orders-pagination" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
+        <div id="orders-pagination" class="orders-pagination"
+          style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;"></div>
       </div>
     </div>
 
@@ -759,9 +790,9 @@
         <button id="btn-close-tarot-share" class="btn-close">&times;</button>
       </div>
       <div class="tarot-share-body">
-        <div class="tarot-share-format-badge">✦ 1080 × 1350 · Tối ưu cho Instagram Feed ✦</div>
         <div class="tarot-share-preview-container">
-          <div id="tarot-share-loader" class="btn-spinner" style="width: 40px; height: 40px; border-width: 4px; border-top-color: var(--tarot-gold);"></div>
+          <div id="tarot-share-loader" class="btn-spinner"
+            style="width: 40px; height: 40px; border-width: 4px; border-top-color: var(--tarot-gold);"></div>
           <img id="tarot-share-preview-img" src="" alt="Bản Ngã Tarot Preview" style="display: none;" />
         </div>
         <div class="tarot-share-actions">

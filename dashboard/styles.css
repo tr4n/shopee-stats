@@ -3832,19 +3832,22 @@ body {
 }
 .tarot-card-narrative {
   font-family: Georgia, serif;
-  font-size: 9.2px;
+  color: var(--tarot-text);
+  margin: 8px 4px 0;
+  padding: 0 10px;
+  text-align: left;
+  max-height: 90px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.narrative-bullet {
+  font-size: 8px;
   font-style: italic;
-  line-height: 1.45;
+  line-height: 1.35;
   color: var(--tarot-text);
   opacity: 0.85;
-  margin: 10px 4px 0;
-  padding: 0 6px;
-  text-align: center;
-  max-height: 70px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
 }
 .tarot-card-header, .tarot-card-footer {
   font-family: Georgia, serif;
@@ -4049,7 +4052,7 @@ body {
   background: radial-gradient(ellipse at 30% 10%, #13082e 0%, #090514 60%, #050210 100%) !important;
   border: 1px solid rgba(200, 169, 110, 0.25) !important;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(200,169,110,0.08) !important;
-  max-width: 540px !important;
+  max-width: 640px !important;
   color: #fff !important;
 }
 
@@ -4096,7 +4099,7 @@ body {
 /* Preview container: 4:5 ratio */
 .tarot-share-preview-container {
   width: 100%;
-  max-width: 320px;
+  max-width: 460px;
   height: auto;
   aspect-ratio: 4 / 5;
   border-radius: 16px;

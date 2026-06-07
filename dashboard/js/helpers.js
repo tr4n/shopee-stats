@@ -205,6 +205,9 @@ function renderAIInsight(text, cardId, profile) {
       ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim()
       : 'Đang lắng nghe thông điệp từ vũ trụ...';
 
+    const sentences = cleanText.split(/(?<=[.!?…])\s+/).map(s => s.trim()).filter(Boolean);
+    const narrativeHtml = sentences.map(s => `<div class="narrative-bullet">• ${escHtml(s)}</div>`).join('');
+
     return `
       <div class="holo-sweep"></div>
       <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
@@ -216,7 +219,9 @@ function renderAIInsight(text, cardId, profile) {
         <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
         <span class="tarot-card-subtitle">${sub}</span>
         <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
-        <div class="tarot-card-narrative">"${escHtml(cleanText)}"</div>
+        <div class="tarot-card-narrative">
+          ${narrativeHtml}
+        </div>
       </div>
       <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
     `;
