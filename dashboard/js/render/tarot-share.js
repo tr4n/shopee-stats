@@ -1,7 +1,7 @@
 /**
  * Shopee Stats — Tarot Share Image Generator (Canvas)
  * Renders a high-resolution 1080×1350 image (4:5 ratio) for Instagram Feed / Facebook sharing.
- * Design: Luminous Tarot Card — archetype-specific gradient card panel + cosmic "Vũ Trụ Phán" panel.
+ * Design: Luminous Tarot Card — archetype-specific gradient card panel + cosmic stars.
  */
 
 window.generateTarotShareImage = function(profile, cachedText) {
@@ -125,17 +125,6 @@ window.generateTarotShareImage = function(profile, cachedText) {
     return lines;
   }
 
-  // Extract first meaningful sentence from narrative
-  function getFirstSentence(text) {
-    if (!text) return '';
-    const clean = text.replace(/<\/?[^>]+(>|$)/g, '').trim();
-    // Split on sentence-ending punctuation
-    const match = clean.match(/^.{20,200}?[.!?…]/);
-    if (match) return match[0].trim();
-    // Fallback: first 160 chars
-    return clean.slice(0, 160).trim();
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. GLOBAL BACKGROUND — deep space black
   // ═══════════════════════════════════════════════════════════════════════════
@@ -147,38 +136,48 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fillRect(0, 0, W, H);
 
   // Subtle atmospheric glow blob behind card
-  const glowBlob = ctx.createRadialGradient(W / 2, 420, 0, W / 2, 420, 500);
-  glowBlob.addColorStop(0,   pal.glow + '22');
+  const glowBlob = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
+  glowBlob.addColorStop(0,   pal.glow + '25');
   glowBlob.addColorStop(0.5, pal.glow + '0a');
   glowBlob.addColorStop(1,   'transparent');
   ctx.fillStyle = glowBlob;
   ctx.fillRect(0, 0, W, H);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 2. HEADER — "✦ SHOPEE COSMIC TAROT ✦"
-  // ═══════════════════════════════════════════════════════════════════════════
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle    = '#c8a96e';
-  ctx.font         = 'bold 22px Arial';
-  setGlow('#c8a96e', 6);
-  ctx.fillText('✦   S H O P E E   C O S M I C   T A R O T   ✦', W / 2, 54);
-  clearGlow();
+  // Ambient constellation dots & faint lines across the background
+  const dots = [
+    {x: 0.1, y: 0.12}, {x: 0.18, y: 0.35}, {x: 0.08, y: 0.65}, {x: 0.15, y: 0.88},
+    {x: 0.9, y: 0.15}, {x: 0.82, y: 0.38}, {x: 0.92, y: 0.62}, {x: 0.85, y: 0.85},
+    {x: 0.32, y: 0.06}, {x: 0.68, y: 0.05}, {x: 0.45, y: 0.95}, {x: 0.58, y: 0.94}
+  ];
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+  for (const d of dots) {
+    ctx.beginPath();
+    ctx.arc(d.x * W, d.y * H, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = 'rgba(200, 169, 110, 0.05)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  const connections = [[0, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 7], [8, 9]];
+  for (const [a, b] of connections) {
+    ctx.moveTo(dots[a].x * W, dots[a].y * H);
+    ctx.lineTo(dots[b].x * W, dots[b].y * H);
+  }
+  ctx.stroke();
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 3. CARD PANEL — upper ~62% of image
+  // 2. THE SINGLE VERTICAL TAROT CARD (Aspect Ratio 220:370 -> 700:1177)
   // ═══════════════════════════════════════════════════════════════════════════
-  const CARD_MARGIN = 56;
-  const CARD_X      = CARD_MARGIN;
-  const CARD_Y      = 92;
-  const CARD_W      = W - CARD_MARGIN * 2;
-  const CARD_H      = 760;  // ~56% of H
-  const CARD_R      = 28;
+  const CARD_W = 700;
+  const CARD_H = 1177;
+  const CARD_X = (W - CARD_W) / 2;     // 190
+  const CARD_Y = (H - CARD_H) / 2 - 20; // 66.5 (slightly pushed up to leave space for watermark)
+  const CARD_R = 30;
 
   // Card outer glow
-  setGlow(pal.glow, 50);
-  ctx.strokeStyle = pal.glow + '88';
-  ctx.lineWidth   = 2;
+  setGlow(pal.glow, 45);
+  ctx.strokeStyle = pal.glow + '66';
+  ctx.lineWidth   = 3;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.stroke();
   clearGlow();
@@ -192,304 +191,149 @@ window.generateTarotShareImage = function(profile, cachedText) {
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.fill();
 
-  // Card gold double border
+  // Outer gold border (thick)
   ctx.strokeStyle = '#c8a96e';
-  ctx.lineWidth   = 2.5;
-  roundRect(CARD_X + 14, CARD_Y + 14, CARD_W - 28, CARD_H - 28, CARD_R - 6);
+  ctx.lineWidth   = 3.5;
+  roundRect(CARD_X + 16, CARD_Y + 16, CARD_W - 32, CARD_H - 32, CARD_R - 5);
   ctx.stroke();
 
-  ctx.strokeStyle = '#c8a96e66';
-  ctx.lineWidth   = 1;
-  roundRect(CARD_X + 20, CARD_Y + 20, CARD_W - 40, CARD_H - 40, CARD_R - 10);
+  // Inner gold border (thin)
+  ctx.strokeStyle = '#c8a96e55';
+  ctx.lineWidth   = 1.5;
+  roundRect(CARD_X + 22, CARD_Y + 22, CARD_W - 44, CARD_H - 44, CARD_R - 7);
   ctx.stroke();
 
   // Corner ornaments ◈
-  const cOrnX = [CARD_X + 38, CARD_X + CARD_W - 38];
-  const cOrnY = [CARD_Y + 38, CARD_Y + CARD_H - 38];
+  const cOrnX = [CARD_X + 42, CARD_X + CARD_W - 42];
+  const cOrnY = [CARD_Y + 42, CARD_Y + CARD_H - 42];
   ctx.fillStyle = '#c8a96e';
-  ctx.font = 'bold 22px Arial';
+  ctx.font = 'bold 24px Arial';
   setGlow('#c8a96e', 8);
-  for (const cx of cOrnX) for (const cy of cOrnY) ctx.fillText('◈', cx, cy);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const cx of cOrnX) {
+    for (const cy of cOrnY) {
+      ctx.fillText('◈', cx, cy);
+    }
+  }
   clearGlow();
 
-  // Header label inside card: "SHOPEE TAROT"
-  ctx.fillStyle = '#c8a96eaa';
-  ctx.font      = 'bold 11px Arial';
-  ctx.fillText('S H O P E E   T A R O T', W / 2, CARD_Y + 52);
+  // Card Header: "✦ SHOPEE COSMIC TAROT ✦"
+  ctx.fillStyle = '#c8a96ecc';
+  ctx.font      = 'bold 13px Georgia, serif';
+  ctx.fillText('✦   S H O P E E   C O S M I C   T A R O T   ✦', W / 2, CARD_Y + 52);
 
-  // Thin divider line under header
-  const divY1 = CARD_Y + 68;
-  const divGrad1 = ctx.createLinearGradient(CARD_X + 80, divY1, CARD_X + CARD_W - 80, divY1);
-  divGrad1.addColorStop(0,   'transparent');
-  divGrad1.addColorStop(0.5, '#c8a96e66');
-  divGrad1.addColorStop(1,   'transparent');
-  ctx.strokeStyle = divGrad1;
+  // Thin header divider line
+  ctx.strokeStyle = '#c8a96e33';
   ctx.lineWidth   = 1;
   ctx.beginPath();
-  ctx.moveTo(CARD_X + 80, divY1);
-  ctx.lineTo(CARD_X + CARD_W - 80, divY1);
+  ctx.moveTo(CARD_X + 35, CARD_Y + 68);
+  ctx.lineTo(CARD_X + CARD_W - 35, CARD_Y + 68);
   ctx.stroke();
 
-  // ── Emoji / icon ─────────────────────────────────────────────────────────
-  const emojiY = CARD_Y + 180;
-  ctx.font         = '120px Arial';
+  // Emoji circular dashed frame & glow halo
+  const emojiY = CARD_Y + 240;
+  
+  // Dashed frame outer circle
+  ctx.strokeStyle = '#c8a96e';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath();
+  ctx.arc(W / 2, emojiY, 110, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]); // reset
+
+  // Glow halo behind emoji
+  const emojiHalo = ctx.createRadialGradient(W / 2, emojiY, 0, W / 2, emojiY, 140);
+  emojiHalo.addColorStop(0, pal.glow + '44');
+  emojiHalo.addColorStop(1, 'transparent');
+  ctx.fillStyle = emojiHalo;
+  ctx.beginPath();
+  ctx.arc(W / 2, emojiY, 140, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Archetype Emoji
+  ctx.font         = '110px Arial';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-
-  // Soft radial halo behind emoji
-  const emojiHalo = ctx.createRadialGradient(W / 2, emojiY, 0, W / 2, emojiY, 130);
-  emojiHalo.addColorStop(0,   pal.glow + '33');
-  emojiHalo.addColorStop(1,   'transparent');
-  ctx.fillStyle = emojiHalo;
-  ctx.fillRect(W / 2 - 160, emojiY - 140, 320, 280);
-
-  setGlow(pal.glow, 30);
+  setGlow(pal.glow, 25);
   ctx.fillText(profile.archetype.icon || '🔮', W / 2, emojiY);
   clearGlow();
 
-  // ── Archetype name ────────────────────────────────────────────────────────
+  // Archetype Title
   const archetypeName = (profile.archetype.label || 'BẢN NGÃ').toUpperCase();
-  const nameWords     = archetypeName.split(' ');
-
-  // Split into at most 2 lines (balanced)
-  let nameLine1 = archetypeName, nameLine2 = '';
-  if (nameWords.length > 2) {
-    const half = Math.ceil(nameWords.length / 2);
-    nameLine1  = nameWords.slice(0, half).join(' ');
-    nameLine2  = nameWords.slice(half).join(' ');
-  }
-
-  // Auto-scale font: start at 72px, reduce until fits within card width - margin
-  const nameMaxW = CARD_W - 120;
-  let nameFontSize = 72;
-  ctx.font = `900 ${nameFontSize}px Arial`;
-  while (
-    nameFontSize > 40 &&
-    (ctx.measureText(nameLine1).width > nameMaxW || (nameLine2 && ctx.measureText(nameLine2).width > nameMaxW))
-  ) {
-    nameFontSize -= 2;
-    ctx.font = `900 ${nameFontSize}px Arial`;
-  }
-
-  const nameLineH = nameFontSize * 1.15;
-  const nameBaseY = nameLine2
-    ? CARD_Y + 310 - nameLineH / 2
-    : CARD_Y + 320;
-
   ctx.fillStyle    = '#ffffff';
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  setGlow('#ffffff', 18);
-  ctx.fillText(nameLine1, W / 2, nameBaseY);
-  if (nameLine2) ctx.fillText(nameLine2, W / 2, nameBaseY + nameLineH);
+  ctx.font         = 'bold 44px Georgia, serif';
+  setGlow('#ffffff', 14);
+  ctx.fillText(archetypeName, W / 2, CARD_Y + 430);
   clearGlow();
 
-  // ── Subtitle (English) ────────────────────────────────────────────────────
-  const subY = nameLine2 ? nameBaseY + nameLineH + 42 : nameBaseY + 52;
+  // Archetype Subtitle (spaced out English name)
   ctx.fillStyle = pal.accent;
-  ctx.font      = `bold 16px Arial`;
-  setGlow(pal.glow, 12);
-  // Spaced-out letters
-  ctx.fillText(subText.split('').join('\u200A'), W / 2, subY);
+  ctx.font      = 'bold 15px Arial';
+  setGlow(pal.glow, 8);
+  ctx.fillText(subText.split('').join('\u200A'), W / 2, CARD_Y + 482);
   clearGlow();
 
-  // Thin gold divider between subtitle and quote
-  const divY2 = subY + 34;
-  const divLen = 220;
-  const divGrad2 = ctx.createLinearGradient(W / 2 - divLen / 2, divY2, W / 2 + divLen / 2, divY2);
-  divGrad2.addColorStop(0,   'transparent');
-  divGrad2.addColorStop(0.5, '#c8a96e');
-  divGrad2.addColorStop(1,   'transparent');
-  ctx.strokeStyle = divGrad2;
-  ctx.lineWidth   = 1;
-  ctx.beginPath();
-  ctx.moveTo(W / 2 - divLen / 2, divY2);
-  ctx.lineTo(W / 2 + divLen / 2, divY2);
-  ctx.stroke();
+  // Subtitle separator ornament
+  ctx.fillStyle = '#c8a96ecc';
+  ctx.font      = '16px Arial';
+  ctx.fillText('✦   ✵   ✦', W / 2, CARD_Y + 528);
 
-  // ── Quote (first sentence of narrative) ──────────────────────────────────
-  const quoteRaw  = getFirstSentence(cachedText);
-  const quoteText = quoteRaw ? `"${quoteRaw}"` : '';
-  if (quoteText) {
-    ctx.fillStyle    = '#e2d9c8cc';
-    ctx.font         = `italic 22px Arial`;
+  // ── Narrative text (Vũ Trụ Phán) ──────────────────────────────────────────
+  let narrativeRaw = cachedText || '';
+  narrativeRaw = narrativeRaw.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim();
+
+  if (narrativeRaw) {
+    const maxTextW = CARD_W - 140; // 560px
+    const maxTextH = 430; // max height for narrative zone
+    
+    let fontSize = 26;
+    let lineH = 42;
+    let lines = [];
+
+    // Auto-scale font size
+    while (fontSize >= 18) {
+      ctx.font = `italic ${fontSize}px Georgia, Arial`;
+      lineH = Math.round(fontSize * 1.6);
+      lines = wrapText(narrativeRaw, maxTextW, ctx.font);
+      if (lines.length * lineH <= maxTextH) {
+        break;
+      }
+      fontSize -= 1;
+    }
+
+    ctx.fillStyle    = '#e8e0f0';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'top';
-
-    const quoteMaxW = CARD_W - 160;
-    let quoteSize   = 22;
-    let quoteLines  = wrapText(quoteText, quoteMaxW, `italic ${quoteSize}px Arial`);
-
-    // Shrink if more than 3 lines
-    while (quoteLines.length > 3 && quoteSize > 16) {
-      quoteSize--;
-      quoteLines = wrapText(quoteText, quoteMaxW, `italic ${quoteSize}px Arial`);
-    }
-    // Trim to max 3 lines with ellipsis
-    if (quoteLines.length > 3) {
-      quoteLines = quoteLines.slice(0, 3);
-      const last = quoteLines[2];
-      quoteLines[2] = last.slice(0, -3).trimEnd() + '…"';
-    }
-
-    ctx.font = `italic ${quoteSize}px Arial`;
-    const quoteLineH = quoteSize * 1.55;
-    const quoteTotalH = quoteLines.length * quoteLineH;
-    const quoteBaseY  = divY2 + 28;
-
-    // Ensure quote doesn't overflow card
-    const quoteEndY = quoteBaseY + quoteTotalH;
-    const cardBottom = CARD_Y + CARD_H - 50;
-    const quoteStartY = quoteEndY > cardBottom
-      ? cardBottom - quoteTotalH
-      : quoteBaseY;
-
-    for (let i = 0; i < quoteLines.length; i++) {
-      ctx.fillText(quoteLines[i], W / 2, quoteStartY + i * quoteLineH);
+    
+    // Vertically center the lines inside the narrative zone
+    const startY = CARD_Y + 575 + (maxTextH - lines.length * lineH) / 2;
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], W / 2, startY + i * lineH);
     }
   }
 
-  // Card footer line: "✦ 2025 ✦"
-  ctx.fillStyle    = '#c8a96e99';
-  ctx.font         = 'bold 13px Arial';
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`✦  ${new Date().getFullYear()}  ✦`, W / 2, CARD_Y + CARD_H - 30);
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 4. VŨ TRỤ PHÁN SECTION — lower ~38% of image
-  // ═══════════════════════════════════════════════════════════════════════════
-  const SEC_Y    = CARD_Y + CARD_H + 28;
-  const SEC_H    = H - SEC_Y - 36;
-  const SEC_X    = CARD_MARGIN;
-  const SEC_W    = W - CARD_MARGIN * 2;
-  const SEC_R    = 24;
-
-  // Section background
-  const secGrad = ctx.createLinearGradient(0, SEC_Y, 0, SEC_Y + SEC_H);
-  secGrad.addColorStop(0,   '#100820');
-  secGrad.addColorStop(1,   '#080512');
-  ctx.fillStyle = secGrad;
-  roundRect(SEC_X, SEC_Y, SEC_W, SEC_H, SEC_R);
-  ctx.fill();
-
-  // Border
+  // Footer divider line
   ctx.strokeStyle = '#c8a96e33';
   ctx.lineWidth   = 1;
-  roundRect(SEC_X, SEC_Y, SEC_W, SEC_H, SEC_R);
-  ctx.stroke();
-
-  // Constellation dots (static, deterministic)
-  const dots = [
-    {x: 0.08, y: 0.15}, {x: 0.22, y: 0.05}, {x: 0.38, y: 0.22}, {x: 0.55, y: 0.08},
-    {x: 0.72, y: 0.18}, {x: 0.88, y: 0.06}, {x: 0.95, y: 0.35}, {x: 0.78, y: 0.48},
-    {x: 0.62, y: 0.55}, {x: 0.45, y: 0.68}, {x: 0.28, y: 0.60}, {x: 0.12, y: 0.72},
-    {x: 0.05, y: 0.52}, {x: 0.18, y: 0.88}, {x: 0.92, y: 0.78},
-  ];
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  for (const d of dots) {
-    const dx = SEC_X + d.x * SEC_W;
-    const dy = SEC_Y + d.y * SEC_H;
-    ctx.beginPath();
-    ctx.arc(dx, dy, 1.2, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  // Faint constellation lines
-  ctx.strokeStyle = 'rgba(200,169,110,0.08)';
-  ctx.lineWidth   = 0.8;
   ctx.beginPath();
-  const lineConst = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],[12,0]];
-  for (const [a, b] of lineConst) {
-    ctx.moveTo(SEC_X + dots[a].x * SEC_W, SEC_Y + dots[a].y * SEC_H);
-    ctx.lineTo(SEC_X + dots[b].x * SEC_W, SEC_Y + dots[b].y * SEC_H);
-  }
+  ctx.moveTo(CARD_X + 35, CARD_Y + CARD_H - 58);
+  ctx.lineTo(CARD_X + CARD_W - 35, CARD_Y + CARD_H - 58);
   ctx.stroke();
 
-  // Section title
-  const titleY = SEC_Y + 38;
-  ctx.fillStyle    = '#c8a96e';
-  ctx.font         = 'bold 14px Arial';
-  ctx.textAlign    = 'center';
+  // Card Footer: "✦ 2026 ✦"
+  ctx.fillStyle    = '#c8a96e99';
+  ctx.font         = 'bold 12px Georgia, serif';
   ctx.textBaseline = 'middle';
-  setGlow('#c8a96e', 10);
-  ctx.fillText('✦   V Ũ   T R Ụ   P H Á N   ✦', W / 2, titleY);
-  clearGlow();
-
-  // Thin gradient separator below title
-  const divY3 = titleY + 22;
-  const divGrad3 = ctx.createLinearGradient(SEC_X + 60, divY3, SEC_X + SEC_W - 60, divY3);
-  divGrad3.addColorStop(0,   'transparent');
-  divGrad3.addColorStop(0.5, '#c8a96e55');
-  divGrad3.addColorStop(1,   'transparent');
-  ctx.strokeStyle = divGrad3;
-  ctx.lineWidth   = 1;
-  ctx.beginPath();
-  ctx.moveTo(SEC_X + 60, divY3);
-  ctx.lineTo(SEC_X + SEC_W - 60, divY3);
-  ctx.stroke();
-
-  // ── Narrative text (dynamic scale to fit) ────────────────────────────────
-  let narrativeRaw = cachedText || '';
-  narrativeRaw = narrativeRaw.replace(/<\/?[^>]+(>|$)/g, '').trim();
-
-  const textX      = W / 2;
-  const textStartY = divY3 + 22;
-  const textMaxW   = SEC_W - 100;
-  const textMaxH   = SEC_Y + SEC_H - textStartY - 44; // leave room for watermark
-
-  let fontSize   = 26;
-  let lineHeight = 40;
-  let finalLines = [];
-
-  // Iteratively reduce font size until text fits
-  while (fontSize >= 17) {
-    ctx.font = `normal ${fontSize}px Arial`;
-    lineHeight = Math.round(fontSize * 1.55);
-    const words = narrativeRaw.split(/\s+/);
-    const lines = [];
-    let line = '';
-    for (const word of words) {
-      const test = line ? line + ' ' + word : word;
-      if (ctx.measureText(test).width > textMaxW && line) {
-        lines.push(line.trim());
-        line = word;
-      } else {
-        line = test;
-      }
-    }
-    if (line) lines.push(line.trim());
-
-    if (lines.length * lineHeight <= textMaxH || fontSize === 17) {
-      finalLines = lines;
-      break;
-    }
-    fontSize -= 1;
-  }
-
-  // If still too many lines, truncate with ellipsis
-  const maxLines = Math.floor(textMaxH / lineHeight);
-  if (finalLines.length > maxLines) {
-    finalLines = finalLines.slice(0, maxLines);
-    const last = finalLines[finalLines.length - 1];
-    finalLines[finalLines.length - 1] = last.trimEnd().slice(0, -2) + '…';
-  }
-
-  ctx.fillStyle    = '#e8e0f0';
-  ctx.font         = `normal ${fontSize}px Arial`;
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'top';
-  for (let i = 0; i < finalLines.length; i++) {
-    ctx.fillText(finalLines[i], textX, textStartY + i * lineHeight);
-  }
+  ctx.fillText(`✦   ${new Date().getFullYear()}   ✦`, W / 2, CARD_Y + CARD_H - 33);
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 5. WATERMARK FOOTER
+  // 3. IMAGE WATERMARK FOOTER (outside card)
   // ═══════════════════════════════════════════════════════════════════════════
   ctx.fillStyle    = 'rgba(255,255,255,0.28)';
   ctx.font         = 'bold 14px Arial';
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', W / 2, H - 22);
+  ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', W / 2, H - 36);
 
   // ─── Output ───────────────────────────────────────────────────────────────
   setTimeout(() => {
