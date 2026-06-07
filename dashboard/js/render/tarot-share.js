@@ -262,9 +262,9 @@ window.generateTarotShareImage = function(profile, cachedText) {
 
   // Archetype Title
   const archetypeName = (profile.archetype.label || 'BẢN NGÃ').toUpperCase();
-  ctx.fillStyle    = '#ffffff';
+  ctx.fillStyle    = '#c8a96e';
   ctx.font         = 'bold 44px Georgia, serif';
-  setGlow('#ffffff', 14);
+  setGlow('#c8a96e', 14);
   ctx.fillText(archetypeName, W / 2, CARD_Y + 430);
   clearGlow();
 
@@ -281,9 +281,10 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fillText('✦   ✵   ✦', W / 2, CARD_Y + 528);
 
   // ── Narrative text (Vũ Trụ Phán) ──────────────────────────────────────────
-  const summaryText = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[profile.archetype.key])
+  const rawSummary = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[profile.archetype.key])
     ? window.ARCHETYPE_CARD_SUMMARIES[profile.archetype.key]
     : (cachedText ? cachedText.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
+  const summaryText = `"${rawSummary}"`;
 
   if (summaryText) {
     const maxTextW = CARD_W - 160; // 540px width (margins of 80px on both sides)

@@ -3530,12 +3530,12 @@ body {
   opacity: 1;
   transform: translateX(0);
   transition: opacity 0.4s ease 0.2s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, max-width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: 800px;
+  max-width: 600px;
 }
 
 .tarot-bottom-row {
   width: 100%;
-  max-width: 1060px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
@@ -3752,7 +3752,6 @@ body {
   );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 3.5px solid var(--tarot-gold);
   color: #ffffff;
   transform: rotateY(180deg);
   display: flex;
@@ -3762,15 +3761,41 @@ body {
   box-shadow: inset 0 0 28px rgba(200,169,110,0.06), 0 14px 32px rgba(38,32,59,0.13);
 }
 
-/* Corner ornaments on front */
-.tarot-card-front::after {
-  content: '◈';
+/* Outer gold border (thick) */
+.tarot-card-front::before {
+  content: '';
   position: absolute;
-  top: 8px; right: 10px;
-  font-size: 10px;
+  inset: 5px;
+  border: 1.2px solid var(--tarot-gold);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner gold border (thin) */
+.tarot-card-front::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 0.6px solid rgba(200, 169, 110, 0.35); /* #c8a96e55 */
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 4 Corner ornaments */
+.tarot-corner-ornament {
+  position: absolute;
+  font-size: 8px;
   color: var(--tarot-gold-light);
   pointer-events: none;
+  z-index: 2;
+  line-height: 1;
 }
+.tarot-corner-ornament.top-left     { top: 10px; left: 10px; }
+.tarot-corner-ornament.top-right    { top: 10px; right: 10px; }
+.tarot-corner-ornament.bottom-left  { bottom: 10px; left: 10px; }
+.tarot-corner-ornament.bottom-right { bottom: 10px; right: 10px; }
 
 /* Holographic shimmer sweep */
 .tarot-card-front .holo-sweep {
@@ -3783,7 +3808,7 @@ body {
   pointer-events: none;
   z-index: 4;
   transition: left 0.7s ease;
-  clip-path: inset(3.5px round 11px);
+  clip-path: inset(7px round 8px); /* Clip holo sweep inside inner border */
 }
 .tarot-card-front.do-shimmer .holo-sweep { left: 140%; }
 

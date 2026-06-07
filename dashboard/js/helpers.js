@@ -207,6 +207,10 @@ function renderAIInsight(text, cardId, profile) {
         : (text ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
 
       return `
+        <span class="tarot-corner-ornament top-left">◈</span>
+        <span class="tarot-corner-ornament top-right">◈</span>
+        <span class="tarot-corner-ornament bottom-left">◈</span>
+        <span class="tarot-corner-ornament bottom-right">◈</span>
         <div class="holo-sweep"></div>
         <div class="tarot-card-header">✦ SHOPEE COSMIC TAROT ✦</div>
         <div class="tarot-card-main">
