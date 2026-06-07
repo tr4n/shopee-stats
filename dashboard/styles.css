@@ -3701,6 +3701,7 @@ body {
   backface-visibility: hidden;
   box-sizing: border-box;
   overflow: hidden;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 /* ── Card Back ── */
