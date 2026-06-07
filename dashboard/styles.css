@@ -3707,7 +3707,7 @@ body {
 
 /* ── Card Back ── */
 .tarot-card-back {
-  background: rgba(255, 255, 255, 0.45);
+  background: linear-gradient(135deg, #180e29 0%, #0a0614 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 4px double var(--tarot-gold);
@@ -3719,7 +3719,6 @@ body {
   z-index: 2;
   transform: rotateY(0deg);
   box-shadow: inset 0 0 40px rgba(200,169,110,0.07), 0 14px 32px rgba(38,32,59,0.13);
-  clip-path: inset(0 round 15px);
 }
 .card-back-ornament {
   position: relative;
@@ -3746,18 +3745,21 @@ body {
 
 /* ── Card Front ── */
 .tarot-card-front {
-  background: rgba(255, 255, 255, 0.5);
+  background: linear-gradient(180deg, 
+    var(--card-bg-top, #13082e) 0%, 
+    var(--card-bg-mid, #090514) 50%, 
+    var(--card-bg-bot, #050210) 100%
+  );
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 3.5px solid var(--tarot-gold);
-  color: var(--tarot-text);
+  color: #ffffff;
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   padding: 14px;
   justify-content: space-between;
   box-shadow: inset 0 0 28px rgba(200,169,110,0.06), 0 14px 32px rgba(38,32,59,0.13);
-  clip-path: inset(0 round 15px);
 }
 
 /* Corner ornaments on front */
@@ -3781,13 +3783,14 @@ body {
   pointer-events: none;
   z-index: 4;
   transition: left 0.7s ease;
+  clip-path: inset(3.5px round 11px);
 }
 .tarot-card-front.do-shimmer .holo-sweep { left: 140%; }
 
 .tarot-front-placeholder {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; height: 100%;
-  color: var(--tarot-muted); gap: 8px;
+  color: var(--tarot-gold-light); gap: 8px;
 }
 
 /* Front layout */
@@ -3826,7 +3829,7 @@ body {
 }
 .tarot-card-subtitle {
   font-size: 9px; text-transform: uppercase;
-  color: var(--tarot-muted); letter-spacing: 2px; opacity: 0.85;
+  color: var(--card-accent, var(--tarot-gold-light)); letter-spacing: 2px; opacity: 0.85;
 }
 .tarot-card-ornaments {
   display: flex; gap: 14px; font-size: 11px;
@@ -3837,7 +3840,7 @@ body {
   font-size: 9.5px;
   font-style: italic;
   line-height: 1.55;
-  color: var(--tarot-text);
+  color: #e8e0f0;
   opacity: 0.85;
   margin: 14px 6px 0;
   padding: 0 8px;
@@ -3856,22 +3859,82 @@ body {
 .tarot-card-header { border-bottom: 1px solid var(--tarot-border); padding-bottom: 6px; }
 .tarot-card-footer { border-top:    1px solid var(--tarot-border); padding-top:    6px; }
 
-/* Archetype glow colors */
-.tarot-card.glow-reformed        { --glow-color: rgba(16, 185, 129, 0.4); }
-.tarot-card.glow-night_owl       { --glow-color: rgba(139, 92, 246, 0.4); }
-.tarot-card.glow-fashion_healer  { --glow-color: rgba(236, 72, 153, 0.4); }
-.tarot-card.glow-bargain_hunter  { --glow-color: rgba(249, 115, 22, 0.4); }
-.tarot-card.glow-emotional       { --glow-color: rgba(6, 182, 212, 0.4); }
-.tarot-card.glow-premium_curator { --glow-color: rgba(234, 179, 8, 0.4); }
-.tarot-card.glow-rising_addict   { --glow-color: rgba(239, 68, 68, 0.4); }
-.tarot-card.glow-morning_planner { --glow-color: rgba(59, 130, 246, 0.4); }
-.tarot-card.glow-seasonal        { --glow-color: rgba(245, 158, 11, 0.4); }
-.tarot-card.glow-beauty_selfcare { --glow-color: rgba(168, 85, 247, 0.4); }
-.tarot-card.glow-tech_optimizer  { --glow-color: rgba(20, 184, 166, 0.4); }
-.tarot-card.glow-home_nester     { --glow-color: rgba(132, 204, 22, 0.4); }
-.tarot-card.glow-food_lover      { --glow-color: rgba(225, 29, 72, 0.4); }
-.tarot-card.glow-family_center   { --glow-color: rgba(34, 197, 94, 0.4); }
-.tarot-card.glow-free_spirit     { --glow-color: rgba(100, 116, 139, 0.4); }
+/* Archetype glow and gradient colors */
+.tarot-card.glow-reformed {
+  --glow-color: rgba(0, 200, 180, 0.4);
+  --card-bg-top: #0d2a3e; --card-bg-mid: #0d4a5e; --card-bg-bot: #093040;
+  --card-accent: #5ee8d8;
+}
+.tarot-card.glow-night_owl {
+  --glow-color: rgba(139, 92, 246, 0.4);
+  --card-bg-top: #160d30; --card-bg-mid: #2a1055; --card-bg-bot: #0e0822;
+  --card-accent: #c084fc;
+}
+.tarot-card.glow-fashion_healer {
+  --glow-color: rgba(236, 72, 153, 0.4);
+  --card-bg-top: #2a0d22; --card-bg-mid: #5a1040; --card-bg-bot: #1a0516;
+  --card-accent: #f9a8d4;
+}
+.tarot-card.glow-bargain_hunter {
+  --glow-color: rgba(249, 115, 22, 0.4);
+  --card-bg-top: #2a1200; --card-bg-mid: #5a2800; --card-bg-bot: #1a0c00;
+  --card-accent: #fdba74;
+}
+.tarot-card.glow-emotional {
+  --glow-color: rgba(6, 182, 212, 0.4);
+  --card-bg-top: #001e2a; --card-bg-mid: #003a50; --card-bg-bot: #00131c;
+  --card-accent: #67e8f9;
+}
+.tarot-card.glow-premium_curator {
+  --glow-color: rgba(234, 179, 8, 0.4);
+  --card-bg-top: #1a1200; --card-bg-mid: #3d2c00; --card-bg-bot: #0e0900;
+  --card-accent: #fde047;
+}
+.tarot-card.glow-rising_addict {
+  --glow-color: rgba(239, 68, 68, 0.4);
+  --card-bg-top: #2a0000; --card-bg-mid: #5a0a00; --card-bg-bot: #180000;
+  --card-accent: #fca5a5;
+}
+.tarot-card.glow-morning_planner {
+  --glow-color: rgba(59, 130, 246, 0.4);
+  --card-bg-top: #001030; --card-bg-mid: #00205c; --card-bg-bot: #000a1e;
+  --card-accent: #93c5fd;
+}
+.tarot-card.glow-seasonal {
+  --glow-color: rgba(245, 158, 11, 0.4);
+  --card-bg-top: #1e1200; --card-bg-mid: #3d2600; --card-bg-bot: #120d00;
+  --card-accent: #fcd34d;
+}
+.tarot-card.glow-beauty_selfcare {
+  --glow-color: rgba(168, 85, 247, 0.4);
+  --card-bg-top: #1a0030; --card-bg-mid: #380060; --card-bg-bot: #0e001e;
+  --card-accent: #d8b4fe;
+}
+.tarot-card.glow-tech_optimizer {
+  --glow-color: rgba(20, 184, 166, 0.4);
+  --card-bg-top: #001e1e; --card-bg-mid: #003d3d; --card-bg-bot: #001212;
+  --card-accent: #5eead4;
+}
+.tarot-card.glow-home_nester {
+  --glow-color: rgba(132, 204, 22, 0.4);
+  --card-bg-top: #0a1e00; --card-bg-mid: #1a3d00; --card-bg-bot: #051200;
+  --card-accent: #bef264;
+}
+.tarot-card.glow-food_lover {
+  --glow-color: rgba(225, 29, 72, 0.4);
+  --card-bg-top: #2a0010; --card-bg-mid: #5a0022; --card-bg-bot: #1a000c;
+  --card-accent: #fda4af;
+}
+.tarot-card.glow-family_center {
+  --glow-color: rgba(34, 197, 94, 0.4);
+  --card-bg-top: #002210; --card-bg-mid: #004522; --card-bg-bot: #00140a;
+  --card-accent: #86efac;
+}
+.tarot-card.glow-free_spirit {
+  --glow-color: rgba(100, 116, 139, 0.4);
+  --card-bg-top: #0d1520; --card-bg-mid: #1e2d44; --card-bg-bot: #080e18;
+  --card-accent: #94a3b8;
+}
 
 .tarot-card.flipped {
   box-shadow: 0 10px 30px -5px rgba(38,32,59,0.08),
