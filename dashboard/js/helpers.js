@@ -201,12 +201,9 @@ function renderAIInsight(text, cardId, profile) {
     };
     const sub = subLabels[a.key] || 'THE SEEKER';
 
-    const cleanText = text
-      ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim()
-      : 'Đang lắng nghe thông điệp từ vũ trụ...';
-
-    const sentences = cleanText.split(/(?<=[.!?…])\s+/).map(s => s.trim()).filter(Boolean);
-    const narrativeHtml = sentences.map(s => `<div class="narrative-bullet">• ${escHtml(s)}</div>`).join('');
+    const summaryText = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[a.key])
+      ? window.ARCHETYPE_CARD_SUMMARIES[a.key]
+      : (text ? text.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
 
     return `
       <div class="holo-sweep"></div>
@@ -219,9 +216,7 @@ function renderAIInsight(text, cardId, profile) {
         <h3 class="tarot-card-title">${escHtml(a.label.toUpperCase())}</h3>
         <span class="tarot-card-subtitle">${sub}</span>
         <div class="tarot-card-ornaments">✦ &nbsp;✵&nbsp; ✦</div>
-        <div class="tarot-card-narrative">
-          ${narrativeHtml}
-        </div>
+        <div class="tarot-card-narrative">"${escHtml(summaryText)}"</div>
       </div>
       <div class="tarot-card-footer">✦ &nbsp;${new Date().getFullYear()}&nbsp; ✦</div>
     `;

@@ -1,0 +1,17 @@
+window.ARCHETYPE_CARD_SUMMARIES = {
+  reformed:        'Đã vượt qua cám dỗ chốt đơn ngẫu hứng, đang hướng tới sự kỷ luật và tự do tài chính bền vững.',
+  night_owl:       'Thường xuyên chốt đơn lúc nửa đêm để xoa dịu tinh thần. Hãy tắt mạng sớm để bảo vệ ví tiền.',
+  fashion_healer:  'Mượn thời trang để thể hiện bản thân và xoa dịu cảm xúc. Hãy ưu tiên chất lượng hơn số lượng.',
+  bargain_hunter:  'Nhạy bén săn sale và tối ưu chi phí. Đừng sa đà mua những thứ không cần thiết chỉ vì rẻ.',
+  emotional:       'Giỏ hàng biến động theo cảm xúc vui buồn. Hãy kiềm chế và để giỏ hàng chờ 3 ngày trước khi mua.',
+  premium_curator: 'Chú trọng chất lượng và gu thẩm mỹ cao cấp. Hãy cân đối ngân sách để không ảnh hưởng quỹ dự phòng.',
+  rising_addict:   'Chi tiêu và chốt đơn tăng tốc chóng mặt. Hãy đặt giới hạn ngân sách hàng tháng trước khi quá đà.',
+  morning_planner: 'Lập kế hoạch mua sắm vô cùng tỉnh táo và kỷ luật. Tuyệt đối không bị thuật toán thao túng lý trí.',
+  seasonal:        'Thường chi tiêu bùng nổ vào các dịp lễ hội và cuối năm. Hãy tích lũy trước để tránh áp lực tài chính.',
+  beauty_selfcare: 'Đầu tư mạnh mẽ cho việc chăm sóc bản thân và làm đẹp. Hãy chi tiêu tỉnh táo để giữ tài khoản khỏe mạnh.',
+  tech_optimizer:  'Đam mê thiết bị công nghệ hiện đại để nâng tầm cuộc sống. Chỉ nên nâng cấp khi thực sự cần thiết.',
+  home_nester:     'Chăm chút không gian sống ấm cúng và tiện nghi. Đừng tích trữ quá nhiều đồ gia dụng không cần thiết.',
+  food_lover:      'Vỗ về tâm trạng bằng ẩm thực và các đơn hàng đồ ăn. Hãy cân đối để bảo vệ cả sức khỏe và ví tiền.',
+  family_center:   'Ưu tiên chăm lo cho gia đình và những người thân yêu. Hãy dành một phần nhỏ để tự thưởng cho chính mình.',
+  free_spirit:     'Mua sắm ngẫu hứng và không theo khuôn mẫu nào. Hãy bắt đầu lập một ngân sách nhỏ để kiểm soát dòng tiền.',
+};

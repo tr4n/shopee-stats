@@ -281,69 +281,38 @@ window.generateTarotShareImage = function(profile, cachedText) {
   ctx.fillText('✦   ✵   ✦', W / 2, CARD_Y + 528);
 
   // ── Narrative text (Vũ Trụ Phán) ──────────────────────────────────────────
-  let narrativeRaw = cachedText || '';
-  narrativeRaw = narrativeRaw.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim();
+  const summaryText = (window.ARCHETYPE_CARD_SUMMARIES && window.ARCHETYPE_CARD_SUMMARIES[profile.archetype.key])
+    ? window.ARCHETYPE_CARD_SUMMARIES[profile.archetype.key]
+    : (cachedText ? cachedText.replace(/<\/?[^>]+(>|$)/g, '').replace(/\*\*/g, '').trim() : 'Đang lắng nghe thông điệp từ vũ trụ...');
 
-  if (narrativeRaw) {
-    const sentences = narrativeRaw.split(/(?<=[.!?…])\s+/).map(s => s.trim()).filter(Boolean);
+  if (summaryText) {
     const maxTextW = CARD_W - 160; // 540px width (margins of 80px on both sides)
     const maxTextH = 430; // max height for narrative zone
     
-    let fontSize = 23;
-    let lineH = 36;
-    let gapH = 12;
-    let wrappedGroups = [];
+    let fontSize = 28;
+    let lineH = 46;
+    let lines = [];
 
     // Auto-scale font size
-    while (fontSize >= 15) {
+    while (fontSize >= 18) {
       ctx.font = `italic ${fontSize}px Georgia, Arial`;
-      lineH = Math.round(fontSize * 1.5);
-      gapH = Math.round(fontSize * 0.55);
-      wrappedGroups = [];
-      let totalH = 0;
-
-      for (let i = 0; i < sentences.length; i++) {
-        const bulletText = `• ${sentences[i]}`;
-        const lines = wrapText(bulletText, maxTextW, ctx.font);
-        wrappedGroups.push(lines);
-        totalH += lines.length * lineH;
-        if (i < sentences.length - 1) {
-          totalH += gapH;
-        }
-      }
-
-      if (totalH <= maxTextH) {
+      lineH = Math.round(fontSize * 1.65);
+      lines = wrapText(summaryText, maxTextW, ctx.font);
+      if (lines.length * lineH <= maxTextH) {
         break;
       }
       fontSize -= 1;
     }
 
     ctx.fillStyle    = '#e8e0f0';
-    ctx.textAlign    = 'left';
+    ctx.textAlign    = 'center';
     ctx.textBaseline = 'top';
     
-    // Calculate total height to center the entire group vertically in the zone
-    let totalH = 0;
-    for (let i = 0; i < wrappedGroups.length; i++) {
-      totalH += wrappedGroups[i].length * lineH;
-      if (i < wrappedGroups.length - 1) totalH += gapH;
+    // Vertically center the lines inside the narrative zone
+    const startY = CARD_Y + 575 + (maxTextH - lines.length * lineH) / 2;
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], W / 2, startY + i * lineH);
     }
-
-    const startX = CARD_X + 80;
-    const startY = CARD_Y + 575 + (maxTextH - totalH) / 2;
-    
-    let currentY = startY;
-    for (let i = 0; i < wrappedGroups.length; i++) {
-      const lines = wrappedGroups[i];
-      for (let j = 0; j < lines.length; j++) {
-        ctx.fillText(lines[j], startX, currentY);
-        currentY += lineH;
-      }
-      currentY += gapH;
-    }
-    
-    // Restore text alignment to center for the rest of canvas operations
-    ctx.textAlign = 'center';
   }
 
   // Footer divider line
