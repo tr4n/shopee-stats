@@ -8,6 +8,7 @@
 let cachedTarotBlob = null;
 let cachedTarotUrl = null;
 let cachedTarotProfileKey = null;
+let cachedTarotText = null;
 
 window.renderTarotCanvas = function (profile, cachedText) {
   return new Promise((resolve, reject) => {
@@ -16,8 +17,8 @@ window.renderTarotCanvas = function (profile, cachedText) {
       return;
     }
 
-    // Return cached image if profile hasn't changed
-    if (cachedTarotBlob && cachedTarotProfileKey === profile.archetype.key) {
+    // Return cached image if profile and text hasn't changed
+    if (cachedTarotBlob && cachedTarotProfileKey === profile.archetype.key && cachedTarotText === cachedText) {
       resolve({ blob: cachedTarotBlob, previewUrl: cachedTarotUrl });
       return;
     }
@@ -346,6 +347,7 @@ window.renderTarotCanvas = function (profile, cachedText) {
           cachedTarotBlob = blob;
           cachedTarotUrl = URL.createObjectURL(blob);
           cachedTarotProfileKey = profile.archetype.key;
+          cachedTarotText = cachedText;
 
           resolve({ blob, previewUrl: cachedTarotUrl });
         }, 'image/png');
@@ -443,6 +445,9 @@ window.generateTarotShareImage = function (profile, cachedText) {
   }
 };
 
+// Track the active canvas generation promise to queue/share between immediate button clicks
+let activeTarotShareData = null; // { profileKey, promise, resolvedValue, isPending }
+
 window.generateTarotDirectShare = function (profile, cachedText) {
   const actionsContainer = document.getElementById('tarot-card-actions');
   const btnDownload = document.getElementById('btn-tarot-direct-download');
@@ -450,68 +455,109 @@ window.generateTarotDirectShare = function (profile, cachedText) {
 
   if (!profile || !profile.archetype || !actionsContainer) return;
 
-  // Keep hidden initially until image is ready
-  actionsContainer.style.display = 'none';
+  // Show the buttons container immediately
+  actionsContainer.style.display = 'flex';
+
+  const profileKey = profile.archetype.key || '';
+
+  // Initialize or fetch the existing promise for this profile key and text
+  if (!activeTarotShareData || activeTarotShareData.profileKey !== profileKey) {
+    const promise = window.renderTarotCanvas(profile, cachedText);
+    activeTarotShareData = {
+      profileKey: profileKey,
+      promise: promise,
+      resolvedValue: null,
+      isPending: true
+    };
+
+    promise.then((result) => {
+      activeTarotShareData.resolvedValue = result;
+      activeTarotShareData.isPending = false;
+    }).catch((err) => {
+      console.error('[Tarot Direct Share Canvas Error]:', err);
+      activeTarotShareData.isPending = false;
+    });
+  }
+
+  // Helper function to safely await and retrieve image data
+  async function getShareImage() {
+    if (!activeTarotShareData || activeTarotShareData.profileKey !== profileKey) {
+      throw new Error('Active tarot share data mismatch or not initialized');
+    }
+    if (activeTarotShareData.isPending) {
+      return await activeTarotShareData.promise;
+    }
+    if (activeTarotShareData.resolvedValue) {
+      return activeTarotShareData.resolvedValue;
+    }
+    throw new Error('Failed to generate Tarot image');
+  }
+
+  // Setup Download button
   if (btnDownload) {
-    btnDownload.disabled = true;
-    btnDownload.classList.add('loading');
-  }
-  if (btnCopy) {
-    btnCopy.disabled = true;
-    btnCopy.classList.add('loading');
-  }
+    btnDownload.classList.remove('loading');
+    btnDownload.disabled = false;
 
-  window.renderTarotCanvas(profile, cachedText)
-    .then(({ blob, previewUrl }) => {
-      if (btnDownload) {
-        btnDownload.disabled = false;
-        btnDownload.classList.remove('loading');
-        const freshDownload = btnDownload.cloneNode(true);
-        btnDownload.parentNode.replaceChild(freshDownload, btnDownload);
-        freshDownload.addEventListener('click', (e) => {
-          e.preventDefault();
-          const link = document.createElement('a');
-          link.href = previewUrl;
-          link.download = `shopee-banga-tarot-${profile.archetype.key}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          showToast('Đã tải ảnh kết quả về máy! 💾');
-        });
+    // Clone node to clear previous event listeners cleanly
+    const freshDownload = btnDownload.cloneNode(true);
+    btnDownload.parentNode.replaceChild(freshDownload, btnDownload);
+
+    freshDownload.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (freshDownload.classList.contains('loading')) return;
+
+      if (activeTarotShareData && activeTarotShareData.isPending) {
+        freshDownload.classList.add('loading');
       }
 
-      if (btnCopy) {
-        btnCopy.disabled = false;
-        btnCopy.classList.remove('loading');
-        const freshCopy = btnCopy.cloneNode(true);
-        btnCopy.parentNode.replaceChild(freshCopy, btnCopy);
-        freshCopy.addEventListener('click', async (e) => {
-          e.preventDefault();
-          try {
-            const item = new ClipboardItem({ 'image/png': blob });
-            await navigator.clipboard.write([item]);
-            showToast('Đã sao chép ảnh vào bộ nhớ tạm! Paste để chia sẻ ngay ✨');
-          } catch (err) {
-            console.warn('[Tarot Direct Copy] Clipboard copy failed:', err);
-            showToast('Không thể tự động copy, vui lòng tải ảnh về máy! 😢');
-          }
-        });
-      }
-
-      // Show container once ready
-      actionsContainer.style.display = 'flex';
-    })
-    .catch((err) => {
-      console.error('[Tarot Direct Share Error]:', err);
-      if (btnDownload) {
-        btnDownload.disabled = false;
-        btnDownload.classList.remove('loading');
-      }
-      if (btnCopy) {
-        btnCopy.disabled = false;
-        btnCopy.classList.remove('loading');
+      try {
+        const { previewUrl } = await getShareImage();
+        const link = document.createElement('a');
+        link.href = previewUrl;
+        link.download = `shopee-banga-tarot-${profileKey}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Đã tải ảnh kết quả về máy! 💾');
+      } catch (err) {
+        console.error('[Tarot Direct Download Error]:', err);
+        showToast('Không thể tải ảnh, vui lòng thử lại sau! 😢');
+      } finally {
+        freshDownload.classList.remove('loading');
       }
     });
+  }
+
+  // Setup Copy button
+  if (btnCopy) {
+    btnCopy.classList.remove('loading');
+    btnCopy.disabled = false;
+
+    // Clone node to clear previous event listeners cleanly
+    const freshCopy = btnCopy.cloneNode(true);
+    btnCopy.parentNode.replaceChild(freshCopy, btnCopy);
+
+    freshCopy.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (freshCopy.classList.contains('loading')) return;
+
+      if (activeTarotShareData && activeTarotShareData.isPending) {
+        freshCopy.classList.add('loading');
+      }
+
+      try {
+        const { blob } = await getShareImage();
+        const item = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([item]);
+        showToast('Đã sao chép ảnh vào bộ nhớ tạm! Paste để chia sẻ ngay ✨');
+      } catch (err) {
+        console.warn('[Tarot Direct Copy] Clipboard copy failed:', err);
+        showToast('Không thể tự động copy, vui lòng tải ảnh về máy! 😢');
+      } finally {
+        freshCopy.classList.remove('loading');
+      }
+    });
+  }
 };
 
 function showToast(message) {
