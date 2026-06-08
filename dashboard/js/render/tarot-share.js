@@ -450,8 +450,8 @@ window.generateTarotDirectShare = function (profile, cachedText) {
 
   if (!profile || !profile.archetype || !actionsContainer) return;
 
-  // Show container immediately, disable buttons and set loading states
-  actionsContainer.style.display = 'flex';
+  // Keep hidden initially until image is ready
+  actionsContainer.style.display = 'none';
   if (btnDownload) {
     btnDownload.disabled = true;
     btnDownload.classList.add('loading');
@@ -497,11 +497,20 @@ window.generateTarotDirectShare = function (profile, cachedText) {
           }
         });
       }
+
+      // Show container once ready
+      actionsContainer.style.display = 'flex';
     })
     .catch((err) => {
       console.error('[Tarot Direct Share Error]:', err);
-      if (btnDownload) btnDownload.classList.remove('loading');
-      if (btnCopy) btnCopy.classList.remove('loading');
+      if (btnDownload) {
+        btnDownload.disabled = false;
+        btnDownload.classList.remove('loading');
+      }
+      if (btnCopy) {
+        btnCopy.disabled = false;
+        btnCopy.classList.remove('loading');
+      }
     });
 };
 
