@@ -1954,6 +1954,12 @@ async function runTarotSequence(selectedPos) {
     const shareBtn = document.getElementById('btn-tarot-share');
     if (shareBtn) shareBtn.style.display = 'inline-flex';
 
+    // Trigger background generation for the direct download/copy buttons under the card
+    const cached = _getInsightText(ck);
+    if (typeof generateTarotDirectShare === 'function') {
+      generateTarotDirectShare(profile, cached);
+    }
+
     // Activate tilt
     initTarotTilt();
   }, 700);
@@ -1969,6 +1975,11 @@ function resetToFanSpread() {
   const rerunBtn  = _getRerunBtn();
 
   if (rerunBtn) rerunBtn.style.display = 'none';
+
+  const actionsContainer = document.getElementById('tarot-card-actions');
+  if (actionsContainer) {
+    actionsContainer.style.display = 'none';
+  }
 
   // Reset card state
   if (card) {
@@ -2063,6 +2074,8 @@ function initTarotViewEvents() {
   }
   if (focusArea) focusArea.style.display = 'none';
   if (shareBtnEl) shareBtnEl.style.display = 'none';
+  const actionsContainer = document.getElementById('tarot-card-actions');
+  if (actionsContainer) actionsContainer.style.display = 'none';
   const bottomRow = document.getElementById('tarot-bottom-row');
   if (bottomRow) bottomRow.style.display = 'none';
   if (card) {
@@ -2167,6 +2180,10 @@ window.checkAndAutoShowTarot = function() {
 
       const shareBtn = document.getElementById('btn-tarot-share');
       if (shareBtn) shareBtn.style.display = 'inline-flex';
+
+      if (typeof generateTarotDirectShare === 'function') {
+        generateTarotDirectShare(profile, cached);
+      }
 
       initTarotTilt();
       return true;
