@@ -42,21 +42,21 @@ window.generateTarotShareImage = function (profile, cachedText) {
 
   // ─── Archetype colour palettes ────────────────────────────────────────────
   const palettes = {
-    reformed: { top: '#0d2a3e', mid: '#0d4a5e', bot: '#093040', glow: '#00c8b4', accent: '#5ee8d8' },
-    night_owl: { top: '#160d30', mid: '#2a1055', bot: '#0e0822', glow: '#8b5cf6', accent: '#c084fc' },
-    fashion_healer: { top: '#2a0d22', mid: '#5a1040', bot: '#1a0516', glow: '#ec4899', accent: '#f9a8d4' },
-    bargain_hunter: { top: '#2a1200', mid: '#5a2800', bot: '#1a0c00', glow: '#f97316', accent: '#fdba74' },
-    emotional: { top: '#001e2a', mid: '#003a50', bot: '#00131c', glow: '#06b6d4', accent: '#67e8f9' },
-    premium_curator: { top: '#1a1200', mid: '#3d2c00', bot: '#0e0900', glow: '#eab308', accent: '#fde047' },
-    rising_addict: { top: '#2a0000', mid: '#5a0a00', bot: '#180000', glow: '#ef4444', accent: '#fca5a5' },
-    morning_planner: { top: '#001030', mid: '#00205c', bot: '#000a1e', glow: '#3b82f6', accent: '#93c5fd' },
-    seasonal: { top: '#1e1200', mid: '#3d2600', bot: '#120d00', glow: '#f59e0b', accent: '#fcd34d' },
-    beauty_selfcare: { top: '#1a0030', mid: '#380060', bot: '#0e001e', glow: '#a855f7', accent: '#d8b4fe' },
-    tech_optimizer: { top: '#001e1e', mid: '#003d3d', bot: '#001212', glow: '#14b8a6', accent: '#5eead4' },
-    home_nester: { top: '#0a1e00', mid: '#1a3d00', bot: '#051200', glow: '#84cc16', accent: '#bef264' },
-    food_lover: { top: '#2a0010', mid: '#5a0022', bot: '#1a000c', glow: '#e11d48', accent: '#fda4af' },
-    family_center: { top: '#002210', mid: '#004522', bot: '#00140a', glow: '#22c55e', accent: '#86efac' },
-    free_spirit: { top: '#0d1520', mid: '#1e2d44', bot: '#080e18', glow: '#64748b', accent: '#94a3b8' },
+    reformed: { top: '#f0fdf4', mid: '#e6fcf5', bot: '#dcfce7', glow: 'rgba(5, 150, 105, 0.2)', accent: '#059669' },
+    night_owl: { top: '#faf5ff', mid: '#f3e8ff', bot: '#e9d5ff', glow: 'rgba(139, 92, 246, 0.2)', accent: '#7c3aed' },
+    fashion_healer: { top: '#fdf2f8', mid: '#fce7f3', bot: '#fbcfe8', glow: 'rgba(236, 72, 153, 0.2)', accent: '#db2777' },
+    bargain_hunter: { top: '#fff7ed', mid: '#ffedd5', bot: '#fed7aa', glow: 'rgba(249, 115, 22, 0.2)', accent: '#ea580c' },
+    emotional: { top: '#ecfeff', mid: '#cffafe', bot: '#a5f3fc', glow: 'rgba(6, 182, 212, 0.2)', accent: '#0891b2' },
+    premium_curator: { top: '#fefce8', mid: '#fef9c3', bot: '#fef08a', glow: 'rgba(234, 179, 8, 0.2)', accent: '#d97706' },
+    rising_addict: { top: '#fff5f5', mid: '#fee2e2', bot: '#fecaca', glow: 'rgba(239, 68, 68, 0.2)', accent: '#dc2626' },
+    morning_planner: { top: '#eff6ff', mid: '#dbeafe', bot: '#bfdbfe', glow: 'rgba(59, 130, 246, 0.2)', accent: '#2563eb' },
+    seasonal: { top: '#fffbeb', mid: '#fef3c7', bot: '#fde68a', glow: 'rgba(245, 158, 11, 0.2)', accent: '#d97706' },
+    beauty_selfcare: { top: '#fdf4ff', mid: '#fae8ff', bot: '#f5d0fe', glow: 'rgba(168, 85, 247, 0.2)', accent: '#9333ea' },
+    tech_optimizer: { top: '#f0fdfa', mid: '#ccfbf1', bot: '#99f6e4', glow: 'rgba(20, 184, 166, 0.2)', accent: '#0d9488' },
+    home_nester: { top: '#f7fee7', mid: '#ecfccb', bot: '#d9f99d', glow: 'rgba(132, 204, 22, 0.2)', accent: '#65a30d' },
+    food_lover: { top: '#fff1f2', mid: '#ffe4e6', bot: '#fecdd3', glow: 'rgba(225, 29, 72, 0.2)', accent: '#e11d48' },
+    family_center: { top: '#f0fdf4', mid: '#dcfce7', bot: '#bbf7d0', glow: 'rgba(34, 197, 94, 0.2)', accent: '#16a34a' },
+    free_spirit: { top: '#f8fafc', mid: '#f1f5f9', bot: '#e2e8f0', glow: 'rgba(148, 163, 184, 0.2)', accent: '#475569' },
   };
   const pal = palettes[profile.archetype.key] || palettes.free_spirit;
 
@@ -128,17 +128,15 @@ window.generateTarotShareImage = function (profile, cachedText) {
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. GLOBAL BACKGROUND — deep space black
   // ═══════════════════════════════════════════════════════════════════════════
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-  bgGrad.addColorStop(0, '#060310');
-  bgGrad.addColorStop(0.5, '#09050f');
-  bgGrad.addColorStop(1, '#040208');
+  const bgGrad = ctx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 800);
+  bgGrad.addColorStop(0, '#fffcf7');
+  bgGrad.addColorStop(1, '#f4eee1');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
   // Subtle atmospheric glow blob behind card
   const glowBlob = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
-  glowBlob.addColorStop(0, pal.glow + '25');
-  glowBlob.addColorStop(0.5, pal.glow + '0a');
+  glowBlob.addColorStop(0, pal.glow + '28');
   glowBlob.addColorStop(1, 'transparent');
   ctx.fillStyle = glowBlob;
   ctx.fillRect(0, 0, W, H);
@@ -149,13 +147,13 @@ window.generateTarotShareImage = function (profile, cachedText) {
     { x: 0.9, y: 0.15 }, { x: 0.82, y: 0.38 }, { x: 0.92, y: 0.62 }, { x: 0.85, y: 0.85 },
     { x: 0.32, y: 0.06 }, { x: 0.68, y: 0.05 }, { x: 0.45, y: 0.95 }, { x: 0.58, y: 0.94 }
   ];
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+  ctx.fillStyle = 'rgba(38, 32, 59, 0.08)';
   for (const d of dots) {
     ctx.beginPath();
     ctx.arc(d.x * W, d.y * H, 2, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.strokeStyle = 'rgba(200, 169, 110, 0.05)';
+  ctx.strokeStyle = 'rgba(200, 169, 110, 0.18)';
   ctx.lineWidth = 0.8;
   ctx.beginPath();
   const connections = [[0, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 7], [8, 9]];
@@ -175,8 +173,8 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const CARD_R = 30;
 
   // Card outer glow
-  setGlow(pal.glow, 45);
-  ctx.strokeStyle = pal.glow + '66';
+  setGlow(pal.glow, 25);
+  ctx.strokeStyle = pal.glow + '44';
   ctx.lineWidth = 3;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.stroke();
@@ -264,14 +262,14 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const archetypeName = (profile.archetype.label || 'BẢN NGÃ').toUpperCase();
   ctx.fillStyle = '#c8a96e';
   ctx.font = 'bold 44px "Times New Roman", Times, Georgia, serif';
-  setGlow('#c8a96e', 14);
+  setGlow('rgba(38, 32, 59, 0.15)', 8);
   ctx.fillText(archetypeName, W / 2, CARD_Y + 430);
   clearGlow();
 
   // Archetype Subtitle (spaced out English name)
   ctx.fillStyle = pal.accent;
   ctx.font = 'bold 15px Arial';
-  setGlow(pal.glow, 8);
+  setGlow('rgba(38, 32, 59, 0.05)', 3);
   ctx.fillText(subText.split('').join('\u200A'), W / 2, CARD_Y + 482);
   clearGlow();
 
@@ -305,7 +303,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
       fontSize -= 1;
     }
 
-    ctx.fillStyle = '#e8e0f0';
+    ctx.fillStyle = '#4a3f68';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
@@ -333,7 +331,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
   // ═══════════════════════════════════════════════════════════════════════════
   // 3. IMAGE WATERMARK FOOTER (outside card)
   // ═══════════════════════════════════════════════════════════════════════════
-  ctx.fillStyle = 'rgba(255,255,255,0.28)';
+  ctx.fillStyle = 'rgba(38, 32, 59, 0.45)';
   ctx.font = 'bold 14px Arial';
   ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', W / 2, H - 36);
 
