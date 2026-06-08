@@ -82,6 +82,21 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const subText = subLabels[profile.archetype.key] || 'THE SEEKER';
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
+  function adjustAlpha(colorStr, alpha) {
+    if (!colorStr) return 'transparent';
+    if (colorStr.startsWith('rgba')) {
+      return colorStr.replace(/[\d\.]+\)$/, alpha + ')');
+    }
+    if (colorStr.startsWith('rgb')) {
+      return colorStr.replace('rgb', 'rgba').replace(/\)$/, ', ' + alpha + ')');
+    }
+    if (colorStr.startsWith('#')) {
+      const hexAlpha = Math.round(alpha * 255).toString(16).padStart(2, '0');
+      return colorStr.substring(0, 7) + hexAlpha;
+    }
+    return colorStr;
+  }
+
   function roundRect(x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -138,8 +153,8 @@ window.generateTarotShareImage = function (profile, cachedText) {
 
   // Subtle atmospheric glow blob behind card
   const glowBlob = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, 600);
-  glowBlob.addColorStop(0, pal.glow + '25');
-  glowBlob.addColorStop(0.5, pal.glow + '0a');
+  glowBlob.addColorStop(0, adjustAlpha(pal.glow, 0.15));
+  glowBlob.addColorStop(0.5, adjustAlpha(pal.glow, 0.04));
   glowBlob.addColorStop(1, 'transparent');
   ctx.fillStyle = glowBlob;
   ctx.fillRect(0, 0, W, H);
@@ -177,7 +192,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
 
   // Card outer glow (optimized blur radius for performance)
   setGlow(pal.glow, 15);
-  ctx.strokeStyle = pal.glow + '66';
+  ctx.strokeStyle = adjustAlpha(pal.glow, 0.40);
   ctx.lineWidth = 3;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
   ctx.stroke();
@@ -246,7 +261,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
 
   // Glow halo behind emoji
   const emojiHalo = ctx.createRadialGradient(W / 2, emojiY, 0, W / 2, emojiY, 140);
-  emojiHalo.addColorStop(0, pal.glow + '44');
+  emojiHalo.addColorStop(0, adjustAlpha(pal.glow, 0.27));
   emojiHalo.addColorStop(1, 'transparent');
   ctx.fillStyle = emojiHalo;
   ctx.beginPath();
