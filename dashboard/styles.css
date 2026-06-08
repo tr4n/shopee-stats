@@ -4177,7 +4177,8 @@ body {
 /* Preview container: 4:5 ratio */
 .tarot-share-preview-container {
   width: 100%;
-  max-width: 460px;
+  max-width: 380px;
+  max-height: 50vh;
   height: auto;
   aspect-ratio: 4 / 5;
   border-radius: 16px;
