@@ -2118,19 +2118,18 @@ function initTarotViewEvents() {
 
 /* ── checkAndAutoShowTarot: restore result state from cache ── */
 window.checkAndAutoShowTarot = function() {
-  if (!_isTarotCardOpened) return false;
-
   const ck     = 'insight-yearly-all';
   const cached = _getInsightText(ck);
 
   if (cached !== null && window.currentDashData) {
+    _isTarotCardOpened = true;
     if (!window._globalPersonalityProfile) {
       window._globalPersonalityProfile = typeof analyzeShoppingPersonality === 'function'
         ? analyzeShoppingPersonality(window.currentDashData)
         : null;
     }
     const profile = window._globalPersonalityProfile;
-    if (!profile) return;
+    if (!profile) return false;
 
     const fanSpread = _getFanSpread();
     const focusArea = _getFocusArea();
