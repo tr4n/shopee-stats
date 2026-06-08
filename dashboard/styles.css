@@ -3925,16 +3925,19 @@ body {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid var(--tarot-border) !important;
   color: var(--tarot-gold-light) !important;
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 50% !important;
+  padding: 8px 16px !important;
+  height: 38px !important;
+  width: auto !important;
+  border-radius: 20px !important;
   cursor: pointer !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   box-shadow: 0 4px 12px rgba(6, 3, 16, 0.25) !important;
-  padding: 0 !important;
 }
 
 .tarot-btn-action:hover:not(:disabled) {
@@ -3961,14 +3964,20 @@ body {
 .tarot-btn-action.loading::after {
   content: '';
   position: absolute;
-  inset: 10px;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
   border: 2px solid transparent;
   border-top-color: var(--tarot-gold);
   border-radius: 50%;
   animation: tarot-spin 0.8s linear infinite;
 }
 
-.tarot-btn-action.loading svg {
+.tarot-btn-action.loading svg,
+.tarot-btn-action.loading span {
   visibility: hidden;
 }
 
