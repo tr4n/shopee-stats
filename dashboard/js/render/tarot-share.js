@@ -31,14 +31,15 @@ window.generateTarotShareImage = function (profile, cachedText) {
   if (btnDownload) btnDownload.disabled = true;
   if (btnCopy) btnCopy.disabled = true;
 
-  // ─── Canvas: 1080 × 1350 (4:5) ───────────────────────────────────────────
-  const W = 1080, H = 1350;
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  try {
+    // ─── Canvas: 1080 × 1350 (4:5) ───────────────────────────────────────────
+    const W = 1080, H = 1350;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
   // ─── Archetype colour palettes ────────────────────────────────────────────
   const palettes = {
@@ -174,8 +175,8 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const CARD_Y = (H - CARD_H) / 2 - 20; // 66.5 (slightly pushed up to leave space for watermark)
   const CARD_R = 30;
 
-  // Card outer glow
-  setGlow(pal.glow, 45);
+  // Card outer glow (optimized blur radius for performance)
+  setGlow(pal.glow, 15);
   ctx.strokeStyle = pal.glow + '66';
   ctx.lineWidth = 3;
   roundRect(CARD_X, CARD_Y, CARD_W, CARD_H, CARD_R);
@@ -208,7 +209,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const cOrnY = [CARD_Y + 42, CARD_Y + CARD_H - 42];
   ctx.fillStyle = '#c8a96e';
   ctx.font = 'bold 24px Arial';
-  setGlow('#c8a96e', 8);
+  setGlow('#c8a96e', 3);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const cx of cOrnX) {
@@ -256,7 +257,7 @@ window.generateTarotShareImage = function (profile, cachedText) {
   ctx.font = '110px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  setGlow(pal.glow, 25);
+  setGlow(pal.glow, 10);
   ctx.fillText(profile.archetype.icon || '🔮', W / 2, emojiY);
   clearGlow();
 
@@ -264,14 +265,14 @@ window.generateTarotShareImage = function (profile, cachedText) {
   const archetypeName = (profile.archetype.label || 'BẢN NGÃ').toUpperCase();
   ctx.fillStyle = '#c8a96e';
   ctx.font = 'bold 44px "Times New Roman", Times, Georgia, serif';
-  setGlow('#c8a96e', 14);
+  setGlow('#c8a96e', 6);
   ctx.fillText(archetypeName, W / 2, CARD_Y + 430);
   clearGlow();
 
   // Archetype Subtitle (spaced out English name)
   ctx.fillStyle = pal.accent;
   ctx.font = 'bold 15px Arial';
-  setGlow(pal.glow, 8);
+  setGlow(pal.glow, 4);
   ctx.fillText(subText.split('').join('\u200A'), W / 2, CARD_Y + 482);
   clearGlow();
 
@@ -394,9 +395,15 @@ window.generateTarotShareImage = function (profile, cachedText) {
         });
       }
 
-      resetShareButton();
-    }, 'image/png');
-  }, 100);
+        resetShareButton();
+      }, 'image/png');
+    }, 100);
+  } catch (err) {
+    console.error('[Tarot Share Error]:', err);
+    resetShareButton();
+    if (loader) loader.style.display = 'none';
+    showToast('Gặp sự cố khi tạo ảnh chia sẻ! 😢');
+  }
 
   // ─── Local helpers ────────────────────────────────────────────────────────
   function resetShareButton() {
