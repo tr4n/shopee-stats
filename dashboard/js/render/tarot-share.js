@@ -42,21 +42,21 @@ window.generateTarotShareImage = function (profile, cachedText) {
 
   // ─── Archetype colour palettes ────────────────────────────────────────────
   const palettes = {
-    reformed: { top: '#0a1c22', mid: '#0c3a3c', bot: '#041416', glow: 'rgba(0, 200, 180, 0.45)', accent: '#4ef2d2' },
-    night_owl: { top: '#0c061a', mid: '#190a3b', bot: '#060210', glow: 'rgba(139, 92, 246, 0.45)', accent: '#b785f5' },
-    fashion_healer: { top: '#1a0515', mid: '#3c092c', bot: '#0a010c', glow: 'rgba(236, 72, 153, 0.45)', accent: '#f472b6' },
-    bargain_hunter: { top: '#1c0a01', mid: '#3a1902', bot: '#0a0400', glow: 'rgba(249, 115, 22, 0.45)', accent: '#ff9f43' },
-    emotional: { top: '#011722', mid: '#042a3f', bot: '#000d14', glow: 'rgba(6, 182, 212, 0.45)', accent: '#22d3ee' },
-    premium_curator: { top: '#140e02', mid: '#2e2105', bot: '#080500', glow: 'rgba(234, 179, 8, 0.45)', accent: '#facc15' },
-    rising_addict: { top: '#1c0205', mid: '#3d0309', bot: '#0a0001', glow: 'rgba(239, 68, 68, 0.45)', accent: '#f87171' },
-    morning_planner: { top: '#020d20', mid: '#051d3b', bot: '#010714', glow: 'rgba(59, 130, 246, 0.45)', accent: '#60a5fa' },
-    seasonal: { top: '#140a02', mid: '#2d1805', bot: '#080400', glow: 'rgba(245, 158, 11, 0.45)', accent: '#fbbf24' },
-    beauty_selfcare: { top: '#130222', mid: '#2a044d', bot: '#070014', glow: 'rgba(168, 85, 247, 0.45)', accent: '#c084fc' },
-    tech_optimizer: { top: '#021a16', mid: '#053830', bot: '#010f0d', glow: 'rgba(20, 184, 166, 0.45)', accent: '#2dd4bf' },
-    home_nester: { top: '#0a1403', mid: '#1c3809', bot: '#040801', glow: 'rgba(132, 204, 22, 0.45)', accent: '#a3e635' },
-    food_lover: { top: '#1c000a', mid: '#3e0317', bot: '#0a0003', glow: 'rgba(225, 29, 72, 0.45)', accent: '#fb7185' },
-    family_center: { top: '#011a0c', mid: '#043c1b', bot: '#001205', glow: 'rgba(34, 197, 94, 0.45)', accent: '#4ade80' },
-    free_spirit: { top: '#0e1217', mid: '#1c242f', bot: '#07090c', glow: 'rgba(148, 163, 184, 0.45)', accent: '#94a3b8' },
+    reformed: { top: '#163a3d', mid: '#235d62', bot: '#0f2729', glow: 'rgba(0, 200, 180, 0.45)', accent: '#4ef2d2' },
+    night_owl: { top: '#2e1a47', mid: '#4c2c75', bot: '#1f1033', glow: 'rgba(139, 92, 246, 0.45)', accent: '#b785f5' },
+    fashion_healer: { top: '#4c1a3b', mid: '#752c5c', bot: '#331027', glow: 'rgba(236, 72, 153, 0.45)', accent: '#f472b6' },
+    bargain_hunter: { top: '#4a2c11', mid: '#73451c', bot: '#301c0a', glow: 'rgba(249, 115, 22, 0.45)', accent: '#ff9f43' },
+    emotional: { top: '#153350', mid: '#25527a', bot: '#0d2136', glow: 'rgba(6, 182, 212, 0.45)', accent: '#22d3ee' },
+    premium_curator: { top: '#3a2e1b', mid: '#5d4a2d', bot: '#251d11', glow: 'rgba(234, 179, 8, 0.45)', accent: '#facc15' },
+    rising_addict: { top: '#52161b', mid: '#80282f', bot: '#330e11', glow: 'rgba(239, 68, 68, 0.45)', accent: '#f87171' },
+    morning_planner: { top: '#132c54', mid: '#224b89', bot: '#0b1c37', glow: 'rgba(59, 130, 246, 0.45)', accent: '#60a5fa' },
+    seasonal: { top: '#442f15', mid: '#694a23', bot: '#2b1d0c', glow: 'rgba(245, 158, 11, 0.45)', accent: '#fbbf24' },
+    beauty_selfcare: { top: '#371d54', mid: '#573083', bot: '#221236', glow: 'rgba(168, 85, 247, 0.45)', accent: '#c084fc' },
+    tech_optimizer: { top: '#113a35', mid: '#1f5d55', bot: '#0a2522', glow: 'rgba(20, 184, 166, 0.45)', accent: '#2dd4bf' },
+    home_nester: { top: '#1f3611', mid: '#33571f', bot: '#14240a', glow: 'rgba(132, 204, 22, 0.45)', accent: '#a3e635' },
+    food_lover: { top: '#4f182c', mid: '#7e2b49', bot: '#320f1b', glow: 'rgba(225, 29, 72, 0.45)', accent: '#fb7185' },
+    family_center: { top: '#113d23', mid: '#1f623a', bot: '#0b2817', glow: 'rgba(34, 197, 94, 0.45)', accent: '#4ade80' },
+    free_spirit: { top: '#2e3947', mid: '#475569', bot: '#1e252e', glow: 'rgba(148, 163, 184, 0.45)', accent: '#94a3b8' },
   };
   const pal = palettes[profile.archetype.key] || palettes.free_spirit;
 
