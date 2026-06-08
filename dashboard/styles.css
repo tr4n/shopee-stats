@@ -3284,6 +3284,9 @@ body {
   position: relative;
   overflow: hidden;
 }
+#view-tarot .page-subtitle {
+  color: var(--tarot-muted);
+}
 
 .tarot-cosmos-container {
   position: relative;
