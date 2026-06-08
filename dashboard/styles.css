@@ -3235,19 +3235,19 @@ body {
   --tarot-gold:        #c8a96e;
   --tarot-gold-light:  #e8d5a3;
   --tarot-gold-glow:   rgba(200, 169, 110, 0.25);
-  --tarot-bg-gradient: radial-gradient(ellipse at 30% 20%, #f4effe 0%, #fdf8f2 45%, #eef3fd 100%);
-  --tarot-glass:       rgba(255, 255, 255, 0.72);
-  --tarot-border:      rgba(200, 169, 110, 0.28);
-  --tarot-text:        #26203b;
-  --tarot-muted:       #7b6f9a;
-  --tarot-card-bg:     #fffef9;
+  --tarot-bg-gradient: radial-gradient(ellipse at 30% 20%, #150b2b 0%, #080314 50%, #03010a 100%);
+  --tarot-glass:       rgba(20, 10, 36, 0.65);
+  --tarot-border:      rgba(200, 169, 110, 0.22);
+  --tarot-text:        #f3eefc;
+  --tarot-muted:       #b3a6d4;
+  --tarot-card-bg:     #120924;
 }
 
 /* Teaser Card on Overview */
 .tarot-teaser-card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, #ffffff 0%, #fcfbf7 100%);
+  background: linear-gradient(145deg, #180d30 0%, #0d061c 100%);
   border: 1px solid rgba(200, 169, 110, 0.22);
   border-radius: 16px;
   padding: 24px;
@@ -3257,11 +3257,11 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  box-shadow: 0 8px 24px rgba(38, 32, 59, 0.04);
+  box-shadow: 0 8px 24px rgba(6, 3, 16, 0.4);
   height: 100%;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.tarot-teaser-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(38,32,59,0.08); }
+.tarot-teaser-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(6, 3, 16, 0.6); }
 .tarot-teaser-card h3 { color: var(--tarot-gold); font-size: 18px; font-weight: 800; margin: 10px 0 6px; letter-spacing: 0.5px; }
 .tarot-teaser-card p { font-size: 13px; color: var(--tarot-muted); line-height: 1.5; margin-bottom: 18px; max-width: 280px; }
 .tarot-teaser-card .teaser-icon { font-size: 38px; animation: tarot-float 3s ease-in-out infinite; }
@@ -4041,7 +4041,7 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 11px 15px;
@@ -4050,27 +4050,27 @@ body {
   border-left: 4px solid var(--glow-color, var(--tarot-gold));
   font-size: 14.5px;
   line-height: 1.55;
-  box-shadow: 0 4px 15px rgba(38, 32, 59, 0.02);
+  box-shadow: 0 4px 15px rgba(6, 3, 16, 0.2);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .tarot-trait-row:hover {
   transform: translateX(6px);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
   border-color: var(--glow-color, var(--tarot-gold));
-  box-shadow: 0 8px 24px rgba(38, 32, 59, 0.06);
+  box-shadow: 0 8px 24px rgba(6, 3, 16, 0.4);
 }
 .tarot-trait-row .trait-icon {
   font-size: 15px;
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 8px rgba(38, 32, 59, 0.05);
+  box-shadow: 0 3px 8px rgba(6, 3, 16, 0.2);
   flex-shrink: 0;
-  border: 1px solid rgba(200, 169, 110, 0.1);
+  border: 1px solid rgba(200, 169, 110, 0.3);
   transition: transform 0.25s ease;
 }
 .tarot-trait-row:hover .trait-icon {
@@ -4105,7 +4105,7 @@ body {
   background: transparent !important;
   padding: 5px 0 !important; font-size: 15.5px !important;
   color: var(--tarot-text) !important; line-height: 1.85 !important;
-  border-bottom: 1px dashed rgba(38, 32, 59, 0.07);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
   display: block;
 }
 .tarot-narrative-text .insight-ai-sentence:last-child { border-bottom: none; }
