@@ -49,36 +49,7 @@ navBtns.forEach((btn) =>
   ),
 );
 
-/* ── Hidden feature: Top Products ── */
-(function() {
-  const navItemItems = document.getElementById("nav-item-items");
-  if (!navItemItems) return;
 
-  if (localStorage.getItem("shopee_unlocked_top_items") === "true") {
-    navItemItems.style.display = "flex";
-  }
-
-  const linkHidden = document.getElementById("link-top-items-hidden");
-  if (linkHidden) {
-    linkHidden.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      // Unhide and persist the navigation button
-      localStorage.setItem("shopee_unlocked_top_items", "true");
-      navItemItems.style.display = "flex";
-
-      // Switch view to Top Products
-      if (typeof switchView === "function") {
-        switchView("items");
-      }
-
-      // Show success toast notification
-      if (typeof showSupportToast === "function") {
-        showSupportToast("✨ Đã kích hoạt thẻ: Top Sản Phẩm!");
-      }
-    });
-  }
-})();
 
 /* ── Session storage ─────────────────────────── */
 // Each dashboard session gets a millis-based ID stored in localStorage.
