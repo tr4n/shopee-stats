@@ -482,6 +482,11 @@
                 const unitOriginalPrice = ((it.price_before_discount !== undefined && it.price_before_discount !== null && it.price_before_discount !== 0) ? it.price_before_discount : it.order_price || 0) / 100000;
                 const unitDiscountedPrice = (it.order_price || 0) / 100000;
 
+                // Loại bỏ các item có giá trị 0đ (quà tặng)
+                if (unitDiscountedPrice === 0) {
+                  continue;
+                }
+
                 const lineOriginalCost = unitOriginalPrice * qty;
                 const lineDiscountedCost = unitDiscountedPrice * qty;
 
