@@ -324,16 +324,17 @@
 
   function cleanHomoglyphsAndFonts(text) {
     if (!text) return '';
+    const normalized = text.normalize("NFC");
     
     // Fast path: if the text doesn't contain any target bypass characters, skip normalization & translation entirely.
     // This is a major optimization for Vietnamese text because normalize("NFKD") decomposes accents,
     // which takes significant CPU time when done on thousands of items.
-    if (!SPECIAL_CHAR_REGEX.test(text)) {
-      return text;
+    if (!SPECIAL_CHAR_REGEX.test(normalized)) {
+      return normalized;
     }
 
     // Step 1: Normalize using NFKD to decompose styled fonts (bold, italic, double-struck, fullwidth, etc.)
-    const decomp = text.normalize("NFKD");
+    const decomp = normalized.normalize("NFKD");
 
     // Step 2: Replace confusable homoglyphs from Cyrillic, Greek, Cherokee, etc.
     let result = '';

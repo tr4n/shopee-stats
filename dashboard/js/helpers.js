@@ -524,17 +524,18 @@ const SPECIAL_CHAR_REGEX = /[\u0370-\u03FF\u0400-\u04FF\u13A0-\u13FF\u200B-\u200
 const cleanHomoglyphsCache = new Map();
 function cleanHomoglyphsAndFonts(text) {
   if (!text) return '';
-  const cached = cleanHomoglyphsCache.get(text);
+  const normalized = text.normalize("NFC");
+  const cached = cleanHomoglyphsCache.get(normalized);
   if (cached !== undefined) return cached;
 
   let result;
   // Fast path: if the text doesn't contain any target bypass characters, skip normalization & translation entirely.
   // This is a major optimization for Vietnamese text because normalize("NFKD") decomposes accents,
   // which takes significant CPU time when done on thousands of items.
-  if (!SPECIAL_CHAR_REGEX.test(text)) {
-    result = text;
+  if (!SPECIAL_CHAR_REGEX.test(normalized)) {
+    result = normalized;
   } else {
-    const decomp = text.normalize("NFKD");
+    const decomp = normalized.normalize("NFKD");
     let temp = '';
     for (const char of decomp) {
       temp += HOMOGLYPH_MAP[char] || char;
@@ -543,7 +544,7 @@ function cleanHomoglyphsAndFonts(text) {
     result = temp.normalize("NFC");
   }
 
-  cleanHomoglyphsCache.set(text, result);
+  cleanHomoglyphsCache.set(normalized, result);
   return result;
 }
 

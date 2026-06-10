@@ -185,7 +185,8 @@ async function initializeCategories() {
 }
 
 function _scoreByKeywords(name) {
-  const n = String(name || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
+  const normalized = String(name || '').normalize("NFC");
+  const n = normalized.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
   const paddedN = ' ' + n + ' ';
   let bestCat = '🏷️ Khác';
   let maxScore = 0;

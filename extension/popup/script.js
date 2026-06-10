@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function compactItemName(name) {
-    let s = String(name || '');
+    let s = String(name || '').normalize("NFC");
     // Strip bracket content (promotional tags)
     s = s.replace(/\[.*?\]|\(.*?\)|\{.*?\}/g, ' ');
     // Strip special chars / emoji, keep letters + numbers, preserve case!
