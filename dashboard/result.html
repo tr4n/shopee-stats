@@ -30,7 +30,7 @@
       <button class="nav-item" data-view="monthly">
         <span class="ni">📅</span> Theo tháng
       </button>
-      <button class="nav-item" data-view="items">
+      <button class="nav-item" data-view="items" id="nav-item-items" style="display: none;">
         <span class="ni">🛒</span> Top Sản phẩm
       </button>
       <button class="nav-item" data-view="categories">
@@ -509,7 +509,7 @@
         <div>
           <h1 class="page-title">Chi Tiêu Theo Danh Mục</h1>
           <p class="page-subtitle" id="cat-subtitle">
-            Phân bổ chi tiêu theo từng danh mục Shopee
+            Phân bổ chi tiêu theo từng danh mục Shopee. <a href="#" id="link-top-items-hidden" style="color: var(--muted); opacity: 0.6; text-decoration: underline; margin-left: 6px; font-size: 11px;">Xem top sản phẩm</a>
           </p>
         </div>
         <div class="pill-row" id="cat-year-pills" style="margin-bottom: 0; align-items: flex-end; flex-shrink: 0"></div>
