@@ -330,7 +330,7 @@ window.renderTarotCanvas = function (profile, cachedText) {
       // Watermark
       ctx.fillStyle = 'rgba(255,255,255,0.28)';
       ctx.font = 'bold 14px Arial';
-      ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ BẢN NGÃ TAROT', W / 2, H - 36);
+      ctx.fillText('SHOPEE ANALYTICS  ✦  GIẢI MÃ TÍN HIỆU VŨ TRỤ', W / 2, H - 36);
 
       // Generate Blob output
       setTimeout(() => {
