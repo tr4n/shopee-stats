@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for (const item of order.il) {
         if (!item.i) continue;
         if (!itemMap[item.i]) itemMap[item.i] = { name: item.n, spent: 0, count: 0 };
-        itemMap[item.i].spent += item.s;
+        itemMap[item.i].spent += item.as ?? item.s;
         itemMap[item.i].count += item.c;
       }
     }
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!allItemAggr[uId]) {
           allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
         }
-        allItemAggr[uId].spent += item.s;
+        allItemAggr[uId].spent += item.as ?? item.s;
         allItemAggr[uId].count += item.c;
         allItemAggr[uId].op = allItemAggr[uId].op || item.op || 0;
         allItemAggr[uId].dp = allItemAggr[uId].dp || item.dp || 0;
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function isCacheStructurallyValid(cache) {
     if (!cache || !cache.lastUpdated || !Array.isArray(cache.miniOrders)) return false;
     // Invalidate cache schema v2 and below (missing ots field)
-    if ((cache.v || 0) < 3) return false;
+    if ((cache.v || 0) < 4) return false;
     // Invalidate caches built by an older version of the extension
     if (CURRENT_EXT_VERSION && cache.ev !== CURRENT_EXT_VERSION) return false;
     // Require il field (item list) on cached orders so period filter works without re-stat.
@@ -753,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!monthMap[ym][item.i]) {
           monthMap[ym][item.i] = { n: item.n, s: 0, c: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
         }
-        monthMap[ym][item.i].s += item.s;
+        monthMap[ym][item.i].s += item.as ?? item.s;
         monthMap[ym][item.i].c += item.c;
         monthMap[ym][item.i].op = monthMap[ym][item.i].op || item.op || 0;
         monthMap[ym][item.i].dp = monthMap[ym][item.i].dp || item.dp || 0;

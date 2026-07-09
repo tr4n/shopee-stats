@@ -527,6 +527,20 @@
             }
           }
 
+          // Pro-rate platform voucher (Shopee voucher) proportionally across items.
+          // Invariant: Σ(item.as) ≈ finalCost for each order.
+          // Only set `as` when ratio < 1 (voucher present) to save storage.
+          // Consumers use `item.as ?? item.s` to fall back to shop-discounted price.
+          const sumItemS = orderItemList.reduce((sum, x) => sum + x.s, 0);
+          if (sumItemS > 0) {
+            const ratio = Math.min(1, finalCost / sumItemS);
+            if (ratio < 1) {
+              for (const itm of orderItemList) {
+                itm.as = itm.s * ratio;
+              }
+            }
+          }
+
           newMiniOrders.push({ ts: rawTs, ots, finalCost, rawCost, itemCount, il: orderItemList });
         }
 
@@ -557,7 +571,7 @@
             if (!filteredItemMap[uniqueItemId]) {
               filteredItemMap[uniqueItemId] = { name: item.n, spent: 0, count: 0, catId: item.cat };
             }
-            filteredItemMap[uniqueItemId].spent += item.s;
+            filteredItemMap[uniqueItemId].spent += item.as ?? item.s;
             filteredItemMap[uniqueItemId].count += item.c;
           }
         }
@@ -572,7 +586,7 @@
           if (!allItemAggr[uId]) {
             allItemAggr[uId] = { name: item.n, spent: 0, count: 0, cat: item.cat, op: item.op || 0, dp: item.dp || 0 };
           }
-          allItemAggr[uId].spent += item.s;
+          allItemAggr[uId].spent += item.as ?? item.s;
           allItemAggr[uId].count += item.c;
           allItemAggr[uId].op = allItemAggr[uId].op || item.op || 0;
           allItemAggr[uId].dp = allItemAggr[uId].dp || item.dp || 0;
@@ -589,7 +603,7 @@
 
       const extVersion = chrome.runtime?.getManifest?.()?.version || '';
       const cachePayload = {
-        v: 3,
+        v: 4,
         ev: extVersion,
         limitYears: LIMIT_YEARS,
         fetchTime: Math.floor(Date.now() / 1000),
