@@ -32,6 +32,15 @@ chrome.runtime.onInstalled.addListener((details) => {
       url: chrome.runtime.getURL('welcome/index.html')
     });
   }
+  if (details.reason === 'update') {
+    chrome.storage.local.remove([
+      'shopee_cache_3',
+      'shopee_cache_5',
+      'shopee_cache_all',
+      'shopee_cache',
+      'shopee_analysis_lock'
+    ]);
+  }
 });
 
 /**

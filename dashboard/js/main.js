@@ -300,7 +300,20 @@ async function checkAndHandleUrlData() {
 
   const parsed = await tryParseAsync(raw, paramMode);
   if (parsed?.t) {
-    const id = parsed.ts ? parsed.ts * 1000 : Date.now();
+    // Remove old dashboard entries from a different extension version before storing new data
+    const newEv = parsed.ev || '';
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith(DASH_DATA_PREFIX)) {
+        try {
+          const old = JSON.parse(localStorage.getItem(key) || 'null');
+          if (old && old.ev !== newEv) localStorage.removeItem(key);
+        } catch { localStorage.removeItem(key); }
+      }
+    }
+
+    // Use current time as storage key so the 3-day expiry in parseData() is based on
+    // when the data was stored (now), not when the original scan happened (parsed.ts).
+    const id = Date.now();
     localStorage.setItem(DASH_DATA_PREFIX + id, JSON.stringify(parsed));
     location.replace("result.html?id=" + id);
     return true;
