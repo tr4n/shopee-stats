@@ -1933,7 +1933,7 @@ async function runTarotSequence(selectedPos) {
     }
 
     const context = profile.aiContext;
-    const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
+    const specificPrompt = `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm gần đây của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`;
 
     _aiInsightCallArgs['tarot-card'] = { context, specificPrompt, cacheKey: ck, fallbackFn: null, profile };
 

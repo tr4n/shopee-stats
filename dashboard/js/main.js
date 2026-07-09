@@ -1137,7 +1137,7 @@ function setupDashboardRatingCard(d) {
         .map(([y, v]) => `Năm ${y}: ${fmtVND(v.t)}`).join(", ");
 
       const specificPrompt = profile
-        ? `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm nhiều năm của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`
+        ? `Hồ sơ tính cách: ${profile.aiContext}\n\nYêu cầu: Viết 1-2 câu nhận xét tâm lý sâu sắc về hành trình mua sắm gần đây của người này. Không liệt kê lại đặc điểm, không số tiền, không tiếng Anh.`
         : `Chi tiêu qua các năm: ${context}. Năm đỉnh điểm: ${maxYear}. Viết 1-2 câu nhận xét ngắn về xu hướng. Không số tiền.`;
 
       enrichWithAI(
