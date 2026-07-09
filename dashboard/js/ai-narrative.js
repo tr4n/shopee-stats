@@ -844,6 +844,59 @@ function computeTemporalPatterns(ol) {
   };
 }
 
+// 2.1b Slice dashboard data to last 12 months (rolling window) for personality analysis
+function sliceToRecentYear(d) {
+  if (!d) return d;
+  const now = Math.floor(Date.now() / 1000);
+  const oneYearAgoTs = now - 365 * 24 * 3600;
+  const cutoffDate = new Date(oneYearAgoTs * 1000);
+  const cutoffYear = cutoffDate.getFullYear();
+  const cutoffMonth = cutoffDate.getMonth() + 1; // 1-12
+
+  const sliced = Object.assign({}, d);
+
+  // Filter order history to last 12 months
+  sliced.ol = (d.ol || []).filter(o => {
+    const ts = o.ot || o.t;
+    return ts && ts >= oneYearAgoTs;
+  });
+
+  // Filter monthly breakdown in yd to last 12 months, recalculate per-year totals
+  const filteredYd = {};
+  for (const [yr, ydata] of Object.entries(d.yd || {})) {
+    const yearNum = Number(yr);
+    if (yearNum < cutoffYear) continue;
+    const filteredMonths = {};
+    for (const [mn, v] of Object.entries(ydata.m || {})) {
+      if (yearNum === cutoffYear && Number(mn) < cutoffMonth) continue;
+      filteredMonths[mn] = v;
+    }
+    const monthTotal = Object.values(filteredMonths).reduce((a, b) => a + (b || 0), 0);
+    if (monthTotal > 0) filteredYd[yr] = { ...ydata, m: filteredMonths, t: monthTotal };
+  }
+  sliced.yd = filteredYd;
+
+  // Filter sale stats to years overlapping last 12 months
+  sliced.oss = Object.fromEntries(
+    Object.entries(d.oss || {}).filter(([yr]) => Number(yr) >= cutoffYear)
+  );
+
+  // Recalculate aggregate totals from filtered yd
+  let totalT = 0, totalO = 0, totalS = 0, totalIp = 0;
+  for (const ydata of Object.values(filteredYd)) {
+    totalT += ydata.t || 0;
+    totalO += ydata.o || 0;
+    totalS += ydata.s || 0;
+    totalIp += ydata.ip || 0;
+  }
+  sliced.t = totalT || d.t;
+  sliced.o = totalO || sliced.ol.length || d.o;
+  sliced.s = totalS;
+  sliced.ip = totalIp;
+
+  return sliced;
+}
+
 // 2.2 Sale behavior stats (prefer d.oss pre-aggregated, fallback to ol)
 function computeSaleStats(d) {
   const result = {
@@ -851,11 +904,13 @@ function computeSaleStats(d) {
     totalOrders: d.o || 0, saleOrders: 0, midnightOrders: 0
   };
 
-  if (window._oss) {
-    const years = Object.keys(window._oss);
+  // Prefer d.oss (allows filtered data from sliceToRecentYear), fall back to global window._oss
+  const ossSource = (d.oss && Object.keys(d.oss).length > 0) ? d.oss : window._oss;
+  if (ossSource) {
+    const years = Object.keys(ossSource);
     for (const yr of years) {
       for (const type of ['double', 'mid', 'end', 'regular']) {
-        const e = window._oss[yr]?.[type];
+        const e = ossSource[yr]?.[type];
         if (!e) continue;
         result.totalSpend += e[0] || 0;
         result.midnightOrders += e[3] || 0;
@@ -1488,17 +1543,20 @@ function analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy, extras) 
 function analyzeShoppingPersonality(d) {
   if (!d) return null;
 
-  const ol = d.ol || [];
-  const yd = d.yd || {};
-  const cs = d.cs || [];
+  // Slice data to last 12 months so personality reflects recent behavior, not years-old history
+  const ds = sliceToRecentYear(d);
+
+  const ol = ds.ol || [];
+  const yd = ds.yd || {};
+  const cs = d.cs || []; // Category preferences kept from full dataset (not time-bounded)
 
   const temporal = computeTemporalPatterns(ol);
-  const saleStats = computeSaleStats(d);
+  const saleStats = computeSaleStats(ds);
   const variance = computeSpendingVariance(yd);
   const yoy = computeYoYTrend(yd);
 
-  const totalOrders = d.o || 0;
-  const totalSpend = d.t || 0;
+  const totalOrders = ds.o || 0;
+  const totalSpend = ds.t || 0;
   const avgOrderValue = totalOrders > 0 ? totalSpend / totalOrders : 0;
 
   let activeMonths = 0;
@@ -1548,7 +1606,7 @@ function analyzeShoppingPersonality(d) {
   const dataCtx = {
     temporal, saleStats, variance, yoy,
     totalOrders, totalSpend, avgOrderValue, activeMonths, catCount,
-    totalSaved: d.s || 0,
+    totalSaved: ds.s || 0,
     selfCareRatio: extras.selfCareRatio,
     familyRatio: extras.familyRatio,
     q4Ratio: yrTotal > 0 ? q4T / yrTotal : 0,
@@ -1556,7 +1614,7 @@ function analyzeShoppingPersonality(d) {
     summerRatio: yrTotal > 0 ? summerT / yrTotal : 0,
   };
 
-  const triggers = analyzeExtendedTriggers(d, temporal, saleStats, variance, yoy, extras);
+  const triggers = analyzeExtendedTriggers(ds, temporal, saleStats, variance, yoy, extras);
   const archetype = resolveArchetype(triggers);
   const traits = buildTraitList(triggers, dataCtx);
 
@@ -1796,7 +1854,7 @@ function animateDetailsReveal() {
 
 /* ── Main sequence orchestrator ── */
 async function runTarotSequence(selectedPos) {
-  const ck = 'insight-yearly-all';
+  const ck = 'insight-last1y';
   const fanSpread = _getFanSpread();
   const focusArea = _getFocusArea();
   const card      = _getTarotCard();
@@ -2105,7 +2163,7 @@ function initTarotViewEvents() {
     freshShare.addEventListener('click', e => {
       e.preventDefault();
       const profile = window._globalPersonalityProfile;
-      const ck = 'insight-yearly-all';
+      const ck = 'insight-last1y';
       const cached = _getInsightText(ck);
       if (typeof generateTarotShareImage === 'function') {
         generateTarotShareImage(profile, cached);
@@ -2118,7 +2176,7 @@ function initTarotViewEvents() {
 
 /* ── checkAndAutoShowTarot: restore result state from cache ── */
 window.checkAndAutoShowTarot = function() {
-  const ck     = 'insight-yearly-all';
+  const ck     = 'insight-last1y';
   const cached = _getInsightText(ck);
 
   if (cached !== null && window.currentDashData) {
