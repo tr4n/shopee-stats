@@ -1144,7 +1144,7 @@ function setupDashboardRatingCard(d) {
         "insight-yearly",
         context,
         specificPrompt,
-        "insight-yearly-all",
+        "insight-last1y",
         null,
         false,
         profile,
