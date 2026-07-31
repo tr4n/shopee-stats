@@ -170,6 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (pri < 80000000) return 'Tín Đồ Cuồng Nhiệt 👑';
     else return 'Cổ Đông Chiến Lược 💎';
   }
+  function getRankClass(pri) {
+    if (pri <= 10000000) return 'rank-novice';
+    else if (pri <= 50000000) return 'rank-regular';
+    else if (pri < 80000000) return 'rank-fanatic';
+    else return 'rank-whale';
+  }
   function escapeHtml(str) {
     return String(str || '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -1251,17 +1257,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // === Number Count-up Animation ===
+  function animateNumber(element, targetValue, formatter, duration = 1000) {
+    if (!element) return;
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentValue = start + (targetValue - start) * easeProgress;
+      element.textContent = formatter ? formatter(currentValue) : Math.round(currentValue).toLocaleString('vi-VN');
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = formatter ? formatter(targetValue) : Math.round(targetValue).toLocaleString('vi-VN');
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
   // === Render Results ===
   function renderResults(data) {
     lastCompleteData = data;
 
-    totalSpentEl.textContent = pxgPrice(data.totalSpent);
-    rankBadgeEl.textContent = getRankBadge(data.totalSpent);
+    const totalVal = data.totalSpent || 0;
+    totalSpentEl.textContent = '0đ';
+    rankBadgeEl.textContent = getRankBadge(totalVal);
 
     renderTrendBadges(data.yearlyStats);
     renderPercentile(data.yearlyStats);
 
     showState(stateResult);
+
+    // Trigger smooth number count-up animation
+    setTimeout(() => {
+      animateNumber(totalSpentEl, totalVal, pxgPrice, 1000);
+    }, 150);
   }
 
   // === Trend Badges ===
