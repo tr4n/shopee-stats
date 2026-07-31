@@ -1284,18 +1284,13 @@ document.addEventListener('DOMContentLoaded', () => {
     lastCompleteData = data;
 
     const totalVal = data.totalSpent || 0;
-    totalSpentEl.textContent = '0đ';
     rankBadgeEl.textContent = getRankBadge(totalVal);
 
     renderTrendBadges(data.yearlyStats);
     renderPercentile(data.yearlyStats);
 
     showState(stateResult);
-
-    // Trigger smooth number count-up animation
-    setTimeout(() => {
-      animateNumber(totalSpentEl, totalVal, pxgPrice, 1000);
-    }, 150);
+    animateNumber(totalSpentEl, totalVal, pxgPrice, 800);
   }
 
   // === Trend Badges ===
